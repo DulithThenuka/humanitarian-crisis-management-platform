@@ -8,4 +8,36 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Backend\HumanitarianCrisisPlatform.API\Controllers\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.API\Middleware\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.API\Extensions\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.API\Filters\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Application\DTOs\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Application\Interfaces\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Application\Common\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Application\Validators\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Application\Services\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Domain\Entities\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Domain\Enums\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Domain\Exceptions\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Domain\Interfaces\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Infrastructure\Data\Configurations\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Infrastructure\Data\Migrations\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Infrastructure\Data\Seed\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Infrastructure\AI\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Infrastructure\Mapping\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Infrastructure\Resilience\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Infrastructure\Notifications\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Infrastructure\Security\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Infrastructure\Repositories\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Tests\Integration\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Tests\Security\" />
+    <Folder Include="Backend\HumanitarianCrisisPlatform.Tests\Unit\" />
+    <Folder Include="Frontend\" />
+    <Folder Include="Database\" />
+    <Folder Include="Docs\" />
+    <Folder Include="README.md\" />
+  </ItemGroup>
+
 </Project>
