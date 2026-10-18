@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Background Dark Teal Base -->
+    <linearGradient id="baseBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a2730" />
+      <stop offset="40%" stop-color="#113640" />
+      <stop offset="80%" stop-color="#082027" />
+      <stop offset="100%" stop-color="#041419" />
+    </linearGradient>
+
+    <!-- Ambient light glow on the newsprint fold -->
+    <radialGradient id="paperGlow" cx="65%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#215c6b" stop-opacity="0.65" />
+      <stop offset="50%" stop-color="#0e323b" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#04151b" stop-opacity="0.9" />
+    </radialGradient>
+
+    <!-- Smooth horizontal fade for hero text readability -->
+    <linearGradient id="leftFade" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#061b22" stop-opacity="0.85" />
+      <stop offset="35%" stop-color="#061b22" stop-opacity="0.62" />
+      <stop offset="70%" stop-color="#061b22" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#061b22" stop-opacity="0.3" />
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Teal Background -->
+  <rect width="1200" height="900" fill="url(#baseBg)" />
+
+  <!-- Newspaper Layers Group with authentic camera angle tilt -->
+  <g transform="rotate(-6 600 450)">
+    <!-- Diagonal Paper Page Body -->
+    <polygon points="-50,160 1300,70 1300,680 -50,770" fill="#133d48" opacity="0.45" />
+
+    <!-- Top fold: Thai & English headline (as in user reference photo) -->
+    <g transform="translate(380, 110) rotate(-4)">
+      <text font-family="'Times New Roman', Georgia, serif" font-size="40" font-weight="800" fill="#b2dbe4" opacity="0.65" letter-spacing="4">
+        พะกทูเดย์  DAILY DISPATCH
+      </text>
+    </g>
+
+    <!-- Crease 1 -->
+    <path d="M-100,210 Q600,160 1300,110" stroke="#041318" stroke-width="12" fill="none" opacity="0.6" />
+    <path d="M-100,216 Q600,166 1300,116" stroke="#367381" stroke-width="2.5" fill="none" opacity="0.4" />
+
+    <!-- Main Headline: WORLD BUSINESS (Exact match to reference photo) -->
+    <g transform="translate(260, 265) rotate(-7)">
+      <text font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="64" font-weight="900" fill="#d2edf4" opacity="0.82" letter-spacing="7">
+        WORLD  BUSINESS
+      </text>
+      <!-- Double editorial lines under headline -->
+      <line x1="-20" y1="20" x2="680" y2="20" stroke="#b2dbe4" stroke-width="3" opacity="0.6" />
+      <line x1="-20" y1="27" x2="680" y2="27" stroke="#b2dbe4" stroke-width="1.5" opacity="0.4" />
+    </g>
+
+    <!-- Inverted / Upside-down text section (Exact match to reference photo) -->
+    <g transform="translate(740, 420) rotate(173)">
+      <text font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="800" fill="#c0e5ee" opacity="0.72" letter-spacing="2">
+        anything that is indicative of town
+      </text>
+      <text font-family="Georgia, 'Times New Roman', serif" font-size="20" font-weight="500" fill="#9ec9d3" opacity="0.6" letter-spacing="1" y="36">
+        countries have direct access to resources and humanitarian response.
+      </text>
+      <text font-family="Georgia, 'Times New Roman', serif" font-size="19" font-weight="500" fill="#9ec9d3" opacity="0.55" letter-spacing="1" y="68">
+        Gen. Thai operations and emergency crisis coordination reports.
+      </text>
+      <text font-family="Georgia, 'Times New Roman', serif" font-size="16" fill="#7faeb9" opacity="0.45" letter-spacing="0.5" y="98">
+        Global disaster response network real-time operational deployment.
+      </text>
+    </g>
+
+    <!-- Simulated Newsprint Text Columns -->
+    <g transform="translate(210, 325) rotate(-7)" fill="#8cb9c3" opacity="0.55" font-family="Georgia, 'Times New Roman', serif" font-size="13.5">
+      <!-- Column 1 -->
+      <g>
+        <text y="0">Crisis logistics networks deployed across</text>
+        <text y="19">affected coastal provinces as response</text>
+        <text y="38">teams monitor real-time distribution and</text>
+        <text y="57">shelter occupancy statistics worldwide.</text>
+        <text y="76">Emergency response units continue rapid</text>
+        <text y="95">assessment protocols through primary hubs.</text>
+      </g>
+
+      <!-- Column 2 -->
+      <g transform="translate(270, 0)">
+        <text y="0">International coordinating agencies have</text>
+        <text y="19">established cross-border humanitarian</text>
+        <text y="38">corridors providing essential supplies,</text>
+        <text y="57">medical facilities, and emergency shelter.</text>
+        <text y="76">Resource inventory metrics show high</text>
+        <text y="95">resilience in automated allocation flows.</text>
+      </g>
+    </g>
+
+    <!-- Crease 2 -->
+    <path d="M-100,500 Q600,440 1300,380" stroke="#041217" stroke-width="16" fill="none" opacity="0.5" />
+  </g>
+
+  <!-- Ambient glow on paper fold -->
+  <rect width="1200" height="900" fill="url(#paperGlow)" />
+
+  <!-- Smooth soft left fade so text is crisp -->
+  <rect width="1200" height="900" fill="url(#leftFade)" />
+</svg>
