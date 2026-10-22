@@ -32,7 +32,8 @@ import { TaskAssignmentPage } from '../pages/volunteers/TaskAssignmentPage';
 export const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/citizen/submit" replace />} />
+      <Route path="/" element={<Navigate to="/coordinator/dashboard" replace />} />
+      <Route path="/dashboard" element={<Navigate to="/coordinator/dashboard" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />

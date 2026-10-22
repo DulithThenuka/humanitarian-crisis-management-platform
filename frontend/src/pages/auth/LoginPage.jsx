@@ -4,6 +4,8 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 import { authService } from '../../services/authService';
+import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
+import reliefcoreLogo from '../../assets/reliefcore-logo.png';
 import './LoginPage.css';
 
 export const LoginPage = () => {
@@ -52,20 +54,11 @@ export const LoginPage = () => {
       <section className="login-hero">
         {/* Brand Header */}
         <div className="hero-brand">
-          <div className="brand-icon-box">
-            {/* Humanitarian Node / Cross Logo */}
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 4V20M4 12H20" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="4" r="2" fill="#5eead4"/>
-              <circle cx="12" cy="20" r="2" fill="#5eead4"/>
-              <circle cx="4" cy="12" r="2" fill="#5eead4"/>
-              <circle cx="20" cy="12" r="2" fill="#5eead4"/>
-            </svg>
-          </div>
-          <div className="brand-text-col">
-            <span className="brand-name">RELIEFCORE</span>
-            <span className="brand-tagline">HUMANITARIAN OPS</span>
-          </div>
+          <img
+            src={reliefcoreLogoWhite}
+            alt="RELIEFCORE Humanitarian Operations"
+            className="hero-brand-logo-img"
+          />
         </div>
 
         {/* Center Main Slogan */}
@@ -103,6 +96,13 @@ export const LoginPage = () => {
 
         <div className="login-form-container">
           <div className="login-header">
+            <div className="login-brand-badge">
+              <img
+                src={reliefcoreLogo}
+                alt="RELIEFCORE Humanitarian Operations"
+                className="login-brand-img"
+              />
+            </div>
             <h2 className="login-title">Welcome back</h2>
             <p className="login-subtitle">Secure access to humanitarian operations</p>
           </div>
