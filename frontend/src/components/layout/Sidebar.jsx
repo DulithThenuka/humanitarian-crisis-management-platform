@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
 
 export const Sidebar = () => {
   const { user } = useAuth();
@@ -28,11 +29,18 @@ export const Sidebar = () => {
       width: '260px',
       borderRight: '1px solid #334155',
       backgroundColor: '#0f172a',
-      padding: '24px 16px',
+      padding: '20px 16px',
       display: 'flex',
       flexDirection: 'column',
       gap: '6px'
     }}>
+      <div style={{ padding: '4px 8px 18px 8px', borderBottom: '1px solid rgba(51, 65, 85, 0.6)', marginBottom: '10px' }}>
+        <img
+          src={reliefcoreLogoWhite}
+          alt="RELIEFCORE"
+          style={{ height: '34px', width: 'auto', maxWidth: '100%', objectFit: 'contain' }}
+        />
+      </div>
       <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', padding: '0 12px 10px 12px' }}>
         Navigation
       </div>

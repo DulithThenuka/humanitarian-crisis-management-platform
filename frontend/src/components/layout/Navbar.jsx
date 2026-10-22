@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../common/Button';
+import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
 
 export const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -25,9 +26,13 @@ export const Navbar = () => {
       top: 0,
       zIndex: 50
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <Link to="/" style={{ textDecoration: 'none', color: '#38bdf8', fontSize: '18px', fontWeight: 800, letterSpacing: '-0.5px' }}>
-          CRISIS RESPONSE HUB
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <img
+            src={reliefcoreLogoWhite}
+            alt="RELIEFCORE Humanitarian Operations"
+            style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+          />
         </Link>
         <span style={{ fontSize: '11px', background: '#0284c7', color: '#fff', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
           LIVE
