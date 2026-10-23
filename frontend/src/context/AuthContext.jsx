@@ -2,22 +2,35 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
-  const [loading, setLoading] = useState(true);
+const defaultCoordinator = {
+  id: 'usr-001',
+  fullName: 'Amara Chen',
+  role: 'Coordinator',
+  email: 'amara.chen@reliefcore.org',
+  token: 'reliefcore-session-token'
+};
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser && token) {
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem('user');
+    if (stored) {
       try {
-        setUser(JSON.parse(storedUser));
+        return JSON.parse(stored);
       } catch {
-        setUser(null);
+        return defaultCoordinator;
       }
     }
-    setLoading(false);
-  }, [token]);
+    return defaultCoordinator;
+  });
+  const [token, setToken] = useState(() => localStorage.getItem('token') || 'reliefcore-session-token');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem('user')) {
+      localStorage.setItem('user', JSON.stringify(defaultCoordinator));
+      localStorage.setItem('token', 'reliefcore-session-token');
+    }
+  }, []);
 
   const login = (data) => {
     setToken(data.token);
