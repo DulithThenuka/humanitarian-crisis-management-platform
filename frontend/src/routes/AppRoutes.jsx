@@ -33,21 +33,24 @@ import { TaskAssignmentPage } from '../pages/volunteers/TaskAssignmentPage';
 export const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<CitizenPortalPage />} />
+      <Route path="/" element={<DashboardOverviewPage />} />
+      <Route path="/dashboard" element={<DashboardOverviewPage />} />
+      <Route path="/coordinator/dashboard" element={<DashboardOverviewPage />} />
+      
+      {/* Citizen routes */}
       <Route path="/citizen" element={<CitizenPortalPage />} />
       <Route path="/citizen/home" element={<CitizenPortalPage />} />
-      <Route path="/dashboard" element={<Navigate to="/coordinator/dashboard" replace />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/unauthorized" element={<UnauthorizedPage />} />
-
-      {/* Citizen routes */}
+      <Route path="/citizen/portal" element={<CitizenPortalPage />} />
       <Route path="/citizen/submit" element={<SubmitRequestPage />} />
       <Route path="/citizen/track" element={<TrackRequestsPage />} />
       <Route path="/citizen/shelters" element={<FindShelterPage />} />
 
+      {/* Auth routes */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
       {/* Coordinator routes */}
-      <Route path="/coordinator/dashboard" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage /></ProtectedRoute>} />
       <Route path="/coordinator/triage" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><RequestTriagePage /></ProtectedRoute>} />
       <Route path="/coordinator/ai-review" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIDecisionReviewPage /></ProtectedRoute>} />
 

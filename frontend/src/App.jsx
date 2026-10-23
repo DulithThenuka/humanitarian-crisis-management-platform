@@ -11,6 +11,8 @@ function AppLayout() {
   const location = useLocation();
   const isDedicatedLayout = 
     location.pathname === '/' || 
+    location.pathname === '/dashboard' ||
+    location.pathname.startsWith('/coordinator') || 
     location.pathname.startsWith('/citizen') || 
     location.pathname === '/login' || 
     location.pathname === '/register';
