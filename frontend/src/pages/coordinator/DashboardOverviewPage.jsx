@@ -33,7 +33,7 @@ import {
 import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
 import sarahJohnson from '../../assets/sarah-johnson.jpg';
 import crisisCenterIcon from '../../assets/crisis-center-icon.png';
-import satelliteCrisisMap from '../../assets/satellite-crisis-map.jpg';
+import { LiveSatelliteCrisisMap } from '../../components/maps/LiveSatelliteCrisisMap';
 import './DashboardOverviewPage.css';
 
 export const DashboardOverviewPage = () => {
@@ -354,63 +354,7 @@ export const DashboardOverviewPage = () => {
           <div className="map-and-requests-row">
             {/* Satellite Map */}
             <div className="satellite-map-card">
-              <img
-                src={satelliteCrisisMap}
-                alt="Western Province Crisis Map"
-                className="map-bg-image"
-              />
-
-              {/* Map UI Overlays */}
-              <div className="map-top-left-dropdown">
-                <span>{selectedProvince}</span>
-                <ChevronDown size={13} color="#64748b" />
-              </div>
-
-              {/* Floating Layers Panel */}
-              <div className="map-layers-floating-panel">
-                <div className="layers-title">Map Layers</div>
-                <label className="layer-toggle-row">
-                  <input type="checkbox" defaultChecked />
-                  <span className="layer-dot-icon" style={{ backgroundColor: '#ef4444' }}>🔥</span>
-                  <span>Crisis Zones</span>
-                </label>
-                <label className="layer-toggle-row">
-                  <input type="checkbox" defaultChecked />
-                  <span className="layer-dot-icon" style={{ backgroundColor: '#f59e0b' }}>⚠️</span>
-                  <span>Assistance Requests</span>
-                </label>
-                <label className="layer-toggle-row">
-                  <input type="checkbox" defaultChecked />
-                  <span className="layer-dot-icon" style={{ backgroundColor: '#10b981' }}>🏠</span>
-                  <span>Shelters</span>
-                </label>
-                <label className="layer-toggle-row">
-                  <input type="checkbox" defaultChecked />
-                  <span className="layer-dot-icon" style={{ backgroundColor: '#3b82f6' }}>📦</span>
-                  <span>Resources</span>
-                </label>
-                <label className="layer-toggle-row">
-                  <input type="checkbox" defaultChecked />
-                  <span className="layer-dot-icon" style={{ backgroundColor: '#8b5cf6' }}>👥</span>
-                  <span>Volunteers</span>
-                </label>
-                <label className="layer-toggle-row">
-                  <input type="checkbox" defaultChecked />
-                  <span className="layer-dot-icon" style={{ backgroundColor: '#14b8a6' }}>📍</span>
-                  <span>Operational Areas</span>
-                </label>
-              </div>
-
-              <button className="map-top-right-btn" title="Expand Map">
-                <Maximize2 size={13} />
-              </button>
-
-              <div className="map-zoom-controls">
-                <button className="zoom-btn">+</button>
-                <button className="zoom-btn">−</button>
-              </div>
-
-              <div className="map-satellite-badge">Satellite</div>
+              <LiveSatelliteCrisisMap onProvinceChange={(prov) => setSelectedProvince(prov)} />
             </div>
 
             {/* Critical Requests List */}
