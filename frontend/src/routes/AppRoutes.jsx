@@ -30,6 +30,7 @@ import { EvacueeAllocationPage } from '../pages/shelters/EvacueeAllocationPage';
 import { VolunteerRosterPage } from '../pages/volunteers/VolunteerRosterPage';
 import { TaskAssignmentPage } from '../pages/volunteers/TaskAssignmentPage';
 
+import { AuditCenterPage } from '../pages/audit/AuditCenterPage';
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -67,6 +68,9 @@ export const AppRoutes = () => {
       <Route path="/volunteers/assignments" element={<ProtectedRoute allowedRoles={['Coordinator', 'Volunteer', 'Admin']}><TaskAssignmentPage /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
+
+      <Route path="/audit" element={<AuditCenterPage />} />
+      <Route path="/coordinator/audit" element={<AuditCenterPage />} />
     </Routes>
   );
 };

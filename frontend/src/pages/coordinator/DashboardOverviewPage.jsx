@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Home, 
@@ -27,7 +27,14 @@ import {
   MoreHorizontal, 
   AlertTriangle, 
   Info, 
-  FileText 
+  FileText,
+  ShieldCheck,
+  Cpu,
+  User,
+  Copy,
+  Check,
+  ExternalLink,
+  X
 } from 'lucide-react';
 
 import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
@@ -39,10 +46,155 @@ import { ReportsAnalyticsView } from "../reports-and-analysis/ReportsAnalyticsVi
 
 import './DashboardOverviewPage.css';
 
+const INITIAL_AUDIT_DATA = [
+  {
+    id: 'AUD-9021',
+    timestamp: '10:25 AM',
+    date: '2026-10-23',
+    user: 'Amara Chen',
+    userType: 'human',
+    role: 'Coordinator',
+    action: 'Priority Modified',
+    entityId: 'REQ-01842',
+    entityType: 'Assistance Request',
+    aiRecommendation: 'HIGH',
+    humanDecision: 'CRITICAL',
+    status: 'APPROVED',
+    notes: 'Pregnant household member confirmed. Road blockage verified by field team.',
+    immutableHash: '0x8f2a49b21dc33e08...ba71',
+    modelConfidence: '88.4%'
+  },
+  {
+    id: 'AUD-9020',
+    timestamp: '10:22 AM',
+    date: '2026-10-23',
+    user: 'AI Engine',
+    userType: 'ai',
+    role: 'AI System',
+    action: 'Classification',
+    entityId: 'REQ-01842',
+    entityType: 'Assistance Request',
+    aiRecommendation: 'Medical',
+    humanDecision: 'Medical',
+    status: 'ACCEPTED',
+    notes: 'Automatic classification based on description analysis.',
+    immutableHash: '0x3c71a9e884d12bb5...e41f',
+    modelConfidence: '96.2%'
+  },
+  {
+    id: 'AUD-9019',
+    timestamp: '10:19 AM',
+    date: '2026-10-23',
+    user: 'Ravi Kumar',
+    userType: 'human',
+    role: 'Coordinator',
+    action: 'Resource Allocated',
+    entityId: 'REQ-01847',
+    entityType: 'Inventory Dispatch',
+    aiRecommendation: '80 units',
+    humanDecision: '80 units',
+    status: 'APPROVED',
+    notes: 'Resource allocated per regional warehouse inventory thresholds.',
+    immutableHash: '0x10b981d77a5e0192...99cf',
+    modelConfidence: '91.0%'
+  },
+  {
+    id: 'AUD-9018',
+    timestamp: '10:14 AM',
+    date: '2026-10-23',
+    user: 'Amara Chen',
+    userType: 'human',
+    role: 'Coordinator',
+    action: 'Volunteer Assigned',
+    entityId: 'REQ-01862',
+    entityType: 'Personnel Match',
+    aiRecommendation: 'Dr. Priya Nair',
+    humanDecision: 'Dr. Priya Nair',
+    status: 'APPROVED',
+    notes: 'Assigned specialist to emergency triage post.',
+    immutableHash: '0x44fd712ea4c9019b...88aa',
+    modelConfidence: '94.8%'
+  },
+  {
+    id: 'AUD-9017',
+    timestamp: '10:08 AM',
+    date: '2026-10-23',
+    user: 'System Core',
+    userType: 'system',
+    role: 'System',
+    action: 'Shelter Allocated',
+    entityId: 'REQ-01878',
+    entityType: 'Shelter Unit',
+    aiRecommendation: 'Colombo Central',
+    humanDecision: 'Colombo Central',
+    status: 'ACCEPTED',
+    notes: 'Shelter occupancy verified and reservation committed.',
+    immutableHash: '0x99e410b00c5a31e8...d309',
+    modelConfidence: '99.1%'
+  },
+  {
+    id: 'AUD-9016',
+    timestamp: '09:55 AM',
+    date: '2026-10-23',
+    user: 'Priya Nair',
+    userType: 'human',
+    role: 'Coordinator',
+    action: 'Request Rejected',
+    entityId: 'REQ-01935',
+    entityType: 'Assistance Request',
+    aiRecommendation: 'MEDIUM',
+    humanDecision: 'REJECTED',
+    status: 'OVERRIDE',
+    notes: 'Duplicate request identified. Linked to REQ-01842 from same household.',
+    immutableHash: '0xef4444a19dc0981e...271c',
+    modelConfidence: '72.5%'
+  },
+  {
+    id: 'AUD-9015',
+    timestamp: '09:42 AM',
+    date: '2026-10-23',
+    user: 'Amara Chen',
+    userType: 'human',
+    role: 'Admin',
+    action: 'User Role Modified',
+    entityId: 'USR-0042',
+    entityType: 'User Permission',
+    aiRecommendation: 'N/A',
+    humanDecision: 'Coordinator',
+    status: 'APPROVED',
+    notes: 'User role escalated after verification of field credentials.',
+    immutableHash: '0x7c3aeda4598110b9...fa51',
+    modelConfidence: 'N/A'
+  },
+  {
+    id: 'AUD-9014',
+    timestamp: '09:30 AM',
+    date: '2026-10-23',
+    user: 'AI Engine',
+    userType: 'ai',
+    role: 'AI System',
+    action: 'Priority Escalation',
+    entityId: 'REQ-01890',
+    entityType: 'Assistance Request',
+    aiRecommendation: 'CRITICAL',
+    humanDecision: 'CRITICAL',
+    status: 'ACCEPTED',
+    notes: 'Water levels threshold exceeded in sector 2.',
+    immutableHash: '0x0284c718a22ec901...4411',
+    modelConfidence: '95.7%'
+  }
+];
+
 export const DashboardOverviewPage = () => {
   const [activeNav, setActiveNav] = useState('dashboard');
   const [searchVal, setSearchVal] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('Western Province');
+
+  // Audit Center specific states
+  const [auditSearchQuery, setAuditSearchQuery] = useState('');
+  const [auditFilter, setAuditFilter] = useState('ALL');
+  const [selectedAuditLog, setSelectedAuditLog] = useState(INITIAL_AUDIT_DATA[0]);
+  const [copiedHash, setCopiedHash] = useState(false);
 
   const navMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, hasSub: false },
@@ -161,6 +313,41 @@ export const DashboardOverviewPage = () => {
     }
   ];
 
+  const filteredAuditData = useMemo(() => {
+    return INITIAL_AUDIT_DATA.filter((log) => {
+      const q = auditSearchQuery.toLowerCase();
+      const matchSearch =
+        log.user.toLowerCase().includes(q) ||
+        log.action.toLowerCase().includes(q) ||
+        log.entityId.toLowerCase().includes(q) ||
+        log.role.toLowerCase().includes(q);
+
+      if (!matchSearch) return false;
+      if (auditFilter === 'OVERRIDE') return log.status === 'OVERRIDE';
+      if (auditFilter === 'AI') return log.userType === 'ai';
+      if (auditFilter === 'APPROVED') return log.status === 'APPROVED' || log.status === 'ACCEPTED';
+      return true;
+    });
+  }, [auditSearchQuery, auditFilter]);
+
+  const handleCopyHash = (hash) => {
+    navigator.clipboard.writeText(hash);
+    setCopiedHash(true);
+    setTimeout(() => setCopiedHash(false), 2000);
+  };
+
+  const getHeaderTitle = () => {
+    if (activeNav === 'reports') return 'Operations Intelligence';
+    if (activeNav === 'audit') return 'Governance & Audit Center';
+    return 'Crisis Command Center';
+  };
+
+  const getHeaderSubtitle = () => {
+    if (activeNav === 'reports') return 'Real-time insights to improve humanitarian response';
+    if (activeNav === 'audit') return 'Cryptographically verifiable tracking of AI recommendations & decisions';
+    return 'Real-time overview of humanitarian operations';
+  };
+
   return (
     <div className="command-center-container">
       {/* =========================================================
@@ -170,7 +357,7 @@ export const DashboardOverviewPage = () => {
         <div>
           {/* Brand Logo */}
           <div className="coord-sidebar-brand">
-            <Link to="/coordinator/dashboard">
+            <Link to="/coordinator/dashboard" onClick={() => setActiveNav('dashboard')}>
               <img
                 src={reliefcoreLogoWhite}
                 alt="RELIEFCORE Humanitarian Operations"
@@ -223,27 +410,23 @@ export const DashboardOverviewPage = () => {
           <div className="header-brand-title-wrap">
             <img src={crisisCenterIcon} alt="Command Center" className="header-icon-box" />
             <div>
-              <h1 className="header-title-text">
-                {activeNav === 'reports' ? 'Operations Intelligence' : 'Crisis Command Center'}
-              </h1>
-              <p className="header-subtitle-text">
-                {activeNav === 'reports' 
-                  ? 'Real-time insights to improve humanitarian response' 
-                  : 'Real-time overview of humanitarian operations'}
-              </p>
+              <h1 className="header-title-text">{getHeaderTitle()}</h1>
+              <p className="header-subtitle-text">{getHeaderSubtitle()}</p>
             </div>
           </div>
 
-          <div className="header-center-search">
-            <Search size={14} className="header-search-icon" />
-            <input
-              type="text"
-              placeholder="Search requests, locations, resources..."
-              className="header-search-input"
-              value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
-            />
-          </div>
+          {activeNav !== 'audit' && (
+            <div className="header-center-search">
+              <Search size={14} className="header-search-icon" />
+              <input
+                type="text"
+                placeholder="Search requests, locations, resources..."
+                className="header-search-input"
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+              />
+            </div>
+          )}
 
           <div className="header-right-tools">
             <button className="header-bell-btn" aria-label="Notifications">
@@ -265,7 +448,268 @@ export const DashboardOverviewPage = () => {
         <div className="coord-body-padding">
           {activeNav === 'reports' ? (
             <ReportsAnalyticsView />
+          ) : activeNav === 'audit' ? (
+            /* =========================================================
+                AUDIT CENTER VIEW
+               ========================================================= */
+            <div className="audit-embedded-wrapper">
+              {/* Transparent Operational Audit Banner */}
+              <div className="audit-hero-banner">
+                <div className="hero-banner-left">
+                  <div className="hero-shield-icon">
+                    <ShieldCheck size={26} />
+                  </div>
+                  <div>
+                    <h2 className="hero-banner-title">Transparent Operational Audit</h2>
+                    <p className="hero-banner-subtitle">
+                      Immutable history of all AI recommendations, human decisions, and system actions.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="hero-banner-metrics">
+                  <div className="hero-stat-block">
+                    <span className="hero-stat-num stat-white">2,847</span>
+                    <span className="hero-stat-tag">Total Records</span>
+                  </div>
+                  <div className="hero-stat-divider"></div>
+                  <div className="hero-stat-block">
+                    <span className="hero-stat-num stat-purple">1,284</span>
+                    <span className="hero-stat-tag">AI Actions</span>
+                  </div>
+                  <div className="hero-stat-divider"></div>
+                  <div className="hero-stat-block">
+                    <span className="hero-stat-num stat-amber">423</span>
+                    <span className="hero-stat-tag">Human Overrides</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Toolbar: Search and Filter Chips */}
+              <div className="audit-toolbar-row">
+                <div className="audit-search-field">
+                  <Search size={15} className="audit-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search audit log by user, action, entity (e.g. REQ-01842)..."
+                    value={auditSearchQuery}
+                    onChange={(e) => setAuditSearchQuery(e.target.value)}
+                  />
+                  {auditSearchQuery && (
+                    <button className="search-clear-btn" onClick={() => setAuditSearchQuery('')}>
+                      <X size={13} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="audit-filter-pills">
+                  <button
+                    className={`filter-chip ${auditFilter === 'ALL' ? 'active' : ''}`}
+                    onClick={() => setAuditFilter('ALL')}
+                  >
+                    All Records
+                  </button>
+                  <button
+                    className={`filter-chip ${auditFilter === 'OVERRIDE' ? 'active' : ''}`}
+                    onClick={() => setAuditFilter('OVERRIDE')}
+                  >
+                    Overrides Only
+                  </button>
+                  <button
+                    className={`filter-chip ${auditFilter === 'AI' ? 'active' : ''}`}
+                    onClick={() => setAuditFilter('AI')}
+                  >
+                    AI Actions
+                  </button>
+                  <button
+                    className={`filter-chip ${auditFilter === 'APPROVED' ? 'active' : ''}`}
+                    onClick={() => setAuditFilter('APPROVED')}
+                  >
+                    Approved
+                  </button>
+                </div>
+              </div>
+
+              {/* Master-Detail Split Workspace */}
+              <div className="audit-split-workspace">
+                {/* Table Master View */}
+                <div className="audit-table-card">
+                  <div className="table-card-head">
+                    <span className="table-count-label">
+                      Showing <b>{filteredAuditData.length}</b> records
+                    </span>
+                    <span className="table-hint-text">Click any row to inspect details</span>
+                  </div>
+
+                  <div className="table-scroller">
+                    <table className="audit-grid-table">
+                      <thead>
+                        <tr>
+                          <th>TIMESTAMP</th>
+                          <th>USER</th>
+                          <th>ROLE</th>
+                          <th>ACTION</th>
+                          <th>ENTITY</th>
+                          <th>AI RECOMMENDATION</th>
+                          <th>HUMAN DECISION</th>
+                          <th>STATUS</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredAuditData.map((row) => {
+                          const isSelected = selectedAuditLog?.id === row.id;
+                          return (
+                            <tr
+                              key={row.id}
+                              className={`audit-row ${isSelected ? 'row-active' : ''}`}
+                              onClick={() => setSelectedAuditLog(row)}
+                            >
+                              <td className="cell-time">{row.timestamp}</td>
+                              <td className="cell-user">
+                                <div className="actor-badge-wrap">
+                                  {row.userType === 'ai' ? (
+                                    <Cpu size={14} className="actor-icon icon-ai" />
+                                  ) : (
+                                    <User size={14} className="actor-icon icon-human" />
+                                  )}
+                                  <span>{row.user}</span>
+                                </div>
+                              </td>
+                              <td className="cell-role">{row.role}</td>
+                              <td className="cell-action">{row.action}</td>
+                              <td className="cell-entity">
+                                <span className="entity-chip">{row.entityId}</span>
+                              </td>
+                              <td className="cell-ai-rec">
+                                <span className="pill-ai">{row.aiRecommendation}</span>
+                              </td>
+                              <td className="cell-decision">
+                                <span className="text-decision">{row.humanDecision}</span>
+                              </td>
+                              <td className="cell-status">
+                                <span className={`status-pill status-${row.status.toLowerCase()}`}>
+                                  {row.status}
+                                </span>
+                              </td>
+                              <td className="cell-chevron">
+                                <ChevronRight size={14} />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Side Inspection Drawer */}
+                {selectedAuditLog && (
+                  <aside className="audit-inspector-drawer">
+                    <div className="drawer-header">
+                      <div>
+                        <h3 className="drawer-title">Audit Detail</h3>
+                        <p className="drawer-subtitle">Record Reference: #{selectedAuditLog.id}</p>
+                      </div>
+                      <span className={`status-pill status-${selectedAuditLog.status.toLowerCase()}`}>
+                        {selectedAuditLog.status}
+                      </span>
+                    </div>
+
+                    <div className="drawer-content-scroll">
+                      {/* Meta List */}
+                      <div className="detail-meta-list">
+                        <div className="meta-pair">
+                          <span className="meta-label">TIMESTAMP</span>
+                          <span className="meta-val">{selectedAuditLog.date} • {selectedAuditLog.timestamp}</span>
+                        </div>
+
+                        <div className="meta-pair">
+                          <span className="meta-label">ENTITY</span>
+                          <div className="entity-link-box">
+                            <span className="entity-id-bold">{selectedAuditLog.entityId}</span>
+                            <span className="entity-type-tag">({selectedAuditLog.entityType})</span>
+                            <ExternalLink size={12} className="link-icon" />
+                          </div>
+                        </div>
+
+                        <div className="meta-pair">
+                          <span className="meta-label">ACTION</span>
+                          <span className="meta-val font-semibold">{selectedAuditLog.action}</span>
+                        </div>
+
+                        <div className="meta-pair">
+                          <span className="meta-label">USER</span>
+                          <div className="actor-line">
+                            <span className="meta-val">{selectedAuditLog.user}</span>
+                            <span className="sub-role-pill">{selectedAuditLog.role}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Decision Diff Comparison */}
+                      <div className="decision-diff-card">
+                        <span className="diff-heading">DECISION COMPARISON</span>
+                        <div className="diff-cols-grid">
+                          <div className="diff-col col-ai">
+                            <div className="diff-top">
+                              <Cpu size={12} />
+                              <span>AI RECOMMENDATION</span>
+                            </div>
+                            <div className="diff-value-box">{selectedAuditLog.aiRecommendation}</div>
+                            <span className="diff-confidence">
+                              Confidence: {selectedAuditLog.modelConfidence}
+                            </span>
+                          </div>
+
+                          <div className="diff-col col-human">
+                            <div className="diff-top">
+                              <User size={12} />
+                              <span>HUMAN DECISION</span>
+                            </div>
+                            <div className="diff-value-box highlight-human">
+                              {selectedAuditLog.humanDecision}
+                            </div>
+                            <span className="diff-confidence text-teal">Recorded Action</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Notes Section */}
+                      <div className="notes-section-box">
+                        <span className="notes-header-tag">REASON / NOTES</span>
+                        <p className="notes-text-body">{selectedAuditLog.notes}</p>
+                      </div>
+
+                      {/* Immutability Verification */}
+                      <div className="crypto-ledger-box">
+                        <div className="ledger-top">
+                          <ShieldCheck size={14} className="crypto-badge-icon" />
+                          <span>CRYPTOGRAPHIC IMMUTABILITY</span>
+                        </div>
+                        <p className="ledger-desc">
+                          This record is immutable and stored with a cryptographic hash for audit integrity[cite: 3].
+                        </p>
+                        <div className="hash-code-row">
+                          <code className="hash-string">{selectedAuditLog.immutableHash}</code>
+                          <button
+                            className="copy-hash-btn"
+                            title="Copy Hash"
+                            onClick={() => handleCopyHash(selectedAuditLog.immutableHash)}
+                          >
+                            {copiedHash ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </aside>
+                )}
+              </div>
+            </div>
           ) : (
+            /* =========================================================
+                DEFAULT COMMAND CENTER DASHBOARD VIEW
+               ========================================================= */
             <>
               {/* Live Operation Status Bar */}
               <div className="live-op-card">
@@ -430,24 +874,19 @@ export const DashboardOverviewPage = () => {
                       </linearGradient>
                     </defs>
 
-                    {/* Y Axis Grid lines */}
                     <line x1="25" y1="15" x2="255" y2="15" stroke="#f1f5f9" strokeDasharray="3 3" />
                     <line x1="25" y1="40" x2="255" y2="40" stroke="#f1f5f9" strokeDasharray="3 3" />
                     <line x1="25" y1="65" x2="255" y2="65" stroke="#f1f5f9" strokeDasharray="3 3" />
 
-                    {/* Y Axis text */}
                     <text x="5" y="18" fill="#94a3b8" fontSize="8">150</text>
                     <text x="5" y="43" fill="#94a3b8" fontSize="8">100</text>
                     <text x="12" y="68" fill="#94a3b8" fontSize="8">50</text>
                     <text x="15" y="80" fill="#94a3b8" fontSize="8">0</text>
 
-                    {/* Area under curve */}
                     <path
                       d="M 35 65 L 65 52 L 100 48 L 135 40 L 170 38 L 205 24 L 240 18 L 240 75 L 35 75 Z"
                       fill="url(#chartGradient)"
                     />
-
-                    {/* Main line */}
                     <path
                       d="M 35 65 L 65 52 L 100 48 L 135 40 L 170 38 L 205 24 L 240 18"
                       stroke="#0ea5e9"
@@ -456,7 +895,6 @@ export const DashboardOverviewPage = () => {
                       strokeLinejoin="round"
                     />
 
-                    {/* Data points */}
                     <circle cx="35" cy="65" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
                     <circle cx="65" cy="52" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
                     <circle cx="100" cy="48" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
@@ -465,7 +903,6 @@ export const DashboardOverviewPage = () => {
                     <circle cx="205" cy="24" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
                     <circle cx="240" cy="18" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
 
-                    {/* X Axis days */}
                     <text x="30" y="88" fill="#94a3b8" fontSize="7.5">Mon</text>
                     <text x="62" y="88" fill="#94a3b8" fontSize="7.5">Tue</text>
                     <text x="96" y="88" fill="#94a3b8" fontSize="7.5">Wed</text>
@@ -481,7 +918,6 @@ export const DashboardOverviewPage = () => {
                   <h4 className="card-heading-text">Resource Utilisation</h4>
 
                   <div className="donuts-group">
-                    {/* Donut 1: Food 78% */}
                     <div className="donut-stat-item">
                       <div className="donut-circle-wrap">
                         <svg width="48" height="48" viewBox="0 0 36 36">
@@ -505,7 +941,6 @@ export const DashboardOverviewPage = () => {
                       <span className="donut-label-text">Food</span>
                     </div>
 
-                    {/* Donut 2: Medical 64% */}
                     <div className="donut-stat-item">
                       <div className="donut-circle-wrap">
                         <svg width="48" height="48" viewBox="0 0 36 36">
@@ -529,7 +964,6 @@ export const DashboardOverviewPage = () => {
                       <span className="donut-label-text">Medical</span>
                     </div>
 
-                    {/* Donut 3: Vehicles 52% */}
                     <div className="donut-stat-item">
                       <div className="donut-circle-wrap">
                         <svg width="48" height="48" viewBox="0 0 36 36">
@@ -553,7 +987,6 @@ export const DashboardOverviewPage = () => {
                       <span className="donut-label-text">Vehicles</span>
                     </div>
 
-                    {/* Donut 4: Shelter 89% */}
                     <div className="donut-stat-item">
                       <div className="donut-circle-wrap">
                         <svg width="48" height="48" viewBox="0 0 36 36">
@@ -707,7 +1140,6 @@ export const DashboardOverviewPage = () => {
                   </div>
 
                   <div className="alerts-list-col">
-                    {/* Alert 1 */}
                     <div className="alert-entry-card alert-entry-red">
                       <div className="alert-entry-head">
                         <AlertTriangle size={13} color="#dc2626" />
@@ -719,7 +1151,6 @@ export const DashboardOverviewPage = () => {
                       <span className="alert-time-sm">2 hours ago</span>
                     </div>
 
-                    {/* Alert 2 */}
                     <div className="alert-entry-card alert-entry-amber">
                       <div className="alert-entry-head">
                         <AlertCircle size={13} color="#d97706" />
@@ -731,7 +1162,6 @@ export const DashboardOverviewPage = () => {
                       <span className="alert-time-sm">4 hours ago</span>
                     </div>
 
-                    {/* Alert 3 */}
                     <div className="alert-entry-card alert-entry-blue">
                       <div className="alert-entry-head">
                         <Info size={13} color="#2563eb" />
