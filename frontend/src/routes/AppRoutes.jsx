@@ -8,6 +8,7 @@ import { RegisterPage } from '../pages/auth/RegisterPage';
 import { UnauthorizedPage } from '../pages/auth/UnauthorizedPage';
 
 // Citizen Pages
+import { CitizenPortalPage } from '../pages/citizen/CitizenPortalPage';
 import { SubmitRequestPage } from '../pages/citizen/SubmitRequestPage';
 import { TrackRequestsPage } from '../pages/citizen/TrackRequestsPage';
 import { FindShelterPage } from '../pages/citizen/FindShelterPage';
@@ -32,7 +33,9 @@ import { TaskAssignmentPage } from '../pages/volunteers/TaskAssignmentPage';
 export const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/coordinator/dashboard" replace />} />
+      <Route path="/" element={<CitizenPortalPage />} />
+      <Route path="/citizen" element={<CitizenPortalPage />} />
+      <Route path="/citizen/home" element={<CitizenPortalPage />} />
       <Route path="/dashboard" element={<Navigate to="/coordinator/dashboard" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />

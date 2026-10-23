@@ -9,9 +9,13 @@ import './assets/styles.css';
 
 function AppLayout() {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login';
+  const isDedicatedLayout = 
+    location.pathname === '/' || 
+    location.pathname.startsWith('/citizen') || 
+    location.pathname === '/login' || 
+    location.pathname === '/register';
 
-  if (isAuthPage) {
+  if (isDedicatedLayout) {
     return (
       <main style={{ minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
         <AppRoutes />
