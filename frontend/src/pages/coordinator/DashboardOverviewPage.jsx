@@ -43,6 +43,7 @@ import crisisCenterIcon from '../../assets/crisis-center-icon.png';
 import { LiveSatelliteCrisisMap } from '../../components/maps/LiveSatelliteCrisisMap';
 
 import { ReportsAnalyticsView } from "../reports-and-analysis/ReportsAnalyticsView";
+import { OperationalMapView } from "../map/OperationalMapView";
 
 import './DashboardOverviewPage.css';
 
@@ -339,23 +340,22 @@ export const DashboardOverviewPage = () => {
   const getHeaderTitle = () => {
     if (activeNav === 'reports') return 'Operations Intelligence';
     if (activeNav === 'audit') return 'Governance & Audit Center';
+    if (activeNav === 'maps') return 'Operational GIS & Logistics Map';
     return 'Crisis Command Center';
   };
 
   const getHeaderSubtitle = () => {
     if (activeNav === 'reports') return 'Real-time insights to improve humanitarian response';
     if (activeNav === 'audit') return 'Cryptographically verifiable tracking of AI recommendations & decisions';
+    if (activeNav === 'maps') return 'Geospatial service coverage, road routing, and proximity matching';
     return 'Real-time overview of humanitarian operations';
   };
 
   return (
     <div className="command-center-container">
-      {/* =========================================================
-          1. Left Sidebar Navigation
-          ========================================================= */}
+      {/* 1. Left Sidebar Navigation */}
       <aside className="coord-sidebar">
         <div>
-          {/* Brand Logo */}
           <div className="coord-sidebar-brand">
             <Link to="/coordinator/dashboard" onClick={() => setActiveNav('dashboard')}>
               <img
@@ -366,7 +366,6 @@ export const DashboardOverviewPage = () => {
             </Link>
           </div>
 
-          {/* Navigation Links */}
           <nav className="coord-sidebar-nav">
             {navMenuItems.map((item) => {
               const IconComp = item.icon;
@@ -389,7 +388,6 @@ export const DashboardOverviewPage = () => {
           </nav>
         </div>
 
-        {/* Sidebar Footer User Card */}
         <div className="coord-sidebar-bottom">
           <div className="coord-user-card">
             <img src={sarahJohnson} alt="Sarah Johnson" className="coord-avatar-img" />
@@ -401,11 +399,8 @@ export const DashboardOverviewPage = () => {
         </div>
       </aside>
 
-      {/* =========================================================
-          2. Main Content
-          ========================================================= */}
+      {/* 2. Main Content */}
       <main className="coord-main-content">
-        {/* Top Header */}
         <header className="coord-top-header">
           <div className="header-brand-title-wrap">
             <img src={crisisCenterIcon} alt="Command Center" className="header-icon-box" />
@@ -415,7 +410,7 @@ export const DashboardOverviewPage = () => {
             </div>
           </div>
 
-          {activeNav !== 'audit' && (
+          {activeNav !== 'audit' && activeNav !== 'maps' && (
             <div className="header-center-search">
               <Search size={14} className="header-search-icon" />
               <input
@@ -448,12 +443,10 @@ export const DashboardOverviewPage = () => {
         <div className="coord-body-padding">
           {activeNav === 'reports' ? (
             <ReportsAnalyticsView />
+          ) : activeNav === 'maps' ? (
+            <OperationalMapView />
           ) : activeNav === 'audit' ? (
-            /* =========================================================
-                AUDIT CENTER VIEW
-               ========================================================= */
             <div className="audit-embedded-wrapper">
-              {/* Transparent Operational Audit Banner */}
               <div className="audit-hero-banner">
                 <div className="hero-banner-left">
                   <div className="hero-shield-icon">
@@ -462,7 +455,7 @@ export const DashboardOverviewPage = () => {
                   <div>
                     <h2 className="hero-banner-title">Transparent Operational Audit</h2>
                     <p className="hero-banner-subtitle">
-                      Immutable history of all AI recommendations, human decisions, and system actions.
+                      Immutable history of all AI recommendations, human decisions, and system actions[cite: 3].
                     </p>
                   </div>
                 </div>
@@ -485,7 +478,7 @@ export const DashboardOverviewPage = () => {
                 </div>
               </div>
 
-              {/* Toolbar: Search and Filter Chips */}
+              {/* Toolbar */}
               <div className="audit-toolbar-row">
                 <div className="audit-search-field">
                   <Search size={15} className="audit-search-icon" />
@@ -530,9 +523,8 @@ export const DashboardOverviewPage = () => {
                 </div>
               </div>
 
-              {/* Master-Detail Split Workspace */}
+              {/* Split Workspace */}
               <div className="audit-split-workspace">
-                {/* Table Master View */}
                 <div className="audit-table-card">
                   <div className="table-card-head">
                     <span className="table-count-label">
@@ -617,7 +609,6 @@ export const DashboardOverviewPage = () => {
                     </div>
 
                     <div className="drawer-content-scroll">
-                      {/* Meta List */}
                       <div className="detail-meta-list">
                         <div className="meta-pair">
                           <span className="meta-label">TIMESTAMP</span>
@@ -647,7 +638,6 @@ export const DashboardOverviewPage = () => {
                         </div>
                       </div>
 
-                      {/* Decision Diff Comparison */}
                       <div className="decision-diff-card">
                         <span className="diff-heading">DECISION COMPARISON</span>
                         <div className="diff-cols-grid">
@@ -675,13 +665,11 @@ export const DashboardOverviewPage = () => {
                         </div>
                       </div>
 
-                      {/* Notes Section */}
                       <div className="notes-section-box">
                         <span className="notes-header-tag">REASON / NOTES</span>
                         <p className="notes-text-body">{selectedAuditLog.notes}</p>
                       </div>
 
-                      {/* Immutability Verification */}
                       <div className="crypto-ledger-box">
                         <div className="ledger-top">
                           <ShieldCheck size={14} className="crypto-badge-icon" />
@@ -707,11 +695,8 @@ export const DashboardOverviewPage = () => {
               </div>
             </div>
           ) : (
-            /* =========================================================
-                DEFAULT COMMAND CENTER DASHBOARD VIEW
-               ========================================================= */
+            /* DEFAULT DASHBOARD VIEW */
             <>
-              {/* Live Operation Status Bar */}
               <div className="live-op-card">
                 <div className="live-op-left">
                   <div className="live-op-pill">
@@ -728,9 +713,7 @@ export const DashboardOverviewPage = () => {
                 </Link>
               </div>
 
-              {/* Row of 6 KPI Stat Cards */}
               <div className="kpi-row-grid">
-                {/* Card 1: Active Crises */}
                 <div className="kpi-stat-card">
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
@@ -742,7 +725,6 @@ export const DashboardOverviewPage = () => {
                   <span className="kpi-sub-trend trend-green">↑ +3 this week</span>
                 </div>
 
-                {/* Card 2: Open Requests */}
                 <div className="kpi-stat-card">
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
@@ -754,7 +736,6 @@ export const DashboardOverviewPage = () => {
                   <span className="kpi-sub-trend trend-red">↑ +12%</span>
                 </div>
 
-                {/* Card 3: High Priority */}
                 <div className="kpi-stat-card">
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#fef2f2', color: '#ef4444' }}>
@@ -766,7 +747,6 @@ export const DashboardOverviewPage = () => {
                   <span className="kpi-sub-trend trend-red">↑ +7</span>
                 </div>
 
-                {/* Card 4: Resources Allocated */}
                 <div className="kpi-stat-card">
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#f0fdfa', color: '#14b8a6' }}>
@@ -780,7 +760,6 @@ export const DashboardOverviewPage = () => {
                   </div>
                 </div>
 
-                {/* Card 5: Shelter Occupancy */}
                 <div className="kpi-stat-card">
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#fff7ed', color: '#f97316' }}>
@@ -794,7 +773,6 @@ export const DashboardOverviewPage = () => {
                   </div>
                 </div>
 
-                {/* Card 6: AI Recommendations */}
                 <div className="kpi-stat-card">
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#f5f3ff', color: '#8b5cf6' }}>
@@ -807,14 +785,11 @@ export const DashboardOverviewPage = () => {
                 </div>
               </div>
 
-              {/* Middle Row: Satellite Crisis Map + Critical Requests */}
               <div className="map-and-requests-row">
-                {/* Satellite Map */}
                 <div className="satellite-map-card">
                   <LiveSatelliteCrisisMap onProvinceChange={(prov) => setSelectedProvince(prov)} />
                 </div>
 
-                {/* Critical Requests List */}
                 <div className="critical-requests-card">
                   <div className="card-title-header">
                     <h3 className="card-heading-text">Critical Requests</h3>
@@ -848,9 +823,7 @@ export const DashboardOverviewPage = () => {
                 </div>
               </div>
 
-              {/* Middle Row 2: Request Activity + Resource Utilisation + Recent Decisions */}
               <div className="activity-util-decisions-row">
-                {/* Request Activity Area Chart */}
                 <div className="activity-card">
                   <div className="activity-top-row">
                     <div>
@@ -865,7 +838,6 @@ export const DashboardOverviewPage = () => {
                     <span className="activity-count-label">Total Requests</span>
                   </div>
 
-                  {/* Vector SVG Line Chart */}
                   <svg className="chart-svg-container" viewBox="0 0 260 90" fill="none">
                     <defs>
                       <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
@@ -873,16 +845,13 @@ export const DashboardOverviewPage = () => {
                         <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.0" />
                       </linearGradient>
                     </defs>
-
                     <line x1="25" y1="15" x2="255" y2="15" stroke="#f1f5f9" strokeDasharray="3 3" />
                     <line x1="25" y1="40" x2="255" y2="40" stroke="#f1f5f9" strokeDasharray="3 3" />
                     <line x1="25" y1="65" x2="255" y2="65" stroke="#f1f5f9" strokeDasharray="3 3" />
-
                     <text x="5" y="18" fill="#94a3b8" fontSize="8">150</text>
                     <text x="5" y="43" fill="#94a3b8" fontSize="8">100</text>
                     <text x="12" y="68" fill="#94a3b8" fontSize="8">50</text>
                     <text x="15" y="80" fill="#94a3b8" fontSize="8">0</text>
-
                     <path
                       d="M 35 65 L 65 52 L 100 48 L 135 40 L 170 38 L 205 24 L 240 18 L 240 75 L 35 75 Z"
                       fill="url(#chartGradient)"
@@ -894,7 +863,6 @@ export const DashboardOverviewPage = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
-
                     <circle cx="35" cy="65" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
                     <circle cx="65" cy="52" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
                     <circle cx="100" cy="48" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
@@ -902,7 +870,6 @@ export const DashboardOverviewPage = () => {
                     <circle cx="170" cy="38" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
                     <circle cx="205" cy="24" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
                     <circle cx="240" cy="18" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
-
                     <text x="30" y="88" fill="#94a3b8" fontSize="7.5">Mon</text>
                     <text x="62" y="88" fill="#94a3b8" fontSize="7.5">Tue</text>
                     <text x="96" y="88" fill="#94a3b8" fontSize="7.5">Wed</text>
@@ -913,7 +880,6 @@ export const DashboardOverviewPage = () => {
                   </svg>
                 </div>
 
-                {/* Resource Utilisation Donuts */}
                 <div className="utilisation-card">
                   <h4 className="card-heading-text">Resource Utilisation</h4>
 
@@ -1012,7 +978,6 @@ export const DashboardOverviewPage = () => {
                   </div>
                 </div>
 
-                {/* Recent Decisions Card */}
                 <div className="decisions-card">
                   <h4 className="card-heading-text">Recent Decisions</h4>
 
@@ -1059,9 +1024,7 @@ export const DashboardOverviewPage = () => {
                 </div>
               </div>
 
-              {/* Bottom Row: Priority Request Queue Table + Emergency Alerts */}
               <div className="queue-and-alerts-row">
-                {/* Priority Request Queue Table */}
                 <div className="queue-table-card">
                   <div className="queue-header-flex">
                     <div className="queue-title-left">
@@ -1132,7 +1095,6 @@ export const DashboardOverviewPage = () => {
                   </table>
                 </div>
 
-                {/* Emergency Alerts */}
                 <div className="alerts-card-box">
                   <div className="card-title-header">
                     <h3 className="card-heading-text">Emergency Alerts</h3>

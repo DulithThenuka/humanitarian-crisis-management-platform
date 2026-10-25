@@ -13,7 +13,8 @@ function AppLayout() {
     location.pathname === '/' || 
     location.pathname === '/dashboard' ||
     location.pathname.startsWith('/coordinator') || 
-    location.pathname.startsWith('/audit') ||           // <--- Added for Audit Center
+    location.pathname.startsWith('/audit') ||
+    location.pathname.startsWith('/map') ||
     location.pathname.startsWith('/citizen') || 
     location.pathname === '/login' || 
     location.pathname === '/register';
