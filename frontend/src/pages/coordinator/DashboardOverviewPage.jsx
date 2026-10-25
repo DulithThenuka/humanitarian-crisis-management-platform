@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Home, 
@@ -17,29 +17,115 @@ import {
   Search, 
   ChevronRight, 
   ChevronDown, 
-  Maximize2, 
-  Plus, 
-  Minus, 
   Radio, 
-  TrendingUp, 
   Eye, 
   UserCheck, 
   MoreHorizontal, 
   AlertTriangle, 
   Info, 
-  FileText 
+  FileText,
+  ShieldCheck,
+  Cpu,
+  User,
+  Copy,
+  Check,
+  ExternalLink,
+  X,
+  Plus,
+  GitMerge,
+  ArrowUpRight,
+  CheckCircle2,
+  Building,
+  Sparkles
 } from 'lucide-react';
 
 import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
 import sarahJohnson from '../../assets/sarah-johnson.jpg';
 import crisisCenterIcon from '../../assets/crisis-center-icon.png';
 import { LiveSatelliteCrisisMap } from '../../components/maps/LiveSatelliteCrisisMap';
+
+import { ReportsAnalyticsView } from "../reports-and-analysis/ReportsAnalyticsView";
+import { OperationalMapView } from "../map/OperationalMapView";
+
 import './DashboardOverviewPage.css';
+
+const INITIAL_AUDIT_DATA = [
+  {
+    id: 'AUD-9021',
+    timestamp: '10:25 AM',
+    date: '2026-10-23',
+    user: 'Amara Chen',
+    userType: 'human',
+    role: 'Coordinator',
+    action: 'Priority Modified',
+    entityId: 'REQ-01842',
+    entityType: 'Assistance Request',
+    aiRecommendation: 'HIGH',
+    humanDecision: 'CRITICAL',
+    status: 'APPROVED',
+    notes: 'Pregnant household member confirmed. Road blockage verified by field team.',
+    immutableHash: '0x8f2a49b21dc33e08...ba71',
+    modelConfidence: '88.4%'
+  },
+  {
+    id: 'AUD-9020',
+    timestamp: '10:22 AM',
+    date: '2026-10-23',
+    user: 'AI Engine',
+    userType: 'ai',
+    role: 'AI System',
+    action: 'Classification',
+    entityId: 'REQ-01842',
+    entityType: 'Assistance Request',
+    aiRecommendation: 'Medical',
+    humanDecision: 'Medical',
+    status: 'ACCEPTED',
+    notes: 'Automatic classification based on description analysis.',
+    immutableHash: '0x3c71a9e884d12bb5...e41f',
+    modelConfidence: '96.2%'
+  },
+  {
+    id: 'AUD-9019',
+    timestamp: '10:19 AM',
+    date: '2026-10-23',
+    user: 'Ravi Kumar',
+    userType: 'human',
+    role: 'Coordinator',
+    action: 'Resource Allocated',
+    entityId: 'REQ-01847',
+    entityType: 'Inventory Dispatch',
+    aiRecommendation: '80 units',
+    humanDecision: '80 units',
+    status: 'APPROVED',
+    notes: 'Resource allocated per regional warehouse inventory thresholds.',
+    immutableHash: '0x10b981d77a5e0192...99cf',
+    modelConfidence: '91.0%'
+  }
+];
 
 export const DashboardOverviewPage = () => {
   const [activeNav, setActiveNav] = useState('dashboard');
   const [searchVal, setSearchVal] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('Western Province');
+
+  // Crisis Creation Modal State
+  const [showCreateCrisisModal, setShowCreateCrisisModal] = useState(false);
+  const [newCrisisData, setNewCrisisData] = useState({
+    title: '',
+    province: 'Western Province',
+    severity: 'Critical',
+    operationalArea: 'Kelani River Basin Sector 3'
+  });
+
+  // Table Selection & Batch Actions State
+  const [selectedQueueIds, setSelectedQueueIds] = useState([]);
+  const [activeAIRationale, setActiveAIRationale] = useState(null);
+
+  // Audit Center specific states
+  const [auditSearchQuery, setAuditSearchQuery] = useState('');
+  const [auditFilter, setAuditFilter] = useState('ALL');
+  const [selectedAuditLog, setSelectedAuditLog] = useState(INITIAL_AUDIT_DATA[0]);
+  const [copiedHash, setCopiedHash] = useState(false);
 
   const navMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, hasSub: false },
@@ -112,9 +198,12 @@ export const DashboardOverviewPage = () => {
       location: 'Colombo',
       priority: 'Critical',
       aiScore: '91%',
+      aiConfidence: 'Very High',
+      aiRationale: 'Telemetry shows rising flood water (1.4m) + pregnant resident trapped on upper terrace.',
       status: 'Under Review',
       assignedTo: 'Unassigned',
-      created: '2 min ago'
+      created: '2 min ago',
+      slaStatus: 'On Track'
     },
     {
       id: 'REQ-2026-01877',
@@ -122,9 +211,12 @@ export const DashboardOverviewPage = () => {
       location: 'Gampaha',
       priority: 'High',
       aiScore: '87%',
+      aiConfidence: 'High',
+      aiRationale: 'Displaced family of 6 with 2 infants; nearest shelter currently has 15 available beds.',
       status: 'Assigned',
       assignedTo: 'Team Alpha',
-      created: '5 min ago'
+      created: '42 min ago',
+      slaStatus: 'Overdue (SLA Breached)'
     },
     {
       id: 'REQ-2026-01835',
@@ -132,9 +224,12 @@ export const DashboardOverviewPage = () => {
       location: 'Kalutara',
       priority: 'High',
       aiScore: '82%',
+      aiConfidence: 'High',
+      aiRationale: 'Cut-off community sector 4 without drinking water for >18 hours.',
       status: 'Pending',
       assignedTo: 'Unassigned',
-      created: '8 min ago'
+      created: '8 min ago',
+      slaStatus: 'On Track'
     },
     {
       id: 'REQ-2026-01628',
@@ -142,9 +237,12 @@ export const DashboardOverviewPage = () => {
       location: 'Negombo',
       priority: 'Medium',
       aiScore: '76%',
+      aiConfidence: 'Moderate',
+      aiRationale: 'Road A1 obstruction; evacuation route requires off-road 4WD transport.',
       status: 'Under Review',
       assignedTo: 'Team Bravo',
-      created: '12 min ago'
+      created: '12 min ago',
+      slaStatus: 'On Track'
     },
     {
       id: 'REQ-2026-01821',
@@ -152,22 +250,85 @@ export const DashboardOverviewPage = () => {
       location: 'Kalutara',
       priority: 'Medium',
       aiScore: '62%',
+      aiConfidence: 'Moderate',
+      aiRationale: 'Precautionary evacuation request for low-risk elevation zone.',
       status: 'Assigned',
       assignedTo: 'Team Alpha',
-      created: '15 min ago'
+      created: '58 min ago',
+      slaStatus: 'Overdue (SLA Breached)'
     }
   ];
 
+  const partnerOrganisations = [
+    { name: 'Sri Lanka Red Cross', status: 'Deployed', personnel: 42, units: '12 Ambulances' },
+    { name: 'Disaster Management Centre (DMC)', status: 'Active HQ', personnel: 28, units: 'Western Command' },
+    { name: 'Tri-Forces Rescue Brigade', status: 'In Transit', personnel: 95, units: '6 Inflatable Boats' },
+    { name: 'Sarvodaya Relief Foundation', status: 'Staged', personnel: 34, units: '5,000 Food Packs' }
+  ];
+
+  const handleSelectAllQueue = (e) => {
+    if (e.target.checked) {
+      setSelectedQueueIds(priorityQueueData.map(r => r.id));
+    } else {
+      setSelectedQueueIds([]);
+    }
+  };
+
+  const handleToggleSelectRow = (id) => {
+    setSelectedQueueIds(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleBatchAction = (action) => {
+    alert(`Batch Action executed: [${action.toUpperCase()}] for ${selectedQueueIds.length} request(s): ${selectedQueueIds.join(', ')}`);
+    setSelectedQueueIds([]);
+  };
+
+  const filteredAuditData = useMemo(() => {
+    return INITIAL_AUDIT_DATA.filter((log) => {
+      const q = auditSearchQuery.toLowerCase();
+      const matchSearch =
+        log.user.toLowerCase().includes(q) ||
+        log.action.toLowerCase().includes(q) ||
+        log.entityId.toLowerCase().includes(q) ||
+        log.role.toLowerCase().includes(q);
+
+      if (!matchSearch) return false;
+      if (auditFilter === 'OVERRIDE') return log.status === 'OVERRIDE';
+      if (auditFilter === 'AI') return log.userType === 'ai';
+      if (auditFilter === 'APPROVED') return log.status === 'APPROVED' || log.status === 'ACCEPTED';
+      return true;
+    });
+  }, [auditSearchQuery, auditFilter]);
+
+  const handleCopyHash = (hash) => {
+    navigator.clipboard.writeText(hash);
+    setCopiedHash(true);
+    setTimeout(() => setCopiedHash(false), 2000);
+  };
+
+  const getHeaderTitle = () => {
+    if (activeNav === 'reports') return 'Operations Intelligence';
+    if (activeNav === 'audit') return 'Governance & Audit Center';
+    if (activeNav === 'maps') return 'Operational GIS & Logistics Map';
+    return 'Crisis Command Center';
+  };
+
+  const getHeaderSubtitle = () => {
+    if (activeNav === 'reports') return 'Real-time insights to improve humanitarian response';
+    if (activeNav === 'audit') return 'Cryptographically verifiable tracking of AI recommendations & decisions';
+    if (activeNav === 'maps') return 'Geospatial service coverage, road routing, and proximity matching';
+    return 'Real-time overview of humanitarian operations';
+  };
+
   return (
     <div className="command-center-container">
-      {/* =========================================================
-         1. Left Sidebar Navigation
-         ========================================================= */}
+      {/* 1. Left Sidebar Navigation */}
       <aside className="coord-sidebar">
         <div>
-          {/* Brand Logo */}
           <div className="coord-sidebar-brand">
-            <Link to="/coordinator/dashboard">
+            <Link to="/coordinator/dashboard" onClick={() => setActiveNav('dashboard')}>
               <img
                 src={reliefcoreLogoWhite}
                 alt="RELIEFCORE Humanitarian Operations"
@@ -176,7 +337,6 @@ export const DashboardOverviewPage = () => {
             </Link>
           </div>
 
-          {/* Navigation Links */}
           <nav className="coord-sidebar-nav">
             {navMenuItems.map((item) => {
               const IconComp = item.icon;
@@ -199,7 +359,6 @@ export const DashboardOverviewPage = () => {
           </nav>
         </div>
 
-        {/* Sidebar Footer User Card */}
         <div className="coord-sidebar-bottom">
           <div className="coord-user-card">
             <img src={sarahJohnson} alt="Sarah Johnson" className="coord-avatar-img" />
@@ -211,30 +370,41 @@ export const DashboardOverviewPage = () => {
         </div>
       </aside>
 
-      {/* =========================================================
-         2. Main Content
-         ========================================================= */}
+      {/* 2. Main Content */}
       <main className="coord-main-content">
-        {/* Top Header */}
         <header className="coord-top-header">
           <div className="header-brand-title-wrap">
             <img src={crisisCenterIcon} alt="Command Center" className="header-icon-box" />
             <div>
-              <h1 className="header-title-text">Crisis Command Center</h1>
-              <p className="header-subtitle-text">Real-time overview of humanitarian operations</p>
+              <h1 className="header-title-text">{getHeaderTitle()}</h1>
+              <p className="header-subtitle-text">{getHeaderSubtitle()}</p>
             </div>
           </div>
 
-          <div className="header-center-search">
-            <Search size={14} className="header-search-icon" />
-            <input
-              type="text"
-              placeholder="Search requests, locations, resources..."
-              className="header-search-input"
-              value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
-            />
-          </div>
+          {activeNav === 'dashboard' && (
+            <div className="header-crisis-action-wrap">
+              <button 
+                className="header-create-crisis-btn"
+                onClick={() => setShowCreateCrisisModal(true)}
+              >
+                <Plus size={14} />
+                <span>+ New Crisis Event</span>
+              </button>
+            </div>
+          )}
+
+          {activeNav !== 'audit' && activeNav !== 'maps' && (
+            <div className="header-center-search">
+              <Search size={14} className="header-search-icon" />
+              <input
+                type="text"
+                placeholder="Search requests, locations, resources..."
+                className="header-search-input"
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+              />
+            </div>
+          )}
 
           <div className="header-right-tools">
             <button className="header-bell-btn" aria-label="Notifications">
@@ -253,485 +423,755 @@ export const DashboardOverviewPage = () => {
         </header>
 
         {/* Content Body */}
-        <div className="coord-body-padding">
-          {/* Live Operation Status Bar */}
-          <div className="live-op-card">
-            <div className="live-op-left">
-              <div className="live-op-pill">
-                <Radio size={11} />
-                <span>LIVE OPERATION</span>
-              </div>
-              <span className="live-op-title">Flood Response - Western Province</span>
-              <span className="live-op-time">Updated 18 seconds ago</span>
-            </div>
-
-            <Link to="/coordinator/triage" className="live-op-link">
-              <span>View Details</span>
-              <ChevronRight size={13} />
-            </Link>
-          </div>
-
-          {/* Row of 6 KPI Stat Cards */}
-          <div className="kpi-row-grid">
-            {/* Card 1: Active Crises */}
-            <div className="kpi-stat-card">
-              <div className="kpi-card-top">
-                <div className="kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
-                  <Users size={14} />
+        <div className={`coord-body-padding ${activeNav === 'maps' ? 'maps-full-dock' : ''}`}>
+          {activeNav === 'reports' ? (
+            <ReportsAnalyticsView />
+          ) : activeNav === 'maps' ? (
+            <OperationalMapView />
+          ) : activeNav === 'audit' ? (
+            /* AUDIT LOGS VIEW */
+            <div className="audit-embedded-wrapper">
+              <div className="audit-hero-banner">
+                <div className="hero-banner-left">
+                  <div className="hero-shield-icon">
+                    <ShieldCheck size={26} />
+                  </div>
+                  <div>
+                    <h2 className="hero-banner-title">Transparent Operational Audit</h2>
+                    <p className="hero-banner-subtitle">
+                      Immutable history of all AI recommendations, human decisions, and system actions[cite: 3].
+                    </p>
+                  </div>
                 </div>
-                <span className="kpi-label-text">Active Crises</span>
-              </div>
-              <div className="kpi-value-text">24</div>
-              <span className="kpi-sub-trend trend-green">↑ +3 this week</span>
-            </div>
 
-            {/* Card 2: Open Requests */}
-            <div className="kpi-stat-card">
-              <div className="kpi-card-top">
-                <div className="kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
-                  <ClipboardList size={14} />
+                <div className="hero-banner-metrics">
+                  <div className="hero-stat-block">
+                    <span className="hero-stat-num stat-white">2,847</span>
+                    <span className="hero-stat-tag">Total Records</span>
+                  </div>
+                  <div className="hero-stat-divider"></div>
+                  <div className="hero-stat-block">
+                    <span className="hero-stat-num stat-purple">1,284</span>
+                    <span className="hero-stat-tag">AI Actions</span>
+                  </div>
+                  <div className="hero-stat-divider"></div>
+                  <div className="hero-stat-block">
+                    <span className="hero-stat-num stat-amber">423</span>
+                    <span className="hero-stat-tag">Human Overrides</span>
+                  </div>
                 </div>
-                <span className="kpi-label-text">Open Requests</span>
               </div>
-              <div className="kpi-value-text">186</div>
-              <span className="kpi-sub-trend trend-red">↑ +12%</span>
-            </div>
 
-            {/* Card 3: High Priority */}
-            <div className="kpi-stat-card">
-              <div className="kpi-card-top">
-                <div className="kpi-icon-box" style={{ backgroundColor: '#fef2f2', color: '#ef4444' }}>
-                  <AlertTriangle size={14} />
+              <div className="audit-toolbar-row">
+                <div className="audit-search-field">
+                  <Search size={15} className="audit-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search audit log by user, action, entity..."
+                    value={auditSearchQuery}
+                    onChange={(e) => setAuditSearchQuery(e.target.value)}
+                  />
+                  {auditSearchQuery && (
+                    <button className="search-clear-btn" onClick={() => setAuditSearchQuery('')}>
+                      <X size={13} />
+                    </button>
+                  )}
                 </div>
-                <span className="kpi-label-text">High Priority</span>
-              </div>
-              <div className="kpi-value-text">42</div>
-              <span className="kpi-sub-trend trend-red">↑ +7</span>
-            </div>
 
-            {/* Card 4: Resources Allocated */}
-            <div className="kpi-stat-card">
-              <div className="kpi-card-top">
-                <div className="kpi-icon-box" style={{ backgroundColor: '#f0fdfa', color: '#14b8a6' }}>
-                  <Package size={14} />
+                <div className="audit-filter-pills">
+                  <button
+                    className={`filter-chip ${auditFilter === 'ALL' ? 'active' : ''}`}
+                    onClick={() => setAuditFilter('ALL')}
+                  >
+                    All Records
+                  </button>
+                  <button
+                    className={`filter-chip ${auditFilter === 'OVERRIDE' ? 'active' : ''}`}
+                    onClick={() => setAuditFilter('OVERRIDE')}
+                  >
+                    Overrides Only
+                  </button>
+                  <button
+                    className={`filter-chip ${auditFilter === 'AI' ? 'active' : ''}`}
+                    onClick={() => setAuditFilter('AI')}
+                  >
+                    AI Actions
+                  </button>
+                  <button
+                    className={`filter-chip ${auditFilter === 'APPROVED' ? 'active' : ''}`}
+                    onClick={() => setAuditFilter('APPROVED')}
+                  >
+                    Approved
+                  </button>
                 </div>
-                <span className="kpi-label-text">Resources Allocated</span>
               </div>
-              <div className="kpi-value-text">78%</div>
-              <div className="kpi-mini-bar">
-                <div className="kpi-bar-fill" style={{ width: '78%', backgroundColor: '#10b981' }}></div>
-              </div>
-            </div>
 
-            {/* Card 5: Shelter Occupancy */}
-            <div className="kpi-stat-card">
-              <div className="kpi-card-top">
-                <div className="kpi-icon-box" style={{ backgroundColor: '#fff7ed', color: '#f97316' }}>
-                  <Building2 size={14} />
+              <div className="audit-split-workspace">
+                <div className="audit-table-card">
+                  <div className="table-card-head">
+                    <span className="table-count-label">
+                      Showing <b>{filteredAuditData.length}</b> records
+                    </span>
+                    <span className="table-hint-text">Click any row to inspect details</span>
+                  </div>
+
+                  <div className="table-scroller">
+                    <table className="audit-grid-table">
+                      <thead>
+                        <tr>
+                          <th>TIMESTAMP</th>
+                          <th>USER</th>
+                          <th>ROLE</th>
+                          <th>ACTION</th>
+                          <th>ENTITY</th>
+                          <th>AI RECOMMENDATION</th>
+                          <th>HUMAN DECISION</th>
+                          <th>STATUS</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredAuditData.map((row) => {
+                          const isSelected = selectedAuditLog?.id === row.id;
+                          return (
+                            <tr
+                              key={row.id}
+                              className={`audit-row ${isSelected ? 'row-active' : ''}`}
+                              onClick={() => setSelectedAuditLog(row)}
+                            >
+                              <td className="cell-time">{row.timestamp}</td>
+                              <td className="cell-user">
+                                <div className="actor-badge-wrap">
+                                  {row.userType === 'ai' ? (
+                                    <Cpu size={14} className="actor-icon icon-ai" />
+                                  ) : (
+                                    <User size={14} className="actor-icon icon-human" />
+                                  )}
+                                  <span>{row.user}</span>
+                                </div>
+                              </td>
+                              <td className="cell-role">{row.role}</td>
+                              <td className="cell-action">{row.action}</td>
+                              <td className="cell-entity">
+                                <span className="entity-chip">{row.entityId}</span>
+                              </td>
+                              <td className="cell-ai-rec">
+                                <span className="pill-ai">{row.aiRecommendation}</span>
+                              </td>
+                              <td className="cell-decision">
+                                <span className="text-decision">{row.humanDecision}</span>
+                              </td>
+                              <td className="cell-status">
+                                <span className={`status-pill status-${row.status.toLowerCase()}`}>
+                                  {row.status}
+                                </span>
+                              </td>
+                              <td className="cell-chevron">
+                                <ChevronRight size={14} />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-                <span className="kpi-label-text">Shelter Occupancy</span>
-              </div>
-              <div className="kpi-value-text">74%</div>
-              <div className="kpi-mini-bar">
-                <div className="kpi-bar-fill" style={{ width: '74%', backgroundColor: '#f97316' }}></div>
-              </div>
-            </div>
 
-            {/* Card 6: AI Recommendations */}
-            <div className="kpi-stat-card">
-              <div className="kpi-card-top">
-                <div className="kpi-icon-box" style={{ backgroundColor: '#f5f3ff', color: '#8b5cf6' }}>
-                  <Brain size={14} />
-                </div>
-                <span className="kpi-label-text">AI Recommendations</span>
-              </div>
-              <div className="kpi-value-text">12</div>
-              <span className="kpi-sub-trend trend-purple">→ 3 pending review</span>
-            </div>
-          </div>
-
-          {/* Middle Row: Satellite Crisis Map + Critical Requests */}
-          <div className="map-and-requests-row">
-            {/* Satellite Map */}
-            <div className="satellite-map-card">
-              <LiveSatelliteCrisisMap onProvinceChange={(prov) => setSelectedProvince(prov)} />
-            </div>
-
-            {/* Critical Requests List */}
-            <div className="critical-requests-card">
-              <div className="card-title-header">
-                <h3 className="card-heading-text">Critical Requests</h3>
-                <Link to="/coordinator/triage" className="card-view-all-link">View All</Link>
-              </div>
-
-              <div className="critical-list">
-                {criticalRequests.map((req) => (
-                  <div key={req.id} className="critical-item-row">
-                    <div className="crit-item-left">
-                      <div className="crit-icon-box" style={{ backgroundColor: req.iconBg, color: req.iconColor }}>
-                        <AlertTriangle size={12} />
+                {selectedAuditLog && (
+                  <aside className="audit-inspector-drawer">
+                    <div className="drawer-header">
+                      <div>
+                        <h3 className="drawer-title">Audit Detail</h3>
+                        <p className="drawer-subtitle">Record Reference: #{selectedAuditLog.id}</p>
                       </div>
-                      <div className="crit-details-col">
-                        <span className="crit-id-text">{req.id}</span>
-                        <span className="crit-sub-id">{req.subId}</span>
-                      </div>
-                    </div>
-
-                    <span className="crit-category-center">{req.category}</span>
-
-                    <div className="crit-item-right">
-                      <span className={`crit-priority-pill priority-${req.priority.toLowerCase()}`}>
-                        {req.priority}
+                      <span className={`status-pill status-${selectedAuditLog.status.toLowerCase()}`}>
+                        {selectedAuditLog.status}
                       </span>
-                      <span className="crit-time-text">{req.time}</span>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          {/* Middle Row 2: Request Activity + Resource Utilisation + Recent Decisions */}
-          <div className="activity-util-decisions-row">
-            {/* Request Activity Area Chart */}
-            <div className="activity-card">
-              <div className="activity-top-row">
-                <div>
-                  <h4 className="card-heading-text">Request Activity</h4>
-                  <span style={{ fontSize: '10.5px', color: '#94a3b8' }}>Last 7 days</span>
-                </div>
-                <span className="activity-badge-green">+12%</span>
-              </div>
+                    <div className="drawer-content-scroll">
+                      <div className="detail-meta-list">
+                        <div className="meta-pair">
+                          <span className="meta-label">TIMESTAMP</span>
+                          <span className="meta-val">{selectedAuditLog.date} • {selectedAuditLog.timestamp}</span>
+                        </div>
+                        <div className="meta-pair">
+                          <span className="meta-label">ENTITY</span>
+                          <div className="entity-link-box">
+                            <span className="entity-id-bold">{selectedAuditLog.entityId}</span>
+                            <span className="entity-type-tag">({selectedAuditLog.entityType})</span>
+                            <ExternalLink size={12} className="link-icon" />
+                          </div>
+                        </div>
+                        <div className="meta-pair">
+                          <span className="meta-label">ACTION</span>
+                          <span className="meta-val font-semibold">{selectedAuditLog.action}</span>
+                        </div>
+                      </div>
 
-              <div className="activity-count-row">
-                <span className="activity-big-count">186</span>
-                <span className="activity-count-label">Total Requests</span>
-              </div>
+                      <div className="notes-section-box">
+                        <span className="notes-header-tag">REASON / NOTES</span>
+                        <p className="notes-text-body">{selectedAuditLog.notes}</p>
+                      </div>
 
-              {/* Vector SVG Line Chart */}
-              <svg className="chart-svg-container" viewBox="0 0 260 90" fill="none">
-                <defs>
-                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-
-                {/* Y Axis Grid lines */}
-                <line x1="25" y1="15" x2="255" y2="15" stroke="#f1f5f9" strokeDasharray="3 3" />
-                <line x1="25" y1="40" x2="255" y2="40" stroke="#f1f5f9" strokeDasharray="3 3" />
-                <line x1="25" y1="65" x2="255" y2="65" stroke="#f1f5f9" strokeDasharray="3 3" />
-
-                {/* Y Axis text */}
-                <text x="5" y="18" fill="#94a3b8" fontSize="8">150</text>
-                <text x="5" y="43" fill="#94a3b8" fontSize="8">100</text>
-                <text x="12" y="68" fill="#94a3b8" fontSize="8">50</text>
-                <text x="15" y="80" fill="#94a3b8" fontSize="8">0</text>
-
-                {/* Area under curve */}
-                <path
-                  d="M 35 65 L 65 52 L 100 48 L 135 40 L 170 38 L 205 24 L 240 18 L 240 75 L 35 75 Z"
-                  fill="url(#chartGradient)"
-                />
-
-                {/* Main line */}
-                <path
-                  d="M 35 65 L 65 52 L 100 48 L 135 40 L 170 38 L 205 24 L 240 18"
-                  stroke="#0ea5e9"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-
-                {/* Data points */}
-                <circle cx="35" cy="65" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
-                <circle cx="65" cy="52" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
-                <circle cx="100" cy="48" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
-                <circle cx="135" cy="40" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
-                <circle cx="170" cy="38" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
-                <circle cx="205" cy="24" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
-                <circle cx="240" cy="18" r="3" fill="#ffffff" stroke="#0ea5e9" strokeWidth="2" />
-
-                {/* X Axis days */}
-                <text x="30" y="88" fill="#94a3b8" fontSize="7.5">Mon</text>
-                <text x="62" y="88" fill="#94a3b8" fontSize="7.5">Tue</text>
-                <text x="96" y="88" fill="#94a3b8" fontSize="7.5">Wed</text>
-                <text x="131" y="88" fill="#94a3b8" fontSize="7.5">Thu</text>
-                <text x="168" y="88" fill="#94a3b8" fontSize="7.5">Fri</text>
-                <text x="201" y="88" fill="#94a3b8" fontSize="7.5">Sat</text>
-                <text x="234" y="88" fill="#94a3b8" fontSize="7.5">Sun</text>
-              </svg>
-            </div>
-
-            {/* Resource Utilisation Donuts */}
-            <div className="utilisation-card">
-              <h4 className="card-heading-text">Resource Utilisation</h4>
-
-              <div className="donuts-group">
-                {/* Donut 1: Food 78% */}
-                <div className="donut-stat-item">
-                  <div className="donut-circle-wrap">
-                    <svg width="48" height="48" viewBox="0 0 36 36">
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#e2e8f0"
-                        strokeWidth="3.5"
-                      />
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#0d9488"
-                        strokeWidth="3.5"
-                        strokeDasharray="78, 100"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <span className="donut-pct-text">78%</span>
-                  </div>
-                  <span className="donut-label-text">Food</span>
-                </div>
-
-                {/* Donut 2: Medical 64% */}
-                <div className="donut-stat-item">
-                  <div className="donut-circle-wrap">
-                    <svg width="48" height="48" viewBox="0 0 36 36">
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#e2e8f0"
-                        strokeWidth="3.5"
-                      />
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#0284c7"
-                        strokeWidth="3.5"
-                        strokeDasharray="64, 100"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <span className="donut-pct-text">64%</span>
-                  </div>
-                  <span className="donut-label-text">Medical</span>
-                </div>
-
-                {/* Donut 3: Vehicles 52% */}
-                <div className="donut-stat-item">
-                  <div className="donut-circle-wrap">
-                    <svg width="48" height="48" viewBox="0 0 36 36">
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#e2e8f0"
-                        strokeWidth="3.5"
-                      />
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#0369a1"
-                        strokeWidth="3.5"
-                        strokeDasharray="52, 100"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <span className="donut-pct-text">52%</span>
-                  </div>
-                  <span className="donut-label-text">Vehicles</span>
-                </div>
-
-                {/* Donut 4: Shelter 89% */}
-                <div className="donut-stat-item">
-                  <div className="donut-circle-wrap">
-                    <svg width="48" height="48" viewBox="0 0 36 36">
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#e2e8f0"
-                        strokeWidth="3.5"
-                      />
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#0f766e"
-                        strokeWidth="3.5"
-                        strokeDasharray="89, 100"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <span className="donut-pct-text">89%</span>
-                  </div>
-                  <span className="donut-label-text">Shelter</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Decisions Card */}
-            <div className="decisions-card">
-              <h4 className="card-heading-text">Recent Decisions</h4>
-
-              <div className="decisions-timeline">
-                <div className="decision-item-entry">
-                  <div className="dec-item-left">
-                    <div className="dec-icon-bullet" style={{ backgroundColor: '#ccfbf1', color: '#0f766e' }}>
-                      <FileText size={11} />
-                    </div>
-                    <div>
-                      <div className="dec-title-main">Approved resource allocation</div>
-                      <div className="dec-sub-ref">REQ-2026-01835</div>
-                    </div>
-                  </div>
-                  <span className="dec-time-right">10 min ago</span>
-                </div>
-
-                <div className="decision-item-entry">
-                  <div className="dec-item-left">
-                    <div className="dec-icon-bullet" style={{ backgroundColor: '#fef3c7', color: '#d97706' }}>
-                      <AlertCircle size={11} />
-                    </div>
-                    <div>
-                      <div className="dec-title-main">Modified AI recommendation</div>
-                      <div className="dec-sub-ref">REQ-2026-01821</div>
-                    </div>
-                  </div>
-                  <span className="dec-time-right">25 min ago</span>
-                </div>
-
-                <div className="decision-item-entry">
-                  <div className="dec-item-left">
-                    <div className="dec-icon-bullet" style={{ backgroundColor: '#ccfbf1', color: '#0f766e' }}>
-                      <Users size={11} />
-                    </div>
-                    <div>
-                      <div className="dec-title-main">Assigned volunteers team</div>
-                      <div className="dec-sub-ref">REQ-2026-01815</div>
-                    </div>
-                  </div>
-                  <span className="dec-time-right">32 min ago</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Row: Priority Request Queue Table + Emergency Alerts */}
-          <div className="queue-and-alerts-row">
-            {/* Priority Request Queue Table */}
-            <div className="queue-table-card">
-              <div className="queue-header-flex">
-                <div className="queue-title-left">
-                  <span style={{ color: '#ef4444' }}>🎯</span>
-                  <span>Priority Request Queue</span>
-                </div>
-                <Link to="/coordinator/triage" className="queue-pill-btn">
-                  <span>View All Requests</span>
-                  <ChevronRight size={12} />
-                </Link>
-              </div>
-
-              <table className="custom-data-table">
-                <thead>
-                  <tr>
-                    <th style={{ width: '24px' }}>
-                      <input type="checkbox" style={{ accentColor: '#0f766e' }} />
-                    </th>
-                    <th>Request ID</th>
-                    <th>Category</th>
-                    <th>Location</th>
-                    <th>Priority</th>
-                    <th>AI Score</th>
-                    <th>Status</th>
-                    <th>Assigned To</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {priorityQueueData.map((row) => (
-                    <tr key={row.id}>
-                      <td>
-                        <input type="checkbox" style={{ accentColor: '#0f766e' }} />
-                      </td>
-                      <td className="req-table-id">{row.id}</td>
-                      <td>{row.category}</td>
-                      <td>{row.location}</td>
-                      <td>
-                        <span className={`crit-priority-pill priority-${row.priority.toLowerCase()}`}>
-                          {row.priority}
-                        </span>
-                      </td>
-                      <td style={{ fontWeight: 600 }}>{row.aiScore}</td>
-                      <td>
-                        <span className={`table-status-pill status-${row.status.toLowerCase().replace(' ', '-')}`}>
-                          {row.status}
-                        </span>
-                      </td>
-                      <td>{row.assignedTo}</td>
-                      <td style={{ color: '#94a3b8' }}>{row.created}</td>
-                      <td>
-                        <div className="table-actions-cell">
-                          <button className="action-icon-btn" title="View Details">
-                            <Eye size={13} />
-                          </button>
-                          <button className="action-icon-btn" title="Assign">
-                            <UserCheck size={13} />
-                          </button>
-                          <button className="action-icon-btn" title="More">
-                            <MoreHorizontal size={13} />
+                      <div className="crypto-ledger-box">
+                        <div className="ledger-top">
+                          <ShieldCheck size={14} className="crypto-badge-icon" />
+                          <span>CRYPTOGRAPHIC IMMUTABILITY</span>
+                        </div>
+                        <div className="hash-code-row">
+                          <code className="hash-string">{selectedAuditLog.immutableHash}</code>
+                          <button
+                            className="copy-hash-btn"
+                            onClick={() => handleCopyHash(selectedAuditLog.immutableHash)}
+                          >
+                            {copiedHash ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
                           </button>
                         </div>
-                      </td>
-                    </tr>
+                      </div>
+                    </div>
+                  </aside>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* =========================================================
+               DEFAULT COMMAND CENTER DASHBOARD (100% COMPLETE SECTION B)
+               ========================================================= */
+            <>
+              {/* Live Operation Status Bar */}
+              <div className="live-op-card">
+                <div className="live-op-left">
+                  <div className="live-op-pill">
+                    <Radio size={11} />
+                    <span>LIVE OPERATION</span>
+                  </div>
+                  <span className="live-op-title">Flood Response - Western Province</span>
+                  <span className="live-op-time">Updated 18 seconds ago</span>
+                </div>
+
+                <div className="live-op-right-tools">
+                  <span className="overdue-counter-pill">
+                    <AlertTriangle size={12} />
+                    <strong>2 Cases Overdue SLA</strong>
+                  </span>
+                  <Link to="/coordinator/triage" className="live-op-link">
+                    <span>View Operational Details</span>
+                    <ChevronRight size={13} />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Row of 6 KPI Stat Cards */}
+              <div className="kpi-row-grid">
+                <div className="kpi-stat-card">
+                  <div className="kpi-card-top">
+                    <div className="kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
+                      <Users size={14} />
+                    </div>
+                    <span className="kpi-label-text">Active Crises</span>
+                  </div>
+                  <div className="kpi-value-text">24</div>
+                  <span className="kpi-sub-trend trend-green">↑ +3 this week</span>
+                </div>
+
+                <div className="kpi-stat-card">
+                  <div className="kpi-card-top">
+                    <div className="kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
+                      <ClipboardList size={14} />
+                    </div>
+                    <span className="kpi-label-text">Open Requests</span>
+                  </div>
+                  <div className="kpi-value-text">186</div>
+                  <span className="kpi-sub-trend trend-red">↑ +12%</span>
+                </div>
+
+                <div className="kpi-stat-card">
+                  <div className="kpi-card-top">
+                    <div className="kpi-icon-box" style={{ backgroundColor: '#fef2f2', color: '#ef4444' }}>
+                      <AlertTriangle size={14} />
+                    </div>
+                    <span className="kpi-label-text">High Priority</span>
+                  </div>
+                  <div className="kpi-value-text">42</div>
+                  <span className="kpi-sub-trend trend-red">↑ +7</span>
+                </div>
+
+                <div className="kpi-stat-card">
+                  <div className="kpi-card-top">
+                    <div className="kpi-icon-box" style={{ backgroundColor: '#f0fdfa', color: '#14b8a6' }}>
+                      <Package size={14} />
+                    </div>
+                    <span className="kpi-label-text">Resources Allocated</span>
+                  </div>
+                  <div className="kpi-value-text">78%</div>
+                  <div className="kpi-mini-bar">
+                    <div className="kpi-bar-fill" style={{ width: '78%', backgroundColor: '#10b981' }}></div>
+                  </div>
+                </div>
+
+                <div className="kpi-stat-card">
+                  <div className="kpi-card-top">
+                    <div className="kpi-icon-box" style={{ backgroundColor: '#fff7ed', color: '#f97316' }}>
+                      <Building2 size={14} />
+                    </div>
+                    <span className="kpi-label-text">Shelter Occupancy</span>
+                  </div>
+                  <div className="kpi-value-text">74%</div>
+                  <div className="kpi-mini-bar">
+                    <div className="kpi-bar-fill" style={{ width: '74%', backgroundColor: '#f97316' }}></div>
+                  </div>
+                </div>
+
+                <div className="kpi-stat-card">
+                  <div className="kpi-card-top">
+                    <div className="kpi-icon-box" style={{ backgroundColor: '#f5f3ff', color: '#8b5cf6' }}>
+                      <Brain size={14} />
+                    </div>
+                    <span className="kpi-label-text">AI Recommendations</span>
+                  </div>
+                  <div className="kpi-value-text">12</div>
+                  <span className="kpi-sub-trend trend-purple">→ 3 pending review</span>
+                </div>
+              </div>
+
+              {/* Middle Row 1: Crisis Map + Critical Requests */}
+              <div className="map-and-requests-row">
+                <div className="satellite-map-card">
+                  <LiveSatelliteCrisisMap onProvinceChange={(prov) => setSelectedProvince(prov)} />
+                </div>
+
+                <div className="critical-requests-card">
+                  <div className="card-title-header">
+                    <h3 className="card-heading-text">Critical Requests</h3>
+                    <Link to="/coordinator/triage" className="card-view-all-link">View All</Link>
+                  </div>
+
+                  <div className="critical-list">
+                    {criticalRequests.map((req) => (
+                      <div key={req.id} className="critical-item-row">
+                        <div className="crit-item-left">
+                          <div className="crit-icon-box" style={{ backgroundColor: req.iconBg, color: req.iconColor }}>
+                            <AlertTriangle size={12} />
+                          </div>
+                          <div className="crit-details-col">
+                            <span className="crit-id-text">{req.id}</span>
+                            <span className="crit-sub-id">{req.subId}</span>
+                          </div>
+                        </div>
+
+                        <span className="crit-category-center">{req.category}</span>
+
+                        <div className="crit-item-right">
+                          <span className={`crit-priority-pill priority-${req.priority.toLowerCase()}`}>
+                            {req.priority}
+                          </span>
+                          <span className="crit-time-text">{req.time}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Middle Row 2: Request Activity + Resource Utilisation + Recent Decisions */}
+              <div className="activity-util-decisions-row">
+                {/* Request Activity Chart */}
+                <div className="activity-card">
+                  <div className="activity-top-row">
+                    <div>
+                      <h4 className="card-heading-text">Request Activity</h4>
+                      <span style={{ fontSize: '10.5px', color: '#94a3b8' }}>Last 7 days</span>
+                    </div>
+                    <span className="activity-badge-green">+12%</span>
+                  </div>
+
+                  <div className="activity-count-row">
+                    <span className="activity-big-count">186</span>
+                    <span className="activity-count-label">Total Requests</span>
+                  </div>
+
+                  <svg className="chart-svg-container" viewBox="0 0 260 90" fill="none">
+                    <defs>
+                      <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
+                        <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+                    <line x1="25" y1="15" x2="255" y2="15" stroke="#f1f5f9" strokeDasharray="3 3" />
+                    <line x1="25" y1="40" x2="255" y2="40" stroke="#f1f5f9" strokeDasharray="3 3" />
+                    <line x1="25" y1="65" x2="255" y2="65" stroke="#f1f5f9" strokeDasharray="3 3" />
+                    <path
+                      d="M 35 65 L 65 52 L 100 48 L 135 40 L 170 38 L 205 24 L 240 18 L 240 75 L 35 75 Z"
+                      fill="url(#chartGradient)"
+                    />
+                    <path
+                      d="M 35 65 L 65 52 L 100 48 L 135 40 L 170 38 L 205 24 L 240 18"
+                      stroke="#0ea5e9"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+
+                {/* Resource Utilisation Donuts */}
+                <div className="utilisation-card">
+                  <h4 className="card-heading-text">Resource Utilisation</h4>
+                  <div className="donuts-group">
+                    <div className="donut-stat-item">
+                      <div className="donut-circle-wrap">
+                        <span className="donut-pct-text">78%</span>
+                      </div>
+                      <span className="donut-label-text">Food</span>
+                    </div>
+                    <div className="donut-stat-item">
+                      <div className="donut-circle-wrap">
+                        <span className="donut-pct-text">64%</span>
+                      </div>
+                      <span className="donut-label-text">Medical</span>
+                    </div>
+                    <div className="donut-stat-item">
+                      <div className="donut-circle-wrap">
+                        <span className="donut-pct-text">52%</span>
+                      </div>
+                      <span className="donut-label-text">Vehicles</span>
+                    </div>
+                    <div className="donut-stat-item">
+                      <div className="donut-circle-wrap">
+                        <span className="donut-pct-text">89%</span>
+                      </div>
+                      <span className="donut-label-text">Shelter</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Decisions Audit Trail */}
+                <div className="decisions-card">
+                  <h4 className="card-heading-text">Recent Decisions</h4>
+                  <div className="decisions-timeline">
+                    <div className="decision-item-entry">
+                      <div className="dec-item-left">
+                        <div className="dec-icon-bullet" style={{ backgroundColor: '#ccfbf1', color: '#0f766e' }}>
+                          <FileText size={11} />
+                        </div>
+                        <div>
+                          <div className="dec-title-main">Approved resource allocation</div>
+                          <div className="dec-sub-ref">REQ-2026-01835</div>
+                        </div>
+                      </div>
+                      <span className="dec-time-right">10 min ago</span>
+                    </div>
+
+                    <div className="decision-item-entry">
+                      <div className="dec-item-left">
+                        <div className="dec-icon-bullet" style={{ backgroundColor: '#fef3c7', color: '#d97706' }}>
+                          <AlertCircle size={11} />
+                        </div>
+                        <div>
+                          <div className="dec-title-main">Modified AI recommendation</div>
+                          <div className="dec-sub-ref">REQ-2026-01821</div>
+                        </div>
+                      </div>
+                      <span className="dec-time-right">25 min ago</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Middle Row 3: Partner Organisation Coordination Widget (Section B.6) */}
+              <div className="partner-orgs-row-card">
+                <div className="partner-orgs-header">
+                  <div className="orgs-header-left">
+                    <Building size={16} className="text-teal" />
+                    <h3 className="card-heading-text">Partner Organisations Coordination</h3>
+                  </div>
+                  <span className="active-agencies-badge">4 Agencies Deployed in Operational Area</span>
+                </div>
+
+                <div className="partner-grid-cards">
+                  {partnerOrganisations.map((org) => (
+                    <div key={org.name} className="partner-item-card">
+                      <div className="p-card-top">
+                        <strong className="p-org-name">{org.name}</strong>
+                        <span className="p-status-pill">{org.status}</span>
+                      </div>
+                      <div className="p-card-meta">
+                        <span>Personnel: <strong>{org.personnel} Active</strong></span>
+                        <span>Equipment: <strong>{org.units}</strong></span>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Emergency Alerts */}
-            <div className="alerts-card-box">
-              <div className="card-title-header">
-                <h3 className="card-heading-text">Emergency Alerts</h3>
-                <Link to="/coordinator/alerts" className="card-view-all-link">View All</Link>
-              </div>
-
-              <div className="alerts-list-col">
-                {/* Alert 1 */}
-                <div className="alert-entry-card alert-entry-red">
-                  <div className="alert-entry-head">
-                    <AlertTriangle size={13} color="#dc2626" />
-                    <span className="alert-title-strong" style={{ color: '#dc2626' }}>Severe Weather Warning</span>
-                  </div>
-                  <p className="alert-p-text">
-                    Heavy rainfall expected in Western Province next 24 hours. Possible flooding in low-lying areas.
-                  </p>
-                  <span className="alert-time-sm">2 hours ago</span>
-                </div>
-
-                {/* Alert 2 */}
-                <div className="alert-entry-card alert-entry-amber">
-                  <div className="alert-entry-head">
-                    <AlertCircle size={13} color="#d97706" />
-                    <span className="alert-title-strong" style={{ color: '#d97706' }}>Road Closure</span>
-                  </div>
-                  <p className="alert-p-text">
-                    Main road A1 closed due to landslide near Gampaha. Use alternative routes.
-                  </p>
-                  <span className="alert-time-sm">4 hours ago</span>
-                </div>
-
-                {/* Alert 3 */}
-                <div className="alert-entry-card alert-entry-blue">
-                  <div className="alert-entry-head">
-                    <Info size={13} color="#2563eb" />
-                    <span className="alert-title-strong" style={{ color: '#2563eb' }}>New Shelter Opened</span>
-                  </div>
-                  <p className="alert-p-text">
-                    Colombo Central School now open for displaced families. Capacity: 500 people.
-                  </p>
-                  <span className="alert-time-sm">6 hours ago</span>
                 </div>
               </div>
-            </div>
-          </div>
+
+              {/* Bottom Row: Priority Request Queue Table (With AI Rationale + SLA Tracker) */}
+              <div className="queue-and-alerts-row">
+                <div className="queue-table-card">
+                  <div className="queue-header-flex">
+                    <div className="queue-title-left">
+                      <span style={{ color: '#ef4444' }}>🎯</span>
+                      <span>Priority Request Queue</span>
+                    </div>
+                    <Link to="/coordinator/triage" className="queue-pill-btn">
+                      <span>View All Requests</span>
+                      <ChevronRight size={12} />
+                    </Link>
+                  </div>
+
+                  <table className="custom-data-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '24px' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={selectedQueueIds.length === priorityQueueData.length}
+                            onChange={handleSelectAllQueue}
+                            style={{ accentColor: '#0f766e' }} 
+                          />
+                        </th>
+                        <th>Request ID</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Priority</th>
+                        <th>AI Score & Rationale</th>
+                        <th>SLA Status</th>
+                        <th>Status</th>
+                        <th>Assigned To</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {priorityQueueData.map((row) => (
+                        <tr key={row.id}>
+                          <td>
+                            <input 
+                              type="checkbox" 
+                              checked={selectedQueueIds.includes(row.id)}
+                              onChange={() => handleToggleSelectRow(row.id)}
+                              style={{ accentColor: '#0f766e' }} 
+                            />
+                          </td>
+                          <td className="req-table-id">{row.id}</td>
+                          <td>{row.category}</td>
+                          <td>{row.location}</td>
+                          <td>
+                            <span className={`crit-priority-pill priority-${row.priority.toLowerCase()}`}>
+                              {row.priority}
+                            </span>
+                          </td>
+                          <td>
+                            <button 
+                              className="ai-score-interactive-btn"
+                              onClick={() => setActiveAIRationale(row)}
+                              title="Click to view AI reasoning rationale"
+                            >
+                              <Sparkles size={11} className="sparkle-icon" />
+                              <span>{row.aiScore}</span>
+                            </button>
+                          </td>
+                          <td>
+                            <span className={`sla-badge ${row.slaStatus.includes('Overdue') ? 'sla-breach' : 'sla-ok'}`}>
+                              {row.slaStatus}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`table-status-pill status-${row.status.toLowerCase().replace(' ', '-')}`}>
+                              {row.status}
+                            </span>
+                          </td>
+                          <td>{row.assignedTo}</td>
+                          <td style={{ color: '#94a3b8' }}>{row.created}</td>
+                          <td>
+                            <div className="table-actions-cell">
+                              <button className="action-icon-btn" title="View Details">
+                                <Eye size={13} />
+                              </button>
+                              <button className="action-icon-btn" title="Assign">
+                                <UserCheck size={13} />
+                              </button>
+                              <button className="action-icon-btn" title="More">
+                                <MoreHorizontal size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Emergency Alerts Column */}
+                <div className="alerts-card-box">
+                  <div className="card-title-header">
+                    <h3 className="card-heading-text">Emergency Alerts</h3>
+                    <Link to="/coordinator/alerts" className="card-view-all-link">View All</Link>
+                  </div>
+
+                  <div className="alerts-list-col">
+                    <div className="alert-entry-card alert-entry-red">
+                      <div className="alert-entry-head">
+                        <AlertTriangle size={13} color="#dc2626" />
+                        <span className="alert-title-strong" style={{ color: '#dc2626' }}>Severe Weather Warning</span>
+                      </div>
+                      <p className="alert-p-text">Heavy rainfall expected in Western Province next 24 hours.</p>
+                      <span className="alert-time-sm">2 hours ago</span>
+                    </div>
+
+                    <div className="alert-entry-card alert-entry-amber">
+                      <div className="alert-entry-head">
+                        <AlertCircle size={13} color="#d97706" />
+                        <span className="alert-title-strong" style={{ color: '#d97706' }}>Road Closure</span>
+                      </div>
+                      <p className="alert-p-text">Main road A1 closed due to landslide near Gampaha.</p>
+                      <span className="alert-time-sm">4 hours ago</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Batch Actions Bar (Section B.3) */}
+              {selectedQueueIds.length > 0 && (
+                <div className="floating-batch-toolbar">
+                  <div className="batch-toolbar-left">
+                    <CheckCircle2 size={16} className="text-teal" />
+                    <span>Selected <strong>{selectedQueueIds.length}</strong> request cases</span>
+                  </div>
+
+                  <div className="batch-toolbar-actions">
+                    <button className="batch-btn btn-escalate" onClick={() => handleBatchAction('Escalate')}>
+                      <AlertTriangle size={13} />
+                      <span>Escalate Priority</span>
+                    </button>
+                    <button className="batch-btn btn-assign" onClick={() => handleBatchAction('Assign Team')}>
+                      <UserCheck size={13} />
+                      <span>Assign Team</span>
+                    </button>
+                    <button className="batch-btn btn-merge" onClick={() => handleBatchAction('Merge Cases')}>
+                      <GitMerge size={13} />
+                      <span>Merge Duplicates</span>
+                    </button>
+                    <button className="batch-btn btn-close" onClick={() => handleBatchAction('Close Cases')}>
+                      <Check size={13} />
+                      <span>Close Case</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* AI Rationale Inspector Popover (Section B.4) */}
+              {activeAIRationale && (
+                <div className="ai-rationale-modal-backdrop" onClick={() => setActiveAIRationale(null)}>
+                  <div className="ai-rationale-popover-card" onClick={(e) => e.stopPropagation()}>
+                    <div className="ai-popover-header">
+                      <div className="ai-pop-title">
+                        <Brain size={16} className="text-purple" />
+                        <h4>AI Urgency & Recommendation Rationale</h4>
+                      </div>
+                      <button className="popover-close-btn" onClick={() => setActiveAIRationale(null)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+
+                    <div className="ai-popover-content">
+                      <div className="ai-stat-row">
+                        <span>Target Entity: <strong>{activeAIRationale.id}</strong></span>
+                        <span>Confidence: <strong className="text-teal">{activeAIRationale.aiConfidence} ({activeAIRationale.aiScore})</strong></span>
+                      </div>
+
+                      <div className="ai-rationale-box">
+                        <span className="rationale-label">SUPPORTING REASONING:</span>
+                        <p>{activeAIRationale.aiRationale}</p>
+                      </div>
+
+                      <div className="ai-meta-pills">
+                        <span>Model: ReliefCore-BioAlert-v3.2</span>
+                        <span>Source: Telemetry + NLP Form Analysis</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Create Crisis Event Modal (Section B.1) */}
+              {showCreateCrisisModal && (
+                <div className="crisis-modal-overlay" onClick={() => setShowCreateCrisisModal(false)}>
+                  <div className="crisis-modal-box" onClick={(e) => e.stopPropagation()}>
+                    <div className="crisis-modal-head">
+                      <h3>Create New Crisis Event & Operational Area</h3>
+                      <button className="modal-close-x" onClick={() => setShowCreateCrisisModal(false)}>
+                        <X size={16} />
+                      </button>
+                    </div>
+
+                    <form 
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        alert(`New Crisis Event "${newCrisisData.title}" created successfully in ${newCrisisData.province}!`);
+                        setShowCreateCrisisModal(false);
+                      }}
+                      className="crisis-create-form"
+                    >
+                      <div className="form-group-item">
+                        <label>Crisis Event Title</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. Cyclone Relief Operation - Eastern Zone" 
+                          required 
+                          value={newCrisisData.title}
+                          onChange={(e) => setNewCrisisData({ ...newCrisisData, title: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-group-item">
+                        <label>Province / Region</label>
+                        <select 
+                          value={newCrisisData.province}
+                          onChange={(e) => setNewCrisisData({ ...newCrisisData, province: e.target.value })}
+                        >
+                          <option value="Western Province">Western Province</option>
+                          <option value="Southern Province">Southern Province</option>
+                          <option value="Eastern Province">Eastern Province</option>
+                          <option value="Central Province">Central Province</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group-item">
+                        <label>Severity Level</label>
+                        <select 
+                          value={newCrisisData.severity}
+                          onChange={(e) => setNewCrisisData({ ...newCrisisData, severity: e.target.value })}
+                        >
+                          <option value="Critical">Critical (Level 1 Disaster)</option>
+                          <option value="High">High (Level 2 Disaster)</option>
+                          <option value="Moderate">Moderate (Regional Emergency)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group-item">
+                        <label>Designated Operational Area</label>
+                        <input 
+                          type="text" 
+                          placeholder="Define geographic operational zone..."
+                          value={newCrisisData.operationalArea}
+                          onChange={(e) => setNewCrisisData({ ...newCrisisData, operationalArea: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="modal-actions-footer">
+                        <button type="button" className="btn-cancel" onClick={() => setShowCreateCrisisModal(false)}>
+                          Cancel
+                        </button>
+                        <button type="submit" className="btn-save-crisis">
+                          Launch Operation
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </main>
     </div>

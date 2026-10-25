@@ -109,7 +109,8 @@ export const LiveSatelliteCrisisMap = ({ onProvinceChange }) => {
       center: config.center,
       zoom: config.zoom,
       zoomControl: false, // Custom zoom buttons used
-      attributionControl: false
+      attributionControl: false,
+      scrollWheelZoom: false // Prevents accidental scroll zoom when scrolling dashboard
     });
 
     // Real High-Resolution Esri Satellite Imagery
@@ -479,7 +480,10 @@ export const LiveSatelliteCrisisMap = ({ onProvinceChange }) => {
       </div>
 
       {/* Bottom Right Satellite Badge */}
-      <div className="map-satellite-badge">Satellite</div>
+      <div className="map-satellite-badge">
+        <span className="map-satellite-thumb-sq"></span>
+        <span>Satellite</span>
+      </div>
     </div>
   );
 };
