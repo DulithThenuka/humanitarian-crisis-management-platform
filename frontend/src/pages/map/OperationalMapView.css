@@ -1,6 +1,5 @@
 /* =========================================================
-   FULLSCREEN OPERATIONAL GEOSPATIAL COMMAND CENTER
-   Matches Image 1 layout, proportions, and dark teal colors
+   COMMAND MAP FULLSCREEN LAYOUT
    ========================================================= */
 .command-map-fullscreen {
   display: flex;
@@ -11,7 +10,7 @@
   color: #e2e8f0;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  margin: -14px -20px -24px -20px; /* Expands to fill the dashboard container */
+  margin: -14px -20px -24px -20px;
 }
 
 /* 1. TOP COMMAND BAR */
@@ -104,7 +103,8 @@
 }
 
 .btn-capture.active-capture {
-  background-color: #ef4444;
+  background-color: #dc2626;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
 }
 
 .btn-locate {
@@ -223,7 +223,6 @@
 .dot-purple { background-color: #8b5cf6; }
 .dot-teal { background-color: #0e7490; }
 
-/* Crisis Dock Card */
 .crisis-dock-card {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(10, 33, 44, 0.95) 100%);
   border-color: rgba(239, 68, 68, 0.28);
@@ -281,7 +280,6 @@
 .stat-dim { color: #64748b; }
 .stat-bold { color: #ffffff; }
 
-/* Coverage Box */
 .coverage-title-wrap {
   display: flex;
   align-items: center;
@@ -362,36 +360,90 @@
   height: 100%;
 }
 
-.cmd-map-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
+.cmd-map-canvas-area.canvas-crosshair {
+  cursor: crosshair;
 }
 
-.map-node-item {
-  cursor: pointer;
-  transition: transform 0.15s ease;
+/* Top Pin-Drop Mode Notice (Screenshot accurate) */
+.pin-drop-alert-banner {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 18px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+  animation: slideDownNotice 0.2s ease-out;
 }
 
-.map-node-item:hover {
-  transform: scale(1.15);
-  transform-origin: center;
+@keyframes slideDownNotice {
+  from { transform: translate(-50%, -15px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
 }
 
-.active-target-pulse circle:first-child {
-  animation: pulseTarget 1.8s infinite ease-out;
+.alert-target-icon {
+  animation: spinSlow 3s infinite linear;
 }
 
-@keyframes pulseTarget {
-  0% { r: 14px; opacity: 0.8; }
-  100% { r: 36px; opacity: 0; }
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Leaflet Tile Inversion to pure dark mode */
+.dark-tile-layer {
+  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(120%);
+}
+
+.leaflet-container {
+  background-color: #061217 !important;
+  font-family: inherit;
+}
+
+.custom-leaflet-marker {
+  background: transparent;
+  border: none;
+}
+
+/* "NEW GPS PIN DROP" Marker (Screenshot accurate) */
+.dropped-pin-container {
+  display: flex;
+  align-items: center;
+}
+
+.dropped-pin-badge {
+  background-color: rgba(220, 38, 38, 0.88);
+  border: 2px solid #ffffff;
+  border-radius: 9999px;
+  padding: 3px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: 0 0 15px #ef4444;
+  white-space: nowrap;
+}
+
+.dropped-pin-icon-wrap {
+  font-size: 12px;
 }
 
 .canvas-floating-scale {
   position: absolute;
   bottom: 12px;
   left: 14px;
-  z-index: 5;
+  z-index: 500;
+  pointer-events: none;
 }
 
 .scale-box {
@@ -414,26 +466,347 @@
   background-color: rgba(6, 20, 26, 0.85);
   padding: 2px 8px;
   border-radius: 4px;
+  z-index: 500;
+  pointer-events: none;
 }
 
-.canvas-floating-alert {
+/* =========================================================
+   FLOATING SHELTER DETAIL POPUP (Matches Screenshot)
+   ========================================================= */
+.map-figma-popup-card {
   position: absolute;
-  top: 14px;
-  left: 50%;
+  top: 40px;
+  left: 45%;
   transform: translateX(-50%);
-  background-color: rgba(8, 29, 38, 0.95);
-  border: 1px solid #0e7490;
+  width: 290px;
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.6);
+  z-index: 1000 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeInPopup 0.18s ease-out;
+  pointer-events: auto !important;
+}
+
+.figma-popup-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.figma-popup-type-pill {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pill-service { color: #0d9488; }
+.pill-shelter { color: #10b981; }
+.pill-request { color: #ef4444; }
+.pill-resource { color: #f59e0b; }
+.pill-volunteer { color: #8b5cf6; }
+
+.figma-popup-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.figma-popup-close-btn:hover {
+  color: #0f172a;
+}
+
+.figma-popup-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.figma-popup-subtitle {
+  font-size: 11px;
+  color: #64748b;
+  margin: 0;
+}
+
+.figma-popup-shelter-stats {
+  display: flex;
+  justify-content: space-around;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 4px 0;
+}
+
+.stat-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.stat-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.figma-popup-route-box {
+  background-color: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.route-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.route-header-left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  color: #0f172a;
+}
+
+.route-dist-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #0284c7;
+}
+
+.route-note-p {
+  font-size: 9.5px;
+  color: #64748b;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.figma-popup-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 4px 0;
+}
+
+.figma-popup-tags span {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9999px;
+}
+
+.figma-btn-dispatch {
+  background-color: #0f766e;
+  color: #ffffff;
+  border: none;
   border-radius: 6px;
-  padding: 5px 12px;
+  padding: 8px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+  transition: background-color 0.15s;
+}
+
+.figma-btn-dispatch:hover {
+  background-color: #115e59;
+}
+
+/* =========================================================
+   LOCATION CAPTURE FORM (Screenshot Red Box on Right)
+   ========================================================= */
+.location-capture-drawer {
+  background-color: #0a212c;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: slideInDrawer 0.2s ease-out;
+}
+
+@keyframes slideInDrawer {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.capture-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer-title-left {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 10.5px;
-  color: #38bdf8;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
-/* RIGHT LOGISTICS DOCK */
+.drawer-title-left h3 {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+.drawer-close-x {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+}
+
+.drawer-close-x:hover {
+  color: #ffffff;
+}
+
+.captured-coords-display-box {
+  background-color: #07171f;
+  border: 1px solid #153c4d;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.coords-code-line {
+  display: flex;
+  justify-content: space-between;
+  font-family: monospace;
+  font-size: 11px;
+  color: #10b981;
+  font-weight: 700;
+}
+
+.coords-sector-sub {
+  font-size: 9px;
+  color: #64748b;
+  margin: 0;
+}
+
+.capture-input-form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background-color: #07171f;
+  border: 1px solid #153c4d;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: #ffffff;
+  outline: none;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #0e7490;
+}
+
+.severity-toggle-row {
+  display: flex;
+  gap: 6px;
+}
+
+.sev-btn {
+  flex: 1;
+  background-color: #07171f;
+  border: 1px solid #153c4d;
+  color: #94a3b8;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 5px 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.sev-btn.sev-critical {
+  background-color: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+.sev-btn.sev-high {
+  background-color: #f59e0b;
+  color: #ffffff;
+  border-color: #f59e0b;
+}
+
+.sev-btn.sev-medium {
+  background-color: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+.submit-register-btn {
+  background-color: #059669;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background-color 0.15s;
+}
+
+.submit-register-btn:hover {
+  background-color: #047857;
+}
+
+/* RIGHT LOGISTICS DOCK (DEFAULT) */
 .cmd-right-dock {
   background-color: #071922;
   border-left: 1px solid #12303d;
@@ -473,6 +846,12 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.match-card-item:hover {
+  background-color: #0b2632;
+  border-color: #0e7490;
 }
 
 .m-card-head {
@@ -546,7 +925,7 @@
   border-color: #0e7490;
 }
 
-/* Turn-by-turn Guidance */
+/* Route Guidance Steps */
 .step-count-chip {
   font-size: 9px;
   color: #64748b;
@@ -611,13 +990,61 @@
   line-height: 1.25;
 }
 
-/* Text Utilities */
+.leaflet-control-attribution {
+  background: rgba(6, 20, 26, 0.75) !important;
+  color: #64748b !important;
+  font-size: 9px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #0e7490 !important;
+}
+
 .text-red { color: #ef4444; }
 .text-teal { color: #0e7490; }
 .text-amber { color: #f59e0b; }
 .text-cyan { color: #38bdf8; }
+.text-orange { color: #d97706; }
 
-.coord-body-padding.maps-full-dock {
-  padding: 0;
-  gap: 0;
+/* Ensure the dropped pin element is clickable */
+.dropped-pin-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.dropped-pin-badge {
+  background-color: rgba(220, 38, 38, 0.95);
+  border: 2px solid #ffffff;
+  border-radius: 9999px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: 0 0 15px #ef4444;
+  white-space: nowrap;
+  cursor: pointer !important;
+}
+
+/* Floating detail popup z-index */
+.map-figma-popup-card {
+  position: absolute;
+  top: 40px;
+  left: 45%;
+  transform: translateX(-50%);
+  width: 290px;
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.65);
+  z-index: 2000 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeInPopup 0.18s ease-out;
+  pointer-events: auto !important;
 }
