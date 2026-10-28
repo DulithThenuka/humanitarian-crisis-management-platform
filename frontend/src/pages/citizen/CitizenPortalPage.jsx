@@ -271,7 +271,12 @@ export const CitizenPortalPage = () => {
               </Link>
             </div>
 
-            <div className="request-summary-card">
+            <div 
+              className="request-summary-card"
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigate('/coordinator/requests/REQ-2026-01842')}
+              title="Click to view live tracking details for REQ-2026-01842"
+            >
               <div className="request-card-info-side">
                 <div className="request-red-bar"></div>
                 <div>

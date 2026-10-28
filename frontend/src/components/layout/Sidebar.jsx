@@ -12,6 +12,7 @@ export const Sidebar = () => {
     { label: 'My Requests', to: '/citizen/track', roles: ['Citizen', 'Coordinator', 'Admin'] },
     { label: 'Find Shelters', to: '/citizen/shelters', roles: ['Citizen', 'Coordinator', 'LogisticsManager', 'Volunteer', 'Admin'] },
     { label: 'Emergency Overview', to: '/coordinator/dashboard', roles: ['Coordinator', 'Admin'] },
+    { label: 'Assistance Requests', to: '/coordinator/requests', roles: ['Coordinator', 'Admin', 'Citizen'] },
     { label: 'Request Triage', to: '/coordinator/triage', roles: ['Coordinator', 'Admin'] },
     { label: 'AI Review & Governance', to: '/coordinator/ai-review', roles: ['Coordinator', 'Admin'] },
     { label: 'Resource Inventory', to: '/logistics/inventory', roles: ['LogisticsManager', 'Coordinator', 'Admin'] },

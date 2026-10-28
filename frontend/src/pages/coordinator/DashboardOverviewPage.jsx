@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Link, useLocation, useParams, useNavigate } from 'react-router-dom';
 import { 
   Home, 
   AlertCircle, 
@@ -107,11 +107,51 @@ const INITIAL_AUDIT_DATA = [
 ];
 
 export const DashboardOverviewPage = () => {
+  const location = useLocation();
+  const params = useParams();
+  const navigate = useNavigate();
+
   const [activeNav, setActiveNav] = useState('requests');
   const [requestViewMode, setRequestViewMode] = useState('list');
   const [selectedRequestId, setSelectedRequestId] = useState('REQ-2026-01842');
   const [searchVal, setSearchVal] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('Western Province');
+
+  useEffect(() => {
+    if (params.id) {
+      setActiveNav('requests');
+      setSelectedRequestId(params.id);
+      setRequestViewMode('detail');
+    } else if (location.pathname === '/coordinator/requests' || location.pathname === '/requests') {
+      setActiveNav('requests');
+      setRequestViewMode('list');
+    } else if (location.pathname === '/map') {
+      setActiveNav('maps');
+    } else if (location.pathname === '/reports' || location.pathname === '/analytics') {
+      setActiveNav('reports');
+    } else if (location.pathname === '/coordinator/dashboard') {
+      setActiveNav('dashboard');
+    }
+  }, [location.pathname, params.id]);
+
+  const handleNavClick = (itemId) => {
+    if (itemId === 'resources') {
+      navigate('/logistics/inventory');
+    } else if (itemId === 'shelters') {
+      navigate('/shelters/directory');
+    } else if (itemId === 'volunteers') {
+      navigate('/volunteers/roster');
+    } else if (itemId === 'ai-ops') {
+      navigate('/coordinator/ai-review');
+    } else if (itemId === 'crisis') {
+      setShowCreateCrisisModal(true);
+    } else if (itemId === 'requests') {
+      setActiveNav('requests');
+      setRequestViewMode('list');
+    } else {
+      setActiveNav(itemId);
+    }
+  };
 
   // Crisis Creation Modal State
   const [showCreateCrisisModal, setShowCreateCrisisModal] = useState(false);
@@ -350,7 +390,7 @@ export const DashboardOverviewPage = () => {
                 <button
                   key={item.id}
                   className={`coord-nav-item ${isActive ? 'active' : ''}`}
-                  onClick={() => setActiveNav(item.id)}
+                  onClick={() => handleNavClick(item.id)}
                 >
                   <div className="coord-nav-left">
                     <IconComp size={16} />
@@ -710,10 +750,14 @@ export const DashboardOverviewPage = () => {
                     <AlertTriangle size={12} />
                     <strong>2 Cases Overdue SLA</strong>
                   </span>
-                  <Link to="/coordinator/triage" className="live-op-link">
+                  <span 
+                    className="live-op-link"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => { setActiveNav('requests'); setRequestViewMode('list'); }}
+                  >
                     <span>View Operational Details</span>
                     <ChevronRight size={13} />
-                  </Link>
+                  </span>
                 </div>
               </div>
 
@@ -730,7 +774,11 @@ export const DashboardOverviewPage = () => {
                   <span className="kpi-sub-trend trend-green">↑ +3 this week</span>
                 </div>
 
-                <div className="kpi-stat-card">
+                <div 
+                  className="kpi-stat-card"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => { setActiveNav('requests'); setRequestViewMode('list'); }}
+                >
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
                       <ClipboardList size={14} />
@@ -741,7 +789,11 @@ export const DashboardOverviewPage = () => {
                   <span className="kpi-sub-trend trend-red">↑ +12%</span>
                 </div>
 
-                <div className="kpi-stat-card">
+                <div 
+                  className="kpi-stat-card"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => { setActiveNav('requests'); setRequestViewMode('list'); }}
+                >
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#fef2f2', color: '#ef4444' }}>
                       <AlertTriangle size={14} />
@@ -752,7 +804,11 @@ export const DashboardOverviewPage = () => {
                   <span className="kpi-sub-trend trend-red">↑ +7</span>
                 </div>
 
-                <div className="kpi-stat-card">
+                <div 
+                  className="kpi-stat-card"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate('/logistics/inventory')}
+                >
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#f0fdfa', color: '#14b8a6' }}>
                       <Package size={14} />
@@ -765,7 +821,11 @@ export const DashboardOverviewPage = () => {
                   </div>
                 </div>
 
-                <div className="kpi-stat-card">
+                <div 
+                  className="kpi-stat-card"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate('/shelters/directory')}
+                >
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#fff7ed', color: '#f97316' }}>
                       <Building2 size={14} />
@@ -778,7 +838,11 @@ export const DashboardOverviewPage = () => {
                   </div>
                 </div>
 
-                <div className="kpi-stat-card">
+                <div 
+                  className="kpi-stat-card"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate('/coordinator/ai-review')}
+                >
                   <div className="kpi-card-top">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#f5f3ff', color: '#8b5cf6' }}>
                       <Brain size={14} />
@@ -799,7 +863,13 @@ export const DashboardOverviewPage = () => {
                 <div className="critical-requests-card">
                   <div className="card-title-header">
                     <h3 className="card-heading-text">Critical Requests</h3>
-                    <Link to="/coordinator/triage" className="card-view-all-link">View All</Link>
+                    <span 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => { setActiveNav('requests'); setRequestViewMode('list'); }}
+                      className="card-view-all-link"
+                    >
+                      View All
+                    </span>
                   </div>
 
                   <div className="critical-list">
@@ -809,9 +879,9 @@ export const DashboardOverviewPage = () => {
                         className="critical-item-row"
                         style={{ cursor: 'pointer' }}
                         onClick={() => {
-                          if (req.id === 'REQ-2026-01842') {
-                            setActiveNav('requests');
-                          }
+                          setSelectedRequestId(req.id);
+                          setRequestViewMode('detail');
+                          setActiveNav('requests');
                         }}
                       >
                         <div className="crit-item-left">
@@ -1020,7 +1090,9 @@ export const DashboardOverviewPage = () => {
                             className="req-table-id"
                             style={{ cursor: 'pointer', color: '#0284c7' }}
                             onClick={() => {
-                              if (row.id === 'REQ-2026-01842') setActiveNav('requests');
+                              setSelectedRequestId(row.id);
+                              setRequestViewMode('detail');
+                              setActiveNav('requests');
                             }}
                           >
                             {row.id}
@@ -1060,7 +1132,9 @@ export const DashboardOverviewPage = () => {
                                 className="action-icon-btn" 
                                 title="View Details"
                                 onClick={() => {
-                                  if (row.id === 'REQ-2026-01842') setActiveNav('requests');
+                                  setSelectedRequestId(row.id);
+                                  setRequestViewMode('detail');
+                                  setActiveNav('requests');
                                 }}
                               >
                                 <Eye size={13} />

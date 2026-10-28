@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   Bell, 
@@ -231,6 +232,7 @@ export const AssistanceRequestsListView = ({
   isEmbedded = false
 }) => {
   const { showAlert } = useAlert();
+  const navigate = useNavigate();
 
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState('');
@@ -423,7 +425,7 @@ export const AssistanceRequestsListView = ({
 
           <button 
             className="arl-btn-new-request"
-            onClick={() => showAlert("Opening Citizen Request Intake Modal...", "info")}
+            onClick={() => navigate('/citizen/submit')}
           >
             <Plus size={15} />
             <span>+ New Request</span>
@@ -733,7 +735,7 @@ export const AssistanceRequestsListView = ({
 
                       <button 
                         className="arl-drawer-btn-map"
-                        onClick={() => onOpenMap ? onOpenMap() : showAlert("Opening full GIS operational map...", "info")}
+                        onClick={() => onOpenMap ? onOpenMap() : navigate('/map')}
                       >
                         <ExternalLink size={11} />
                         <span>View on Map</span>
@@ -877,3 +879,4 @@ export const AssistanceRequestsListView = ({
     </div>
   );
 };
+
