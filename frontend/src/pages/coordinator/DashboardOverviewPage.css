@@ -1531,6 +1531,12 @@
   padding: 10px 20px 10px 20px;
 }
 
+/* Requests full dock */
+.coord-body-padding.requests-full-dock {
+  padding: 0;
+  gap: 0;
+}
+
 /* =========================================================
    AUDIT CENTER EMBEDDED STYLING
    ========================================================= */

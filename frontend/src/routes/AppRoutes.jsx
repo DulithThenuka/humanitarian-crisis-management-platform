@@ -17,6 +17,7 @@ import { FindShelterPage } from '../pages/citizen/FindShelterPage';
 import { DashboardOverviewPage } from '../pages/coordinator/DashboardOverviewPage';
 import { RequestTriagePage } from '../pages/coordinator/RequestTriagePage';
 import { AIDecisionReviewPage } from '../pages/coordinator/AIDecisionReviewPage';
+import { AssistanceRequestDetailPage } from '../pages/coordinator/AssistanceRequestDetailPage';
 
 // Logistics Pages
 import { ResourceInventoryPage } from '../pages/logistics/ResourceInventoryPage';
@@ -36,6 +37,10 @@ export const AppRoutes = () => {
       <Route path="/" element={<DashboardOverviewPage />} />
       <Route path="/dashboard" element={<DashboardOverviewPage />} />
       <Route path="/coordinator/dashboard" element={<DashboardOverviewPage />} />
+      <Route path="/coordinator/requests" element={<DashboardOverviewPage />} />
+      <Route path="/coordinator/requests/:id" element={<DashboardOverviewPage />} />
+      <Route path="/requests/:id" element={<DashboardOverviewPage />} />
+      <Route path="/request-detail" element={<DashboardOverviewPage />} />
       
       {/* Citizen routes */}
       <Route path="/citizen" element={<CitizenPortalPage />} />

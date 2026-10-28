@@ -36,7 +36,8 @@ import {
   ArrowUpRight,
   CheckCircle2,
   Building,
-  Sparkles
+  Sparkles,
+  Inbox
 } from 'lucide-react';
 
 import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
@@ -46,6 +47,8 @@ import { LiveSatelliteCrisisMap } from '../../components/maps/LiveSatelliteCrisi
 
 import { ReportsAnalyticsView } from "../reports-and-analysis/ReportsAnalyticsView";
 import { OperationalMapView } from "../map/OperationalMapView";
+import { AssistanceRequestDetailPage } from "./AssistanceRequestDetailPage";
+import { AssistanceRequestsListView } from "./AssistanceRequestsListView";
 
 import './DashboardOverviewPage.css';
 
@@ -104,7 +107,9 @@ const INITIAL_AUDIT_DATA = [
 ];
 
 export const DashboardOverviewPage = () => {
-  const [activeNav, setActiveNav] = useState('dashboard');
+  const [activeNav, setActiveNav] = useState('requests');
+  const [requestViewMode, setRequestViewMode] = useState('list');
+  const [selectedRequestId, setSelectedRequestId] = useState('REQ-2026-01842');
   const [searchVal, setSearchVal] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('Western Province');
 
@@ -352,7 +357,7 @@ export const DashboardOverviewPage = () => {
                     <span>{item.label}</span>
                   </div>
                   {item.badge && <span className="coord-nav-badge">{item.badge}</span>}
-                  {item.hasSub && <ChevronRight size={13} color="#64748b" />}
+                  {item.hasSub && !isActive && <ChevronRight size={13} color="#64748b" />}
                 </button>
               );
             })}
@@ -373,13 +378,46 @@ export const DashboardOverviewPage = () => {
       {/* 2. Main Content */}
       <main className="coord-main-content">
         <header className="coord-top-header">
-          <div className="header-brand-title-wrap">
-            <img src={crisisCenterIcon} alt="Command Center" className="header-icon-box" />
-            <div>
-              <h1 className="header-title-text">{getHeaderTitle()}</h1>
-              <p className="header-subtitle-text">{getHeaderSubtitle()}</p>
+          {activeNav === 'requests' ? (
+            requestViewMode === 'detail' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                <span style={{ color: '#0d9488', display: 'flex', alignItems: 'center' }}>
+                  <Inbox size={15} />
+                </span>
+                <span 
+                  style={{ color: '#64748b', fontWeight: 500, cursor: 'pointer' }}
+                  onClick={() => setRequestViewMode('list')}
+                >
+                  Assistance Requests
+                </span>
+                <span style={{ color: '#94a3b8', fontSize: '11px' }}>&gt;</span>
+                <span style={{ color: '#475569', fontWeight: 600 }}>{selectedRequestId}</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="13" stroke="#0e6f76" strokeWidth="2.5" />
+                    <path d="M12 12C12 9.79 13.79 8 16 8C18.21 8 20 9.79 20 12" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+                    <circle cx="16" cy="16" r="3" fill="#0284c7" />
+                    <path d="M10 22C11 19 13.5 18 16 18C18.5 18 21 19 22 22" stroke="#0e6f76" strokeWidth="2.5" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="header-title-text" style={{ fontSize: '17px', fontWeight: 800 }}>Assistance Requests</h1>
+                  <p className="header-subtitle-text" style={{ fontSize: '11px' }}>Manage, review and coordinate all emergency assistance requests</p>
+                </div>
+              </div>
+            )
+          ) : (
+            <div className="header-brand-title-wrap">
+              <img src={crisisCenterIcon} alt="Command Center" className="header-icon-box" />
+              <div>
+                <h1 className="header-title-text">{getHeaderTitle()}</h1>
+                <p className="header-subtitle-text">{getHeaderSubtitle()}</p>
+              </div>
             </div>
-          </div>
+          )}
 
           {activeNav === 'dashboard' && (
             <div className="header-crisis-action-wrap">
@@ -398,7 +436,7 @@ export const DashboardOverviewPage = () => {
               <Search size={14} className="header-search-icon" />
               <input
                 type="text"
-                placeholder="Search requests, locations, resources..."
+                placeholder={activeNav === 'requests' && requestViewMode === 'list' ? "Search requests by ID, location, category..." : "Search requests, locations, resources..."}
                 className="header-search-input"
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
@@ -409,7 +447,7 @@ export const DashboardOverviewPage = () => {
           <div className="header-right-tools">
             <button className="header-bell-btn" aria-label="Notifications">
               <Bell size={18} />
-              <span className="header-bell-dot">3</span>
+              <span className="header-bell-dot">{activeNav === 'requests' && requestViewMode === 'detail' ? '1' : '3'}</span>
             </button>
 
             <div className="header-user-profile">
@@ -423,8 +461,25 @@ export const DashboardOverviewPage = () => {
         </header>
 
         {/* Content Body */}
-        <div className={`coord-body-padding ${activeNav === 'maps' ? 'maps-full-dock' : ''}`}>
-          {activeNav === 'reports' ? (
+        <div className={`coord-body-padding ${activeNav === 'maps' ? 'maps-full-dock' : ''} ${activeNav === 'requests' ? 'requests-full-dock' : ''}`}>
+          {activeNav === 'requests' ? (
+            requestViewMode === 'detail' ? (
+              <AssistanceRequestDetailPage 
+                isEmbedded={true}
+                onNavigateTab={() => setRequestViewMode('list')}
+                onOpenMap={() => setActiveNav('maps')}
+              />
+            ) : (
+              <AssistanceRequestsListView 
+                isEmbedded={true}
+                onSelectFullDetail={(id) => {
+                  setSelectedRequestId(id);
+                  setRequestViewMode('detail');
+                }}
+                onOpenMap={() => setActiveNav('maps')}
+              />
+            )
+          ) : activeNav === 'reports' ? (
             <ReportsAnalyticsView />
           ) : activeNav === 'maps' ? (
             <OperationalMapView />
@@ -749,7 +804,16 @@ export const DashboardOverviewPage = () => {
 
                   <div className="critical-list">
                     {criticalRequests.map((req) => (
-                      <div key={req.id} className="critical-item-row">
+                      <div 
+                        key={req.id} 
+                        className="critical-item-row"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                          if (req.id === 'REQ-2026-01842') {
+                            setActiveNav('requests');
+                          }
+                        }}
+                      >
                         <div className="crit-item-left">
                           <div className="crit-icon-box" style={{ backgroundColor: req.iconBg, color: req.iconColor }}>
                             <AlertTriangle size={12} />
@@ -952,7 +1016,15 @@ export const DashboardOverviewPage = () => {
                               style={{ accentColor: '#0f766e' }} 
                             />
                           </td>
-                          <td className="req-table-id">{row.id}</td>
+                          <td 
+                            className="req-table-id"
+                            style={{ cursor: 'pointer', color: '#0284c7' }}
+                            onClick={() => {
+                              if (row.id === 'REQ-2026-01842') setActiveNav('requests');
+                            }}
+                          >
+                            {row.id}
+                          </td>
                           <td>{row.category}</td>
                           <td>{row.location}</td>
                           <td>
@@ -984,7 +1056,13 @@ export const DashboardOverviewPage = () => {
                           <td style={{ color: '#94a3b8' }}>{row.created}</td>
                           <td>
                             <div className="table-actions-cell">
-                              <button className="action-icon-btn" title="View Details">
+                              <button 
+                                className="action-icon-btn" 
+                                title="View Details"
+                                onClick={() => {
+                                  if (row.id === 'REQ-2026-01842') setActiveNav('requests');
+                                }}
+                              >
                                 <Eye size={13} />
                               </button>
                               <button className="action-icon-btn" title="Assign">

@@ -164,6 +164,16 @@ export const LiveSatelliteCrisisMap = ({ onProvinceChange }) => {
       dashArray: '4, 4'
     }).bindPopup(`
       <div class="custom-map-popup">
+
+
+
+
+
+
+
+
+
+      
         <div class="popup-badge red">Level 4 Critical Alert</div>
         <h4>Kelani River Flood Zone</h4>
         <p>Severe inundation along river corridor. Evacuation orders active for lowlands.</p>
