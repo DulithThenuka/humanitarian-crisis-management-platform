@@ -285,7 +285,8 @@
   gap: 12px;
 }
 
-.coord-body-padding.p-0 {
+.coord-body-padding.p-0,
+.coord-body-padding.maps-full-dock {
   padding: 0;
   gap: 0;
 }

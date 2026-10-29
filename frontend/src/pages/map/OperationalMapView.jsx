@@ -24,29 +24,36 @@ import {
   Route,
   Zap,
   X,
-  Target
+  Target,
+  Layers,
+  RotateCcw,
+  Sparkles,
+  Map as MapIcon
 } from 'lucide-react';
 import './OperationalMapView.css';
 
-// SVG DivIcons for Leaflet
-const createCustomIcon = (bgColor, symbol, size = 28) => {
+// =========================================================================
+// CRISP VIBRANT MARKERS FOR LIGHT CARTOGRAPHY
+// =========================================================================
+const createCustomIcon = (bgColor, symbol, size = 30) => {
   return L.divIcon({
     className: 'custom-leaflet-marker',
     html: `
       <div style="
-        background: radial-gradient(circle, ${bgColor} 0%, #081d26 100%);
+        background: ${bgColor};
         width: ${size}px;
         height: ${size}px;
         border-radius: 50%;
-        border: 2px solid #ffffff;
-        box-shadow: 0 0 12px ${bgColor}, inset 0 0 4px rgba(0,0,0,0.8);
+        border: 2.5px solid #ffffff;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.05);
         display: flex;
         align-items: center;
         justify-content: center;
         color: #ffffff;
-        font-weight: 900;
-        font-size: 11px;
+        font-weight: 800;
+        font-size: 11.5px;
         cursor: pointer;
+        transition: transform 0.15s ease;
       ">
         ${symbol || ''}
       </div>
@@ -74,14 +81,46 @@ const createDroppedPinIcon = () => {
 };
 
 const ICONS = {
-  service: createCustomIcon('#0ea5e9', '★', 28),
-  resource: createCustomIcon('#f59e0b', '▲', 26),
-  requestHigh: createCustomIcon('#0284c7', '!', 26),
-  requestCritical: createCustomIcon('#ef4444', '!', 30),
-  shelter: createCustomIcon('#10b981', 'S', 28),
-  volunteer: createCustomIcon('#8b5cf6', 'V', 24),
+  service: createCustomIcon('#0284c7', '★', 30),
+  resource: createCustomIcon('#f59e0b', '▲', 28),
+  requestHigh: createCustomIcon('#ea580c', '!', 28),
+  requestCritical: createCustomIcon('#ef4444', '!', 32),
+  shelter: createCustomIcon('#10b981', 'S', 30),
+  volunteer: createCustomIcon('#8b5cf6', 'V', 26),
   userPin: createDroppedPinIcon(),
-  myLocPin: createCustomIcon('#38bdf8', '📍', 32)
+  myLocPin: createCustomIcon('#0e6f76', '📍', 34)
+};
+
+const MAP_STYLES = {
+  esriStreets: {
+    id: 'esriStreets',
+    name: 'Clean Light',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, METI, TomTom',
+    maxZoom: 19
+  },
+  humanitarian: {
+    id: 'humanitarian',
+    name: 'Humanitarian OSM',
+    url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles by <a href="https://www.hotosm.org/">HOT</a>',
+    subdomains: 'abc',
+    maxZoom: 19
+  },
+  osm: {
+    id: 'osm',
+    name: 'Standard OSM',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  },
+  satellite: {
+    id: 'satellite',
+    name: 'Satellite Hybrid',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP',
+    maxZoom: 19
+  }
 };
 
 const INITIAL_MAP_NODES = [
@@ -109,7 +148,7 @@ const INITIAL_MAP_NODES = [
   {
     id: 'DEP-COL-1',
     type: 'RESOURCE',
-    name: 'Colombo Central Depot Hub',
+    name: 'Colombo Central Logistics Depot',
     location: 'Pettah Main Logistics Base',
     distance: '2.4 km',
     eta: '11 min ETA via Port Access',
@@ -118,75 +157,66 @@ const INITIAL_MAP_NODES = [
     lng: 79.8546
   },
   {
-    id: 'REQ-01865',
+    id: 'REQ-1082',
     type: 'REQUEST',
-    name: 'Peliyagoda Commercial Sector Flood Cluster',
-    location: 'Peliyagoda West',
-    priority: 'HIGH',
-    distance: '3.1 km',
-    eta: '9 min ETA via Katunayake Expy',
-    lat: 6.9685,
-    lng: 79.8821
+    name: 'Emergency Medical Evacuation (4 Trapped)',
+    location: 'Kelaniya, River Bank Lowlands',
+    distance: '1.2 km',
+    eta: '7 min ETA',
+    severity: 'CRITICAL',
+    details: 'Elderly diabetic patient and child stranded on submerged first floor.',
+    lat: 6.9535,
+    lng: 79.9180
   },
   {
-    id: 'SHL-KEL',
+    id: 'SHL-KEL-1',
     type: 'SHELTER',
     name: 'Kelaniya River Safe Camp',
-    location: 'Kelaniya Raja Maha Vihara Grounds',
+    location: 'Kelaniya Temple Relief Hall',
     occupancyPct: 88,
-    availableBeds: 15,
+    availableBeds: 18,
     distance: '1.2 km',
-    eta: '7 min ETA via B214',
-    lat: 6.9535,
-    lng: 79.9192
+    eta: '7 min ETA',
+    lat: 6.9580,
+    lng: 79.9240
   },
   {
-    id: 'REQ-01842',
+    id: 'REQ-1089',
     type: 'REQUEST',
-    name: 'Kelani North Low-Lying Breach Point',
-    location: 'Sedawatta Canal Basin, Kelaniya',
-    priority: 'CRITICAL',
-    distance: '1.8 km',
-    eta: '6 min ETA via Baseline Rd',
-    lat: 6.9450,
-    lng: 79.8880
+    name: 'Drinking Water & Infant Formula Urgent',
+    location: 'Wattala, Hendala Junction',
+    distance: '4.8 km',
+    eta: '14 min ETA',
+    severity: 'HIGH',
+    details: 'Groundwater contaminated by flood runoff. 20 families cut off.',
+    lat: 6.9880,
+    lng: 79.8920
   },
   {
     id: 'VOL-ALPHA',
     type: 'VOLUNTEER',
-    name: 'Rapid Response Team Alpha (8 Rescuers)',
-    location: 'Sedawatta Riverbank Access',
-    distance: '0.8 km',
-    eta: '3 min on foot / boat',
-    lat: 6.9410,
-    lng: 79.8850
+    name: 'Red Cross Swift-Water Rescue Team Alpha',
+    location: 'Stationed near Peliyagoda Bridge',
+    distance: '3.1 km',
+    eta: '9 min ETA',
+    status: 'Ready for Dispatch',
+    lat: 6.9620,
+    lng: 79.8880
   },
   {
-    id: 'SHL-COL-1',
+    id: 'SHL-COL-CENT',
     type: 'SHELTER',
     name: 'Colombo Central Relief Shelter',
-    location: 'Vidyalaya Mawatha, Colombo 10',
+    location: 'Town Hall Grounds, Colombo 07',
     occupancyPct: 74,
-    availableBeds: 66,
-    distance: '4.8 km',
-    eta: '12 min',
-    routeNote: 'Route calculated via Baseline Rd with flood water slowdown at Orugodawatta.',
-    lat: 6.9271,
-    lng: 79.8612
+    availableBeds: 65,
+    distance: '1.6 km',
+    eta: '8 min ETA',
+    lat: 6.9147,
+    lng: 79.8660
   },
   {
-    id: 'REQ-01899',
-    type: 'REQUEST',
-    name: 'Kalutara South Riverside Evacuation',
-    location: 'Kalu Ganga Delta, Kalutara',
-    priority: 'HIGH',
-    distance: '28.4 km',
-    eta: '38 min ETA via Southern Expy',
-    lat: 6.5854,
-    lng: 79.9607
-  },
-  {
-    id: 'SHL-KAL',
+    id: 'SHL-KAL-1',
     type: 'SHELTER',
     name: 'Kalutara Central Haven Camp',
     location: 'Kalutara Urban Council Hall',
@@ -244,6 +274,7 @@ export const OperationalMapView = () => {
     serviceCentres: true
   });
 
+  const [activeMapStyle, setActiveMapStyle] = useState('esriStreets');
   const [selectedNode, setSelectedNode] = useState(INITIAL_MAP_NODES[7]);
   const [targetCenter, setTargetCenter] = useState(null);
   const [myLocationNode, setMyLocationNode] = useState(null);
@@ -252,11 +283,11 @@ export const OperationalMapView = () => {
   const [isCapturing, setIsCapturing] = useState(false);
   const [showCaptureForm, setShowCaptureForm] = useState(false);
   const [capturedCoordinates, setCapturedCoordinates] = useState({
-    lat: '7.0818° N',
-    lng: '79.4648° E',
-    rawLat: 7.0818,
-    rawLng: 79.4648,
-    sectorDesc: 'Captured Location @ Near Sector [X:236, Y:192]'
+    lat: '6.9450° N',
+    lng: '79.8880° E',
+    rawLat: 6.9450,
+    rawLng: 79.8880,
+    sectorDesc: 'Captured Location @ Kelani River Basin Sector'
   });
 
   // Form Fields
@@ -265,6 +296,16 @@ export const OperationalMapView = () => {
   const [severityLevel, setSeverityLevel] = useState('CRITICAL');
   const [incidentDetails, setIncidentDetails] = useState('Flash flooding stranded 3 adults on upper rooftop terrace.');
   const [capturedPins, setCapturedPins] = useState([]);
+
+  // Toast feedback message
+  const [feedbackToast, setFeedbackToast] = useState(null);
+
+  const showToast = (msg) => {
+    setFeedbackToast(msg);
+    setTimeout(() => {
+      setFeedbackToast((prev) => (prev === msg ? null : prev));
+    }, 3200);
+  };
 
   const toggleLayer = (key) => {
     setLayers(prev => ({ ...prev, [key]: !prev[key] }));
@@ -276,73 +317,77 @@ export const OperationalMapView = () => {
       setIsCapturing(true);
       setShowCaptureForm(true);
       setCapturedCoordinates({
-        lat: '7.0818° N',
-        lng: '79.4648° E',
-        rawLat: 7.0818,
-        rawLng: 79.4648,
-        sectorDesc: 'Captured Location @ Near Sector [X:236, Y:192]'
+        lat: '6.9450° N',
+        lng: '79.8880° E',
+        rawLat: 6.9450,
+        rawLng: 79.8880,
+        sectorDesc: 'Click anywhere on map to pinpoint exact citizen coordinates'
       });
+      showToast('Click anywhere on the map to pinpoint citizen coordinates');
     } else {
       setIsCapturing(false);
       setShowCaptureForm(false);
     }
   };
 
-  // User clicks on map canvas while capturing
+  // Handles click on terrain map
   const handlePinDrop = (latlng) => {
-    const formattedLat = `${latlng.lat.toFixed(4)}° N`;
-    const formattedLng = `${latlng.lng.toFixed(4)}° E`;
-
-    const newPinObj = {
-      id: `PIN-${Math.floor(1000 + Math.random() * 9000)}`,
-      type: 'REQUEST',
-      name: `Citizen GPS Request #${requesterName}`,
-      location: `Coordinates: ${formattedLat}, ${formattedLng}`,
-      priority: severityLevel,
-      distance: '2.1 km',
-      eta: '7 min ETA to Nearest Hub',
-      routeNote: `Citizen request logged at [${formattedLat}, ${formattedLng}]. Proximity dispatched to nearest unit.`,
-      lat: latlng.lat,
-      lng: latlng.lng
-    };
+    const latStr = `${latlng.lat.toFixed(4)}° N`;
+    const lngStr = `${latlng.lng.toFixed(4)}° E`;
+    const sectorName = `Captured Location @ Coordinates [${latlng.lat.toFixed(3)}, ${latlng.lng.toFixed(3)}]`;
 
     setCapturedCoordinates({
-      lat: formattedLat,
-      lng: formattedLng,
+      lat: latStr,
+      lng: lngStr,
       rawLat: latlng.lat,
       rawLng: latlng.lng,
-      sectorDesc: `Captured Location @ Selected Coordinates [${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}]`
+      sectorDesc: sectorName
     });
 
-    setCapturedPins([newPinObj]);
-    setSelectedNode(newPinObj);
-    setShowCaptureForm(false); // Close form and show the detail card immediately
+    const newPin = {
+      id: `PIN-${Date.now()}`,
+      type: 'REQUEST',
+      name: `${assistanceCategory} Pin`,
+      location: `Coordinates: ${latStr}, ${lngStr}`,
+      distance: '0.9 km',
+      eta: '4 min ETA',
+      lat: latlng.lat,
+      lng: latlng.lng,
+      severity: severityLevel,
+      routeNote: `Identified via GPS Drop: ${incidentDetails}`
+    };
+
+    setCapturedPins(prev => [newPin, ...prev]);
+    setSelectedNode(newPin);
+    setShowCaptureForm(true);
     setIsCapturing(false);
+    showToast(`Pin dropped at ${latStr}, ${lngStr}`);
   };
 
-  // Submit and register the incident
+  // Form Submission
   const handleRegisterIncident = (e) => {
     e.preventDefault();
-    const registeredNode = {
-      id: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
+    const createdIncident = {
+      id: `INC-2026-${Math.floor(1000 + Math.random() * 9000)}`,
       type: 'REQUEST',
-      name: `Citizen Request: ${requesterName}`,
-      location: `Coordinates: ${capturedCoordinates.lat}, ${capturedCoordinates.lng}`,
-      priority: severityLevel,
-      distance: '2.1 km',
-      eta: '7 min ETA to Nearest Hub',
-      routeNote: incidentDetails,
+      name: `${assistanceCategory} (${requesterName})`,
+      location: capturedCoordinates.sectorDesc,
+      distance: '0.8 km',
+      eta: '5 min ETA via Primary Route',
+      severity: severityLevel,
+      details: incidentDetails,
       lat: capturedCoordinates.rawLat,
       lng: capturedCoordinates.rawLng
     };
 
-    setCapturedPins([registeredNode]);
-    setSelectedNode(registeredNode);
-    setIsCapturing(false);
+    setCapturedPins(prev => [createdIncident, ...prev]);
+    setSelectedNode(createdIncident);
     setShowCaptureForm(false);
+    setIsCapturing(false);
+    showToast(`Incident registered! Closest depots and response teams matched`);
   };
 
-  // Automated Geolocation & Fly-to Navigation
+  // Locate user device
   const handleMyLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -364,6 +409,7 @@ export const OperationalMapView = () => {
           setSelectedNode(myLoc);
           setShowCaptureForm(false);
           setTargetCenter({ lat, lng });
+          showToast('GPS coordinates locked onto your terminal location');
         },
         () => {
           const fallback = {
@@ -380,14 +426,30 @@ export const OperationalMapView = () => {
           setSelectedNode(fallback);
           setShowCaptureForm(false);
           setTargetCenter({ lat: 6.9044, lng: 79.8732 });
+          showToast('Centered on Colombo Emergency Operations Center');
         },
         { enableHighAccuracy: true, timeout: 8000 }
       );
     }
   };
 
+  const handleFlyToSector = (lat, lng, name) => {
+    setTargetCenter({ lat, lng });
+    showToast(`Navigating map to ${name}`);
+  };
+
+  const activeTileConfig = MAP_STYLES[activeMapStyle] || MAP_STYLES.esriStreets;
+
   return (
     <div className="command-map-fullscreen">
+      {/* Toast Notification */}
+      {feedbackToast && (
+        <div className="map-feedback-toast">
+          <Sparkles size={14} className="toast-sparkle" />
+          <span>{feedbackToast}</span>
+        </div>
+      )}
+
       {/* 1. TOP COMMAND BAR */}
       <header className="cmd-map-topbar">
         <div className="cmd-topbar-left">
@@ -401,6 +463,39 @@ export const OperationalMapView = () => {
         </div>
 
         <div className="cmd-topbar-actions">
+          {/* Base Map Style Switcher (100% Free, No API Key Required) */}
+          <div className="map-style-toggle-group">
+            <button
+              className={`style-btn ${activeMapStyle === 'esriStreets' ? 'active' : ''}`}
+              onClick={() => setActiveMapStyle('esriStreets')}
+              title="Clean Light Street View (No API Key Required)"
+            >
+              <MapIcon size={12} />
+              <span>Clean Light</span>
+            </button>
+            <button
+              className={`style-btn ${activeMapStyle === 'humanitarian' ? 'active' : ''}`}
+              onClick={() => setActiveMapStyle('humanitarian')}
+              title="Humanitarian OpenStreetMap"
+            >
+              <span>Humanitarian</span>
+            </button>
+            <button
+              className={`style-btn ${activeMapStyle === 'osm' ? 'active' : ''}`}
+              onClick={() => setActiveMapStyle('osm')}
+              title="Standard OpenStreetMap"
+            >
+              <span>OSM</span>
+            </button>
+            <button
+              className={`style-btn ${activeMapStyle === 'satellite' ? 'active' : ''}`}
+              onClick={() => setActiveMapStyle('satellite')}
+              title="Esri Satellite Imagery"
+            >
+              <span>Satellite</span>
+            </button>
+          </div>
+
           <button 
             className={`cmd-btn btn-capture ${isCapturing ? 'active-capture' : ''}`}
             onClick={handleToggleCapture}
@@ -409,9 +504,17 @@ export const OperationalMapView = () => {
             <span>{isCapturing ? 'Cancel Pin-Drop' : '+ Capture Incident GPS'}</span>
           </button>
 
-          <button className="cmd-btn btn-locate" onClick={handleMyLocation}>
-            <Navigation size={14} />
+          <button className="cmd-btn btn-locate" onClick={handleMyLocation} title="Find terminal location">
+            <Navigation size={13} />
             <span>My Location</span>
+          </button>
+
+          <button 
+            className="cmd-btn btn-reset-center" 
+            onClick={() => handleFlyToSector(6.9271, 79.8812, 'Western Province Center')}
+            title="Reset Map View"
+          >
+            <RotateCcw size={13} />
           </button>
         </div>
       </header>
@@ -424,7 +527,9 @@ export const OperationalMapView = () => {
           <div className="dock-card">
             <div className="dock-card-header">
               <span className="card-heading-upper">MAP LAYER VISIBILITY</span>
-              <span className="layer-count-chip">6 Layers</span>
+              <span className="layer-count-chip">
+                {Object.values(layers).filter(Boolean).length} Active
+              </span>
             </div>
 
             <div className="dock-layers-list">
@@ -517,6 +622,13 @@ export const OperationalMapView = () => {
               <span className="stat-dim">Affected Citizens:</span>
               <strong className="stat-bold">12,430</strong>
             </div>
+            <button 
+              className="crisis-focus-btn"
+              onClick={() => handleFlyToSector(6.9450, 79.8880, 'Kelani Flood Zone')}
+            >
+              <span>Focus Flood Zone</span>
+              <ArrowRight size={11} />
+            </button>
           </div>
 
           {/* Service Coverage Analysis Box */}
@@ -543,12 +655,38 @@ export const OperationalMapView = () => {
             </div>
           </div>
 
+          {/* Quick Sector Fly-To Jump */}
+          <div className="dock-card sector-jump-card">
+            <div className="dock-card-header">
+              <span className="card-heading-upper">QUICK SECTOR JUMP</span>
+              <Compass size={12} className="text-teal" />
+            </div>
+            <div className="sector-jump-grid">
+              <button onClick={() => handleFlyToSector(6.9271, 79.8612, 'Colombo Hub')}>Colombo</button>
+              <button onClick={() => handleFlyToSector(6.9535, 79.9180, 'Kelaniya Basin')}>Kelaniya</button>
+              <button onClick={() => handleFlyToSector(7.0897, 79.9925, 'Gampaha Sector')}>Gampaha</button>
+              <button onClick={() => handleFlyToSector(6.5800, 79.9650, 'Kalutara Sector')}>Kalutara</button>
+            </div>
+          </div>
+
           {/* Bottom Legend */}
           <div className="dock-legend-bottom">
-            <span className="legend-head">LEGEND</span>
+            <span className="legend-head">MAP SYMBOLOGY</span>
             <div className="legend-item">
               <span className="dock-dot dot-red"></span>
-              <span>Critical Crisis Zone (Polygon)</span>
+              <span>Critical Crisis Zone (Buffer)</span>
+            </div>
+            <div className="legend-item">
+              <span className="dock-dot dot-emerald"></span>
+              <span>Active Relief Shelter (S)</span>
+            </div>
+            <div className="legend-item">
+              <span className="dock-dot dot-amber"></span>
+              <span>Logistics Depot Hub (▲)</span>
+            </div>
+            <div className="legend-item">
+              <span className="dock-dot dot-cyan"></span>
+              <span>Assistance Request (!)</span>
             </div>
           </div>
         </aside>
@@ -559,7 +697,8 @@ export const OperationalMapView = () => {
           {isCapturing && (
             <div className="pin-drop-alert-banner">
               <Target size={16} className="alert-target-icon" />
-              <span>PIN-DROP MODE: Click on the terrain map to pinpoint citizen request</span>
+              <span>PIN-DROP MODE: Click anywhere on the map to pinpoint citizen request</span>
+              <button className="banner-cancel-btn" onClick={() => setIsCapturing(false)}>Cancel</button>
             </div>
           )}
 
@@ -567,13 +706,17 @@ export const OperationalMapView = () => {
             center={[6.9271, 79.8812]}
             zoom={12}
             scrollWheelZoom={true}
-            style={{ width: '100%', height: '100%', background: '#061217' }}
+            className="leaflet-light-container"
+            style={{ width: '100%', height: '100%', background: '#f1f5f9' }}
           >
-            {/* OpenStreetMap dark tiles */}
+            {/* Clean Light Tiles */}
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-              className="dark-tile-layer"
+              key={activeTileConfig.id}
+              attribution={activeTileConfig.attribution}
+              url={activeTileConfig.url}
+              subdomains={activeTileConfig.subdomains || 'abc'}
+              maxZoom={activeTileConfig.maxZoom || 19}
+              className="light-tile-layer"
             />
 
             <MapViewController targetCenter={targetCenter} />
@@ -589,8 +732,8 @@ export const OperationalMapView = () => {
                     color: '#ef4444',
                     fillColor: '#ef4444',
                     fillOpacity: 0.16,
-                    weight: 1.5,
-                    dashArray: '4, 4'
+                    weight: 2,
+                    dashArray: '5, 5'
                   }}
                 />
                 <Circle
@@ -599,9 +742,9 @@ export const OperationalMapView = () => {
                   pathOptions={{
                     color: '#f59e0b',
                     fillColor: '#f59e0b',
-                    fillOpacity: 0.14,
-                    weight: 1.5,
-                    dashArray: '4, 4'
+                    fillOpacity: 0.15,
+                    weight: 2,
+                    dashArray: '5, 5'
                   }}
                 />
               </>
@@ -610,7 +753,7 @@ export const OperationalMapView = () => {
             {/* Road Routing Line */}
             <Polyline
               positions={ROUTE_LINE}
-              pathOptions={{ color: '#0ea5e9', weight: 4, dashArray: '6, 6' }}
+              pathOptions={{ color: '#0284c7', weight: 4.5, opacity: 0.88, dashArray: '6, 6' }}
             />
 
             {/* Service Centres */}
@@ -661,7 +804,7 @@ export const OperationalMapView = () => {
               <>
                 <Marker
                   position={[INITIAL_MAP_NODES[3].lat, INITIAL_MAP_NODES[3].lng]}
-                  icon={ICONS.requestHigh}
+                  icon={ICONS.requestCritical}
                   eventHandlers={{
                     click: (e) => {
                       L.DomEvent.stopPropagation(e);
@@ -672,7 +815,7 @@ export const OperationalMapView = () => {
                 />
                 <Marker
                   position={[INITIAL_MAP_NODES[5].lat, INITIAL_MAP_NODES[5].lng]}
-                  icon={ICONS.requestCritical}
+                  icon={ICONS.requestHigh}
                   eventHandlers={{
                     click: (e) => {
                       L.DomEvent.stopPropagation(e);
@@ -681,21 +824,10 @@ export const OperationalMapView = () => {
                     }
                   }}
                 />
-                <Marker
-                  position={[INITIAL_MAP_NODES[8].lat, INITIAL_MAP_NODES[8].lng]}
-                  icon={ICONS.requestHigh}
-                  eventHandlers={{
-                    click: (e) => {
-                      L.DomEvent.stopPropagation(e);
-                      setSelectedNode(INITIAL_MAP_NODES[8]);
-                      setShowCaptureForm(false);
-                    }
-                  }}
-                />
               </>
             )}
 
-            {/* Shelters */}
+            {/* Relief Shelters */}
             {layers.shelters && (
               <>
                 <Marker
@@ -721,12 +853,12 @@ export const OperationalMapView = () => {
                   }}
                 />
                 <Marker
-                  position={[INITIAL_MAP_NODES[9].lat, INITIAL_MAP_NODES[9].lng]}
+                  position={[INITIAL_MAP_NODES[8].lat, INITIAL_MAP_NODES[8].lng]}
                   icon={ICONS.shelter}
                   eventHandlers={{
                     click: (e) => {
                       L.DomEvent.stopPropagation(e);
-                      setSelectedNode(INITIAL_MAP_NODES[9]);
+                      setSelectedNode(INITIAL_MAP_NODES[8]);
                       setShowCaptureForm(false);
                     }
                   }}
@@ -734,7 +866,7 @@ export const OperationalMapView = () => {
               </>
             )}
 
-            {/* Volunteers */}
+            {/* Volunteer Rescue Teams */}
             {layers.volunteers && (
               <Marker
                 position={[INITIAL_MAP_NODES[6].lat, INITIAL_MAP_NODES[6].lng]}
@@ -852,7 +984,7 @@ export const OperationalMapView = () => {
 
               <button 
                 className="figma-btn-dispatch"
-                onClick={() => alert(`Dispatch protocol engaged for: ${selectedNode.name}`)}
+                onClick={() => showToast(`Dispatch protocol engaged for: ${selectedNode.name}`)}
               >
                 <span>Dispatch Support</span>
                 <ArrowRight size={13} />
@@ -996,11 +1128,11 @@ export const OperationalMapView = () => {
                     className="dispatch-1click-btn"
                     onClick={(e) => {
                       e.stopPropagation();
-                      alert('Allocated 50 relief packages from Kelaniya River Safe Camp.');
+                      showToast('Allocated 50 relief packages from Kelaniya River Safe Camp');
                     }}
                   >
                     <CheckCircle2 size={12} />
-                    <span>1-Click Dispatch Closest Stock</span>
+                    <span>1-Click Dispatch Stock</span>
                   </button>
                 </div>
 
@@ -1027,11 +1159,11 @@ export const OperationalMapView = () => {
                     className="dispatch-1click-btn"
                     onClick={(e) => {
                       e.stopPropagation();
-                      alert('Allocated emergency ambulance from Colombo Central Relief Shelter.');
+                      showToast('Emergency ambulance allocated from Colombo Central Relief Shelter');
                     }}
                   >
                     <CheckCircle2 size={12} />
-                    <span>1-Click Dispatch Closest Stock</span>
+                    <span>1-Click Dispatch Stock</span>
                   </button>
                 </div>
 
@@ -1058,11 +1190,11 @@ export const OperationalMapView = () => {
                     className="dispatch-1click-btn"
                     onClick={(e) => {
                       e.stopPropagation();
-                      alert('Dispatched 450 Medical Kits from Colombo Central Logistics Depot.');
+                      showToast('Dispatched 450 Medical Kits from Colombo Central Logistics Depot');
                     }}
                   >
                     <CheckCircle2 size={12} />
-                    <span>1-Click Dispatch Closest Stock</span>
+                    <span>1-Click Dispatch Stock</span>
                   </button>
                 </div>
               </div>
