@@ -31,6 +31,7 @@ import { VolunteerRosterPage } from '../pages/volunteers/VolunteerRosterPage';
 import { TaskAssignmentPage } from '../pages/volunteers/TaskAssignmentPage';
 
 import { AuditCenterPage } from '../pages/audit/AuditCenterPage';
+import { AIOperationsContainer } from '../pages/ai-operations/AIOperationsContainer';
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -52,6 +53,10 @@ export const AppRoutes = () => {
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
       {/* Coordinator routes */}
+      <Route path="/ai-operations" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer /></ProtectedRoute>} />
+      <Route path="/coordinator/ai-ops" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer /></ProtectedRoute>} />
+      <Route path="/ai-workspaces" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="workspace" /></ProtectedRoute>} />
+      <Route path="/ai-governance" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="governance" /></ProtectedRoute>} />
       <Route path="/coordinator/triage" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><RequestTriagePage /></ProtectedRoute>} />
       <Route path="/coordinator/ai-review" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIDecisionReviewPage /></ProtectedRoute>} />
 
@@ -67,10 +72,14 @@ export const AppRoutes = () => {
       <Route path="/volunteers/roster" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><VolunteerRosterPage /></ProtectedRoute>} />
       <Route path="/volunteers/assignments" element={<ProtectedRoute allowedRoles={['Coordinator', 'Volunteer', 'Admin']}><TaskAssignmentPage /></ProtectedRoute>} />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-
+      {/* Audit routes */}
       <Route path="/audit" element={<AuditCenterPage />} />
       <Route path="/coordinator/audit" element={<AuditCenterPage />} />
+      <Route path="/coordinator/alerts" element={<Navigate to="/coordinator/dashboard" replace />} />
+      <Route path="/citizen/alerts" element={<Navigate to="/citizen" replace />} />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

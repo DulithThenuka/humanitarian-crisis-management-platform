@@ -34,7 +34,7 @@ import crisisCenterIcon from '../../assets/crisis-center-icon.png';
 
 import './AuditCenterPage.css';
 
-const INITIAL_AUDIT_DATA = [
+export const INITIAL_AUDIT_DATA = [
   {
     id: 'AUD-9021',
     timestamp: '10:25 AM',
