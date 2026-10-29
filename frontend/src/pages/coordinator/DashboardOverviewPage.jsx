@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { 
   Home, 
@@ -744,8 +744,13 @@ const AIGovernanceSettingsView = () => {
 /* =========================================================
    MAIN DASHBOARD COMPONENT
    ========================================================= */
-export const DashboardOverviewPage = () => {
-  const [activeNav, setActiveNav] = useState('dashboard');
+export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const tabFromQuery = searchParams.get('tab');
+  const [activeNav, setActiveNav] = useState(
+    tabFromQuery || (location.pathname.includes('reports') ? 'reports' : initialTab)
+  );
   const [searchVal, setSearchVal] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('Western Province');
 

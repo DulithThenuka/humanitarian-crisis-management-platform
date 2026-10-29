@@ -38,6 +38,8 @@ export const AppRoutes = () => {
       <Route path="/" element={<DashboardOverviewPage />} />
       <Route path="/dashboard" element={<DashboardOverviewPage />} />
       <Route path="/coordinator/dashboard" element={<DashboardOverviewPage />} />
+      <Route path="/coordinator/reports" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage initialTab="reports" /></ProtectedRoute>} />
+      <Route path="/reports" element={<DashboardOverviewPage initialTab="reports" />} />
       
       {/* Citizen routes */}
       <Route path="/citizen" element={<CitizenPortalPage />} />
