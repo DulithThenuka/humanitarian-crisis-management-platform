@@ -2,6 +2,9 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '../components/layout/ProtectedRoute';
 
+// Public Home Landing
+import { LandingHomePage } from '../pages/home/LandingHomePage';
+
 // Auth Pages
 import { LoginPage } from '../pages/auth/LoginPage';
 import { RegisterPage } from '../pages/auth/RegisterPage';
@@ -17,6 +20,8 @@ import { FindShelterPage } from '../pages/citizen/FindShelterPage';
 import { DashboardOverviewPage } from '../pages/coordinator/DashboardOverviewPage';
 import { RequestTriagePage } from '../pages/coordinator/RequestTriagePage';
 import { AIDecisionReviewPage } from '../pages/coordinator/AIDecisionReviewPage';
+import { AssistanceRequestDetailPage } from '../pages/coordinator/AssistanceRequestDetailPage';
+import { AssistanceRequestsListView } from '../pages/coordinator/AssistanceRequestsListView';
 
 // Logistics Pages
 import { ResourceInventoryPage } from '../pages/logistics/ResourceInventoryPage';
@@ -30,14 +35,27 @@ import { EvacueeAllocationPage } from '../pages/shelters/EvacueeAllocationPage';
 import { VolunteerRosterPage } from '../pages/volunteers/VolunteerRosterPage';
 import { TaskAssignmentPage } from '../pages/volunteers/TaskAssignmentPage';
 
+// Map & Analytics
+import { OperationalMapView } from '../pages/map/OperationalMapView';
+import { ReportsAnalyticsView } from '../pages/reports-and-analysis/ReportsAnalyticsView';
+
 import { AuditCenterPage } from '../pages/audit/AuditCenterPage';
 import { AIOperationsContainer } from '../pages/ai-operations/AIOperationsContainer';
 export const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<DashboardOverviewPage />} />
+      <Route path="/" element={<LandingHomePage />} />
+      <Route path="/home" element={<LandingHomePage />} />
+      <Route path="/landing" element={<LandingHomePage />} />
       <Route path="/dashboard" element={<DashboardOverviewPage />} />
       <Route path="/coordinator/dashboard" element={<DashboardOverviewPage />} />
+      <Route path="/coordinator/requests" element={<DashboardOverviewPage />} />
+      <Route path="/coordinator/requests/:id" element={<DashboardOverviewPage />} />
+      <Route path="/requests/:id" element={<DashboardOverviewPage />} />
+      <Route path="/request-detail" element={<DashboardOverviewPage />} />
+      <Route path="/map" element={<DashboardOverviewPage />} />
+      <Route path="/reports" element={<DashboardOverviewPage />} />
+      <Route path="/analytics" element={<DashboardOverviewPage />} />
       <Route path="/coordinator/reports" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage initialTab="reports" /></ProtectedRoute>} />
       <Route path="/reports" element={<DashboardOverviewPage initialTab="reports" />} />
       
@@ -48,6 +66,7 @@ export const AppRoutes = () => {
       <Route path="/citizen/submit" element={<SubmitRequestPage />} />
       <Route path="/citizen/track" element={<TrackRequestsPage />} />
       <Route path="/citizen/shelters" element={<FindShelterPage />} />
+      <Route path="/citizen/alerts" element={<CitizenPortalPage />} />
 
       {/* Auth routes */}
       <Route path="/login" element={<LoginPage />} />
