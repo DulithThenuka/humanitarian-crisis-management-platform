@@ -73,6 +73,11 @@ export const AppRoutes = () => {
       <Route path="/citizen/alerts" element={<CitizenPortalPage initialTab="alerts" />} />
       <Route path="/alerts" element={<CitizenPortalPage initialTab="alerts" />} />
       <Route path="/emergency-alerts" element={<CitizenPortalPage initialTab="alerts" />} />
+      <Route path="/citizen/safety" element={<CitizenPortalPage initialTab="safety" />} />
+      <Route path="/citizen/safety-guide" element={<CitizenPortalPage initialTab="safety" />} />
+      <Route path="/citizen/safetyguide" element={<CitizenPortalPage initialTab="safety" />} />
+      <Route path="/safety" element={<CitizenPortalPage initialTab="safety" />} />
+      <Route path="/safety-guide" element={<CitizenPortalPage initialTab="safety" />} />
       <Route path="/requests/new" element={<SubmitRequestPage />} />
       <Route path="/assistance-request" element={<SubmitRequestPage />} />
 

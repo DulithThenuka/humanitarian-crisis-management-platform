@@ -4,6 +4,7 @@ import { CitizenAssistanceRequestForm } from './CitizenAssistanceRequestForm';
 import { TrackRequestsPage } from './TrackRequestsPage';
 import { FindShelterPage } from './FindShelterPage';
 import { EmergencyAlertsPage } from './EmergencyAlertsPage';
+import { SafetyGuidePage } from './SafetyGuidePage';
 import { 
   Home, 
   PlusSquare, 
@@ -51,6 +52,7 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
     if (p.includes('/track')) return 'requests';
     if (p.includes('/shelter')) return 'shelters';
     if (p.includes('/alert')) return 'alerts';
+    if (p.includes('/safety')) return 'safety';
     return initialTab;
   };
 
@@ -68,6 +70,8 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
       setActiveTab('shelters');
     } else if (p.includes('/alert')) {
       setActiveTab('alerts');
+    } else if (p.includes('/safety')) {
+      setActiveTab('safety');
     } else if (p === '/citizen' || p === '/citizen/home' || p === '/citizen/portal') {
       setActiveTab('home');
     }
@@ -239,6 +243,8 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
           <FindShelterPage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
         ) : activeTab === 'alerts' ? (
           <EmergencyAlertsPage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
+        ) : activeTab === 'safety' ? (
+          <SafetyGuidePage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
         ) : (
           <>
             {/* Hero Section Banner */}
