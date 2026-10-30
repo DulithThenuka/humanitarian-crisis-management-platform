@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { CitizenAssistanceRequestForm } from './CitizenAssistanceRequestForm';
+import { TrackRequestsPage } from './TrackRequestsPage';
+import { FindShelterPage } from './FindShelterPage';
 import { 
   Home, 
   PlusSquare, 
@@ -37,11 +40,32 @@ import robot3D from '../../assets/robot-3d.png';
 import familyPopout from '../../assets/family-popout.png';
 import './CitizenPortalPage.css';
 
-export const CitizenPortalPage = () => {
-  const [activeTab, setActiveTab] = useState('home');
+export const CitizenPortalPage = ({ initialTab = 'home' }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getInitialTab = () => {
+    if (location.pathname === '/citizen/submit') return 'request';
+    if (location.pathname === '/citizen/track') return 'requests';
+    if (location.pathname === '/citizen/shelters') return 'shelters';
+    return initialTab;
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLang, setSelectedLang] = useState('English');
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.pathname === '/citizen/submit') {
+      setActiveTab('request');
+    } else if (location.pathname === '/citizen/track') {
+      setActiveTab('requests');
+    } else if (location.pathname === '/citizen/shelters') {
+      setActiveTab('shelters');
+    } else if (location.pathname === '/citizen' || location.pathname === '/citizen/home' || location.pathname === '/citizen/portal') {
+      setActiveTab('home');
+    }
+  }, [location.pathname, initialTab]);
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/citizen' },
@@ -201,8 +225,16 @@ export const CitizenPortalPage = () => {
           </button>
         </header>
 
-        {/* Hero Section Banner */}
-        <section className="citizen-hero-card">
+        {activeTab === 'request' ? (
+          <CitizenAssistanceRequestForm onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
+        ) : activeTab === 'requests' ? (
+          <TrackRequestsPage />
+        ) : activeTab === 'shelters' ? (
+          <FindShelterPage />
+        ) : (
+          <>
+            {/* Hero Section Banner */}
+            <section className="citizen-hero-card">
           <div className="hero-text-block">
             <h1 className="hero-main-heading">How can we help you?</h1>
             <p className="hero-sub-text">
@@ -527,6 +559,8 @@ export const CitizenPortalPage = () => {
             <ArrowRight size={14} />
           </button>
         </section>
+          </>
+        )}
 
         {/* Floating 3D AI Assistant Widget */}
         <div className="floating-ai-widget" onClick={() => navigate('/citizen/support')} title="Talk with AI Support Assistant">

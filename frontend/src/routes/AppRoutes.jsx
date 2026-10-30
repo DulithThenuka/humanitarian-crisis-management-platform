@@ -63,10 +63,12 @@ export const AppRoutes = () => {
       <Route path="/citizen" element={<CitizenPortalPage />} />
       <Route path="/citizen/home" element={<CitizenPortalPage />} />
       <Route path="/citizen/portal" element={<CitizenPortalPage />} />
-      <Route path="/citizen/submit" element={<SubmitRequestPage />} />
-      <Route path="/citizen/track" element={<TrackRequestsPage />} />
-      <Route path="/citizen/shelters" element={<FindShelterPage />} />
-      <Route path="/citizen/alerts" element={<CitizenPortalPage />} />
+      <Route path="/citizen/submit" element={<CitizenPortalPage initialTab="request" />} />
+      <Route path="/citizen/track" element={<CitizenPortalPage initialTab="requests" />} />
+      <Route path="/citizen/shelters" element={<CitizenPortalPage initialTab="shelters" />} />
+      <Route path="/citizen/alerts" element={<CitizenPortalPage initialTab="home" />} />
+      <Route path="/requests/new" element={<SubmitRequestPage />} />
+      <Route path="/assistance-request" element={<SubmitRequestPage />} />
 
       {/* Auth routes */}
       <Route path="/login" element={<LoginPage />} />
