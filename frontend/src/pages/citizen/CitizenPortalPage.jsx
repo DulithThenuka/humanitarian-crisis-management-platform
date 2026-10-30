@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { CitizenAssistanceRequestForm } from './CitizenAssistanceRequestForm';
 import { TrackRequestsPage } from './TrackRequestsPage';
 import { FindShelterPage } from './FindShelterPage';
+import { EmergencyAlertsPage } from './EmergencyAlertsPage';
 import { 
   Home, 
   PlusSquare, 
@@ -45,9 +46,11 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
   const navigate = useNavigate();
 
   const getInitialTab = () => {
-    if (location.pathname === '/citizen/submit') return 'request';
-    if (location.pathname === '/citizen/track') return 'requests';
-    if (location.pathname === '/citizen/shelters') return 'shelters';
+    const p = (location.pathname || '').toLowerCase().replace(/\/$/, '');
+    if (p.includes('/submit') || p.includes('/request-assistance')) return 'request';
+    if (p.includes('/track')) return 'requests';
+    if (p.includes('/shelter')) return 'shelters';
+    if (p.includes('/alert')) return 'alerts';
     return initialTab;
   };
 
@@ -56,13 +59,16 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
   const [selectedLang, setSelectedLang] = useState('English');
 
   useEffect(() => {
-    if (location.pathname === '/citizen/submit') {
+    const p = (location.pathname || '').toLowerCase().replace(/\/$/, '');
+    if (p.includes('/submit') || p.includes('/request-assistance')) {
       setActiveTab('request');
-    } else if (location.pathname === '/citizen/track') {
+    } else if (p.includes('/track')) {
       setActiveTab('requests');
-    } else if (location.pathname === '/citizen/shelters') {
+    } else if (p.includes('/shelter')) {
       setActiveTab('shelters');
-    } else if (location.pathname === '/citizen' || location.pathname === '/citizen/home' || location.pathname === '/citizen/portal') {
+    } else if (p.includes('/alert')) {
+      setActiveTab('alerts');
+    } else if (p === '/citizen' || p === '/citizen/home' || p === '/citizen/portal') {
       setActiveTab('home');
     }
   }, [location.pathname, initialTab]);
@@ -230,7 +236,9 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
         ) : activeTab === 'requests' ? (
           <TrackRequestsPage />
         ) : activeTab === 'shelters' ? (
-          <FindShelterPage />
+          <FindShelterPage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
+        ) : activeTab === 'alerts' ? (
+          <EmergencyAlertsPage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
         ) : (
           <>
             {/* Hero Section Banner */}

@@ -21,9 +21,14 @@ function AppLayout() {
     location.pathname.startsWith('/ai-governance') ||
     location.pathname.startsWith('/map') ||
     location.pathname.startsWith('/citizen') || 
+    location.pathname.startsWith('/citize') || 
+    location.pathname.startsWith('/alerts') || 
+    location.pathname.startsWith('/shelters') || 
+    location.pathname.startsWith('/track') || 
+    location.pathname.startsWith('/emergency') || 
+    location.pathname.startsWith('/assistance') || 
     location.pathname.startsWith('/requests') ||
     location.pathname === '/request-detail' ||
-    location.pathname === '/map' ||
     location.pathname === '/reports' ||
     location.pathname === '/analytics' || 
     location.pathname === '/login' || 
