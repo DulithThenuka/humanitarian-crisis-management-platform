@@ -2,6 +2,9 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '../components/layout/ProtectedRoute';
 
+// Public Home Landing
+import { LandingHomePage } from '../pages/home/LandingHomePage';
+
 // Auth Pages
 import { LoginPage } from '../pages/auth/LoginPage';
 import { RegisterPage } from '../pages/auth/RegisterPage';
@@ -39,7 +42,9 @@ import { ReportsAnalyticsView } from '../pages/reports-and-analysis/ReportsAnaly
 export const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<DashboardOverviewPage />} />
+      <Route path="/" element={<LandingHomePage />} />
+      <Route path="/home" element={<LandingHomePage />} />
+      <Route path="/landing" element={<LandingHomePage />} />
       <Route path="/dashboard" element={<DashboardOverviewPage />} />
       <Route path="/coordinator/dashboard" element={<DashboardOverviewPage />} />
       <Route path="/coordinator/requests" element={<DashboardOverviewPage />} />
