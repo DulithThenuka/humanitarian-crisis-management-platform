@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   ArrowLeft, 
   CheckCircle2, 
@@ -23,17 +23,78 @@ import {
   Activity,
   Droplets,
   Clock,
-  ExternalLink
+  Mic,
+  Camera,
+  Search,
+  CheckCircle,
+  FileText,
+  LifeBuoy,
+  Layers,
+  Radio,
+  Wifi,
+  UploadCloud,
+  ChevronRight
 } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
 import { useAlert } from '../../context/AlertContext';
 import { requestService } from '../../services/requestService';
 import './CitizenAssistanceRequestForm.css';
+
+// Custom Pin Icon using inline SVG (Zero asset loading dependencies)
+const customPinIcon = L.divIcon({
+  className: 'custom-leaflet-pin',
+  html: `
+    <div style="
+      background: #0e6f76;
+      color: #ffffff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 4px 12px rgba(14, 111, 118, 0.5);
+    ">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+    </div>
+  `,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32]
+});
+
+// Helper component for Leaflet click-to-pin & recenter
+const InteractiveMapController = ({ coords, setCoords }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    map.flyTo([coords.lat, coords.lon], map.getZoom(), { animate: true, duration: 0.8 });
+  }, [coords.lat, coords.lon, map]);
+
+  useMapEvents({
+    click(e) {
+      setCoords({
+        lat: parseFloat(e.latlng.lat.toFixed(5)),
+        lon: parseFloat(e.latlng.lng.toFixed(5))
+      });
+    }
+  });
+
+  return <Marker position={[coords.lat, coords.lon]} icon={customPinIcon} />;
+};
 
 export const ASSISTANCE_CATEGORIES = [
   {
     id: 'Rescue',
     title: 'Search & Rescue',
-    desc: 'Emergency boat extraction, trapped in rising floodwaters or landslide',
+    desc: 'Life-saving boat extraction from flooded structures or mudslides',
+    tag: 'Boats & Amphibious Units',
     icon: Flame,
     color: '#ef4444',
     bg: '#fee2e2'
@@ -41,7 +102,8 @@ export const ASSISTANCE_CATEGORIES = [
   {
     id: 'Medical',
     title: 'Medical Assistance',
-    desc: 'Urgent medical aid, ambulance, critical medications or oxygen',
+    desc: 'Urgent emergency medical triage, ambulance, insulin or oxygen',
+    tag: 'Field Paramedics',
     icon: HeartPulse,
     color: '#0e6f76',
     bg: '#ccfbf1'
@@ -49,7 +111,8 @@ export const ASSISTANCE_CATEGORIES = [
   {
     id: 'Food & Water',
     title: 'Food & Clean Water',
-    desc: 'Drinking water canisters, meal packets, infant milk and dry rations',
+    desc: 'Emergency drinking water canisters, meal rations, and baby formula',
+    tag: 'Relief Rations',
     icon: UtensilsCrossed,
     color: '#0284c7',
     bg: '#e0f2fe'
@@ -57,31 +120,35 @@ export const ASSISTANCE_CATEGORIES = [
   {
     id: 'Shelter',
     title: 'Emergency Shelter',
-    desc: 'Evacuation shelter space, displaced family housing, dry blankets',
+    desc: 'Temporary housing in verified relief camps, blankets and dry space',
+    tag: 'Safe Evacuation Centers',
     icon: Home,
     color: '#16a34a',
     bg: '#dcfce7'
   },
   {
     id: 'Transport',
-    title: 'Transport Support',
-    desc: 'Evacuation vehicle mobility, road passage assistance, convoy escort',
+    title: 'Evacuation Transport',
+    desc: 'Safe passage mobility, high-clearance truck transport, convoy escort',
+    tag: 'Logistics Fleet',
     icon: Bus,
     color: '#d97706',
     bg: '#fef3c7'
   },
   {
     id: 'Accessibility',
-    title: 'Elderly & Disability Aid',
-    desc: 'Wheelchair transport, bedridden evacuee care, disability support',
+    title: 'Vulnerable & Elderly Aid',
+    desc: 'Wheelchair access, bedridden evacuee care, disability assistance',
+    tag: 'Specialized Care',
     icon: Accessibility,
     color: '#7c3aed',
     bg: '#ede9fe'
   },
   {
     id: 'Other',
-    title: 'Other Critical Supplies',
-    desc: 'Tarpaulins, power backup, sanitary kits, non-standard emergency requests',
+    title: 'Critical Relief Supplies',
+    desc: 'Tarpaulins, power banks, hygiene kits, flashlights and other aid',
+    tag: 'Provisions Supply',
     icon: Package,
     color: '#475569',
     bg: '#f1f5f9'
@@ -95,21 +162,27 @@ export const CitizenAssistanceRequestForm = ({ onBack, onSubmittedSuccess }) => 
 
   // Form State
   const [category, setCategory] = useState(categoryParam || 'Rescue');
+  const [categoryFilter, setCategoryFilter] = useState('');
   const [urgency, setUrgency] = useState(2); // 0=Low, 1=Medium, 2=High, 3=Critical
   const [numberOfPeople, setNumberOfPeople] = useState(3);
   const [vulnerabilities, setVulnerabilities] = useState(['Elderly (65+)']);
-  
-  // Location
+
+  // Location State
   const [province, setProvince] = useState('Western Province');
   const [district, setDistrict] = useState('Colombo');
   const [address, setAddress] = useState('');
-  const [hazardLevel, setHazardLevel] = useState('Rising Floodwaters (Waist Deep)');
   const [coords, setCoords] = useState({ lat: 6.9271, lon: 79.8612 });
   const [gpsDetecting, setGpsDetecting] = useState(false);
   const [gpsDetected, setGpsDetected] = useState(false);
+  const [hazardLevel, setHazardLevel] = useState('Rising Floodwaters (Waist Deep)');
 
-  // Situation & Contact
+  // Situation & Evidence State
   const [description, setDescription] = useState('');
+  const [voiceRecorded, setVoiceRecorded] = useState(false);
+  const [recordingActive, setRecordingActive] = useState(false);
+  const [photoAttached, setPhotoAttached] = useState(false);
+
+  // Contact State
   const [fullName, setFullName] = useState('Dinithi Perera');
   const [contactPhone, setContactPhone] = useState('+94 77 482 9102');
   const [alternatePhone, setAlternatePhone] = useState('+94 71 890 2314');
@@ -119,6 +192,7 @@ export const CitizenAssistanceRequestForm = ({ onBack, onSubmittedSuccess }) => 
   const [submittedReq, setSubmittedReq] = useState(null);
   const { showAlert } = useAlert();
 
+  // Pre-fill from query parameter
   useEffect(() => {
     if (categoryParam) {
       const match = ASSISTANCE_CATEGORIES.find(
@@ -133,10 +207,48 @@ export const CitizenAssistanceRequestForm = ({ onBack, onSubmittedSuccess }) => 
     }
   }, [categoryParam]);
 
+  // Dynamic progress calculation (out of 6 milestones)
+  const progressPercent = useMemo(() => {
+    let score = 16.6; // Category is selected
+    if (urgency !== null) score += 16.6;
+    if (numberOfPeople > 0) score += 16.6;
+    if (address.trim() || gpsDetected) score += 16.6;
+    if (description.trim()) score += 16.6;
+    if (fullName.trim() && contactPhone.trim()) score += 17.0;
+    return Math.min(100, Math.round(score));
+  }, [urgency, numberOfPeople, address, gpsDetected, description, fullName, contactPhone]);
+
+  // Real-time AI Triage calculation preview
+  const liveTriageEstimate = useMemo(() => {
+    let baseScore = 65;
+    if (category === 'Rescue' || category === 'Medical') baseScore += 20;
+    if (urgency === 3) baseScore += 14;
+    else if (urgency === 2) baseScore += 8;
+    if (vulnerabilities.length > 0) baseScore += Math.min(6, vulnerabilities.length * 2);
+    
+    const finalScore = Math.min(98, baseScore);
+    const calculatedTier = urgency === 3 ? 'CRITICAL (Level 1)' : urgency === 2 ? 'HIGH (Level 2)' : 'STANDARD PRIORITY';
+    const sla = urgency === 3 ? '< 18 minutes' : urgency === 2 ? '< 45 minutes' : '< 3 hours';
+    const queue = urgency === 3 ? 'Kelani Basin Immediate Boat Unit' : 'Western Sector Regional Response Hub';
+
+    return {
+      score: `${finalScore}%`,
+      tier: calculatedTier,
+      sla,
+      queue
+    };
+  }, [category, urgency, vulnerabilities]);
+
   const toggleVulnerability = (tag) => {
     setVulnerabilities(prev => 
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
+  };
+
+  const handlePresetLocation = (presetLat, presetLon, presetDist) => {
+    setCoords({ lat: presetLat, lon: presetLon });
+    setDistrict(presetDist);
+    if (showAlert) showAlert(`Location set to ${presetDist}.`, "info");
   };
 
   const handleDetectGPS = () => {
@@ -155,18 +267,29 @@ export const CitizenAssistanceRequestForm = ({ onBack, onSubmittedSuccess }) => 
         setGpsDetected(true);
         if (showAlert) showAlert("Device GPS coordinates captured successfully!", "success");
       },
-      (err) => {
+      () => {
         setGpsDetecting(false);
-        if (showAlert) showAlert("Could not retrieve GPS location. Defaulting to regional coordinates.", "info");
+        if (showAlert) showAlert("GPS timed out. You can click on the map to place the pin.", "info");
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      { timeout: 8000, enableHighAccuracy: true }
     );
+  };
+
+  const handleToggleVoiceRecord = () => {
+    if (!recordingActive) {
+      setRecordingActive(true);
+      setTimeout(() => {
+        setRecordingActive(false);
+        setVoiceRecorded(true);
+        if (showAlert) showAlert("Voice note recorded: 'Flooding near Kelani river house' (14s)", "success");
+      }, 2500);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!description.trim()) {
-      if (showAlert) showAlert("Please describe your situation or emergency needs.", "error");
+      if (showAlert) showAlert("Please describe the emergency situation.", "error");
       return;
     }
 
@@ -175,7 +298,9 @@ export const CitizenAssistanceRequestForm = ({ onBack, onSubmittedSuccess }) => 
     const vulnerabilitySummary = vulnerabilities.length > 0 
       ? ` | Vulnerabilities: ${vulnerabilities.join(', ')}` 
       : '';
-    const fullDescription = `${description} [Hazard: ${hazardLevel}${vulnerabilitySummary} | Contact: ${fullName}]`;
+    const voiceNoteInfo = voiceRecorded ? ' | Audio Note Attached (14s)' : '';
+    const photoInfo = photoAttached ? ' | Incident Photo Attached' : '';
+    const fullDescription = `${description} [Hazard: ${hazardLevel}${vulnerabilitySummary}${voiceNoteInfo}${photoInfo} | Requester: ${fullName}]`;
     const fullAddress = `${address ? address + ', ' : ''}${district}, ${province}`;
 
     const payload = {
@@ -200,16 +325,17 @@ export const CitizenAssistanceRequestForm = ({ onBack, onSubmittedSuccess }) => 
         numberOfPeople,
         address: fullAddress,
         coords,
-        aiScore: urgency === 3 ? '96%' : urgency === 2 ? '89%' : '74%',
-        aiQueue: urgency === 3 ? 'Immediate High-Water Extraction Unit' : 'Western Sector Regional Response Hub',
-        estimatedSla: urgency === 3 ? '< 20 minutes' : urgency === 2 ? '< 45 minutes' : '< 3 hours'
+        aiScore: liveTriageEstimate.score,
+        aiQueue: liveTriageEstimate.queue,
+        estimatedSla: liveTriageEstimate.sla,
+        submittedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
       setSubmittedReq(successData);
-      if (showAlert) showAlert("Assistance Request transmitted! AI Triage engine has queued response.", "success");
+      if (showAlert) showAlert("Assistance Request transmitted! Field response team alerted.", "success");
       if (onSubmittedSuccess) onSubmittedSuccess(successData);
     } catch (err) {
-      // Robust fallback for demo or unauthenticated visitors
+      // Demo and unauthenticated fallback
       const mockId = `REQ-2026-0${Math.floor(2100 + Math.random() * 500)}`;
       const fallbackData = {
         id: mockId,
@@ -218,104 +344,101 @@ export const CitizenAssistanceRequestForm = ({ onBack, onSubmittedSuccess }) => 
         numberOfPeople,
         address: fullAddress,
         coords,
-        aiScore: urgency === 3 ? '96%' : urgency === 2 ? '89%' : '74%',
-        aiQueue: urgency === 3 ? 'Immediate High-Water Extraction Unit' : 'Western Sector Regional Response Hub',
-        estimatedSla: urgency === 3 ? '< 20 minutes' : urgency === 2 ? '< 45 minutes' : '< 3 hours'
+        aiScore: liveTriageEstimate.score,
+        aiQueue: liveTriageEstimate.queue,
+        estimatedSla: liveTriageEstimate.sla,
+        submittedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
       setSubmittedReq(fallbackData);
-      if (showAlert) showAlert("Assistance Request lodged! Live AI triage dispatch initialized.", "success");
+      if (showAlert) showAlert("Assistance Request queued! Real-time AI triage active (Demo Mode).", "success");
       if (onSubmittedSuccess) onSubmittedSuccess(fallbackData);
     } finally {
       setSubmitting(false);
     }
   };
 
+  // Filtered categories
+  const filteredCategories = ASSISTANCE_CATEGORIES.filter(cat => 
+    cat.title.toLowerCase().includes(categoryFilter.toLowerCase()) ||
+    cat.desc.toLowerCase().includes(categoryFilter.toLowerCase()) ||
+    cat.tag.toLowerCase().includes(categoryFilter.toLowerCase())
+  );
+
   // =========================================================
-  // SUCCESS / CONFIRMATION VIEW
+  // SUCCESS / POST-SUBMISSION CONFIRMATION VIEW
   // =========================================================
   if (submittedReq) {
     return (
-      <div className="assist-form-container">
-        <div className="assist-success-card">
-          <div className="success-icon-bubble">
-            <CheckCircle2 size={36} />
+      <div className="assist-form-wrapper">
+        <div className="assist-cert-success">
+          <div className="cert-check-bubble">
+            <CheckCircle2 size={42} strokeWidth={2.5} />
           </div>
 
-          <h2 className="success-title">Assistance Request Transmitted</h2>
+          <h2 className="cert-title-strong">Assistance Request Lodged in Live Queue</h2>
           
-          <div className="success-badge-id">
-            <ShieldCheck size={18} />
-            <span>ID: {submittedReq.id}</span>
+          <div className="cert-id-badge">
+            <ShieldCheck size={20} />
+            <span>INCIDENT ID: {submittedReq.id}</span>
           </div>
 
-          <p className="success-desc">
-            Your emergency request for <strong>{submittedReq.category}</strong> covering <strong>{submittedReq.numberOfPeople} individuals</strong> in <strong>{submittedReq.address}</strong> has been registered in the ReliefCore command pipeline.
+          <p className="cert-summary-p">
+            Your emergency request for <strong>{submittedReq.category}</strong> covering <strong>{submittedReq.numberOfPeople} individuals</strong> at <strong>{submittedReq.address}</strong> has been received and routed to field dispatch.
           </p>
 
-          {/* AI Triage Card */}
-          <div className="ai-triage-preview-box">
-            <div className="ai-triage-box-head">
-              <Sparkles size={16} />
-              <span>Real-Time AI Triage & Response Dispatch</span>
+          {/* AI Triage Details Panel */}
+          <div className="cert-triage-panel">
+            <div className="cert-panel-head">
+              <Sparkles size={17} />
+              <span>Real-Time AI Triage & Response Allocation</span>
             </div>
 
-            <div className="ai-triage-grid">
-              <div className="ai-triage-item">
-                <span>Calculated Urgency</span>
+            <div className="cert-metrics-grid">
+              <div className="cert-metric-card">
+                <span>Evaluated Urgency</span>
                 <strong style={{ color: submittedReq.urgency >= 2 ? '#ef4444' : '#0e6f76' }}>
-                  {submittedReq.urgency === 3 ? 'CRITICAL (Level 1)' : submittedReq.urgency === 2 ? 'HIGH (Level 2)' : 'STANDARD'}
+                  {submittedReq.urgency === 3 ? 'CRITICAL (Tier 1)' : submittedReq.urgency === 2 ? 'HIGH (Tier 2)' : 'STANDARD PRIORITY'}
                 </strong>
               </div>
 
-              <div className="ai-triage-item">
-                <span>AI Confidence Score</span>
+              <div className="cert-metric-card">
+                <span>AI Confidence Metric</span>
                 <strong style={{ color: '#0e6f76' }}>{submittedReq.aiScore} Match</strong>
               </div>
 
-              <div className="ai-triage-item">
+              <div className="cert-metric-card">
                 <span>Target Response SLA</span>
                 <strong style={{ color: '#0f172a' }}>{submittedReq.estimatedSla}</strong>
               </div>
             </div>
           </div>
 
-          {/* Safety Protocol Advice */}
-          <div className="safety-tips-box">
-            <div className="safety-tips-title">
-              <AlertTriangle size={15} />
-              <span>Immediate Responder Advice for Your Safety</span>
-            </div>
-            <ul className="safety-tips-list">
-              <li>Stay above current flood line. If water rises, proceed to highest accessible floor or roof structure.</li>
-              <li>Keep your mobile phone on power-saving mode and ensure at least one contact channel remains active.</li>
-              <li>Display a bright cloth, white sheet, or flashlight beam to assist approaching rescue boat crews.</li>
-            </ul>
-          </div>
-
           {/* Action Buttons */}
-          <div className="success-actions-row">
+          <div className="cert-action-buttons">
             <button
-              className="btn-track-status"
+              className="cert-btn-primary"
               onClick={() => navigate(`/coordinator/requests/${submittedReq.id}`)}
             >
-              <Eye size={16} />
+              <Eye size={17} />
               <span>Track Live in Dispatch Pipeline</span>
             </button>
 
             <button
-              className="btn-secondary-action"
+              className="cert-btn-secondary"
               onClick={() => {
                 setSubmittedReq(null);
                 setDescription('');
                 setAddress('');
+                setVoiceRecorded(false);
+                setPhotoAttached(false);
               }}
             >
               Lodge Another Request
             </button>
 
             <button
-              className="btn-secondary-action"
+              className="cert-btn-secondary"
               onClick={() => {
                 if (onBack) onBack();
                 else navigate('/citizen');
@@ -330,412 +453,697 @@ export const CitizenAssistanceRequestForm = ({ onBack, onSubmittedSuccess }) => 
   }
 
   // =========================================================
-  // REQUEST FORM VIEW
+  // MAIN FORM VIEW
   // =========================================================
   return (
-    <div className="assist-form-container">
-      {/* Navigation Header */}
-      <div className="assist-form-header">
+    <div className="assist-form-wrapper">
+      {/* 1. Top Broadcast & Quick Hotline Navigation */}
+      <div className="assist-top-broadcast-bar">
         <button
           type="button"
-          className="back-portal-link"
+          className="assist-back-btn"
           onClick={() => {
             if (onBack) onBack();
             else navigate('/citizen');
           }}
         >
           <ArrowLeft size={16} />
-          <span>Return to Citizen Overview</span>
+          <span>Return to Citizen Portal</span>
         </button>
 
-        <div className="emergency-hotline-badge">
-          <span className="hotline-pulse-dot"></span>
-          <span>Emergency National Hotline: 117</span>
+        <div className="assist-hotline-pills-row">
+          <div className="hotline-badge-red">
+            <span className="pulse-beacon-red"></span>
+            <span>National Emergency Hotline: 117</span>
+          </div>
+
+          <div className="sla-guarantee-pill">
+            <Clock size={14} />
+            <span>AI Triage Dispatch: Active 24/7</span>
+          </div>
         </div>
       </div>
 
-      {/* Hero Banner */}
-      <div className="form-hero-card">
-        <div className="hero-title-section">
+      {/* 2. Hero Header Banner */}
+      <div className="assist-hero-banner">
+        <div className="hero-main-col">
           <h1>Request Emergency Humanitarian Assistance</h1>
           <p>
-            Submit urgent requests for rescue, medical assistance, food, water, or shelter. 
-            All submissions are evaluated instantly by ReliefCore AI triage models for rapid field dispatch.
+            Report urgent crisis needs for rescue, healthcare, nutrition, shelter, or transport.
+            Every submission is instantly classified and prioritized by ReliefCore AI triage models for rapid field convoy dispatch.
           </p>
         </div>
 
-        <div className="hero-ai-badge">
-          <Sparkles size={16} />
-          <span>Automated AI Triage Active</span>
+        <div className="hero-telemetry-badge">
+          <div className="telemetry-row-item">
+            <Wifi size={14} />
+            <span>Emergency Telemetry: Connected</span>
+          </div>
+          <div className="telemetry-row-item">
+            <Sparkles size={14} />
+            <span>AI Urgency Classifier: Ready</span>
+          </div>
         </div>
       </div>
 
-      {/* Form Content */}
-      <form onSubmit={handleSubmit} className="assist-main-card">
-        {/* Step 1: Category Selection */}
-        <div className="form-step-section">
-          <div className="step-header">
-            <span className="step-num-bubble">1</span>
-            <h3 className="step-title">Select Assistance Category</h3>
-          </div>
-          <p className="step-subtitle">Identify the primary type of emergency support required.</p>
-
-          <div className="category-tiles-grid">
-            {ASSISTANCE_CATEGORIES.map((cat) => {
-              const IconComp = cat.icon;
-              const isSelected = category === cat.id;
-              return (
-                <div
-                  key={cat.id}
-                  className={`category-tile ${isSelected ? 'selected' : ''}`}
-                  onClick={() => setCategory(cat.id)}
-                >
-                  <div className="tile-icon-wrap" style={{ backgroundColor: cat.bg, color: cat.color }}>
-                    <IconComp size={19} />
-                  </div>
-                  <div>
-                    <h4 className="tile-title">{cat.title}</h4>
-                    <p className="tile-desc">{cat.desc}</p>
-                  </div>
-                  {isSelected && (
-                    <div className="tile-selected-check">
-                      <Check size={11} strokeWidth={3} />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+      {/* 3. Visual Step Progression Bar */}
+      <div className="assist-stepper-tracker">
+        <div className="stepper-header-meta">
+          <span className="stepper-label-text">Assistance Request Progress</span>
+          <span className="stepper-pct-badge">{progressPercent}% Completed</span>
         </div>
 
-        {/* Step 2: Urgency & Severity */}
-        <div className="form-step-section">
-          <div className="step-header">
-            <span className="step-num-bubble">2</span>
-            <h3 className="step-title">Urgency & Severity Level</h3>
-          </div>
-          <p className="step-subtitle">How urgently is physical intervention or relief delivery required?</p>
-
-          <div className="urgency-pills-row">
-            {/* Critical */}
-            <div
-              className={`urgency-pill-card ${urgency === 3 ? 'selected-critical' : ''}`}
-              onClick={() => setUrgency(3)}
-            >
-              <div className="urgency-head-line">
-                <span className="urgency-label" style={{ color: '#dc2626' }}>Critical</span>
-                <span className="urgency-tag-badge" style={{ background: '#fee2e2', color: '#dc2626' }}>Immediate</span>
-              </div>
-              <span className="urgency-subtext">Immediate danger to life or limb; rising flood or injury</span>
-            </div>
-
-            {/* High */}
-            <div
-              className={`urgency-pill-card ${urgency === 2 ? 'selected-high' : ''}`}
-              onClick={() => setUrgency(2)}
-            >
-              <div className="urgency-head-line">
-                <span className="urgency-label" style={{ color: '#d97706' }}>High</span>
-                <span className="urgency-tag-badge" style={{ background: '#fef3c7', color: '#d97706' }}>&lt; 4 Hours</span>
-              </div>
-              <span className="urgency-subtext">Urgent medical aid, infant care, or vulnerable trapped persons</span>
-            </div>
-
-            {/* Medium */}
-            <div
-              className={`urgency-pill-card ${urgency === 1 ? 'selected-medium' : ''}`}
-              onClick={() => setUrgency(1)}
-            >
-              <div className="urgency-head-line">
-                <span className="urgency-label" style={{ color: '#ca8a04' }}>Medium</span>
-                <span className="urgency-tag-badge" style={{ background: '#fefce8', color: '#ca8a04' }}>Within 24h</span>
-              </div>
-              <span className="urgency-subtext">Provisions, drinking water, or temporary evacuation shelter</span>
-            </div>
-
-            {/* Low */}
-            <div
-              className={`urgency-pill-card ${urgency === 0 ? 'selected-low' : ''}`}
-              onClick={() => setUrgency(0)}
-            >
-              <div className="urgency-head-line">
-                <span className="urgency-label" style={{ color: '#2563eb' }}>Standard</span>
-                <span className="urgency-tag-badge" style={{ background: '#eff6ff', color: '#2563eb' }}>Scheduled</span>
-              </div>
-              <span className="urgency-subtext">General relief supply inquiries or secondary assistance</span>
-            </div>
-          </div>
+        <div className="stepper-progress-track">
+          <div 
+            className="stepper-progress-fill" 
+            style={{ width: `${progressPercent}%` }}
+          ></div>
         </div>
 
-        {/* Step 3: Affected Individuals & Vulnerabilities */}
-        <div className="form-step-section">
-          <div className="step-header">
-            <span className="step-num-bubble">3</span>
-            <h3 className="step-title">Persons Affected & Vulnerabilities</h3>
+        <div className="stepper-milestones-row">
+          <div className={`stepper-milestone-node ${category ? 'completed' : 'active'}`}>
+            <span className="milestone-bubble">{category ? '✓' : '1'}</span>
+            <span>Category</span>
           </div>
-          <p className="step-subtitle">Specify household or group size to calibrate convoy logistics and supplies.</p>
+          <div className={`stepper-milestone-node ${urgency !== null ? 'completed' : ''}`}>
+            <span className="milestone-bubble">{urgency !== null ? '✓' : '2'}</span>
+            <span>Urgency</span>
+          </div>
+          <div className={`stepper-milestone-node ${numberOfPeople > 0 ? 'completed' : ''}`}>
+            <span className="milestone-bubble">{numberOfPeople > 0 ? '✓' : '3'}</span>
+            <span>Group Size</span>
+          </div>
+          <div className={`stepper-milestone-node ${address.trim() || gpsDetected ? 'completed' : ''}`}>
+            <span className="milestone-bubble">{address.trim() || gpsDetected ? '✓' : '4'}</span>
+            <span>Location & Map</span>
+          </div>
+          <div className={`stepper-milestone-node ${description.trim() ? 'completed' : ''}`}>
+            <span className="milestone-bubble">{description.trim() ? '✓' : '5'}</span>
+            <span>Details</span>
+          </div>
+          <div className={`stepper-milestone-node ${fullName && contactPhone ? 'completed' : ''}`}>
+            <span className="milestone-bubble">{fullName && contactPhone ? '✓' : '6'}</span>
+            <span>Contact</span>
+          </div>
+        </div>
+      </div>
 
-          <div className="form-2col-grid">
-            <div className="form-group-item">
-              <label>Number of Individuals Requiring Aid</label>
-              <div className="people-counter-wrap">
-                <button
-                  type="button"
-                  className="counter-btn"
-                  onClick={() => setNumberOfPeople(Math.max(1, numberOfPeople - 1))}
-                >
-                  -
-                </button>
-                <div className="counter-value-box">{numberOfPeople}</div>
-                <button
-                  type="button"
-                  className="counter-btn"
-                  onClick={() => setNumberOfPeople(numberOfPeople + 1)}
-                >
-                  +
-                </button>
-                <span style={{ fontSize: '13px', color: '#64748b' }}>Persons</span>
-              </div>
+      {/* 4. Main 2-Column Content Layout */}
+      <div className="assist-layout-2col">
+        {/* Left Column: Comprehensive Form */}
+        <form onSubmit={handleSubmit} className="assist-form-card">
+          {/* STEP 1: Category Selection */}
+          <div className="form-step-block">
+            <div className="step-block-head">
+              <span className="step-badge-num">1</span>
+              <h3 className="step-badge-title">Select Type of Assistance Needed</h3>
+            </div>
+            <p className="step-block-desc">
+              Choose the primary relief category to align appropriate emergency vehicles and teams.
+            </p>
+
+            {/* Quick Filter Search */}
+            <div className="category-filter-search">
+              <Search size={15} color="#94a3b8" />
+              <input
+                type="text"
+                placeholder="Search categories (e.g., boat, insulin, drinking water, shelter)..."
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+              />
             </div>
 
-            <div className="form-group-item">
-              <label>Hazard / Water Status</label>
-              <select
-                value={hazardLevel}
-                onChange={(e) => setHazardLevel(e.target.value)}
-              >
-                <option value="Rising Floodwaters (Waist Deep)">Rising Floodwaters (Waist Deep)</option>
-                <option value="Severe Flooding (Chest / Roof Level)">Severe Flooding (Chest / Roof Level)</option>
-                <option value="Active Landslide / Debris Flow">Active Landslide / Debris Flow</option>
-                <option value="Trapped by Blocked Access Road">Trapped by Blocked Access Road</option>
-                <option value="Structural Damage / Unsafe Building">Structural Damage / Unsafe Building</option>
-                <option value="Severe Drought / Water Depletion">Severe Drought / Water Depletion</option>
-              </select>
-            </div>
-          </div>
-
-          <div style={{ marginTop: '12px' }}>
-            <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '4px' }}>
-              Special Vulnerability Factors in Group (Select all that apply)
-            </label>
-            <div className="vulnerability-chips-grid">
-              {[
-                'Infants / Small Children',
-                'Elderly (65+)',
-                'Pregnant Women',
-                'Mobility Impaired / Bedridden',
-                'Chronic Medical Condition (Insulin/Oxygen)',
-                'No Clean Drinking Water Left'
-              ].map((vuln) => {
-                const isActive = vulnerabilities.includes(vuln);
+            <div className="category-card-grid">
+              {filteredCategories.map((cat) => {
+                const IconComp = cat.icon;
+                const isSelected = category === cat.id;
                 return (
-                  <button
-                    key={vuln}
-                    type="button"
-                    className={`vuln-chip-btn ${isActive ? 'active' : ''}`}
-                    onClick={() => toggleVulnerability(vuln)}
+                  <div
+                    key={cat.id}
+                    className={`category-select-card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => setCategory(cat.id)}
                   >
-                    {isActive && <Check size={12} strokeWidth={3} />}
-                    <span>{vuln}</span>
-                  </button>
+                    <div className="category-icon-bubble" style={{ backgroundColor: cat.bg, color: cat.color }}>
+                      <IconComp size={20} />
+                    </div>
+                    <div>
+                      <h4 className="category-card-title">{cat.title}</h4>
+                      <p className="category-card-desc">{cat.desc}</p>
+                      <span className="category-tag-sub">{cat.tag}</span>
+                    </div>
+                    {isSelected && (
+                      <div className="category-active-check">
+                        <Check size={12} strokeWidth={3} />
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
           </div>
-        </div>
 
-        {/* Step 4: Incident Location & Geolocation */}
-        <div className="form-step-section">
-          <div className="step-header">
-            <span className="step-num-bubble">4</span>
-            <h3 className="step-title">Location & Geotagging</h3>
-          </div>
-          <p className="step-subtitle">Provide precise physical landmarks so field teams can locate you quickly.</p>
-
-          <div className="form-2col-grid">
-            <div className="form-group-item">
-              <label>Province</label>
-              <select value={province} onChange={(e) => setProvince(e.target.value)}>
-                <option value="Western Province">Western Province</option>
-                <option value="Southern Province">Southern Province</option>
-                <option value="Central Province">Central Province</option>
-                <option value="Sabaragamuwa Province">Sabaragamuwa Province</option>
-                <option value="North Western Province">North Western Province</option>
-                <option value="Eastern Province">Eastern Province</option>
-              </select>
+          {/* STEP 2: Urgency & Severity Level */}
+          <div className="form-step-block">
+            <div className="step-block-head">
+              <span className="step-badge-num">2</span>
+              <h3 className="step-badge-title">Urgency & Crisis Severity</h3>
             </div>
+            <p className="step-block-desc">
+              How quickly is physical intervention required to safeguard lives?
+            </p>
 
-            <div className="form-group-item">
-              <label>District / Divisional Secretariat</label>
-              <select value={district} onChange={(e) => setDistrict(e.target.value)}>
-                {province === 'Western Province' ? (
-                  <>
-                    <option value="Colombo">Colombo (Kolonnawa / Kaduwela / Thimbirigasyaya)</option>
-                    <option value="Gampaha">Gampaha (Kelaniya / Biyagama / Ja-Ela)</option>
-                    <option value="Kalutara">Kalutara (Panadura / Horana / Millaniya)</option>
-                  </>
-                ) : province === 'Southern Province' ? (
-                  <>
-                    <option value="Galle">Galle (Hikkaduwa / Baddegama / Neluwa)</option>
-                    <option value="Matara">Matara (Akuressa / Athuraliya / Kamburupitiya)</option>
-                    <option value="Hambantota">Hambantota (Tangalle / Ambalantota)</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="Kandy">Kandy District</option>
-                    <option value="Kegalle">Kegalle District</option>
-                    <option value="Ratnapura">Ratnapura District</option>
-                  </>
-                )}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-group-item" style={{ marginBottom: '14px' }}>
-            <label>Specific Landmark / Street Address / Visible Markers</label>
-            <input
-              type="text"
-              placeholder="e.g. No. 42 River View Lane, near St. Joseph Church, yellow 2-storey house"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-            />
-          </div>
-
-          {/* Location Panel with GPS */}
-          <div className="location-panel-card">
-            <div className="gps-row-bar">
-              <div className="gps-status-text">
-                <MapPin size={15} color="#0e6f76" />
-                <span>
-                  {gpsDetected 
-                    ? `GPS Locked: ${coords.lat}° N, ${coords.lon}° E` 
-                    : `Coordinates: ${coords.lat}° N, ${coords.lon}° E`}
+            <div className="urgency-cards-row">
+              {/* Critical */}
+              <div
+                className={`urgency-choice-card ${urgency === 3 ? 'critical' : ''}`}
+                onClick={() => setUrgency(3)}
+              >
+                <div className="urgency-title-row">
+                  <span className="urgency-main-label" style={{ color: '#dc2626' }}>
+                    <Flame size={15} /> Critical
+                  </span>
+                  <span className="urgency-sla-pill" style={{ background: '#fee2e2', color: '#dc2626' }}>
+                    &lt; 20 Min
+                  </span>
+                </div>
+                <span className="urgency-desc-text">
+                  Direct danger to life or limb; trapped in rising water or critical injury
                 </span>
               </div>
 
-              <button
-                type="button"
-                className="detect-gps-btn"
-                onClick={handleDetectGPS}
-                disabled={gpsDetecting}
+              {/* High */}
+              <div
+                className={`urgency-choice-card ${urgency === 2 ? 'high' : ''}`}
+                onClick={() => setUrgency(2)}
               >
-                <Compass size={14} />
-                <span>{gpsDetecting ? 'Acquiring Satellite Lock...' : 'Auto-Detect My GPS Location'}</span>
-              </button>
+                <div className="urgency-title-row">
+                  <span className="urgency-main-label" style={{ color: '#d97706' }}>
+                    <Clock size={15} /> High
+                  </span>
+                  <span className="urgency-sla-pill" style={{ background: '#fef3c7', color: '#d97706' }}>
+                    &lt; 2 Hours
+                  </span>
+                </div>
+                <span className="urgency-desc-text">
+                  Urgent medical prescription, infant nourishment, or stranded household
+                </span>
+              </div>
+
+              {/* Medium */}
+              <div
+                className={`urgency-choice-card ${urgency === 1 ? 'medium' : ''}`}
+                onClick={() => setUrgency(1)}
+              >
+                <div className="urgency-title-row">
+                  <span className="urgency-main-label" style={{ color: '#ca8a04' }}>
+                    <Droplets size={15} /> Medium
+                  </span>
+                  <span className="urgency-sla-pill" style={{ background: '#fefce8', color: '#ca8a04' }}>
+                    Today
+                  </span>
+                </div>
+                <span className="urgency-desc-text">
+                  Drinking water supplies, cooked meals, or planned relocation
+                </span>
+              </div>
+
+              {/* Standard */}
+              <div
+                className={`urgency-choice-card ${urgency === 0 ? 'low' : ''}`}
+                onClick={() => setUrgency(0)}
+              >
+                <div className="urgency-title-row">
+                  <span className="urgency-main-label" style={{ color: '#2563eb' }}>
+                    <Package size={15} /> Standard
+                  </span>
+                  <span className="urgency-sla-pill" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                    Scheduled
+                  </span>
+                </div>
+                <span className="urgency-desc-text">
+                  General humanitarian inquiries, secondary rations, or dry clothing
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* STEP 3: Affected Persons & Vulnerabilities */}
+          <div className="form-step-block">
+            <div className="step-block-head">
+              <span className="step-badge-num">3</span>
+              <h3 className="step-badge-title">Persons Affected & Vulnerabilities</h3>
+            </div>
+            <p className="step-block-desc">
+              Specify household size so rescue boats and convoys allocate sufficient capacity and medical gear.
+            </p>
+
+            <div className="form-2col-row">
+              <div className="form-field-group">
+                <label>Number of People Requiring Aid</label>
+                <div className="people-stepper-box">
+                  <button
+                    type="button"
+                    className="stepper-btn"
+                    onClick={() => setNumberOfPeople(Math.max(1, numberOfPeople - 1))}
+                  >
+                    -
+                  </button>
+                  <div className="stepper-num-val">{numberOfPeople}</div>
+                  <button
+                    type="button"
+                    className="stepper-btn"
+                    onClick={() => setNumberOfPeople(numberOfPeople + 1)}
+                  >
+                    +
+                  </button>
+                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>Individuals</span>
+                </div>
+              </div>
+
+              <div className="form-field-group">
+                <label>Water / Environmental Hazard Status</label>
+                <select
+                  value={hazardLevel}
+                  onChange={(e) => setHazardLevel(e.target.value)}
+                >
+                  <option value="Rising Floodwaters (Waist Deep)">Rising Floodwaters (Waist Deep)</option>
+                  <option value="Severe Flooding (Chest / Roof Level)">Severe Flooding (Chest / Roof Level)</option>
+                  <option value="Active Landslide / Mudflow Risk">Active Landslide / Mudflow Risk</option>
+                  <option value="Trapped by Blocked Access Road">Trapped by Blocked Access Road</option>
+                  <option value="Structural Damage / Collapsed Wall">Structural Damage / Collapsed Wall</option>
+                  <option value="Severe Drought / Contaminated Water">Severe Drought / Contaminated Water</option>
+                </select>
+              </div>
             </div>
 
-            <div className="form-2col-grid" style={{ marginBottom: 0 }}>
-              <div className="form-group-item">
-                <label style={{ fontSize: '11.5px', color: '#64748b' }}>Latitude</label>
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={coords.lat}
-                  onChange={(e) => setCoords({ ...coords, lat: parseFloat(e.target.value) || 0 })}
-                />
-              </div>
-              <div className="form-group-item">
-                <label style={{ fontSize: '11.5px', color: '#64748b' }}>Longitude</label>
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={coords.lon}
-                  onChange={(e) => setCoords({ ...coords, lon: parseFloat(e.target.value) || 0 })}
-                />
+            <div style={{ marginTop: '14px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '6px' }}>
+                Special Vulnerability Factors (Select all that apply)
+              </label>
+              <div className="vuln-tags-row">
+                {[
+                  'Infants & Children',
+                  'Elderly (65+)',
+                  'Pregnant Mothers',
+                  'Mobility Impaired / Bedridden',
+                  'Chronic Medical Need (Insulin/Oxygen)',
+                  'Depleted Clean Drinking Water'
+                ].map((vuln) => {
+                  const isActive = vulnerabilities.includes(vuln);
+                  return (
+                    <button
+                      key={vuln}
+                      type="button"
+                      className={`vuln-pill-btn ${isActive ? 'active' : ''}`}
+                      onClick={() => toggleVulnerability(vuln)}
+                    >
+                      {isActive && <Check size={12} strokeWidth={3} />}
+                      <span>{vuln}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Step 5: Situation Description */}
-        <div className="form-step-section">
-          <div className="step-header">
-            <span className="step-num-bubble">5</span>
-            <h3 className="step-title">Emergency Situation Description</h3>
+          {/* STEP 4: Incident Location & Interactive Map Pinning */}
+          <div className="form-step-block">
+            <div className="step-block-head">
+              <span className="step-badge-num">4</span>
+              <h3 className="step-badge-title">Location Geotagging & Interactive Map</h3>
+            </div>
+            <p className="step-block-desc">
+              Pin your location on the map or click a regional preset so rescue boats navigate directly to your coordinates.
+            </p>
+
+            <div className="form-2col-row">
+              <div className="form-field-group">
+                <label>Province</label>
+                <select value={province} onChange={(e) => setProvince(e.target.value)}>
+                  <option value="Western Province">Western Province</option>
+                  <option value="Southern Province">Southern Province</option>
+                  <option value="Central Province">Central Province</option>
+                  <option value="Sabaragamuwa Province">Sabaragamuwa Province</option>
+                  <option value="North Western Province">North Western Province</option>
+                  <option value="Eastern Province">Eastern Province</option>
+                </select>
+              </div>
+
+              <div className="form-field-group">
+                <label>District / Operational Sector</label>
+                <select value={district} onChange={(e) => setDistrict(e.target.value)}>
+                  {province === 'Western Province' ? (
+                    <>
+                      <option value="Colombo">Colombo (Kolonnawa / Kaduwela / Sedawatta)</option>
+                      <option value="Gampaha">Gampaha (Kelaniya / Biyagama / Ja-Ela)</option>
+                      <option value="Kalutara">Kalutara (Panadura / Horana / Millaniya)</option>
+                    </>
+                  ) : province === 'Southern Province' ? (
+                    <>
+                      <option value="Galle">Galle (Hikkaduwa / Baddegama / Neluwa)</option>
+                      <option value="Matara">Matara (Akuressa / Athuraliya / Nilwala)</option>
+                      <option value="Hambantota">Hambantota District</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="Kandy">Kandy District</option>
+                      <option value="Kegalle">Kegalle District</option>
+                      <option value="Ratnapura">Ratnapura District</option>
+                    </>
+                  )}
+                </select>
+              </div>
+            </div>
+
+            <div className="form-field-group" style={{ marginBottom: '14px' }}>
+              <label>Street Address / Landmark Markers</label>
+              <div className="input-with-icon-wrap">
+                <MapPin size={17} className="input-icon-prefix" />
+                <input
+                  type="text"
+                  placeholder="e.g., No. 42 River View Lane, near St. Joseph Church, yellow 2-storey house"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Interactive Leaflet Map Preview Frame */}
+            <div className="location-control-panel">
+              <div className="location-quick-presets">
+                <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Compass size={13} /> Quick Presets:
+                </span>
+                <button
+                  type="button"
+                  className={`preset-chip ${district === 'Colombo' ? 'active' : ''}`}
+                  onClick={() => handlePresetLocation(6.9271, 79.8612, 'Colombo')}
+                >
+                  Colombo / Kelani
+                </button>
+                <button
+                  type="button"
+                  className={`preset-chip ${district === 'Gampaha' ? 'active' : ''}`}
+                  onClick={() => handlePresetLocation(7.084, 80.0098, 'Gampaha')}
+                >
+                  Kelaniya / Biyagama
+                </button>
+                <button
+                  type="button"
+                  className={`preset-chip ${district === 'Kalutara' ? 'active' : ''}`}
+                  onClick={() => handlePresetLocation(6.5854, 79.9607, 'Kalutara')}
+                >
+                  Panadura / Kalutara
+                </button>
+                <button
+                  type="button"
+                  className={`preset-chip ${district === 'Galle' ? 'active' : ''}`}
+                  onClick={() => handlePresetLocation(6.0535, 80.221, 'Galle')}
+                >
+                  Galle / Nilwala
+                </button>
+              </div>
+
+              {/* Embedded Map */}
+              <div className="interactive-map-preview-frame">
+                <div className="map-pin-overlay-hint">
+                  <MapPin size={12} color="#5eead4" />
+                  <span>Click anywhere on the map to pin incident location</span>
+                </div>
+
+                <MapContainer
+                  center={[coords.lat, coords.lon]}
+                  zoom={12}
+                  style={{ height: '100%', width: '100%' }}
+                  scrollWheelZoom={false}
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; OpenStreetMap'
+                  />
+                  <InteractiveMapController coords={coords} setCoords={setCoords} />
+                </MapContainer>
+              </div>
+
+              {/* GPS Detection & Coords */}
+              <div className="gps-detect-bar">
+                <button
+                  type="button"
+                  className="btn-detect-gps"
+                  onClick={handleDetectGPS}
+                  disabled={gpsDetecting}
+                >
+                  <Compass size={15} />
+                  <span>{gpsDetecting ? 'Detecting Device Satellite...' : 'Auto-Detect My GPS Location'}</span>
+                </button>
+
+                <div className="coords-indicator">
+                  <MapPin size={14} color="#0e6f76" />
+                  <span>Pinned: {coords.lat}° N, {coords.lon}° E</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="step-subtitle">Describe the immediate danger, power/water access, or special assistance needed.</p>
 
-          <div className="form-group-item">
-            <textarea
-              rows="4"
-              placeholder="Explain what is happening: e.g. Water reached 1st floor balcony. 4 people including a 78-year-old grandmother requiring medication. Need inflatable boat evacuation before darkness..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </div>
-        </div>
+          {/* STEP 5: Situation Description & Media Evidence */}
+          <div className="form-step-block">
+            <div className="step-block-head">
+              <span className="step-badge-num">5</span>
+              <h3 className="step-badge-title">Situation Details & Media Evidence</h3>
+            </div>
+            <p className="step-block-desc">
+              Explain current hazards, access barriers, and urgency for the field dispatch commander.
+            </p>
 
-        {/* Step 6: Contact Information */}
-        <div className="form-step-section">
-          <div className="step-header">
-            <span className="step-num-bubble">6</span>
-            <h3 className="step-title">Requester Contact Information</h3>
-          </div>
-          <p className="step-subtitle">Ensure your phone number is correct so dispatchers and SAR boats can establish contact.</p>
-
-          <div className="form-2col-grid">
-            <div className="form-group-item">
-              <label>Requester Full Name</label>
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+            <div className="form-field-group">
+              <textarea
+                rows="4"
+                placeholder="Explain the critical situation: e.g. Floodwater entered ground floor at 3:00 AM, currently at chest height. 3 people trapped on upper terrace including an elderly diabetic patient. Road blocked by fallen electrical pole. Need boat rescue before nightfall..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 required
               />
             </div>
 
-            <div className="form-group-item">
-              <label>Primary Contact Phone Number</label>
-              <input
-                type="tel"
-                placeholder="+94 7X XXX XXXX"
-                value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
-                required
-              />
+            {/* Emergency Voice & Photo Upload Simulator */}
+            <div className="emergency-media-strip">
+              <div 
+                className="media-action-box" 
+                onClick={handleToggleVoiceRecord}
+                style={{ borderColor: recordingActive ? '#ef4444' : voiceRecorded ? '#10b981' : '#cbd5e1' }}
+              >
+                <div className="media-icon-box" style={{ color: recordingActive ? '#ef4444' : voiceRecorded ? '#10b981' : '#0e6f76' }}>
+                  <Mic size={18} className={recordingActive ? 'animate-pulse' : ''} />
+                </div>
+                <div>
+                  <span className="media-title-text">
+                    {recordingActive ? 'Recording Audio Memo...' : voiceRecorded ? '✓ Voice Memo Attached (14s)' : 'Record Voice Memo'}
+                  </span>
+                  <span className="media-sub-text">
+                    {voiceRecorded ? 'Click to re-record' : 'Audio note for distressed citizens'}
+                  </span>
+                </div>
+              </div>
+
+              <div 
+                className="media-action-box"
+                onClick={() => {
+                  setPhotoAttached(!photoAttached);
+                  if (!photoAttached && showAlert) showAlert("Flood incident photo attached successfully.", "success");
+                }}
+                style={{ borderColor: photoAttached ? '#10b981' : '#cbd5e1' }}
+              >
+                <div className="media-icon-box" style={{ color: photoAttached ? '#10b981' : '#0e6f76' }}>
+                  <Camera size={18} />
+                </div>
+                <div>
+                  <span className="media-title-text">
+                    {photoAttached ? '✓ Photo Evidence Attached' : 'Attach Incident Photo'}
+                  </span>
+                  <span className="media-sub-text">
+                    {photoAttached ? '1 file ready for upload' : 'Flood level / road blockage image'}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="form-group-item">
-            <label>Alternate Emergency Contact (Relative or Neighbor)</label>
-            <input
-              type="tel"
-              placeholder="+94 7X XXX XXXX (Optional)"
-              value={alternatePhone}
-              onChange={(e) => setAlternatePhone(e.target.value)}
-            />
+          {/* STEP 6: Requester Contact Information */}
+          <div className="form-step-block">
+            <div className="step-block-head">
+              <span className="step-badge-num">6</span>
+              <h3 className="step-badge-title">Requester Contact Information</h3>
+            </div>
+            <p className="step-block-desc">
+              Accurate phone numbers allow boat operators and coordinator desks to confirm visual contact.
+            </p>
+
+            <div className="form-2col-row">
+              <div className="form-field-group">
+                <label>Requester Full Name</label>
+                <div className="input-with-icon-wrap">
+                  <User size={16} className="input-icon-prefix" />
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-field-group">
+                <label>Primary Contact Phone Number</label>
+                <div className="input-with-icon-wrap">
+                  <Phone size={16} className="input-icon-prefix" />
+                  <input
+                    type="tel"
+                    placeholder="+94 7X XXX XXXX"
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="form-field-group">
+              <label>Alternate Emergency Contact (Neighbor or Family)</label>
+              <div className="input-with-icon-wrap">
+                <Phone size={16} className="input-icon-prefix" />
+                <input
+                  type="tel"
+                  placeholder="+94 7X XXX XXXX (Optional)"
+                  value={alternatePhone}
+                  onChange={(e) => setAlternatePhone(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Submit Action Bar */}
+          <div className="form-footer-action-bar">
+            <button
+              type="submit"
+              className="btn-transmit-emergency"
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <Activity size={20} className="animate-spin" />
+                  <span>Transmitting to AI Triage Pipeline...</span>
+                </>
+              ) : (
+                <>
+                  <Send size={19} />
+                  <span>Transmit Emergency Assistance Request</span>
+                </>
+              )}
+            </button>
+
+            <p className="security-lock-disclaimer">
+              <ShieldCheck size={15} color="#0e6f76" />
+              <span>Encrypted Transmission. Your geolocation and personal data are strictly protected for humanitarian response dispatch.</span>
+            </p>
+          </div>
+        </form>
+
+        {/* Right Column: Live AI Triage & Readiness Sidebar */}
+        <div className="assist-sidebar-col">
+          {/* Live AI Decision Card */}
+          <div className="ai-live-triage-card">
+            <div className="ai-card-title-bar">
+              <div className="ai-title-wrap">
+                <Sparkles size={17} />
+                <span>Live AI Triage Engine</span>
+              </div>
+              <span className="ai-live-indicator">
+                <span className="pulse-beacon-red" style={{ background: '#10b981', boxShadow: 'none' }}></span>
+                ACTIVE
+              </span>
+            </div>
+
+            <div className="triage-metric-row">
+              <div className="metric-strip-item">
+                <span>Evaluated Tier</span>
+                <strong style={{ color: urgency >= 2 ? '#dc2626' : '#0e6f76' }}>
+                  {liveTriageEstimate.tier}
+                </strong>
+              </div>
+
+              <div>
+                <div className="metric-strip-item">
+                  <span>AI Urgency Match</span>
+                  <strong>{liveTriageEstimate.score}</strong>
+                </div>
+                <div className="gauge-progress-bar">
+                  <div
+                    className="gauge-fill"
+                    style={{
+                      width: liveTriageEstimate.score,
+                      background: urgency === 3 ? '#ef4444' : urgency === 2 ? '#f97316' : '#0e6f76'
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="metric-strip-item">
+                <span>Target Response SLA</span>
+                <strong style={{ color: '#0f172a' }}>{liveTriageEstimate.sla}</strong>
+              </div>
+
+              <div className="metric-strip-item">
+                <span>Assigned Queue</span>
+                <strong style={{ fontSize: '11.5px', color: '#0e6f76', textAlign: 'right' }}>
+                  {liveTriageEstimate.queue}
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Regional Operations Readiness Card */}
+          <div className="readiness-info-card">
+            <div className="readiness-title">
+              <Radio size={16} color="#0e6f76" />
+              <span>Western Province Ops Readiness</span>
+            </div>
+
+            <div className="readiness-stat-list">
+              <div className="readiness-stat-item">
+                <span>Rescue Inflatables in Zone</span>
+                <strong>14 Active Boats</strong>
+              </div>
+              <div className="readiness-stat-item">
+                <span>Nearby Relief Camps</span>
+                <strong>3 Available</strong>
+              </div>
+              <div className="readiness-stat-item">
+                <span>Medical Triage Squads</span>
+                <strong>4 on Standby</strong>
+              </div>
+              <div className="readiness-stat-item">
+                <span>District Command Desk</span>
+                <strong style={{ color: '#10b981' }}>Connected</strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Life-Safety Advice Card */}
+          <div style={{ background: '#fefce8', border: '1px solid #fef08a', borderRadius: '14px', padding: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#854d0e', fontWeight: 700, fontSize: '13px', marginBottom: '8px' }}>
+              <LifeBuoy size={16} />
+              <span>Immediate Life-Safety Protocol</span>
+            </div>
+            <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: '#713f12', lineHeight: 1.5 }}>
+              <li>Avoid wading through moving water above knee depth.</li>
+              <li>Disconnect main electrical breakers if water enters living areas.</li>
+              <li>Keep phone charged and display bright cloths for rescue boats.</li>
+            </ul>
           </div>
         </div>
-
-        {/* Footer Actions */}
-        <div className="form-submit-footer">
-          <button
-            type="submit"
-            className="submit-primary-btn"
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <Activity size={18} className="animate-spin" />
-                <span>Transmitting to AI Triage Pipeline...</span>
-              </>
-            ) : (
-              <>
-                <Send size={18} />
-                <span>Transmit Emergency Assistance Request</span>
-              </>
-            )}
-          </button>
-
-          <p className="submit-disclaimer">
-            <ShieldCheck size={14} color="#0e6f76" />
-            <span>Encrypted Transmission. Your location and details are strictly used for verified humanitarian emergency dispatch.</span>
-          </p>
-        </div>
-      </form>
+      </div>
     </div>
   );
 };
