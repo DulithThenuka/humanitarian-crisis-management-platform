@@ -58,6 +58,8 @@ export const SubmitRequestPage = () => {
         address: formData.address || 'Western Province'
       });
       showAlert("Emergency request lodged in queue! AI triage initiated.", "success");
+      showAlert("Assistance request lodged successfully! AI triage initiated (Demo Mode).", "success");
+      setFormData({ ...formData, description: '', address: '' });
     } finally {
       setSubmitting(false);
     }

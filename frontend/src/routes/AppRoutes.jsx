@@ -39,6 +39,8 @@ import { TaskAssignmentPage } from '../pages/volunteers/TaskAssignmentPage';
 import { OperationalMapView } from '../pages/map/OperationalMapView';
 import { ReportsAnalyticsView } from '../pages/reports-and-analysis/ReportsAnalyticsView';
 
+import { AuditCenterPage } from '../pages/audit/AuditCenterPage';
+import { AIOperationsContainer } from '../pages/ai-operations/AIOperationsContainer';
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -54,6 +56,8 @@ export const AppRoutes = () => {
       <Route path="/map" element={<DashboardOverviewPage />} />
       <Route path="/reports" element={<DashboardOverviewPage />} />
       <Route path="/analytics" element={<DashboardOverviewPage />} />
+      <Route path="/coordinator/reports" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage initialTab="reports" /></ProtectedRoute>} />
+      <Route path="/reports" element={<DashboardOverviewPage initialTab="reports" />} />
       
       {/* Citizen routes */}
       <Route path="/citizen" element={<CitizenPortalPage />} />
@@ -70,6 +74,11 @@ export const AppRoutes = () => {
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
       {/* Coordinator routes */}
+      <Route path="/ai-ops" element={<DashboardOverviewPage initialTab="ai-ops" />} />
+      <Route path="/ai-operations" element={<DashboardOverviewPage initialTab="ai-ops" />} />
+      <Route path="/coordinator/ai-ops" element={<DashboardOverviewPage initialTab="ai-ops" />} />
+      <Route path="/ai-workspaces" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="workspace" /></ProtectedRoute>} />
+      <Route path="/ai-governance" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="governance" /></ProtectedRoute>} />
       <Route path="/coordinator/triage" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><RequestTriagePage /></ProtectedRoute>} />
       <Route path="/coordinator/ai-review" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIDecisionReviewPage /></ProtectedRoute>} />
 
@@ -85,6 +94,13 @@ export const AppRoutes = () => {
       <Route path="/volunteers/roster" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><VolunteerRosterPage /></ProtectedRoute>} />
       <Route path="/volunteers/assignments" element={<ProtectedRoute allowedRoles={['Coordinator', 'Volunteer', 'Admin']}><TaskAssignmentPage /></ProtectedRoute>} />
 
+      {/* Audit routes */}
+      <Route path="/audit" element={<AuditCenterPage />} />
+      <Route path="/coordinator/audit" element={<AuditCenterPage />} />
+      <Route path="/coordinator/alerts" element={<Navigate to="/coordinator/dashboard" replace />} />
+      <Route path="/citizen/alerts" element={<Navigate to="/citizen" replace />} />
+
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
