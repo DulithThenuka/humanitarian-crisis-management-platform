@@ -23,14 +23,16 @@ import {
   X,
   Plus
 } from 'lucide-react';
+import { createSmoothSplinePath, createSmoothAreaPath } from './aiOperationsData';
 
-export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService = 'classification' }) => {
+export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService = 'classification', showToast }) => {
   const [selectedService, setSelectedService] = useState(initialService);
   const [searchTerm, setSearchTerm] = useState('');
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [configSaved, setConfigSaved] = useState(false);
   const [confidenceThreshold, setConfidenceThreshold] = useState(85);
   const [activeModelVersion, setActiveModelVersion] = useState('v2.4-Production');
+  const [isRestarting, setIsRestarting] = useState(false);
 
   const carouselRef = useRef(null);
 
@@ -39,6 +41,15 @@ export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService 
       setSelectedService(initialService);
     }
   }, [initialService]);
+
+  const handleRestartService = () => {
+    setIsRestarting(true);
+    showToast?.(`Restarting ${selectedService} microservice pod on cluster...`, 'info');
+    setTimeout(() => {
+      setIsRestarting(false);
+      showToast?.(`${selectedService} microservice restarted successfully. Health: 100%`, 'success');
+    }, 1400);
+  };
 
   const scrollCarousel = (direction) => {
     if (carouselRef.current) {
@@ -299,6 +310,117 @@ export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService 
 
   const currentDataset = workspaceData[selectedService] || workspaceData.classification;
 
+  // Dynamic trend telemetry state & mathematical curves
+  const [activeSeries, setActiveSeries] = useState({
+    primary: true,
+    secondary: true,
+    escalated: true,
+    anomalies: true,
+    automated: true
+  });
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+
+  const trendDates = ['Oct 21', 'Oct 22', 'Oct 23', 'Oct 24', 'Oct 25', 'Oct 26', 'Oct 27'];
+
+  const serviceTrendProfiles = {
+    classification: {
+      primary: [28, 55, 48, 74, 62, 88, 76],
+      secondary: [16, 24, 21, 25, 34, 45, 48],
+      escalated: [12, 19, 18, 22, 28, 36, 40],
+      anomalies: [6, 12, 10, 16, 24, 30, 32],
+      automated: [10, 14, 15, 20, 26, 32, 35]
+    },
+    priority: {
+      primary: [35, 48, 42, 68, 75, 92, 84],
+      secondary: [20, 28, 25, 32, 40, 50, 52],
+      escalated: [15, 22, 26, 30, 42, 48, 55],
+      anomalies: [8, 14, 12, 18, 22, 28, 25],
+      automated: [14, 18, 22, 28, 34, 40, 42]
+    },
+    duplicate: {
+      primary: [50, 62, 58, 70, 80, 85, 90],
+      secondary: [14, 18, 16, 20, 24, 26, 28],
+      escalated: [8, 12, 10, 15, 18, 20, 22],
+      anomalies: [4, 6, 8, 10, 14, 16, 15],
+      automated: [25, 35, 40, 50, 65, 75, 80]
+    },
+    resource: {
+      primary: [40, 52, 49, 65, 72, 86, 82],
+      secondary: [22, 30, 28, 35, 42, 54, 50],
+      escalated: [10, 15, 14, 18, 25, 30, 34],
+      anomalies: [5, 9, 8, 12, 15, 19, 21],
+      automated: [18, 25, 28, 36, 45, 52, 58]
+    },
+    shelter: {
+      primary: [30, 42, 40, 58, 66, 78, 72],
+      secondary: [18, 22, 20, 28, 35, 42, 44],
+      escalated: [10, 14, 12, 16, 22, 28, 30],
+      anomalies: [4, 8, 6, 10, 14, 18, 20],
+      automated: [12, 16, 18, 24, 30, 38, 40]
+    },
+    demand: {
+      primary: [45, 60, 55, 72, 82, 94, 88],
+      secondary: [25, 32, 30, 38, 48, 56, 54],
+      escalated: [14, 20, 18, 24, 32, 38, 42],
+      anomalies: [6, 10, 9, 14, 18, 22, 20],
+      automated: [20, 28, 32, 40, 50, 60, 64]
+    },
+    anomaly: {
+      primary: [20, 35, 30, 52, 65, 82, 74],
+      secondary: [15, 20, 18, 24, 30, 38, 40],
+      escalated: [22, 28, 25, 36, 45, 52, 58],
+      anomalies: [12, 24, 20, 32, 44, 58, 62],
+      automated: [8, 12, 14, 18, 24, 30, 32]
+    },
+    security: {
+      primary: [38, 50, 46, 62, 70, 84, 80],
+      secondary: [16, 22, 20, 26, 32, 40, 42],
+      escalated: [8, 12, 11, 15, 20, 24, 26],
+      anomalies: [5, 8, 7, 11, 14, 18, 16],
+      automated: [15, 22, 25, 34, 42, 50, 54]
+    },
+    multilingual: {
+      primary: [42, 56, 52, 68, 78, 90, 85],
+      secondary: [18, 24, 22, 28, 36, 44, 46],
+      escalated: [9, 13, 12, 16, 22, 26, 28],
+      anomalies: [4, 7, 6, 9, 12, 15, 14],
+      automated: [22, 30, 35, 45, 55, 68, 72]
+    },
+    summarization: {
+      primary: [25, 38, 34, 50, 60, 72, 68],
+      secondary: [14, 18, 16, 22, 28, 34, 36],
+      escalated: [6, 10, 8, 12, 16, 20, 22],
+      anomalies: [3, 5, 4, 7, 10, 12, 11],
+      automated: [16, 22, 26, 35, 44, 54, 58]
+    }
+  };
+
+  const currentTrendProfile = serviceTrendProfiles[selectedService] || serviceTrendProfiles.classification;
+
+  const trendSeriesConfig = [
+    { key: 'primary', label: 'Primary', color: '#2563eb', fillId: 'wsGradPrimary', values: currentTrendProfile.primary },
+    { key: 'secondary', label: 'Secondary', color: '#16a34a', fillId: 'wsGradSecondary', values: currentTrendProfile.secondary },
+    { key: 'escalated', label: 'Escalated', color: '#ea580c', fillId: 'wsGradEscalated', values: currentTrendProfile.escalated },
+    { key: 'anomalies', label: 'Anomalies', color: '#dc2626', fillId: 'wsGradAnomalies', values: currentTrendProfile.anomalies },
+    { key: 'automated', label: 'Automated', color: '#8b5cf6', fillId: 'wsGradAutomated', values: currentTrendProfile.automated }
+  ];
+
+  const trendXCoords = [65, 148, 232, 315, 398, 482, 565];
+  const computedTrendSeries = trendSeriesConfig.map(s => {
+    const points = s.values.map((val, idx) => ({
+      x: trendXCoords[idx],
+      y: 210 - (val / 100) * 190,
+      val,
+      day: trendDates[idx]
+    }));
+    return {
+      ...s,
+      points,
+      linePath: createSmoothSplinePath(points, 0.2),
+      areaPath: createSmoothAreaPath(points, 210, 0.2)
+    };
+  });
+
   const filteredRows = currentDataset.rows.filter(r => {
     if (!searchTerm) return true;
     const q = searchTerm.toLowerCase();
@@ -307,10 +429,11 @@ export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService 
 
   const handleSaveModalConfig = () => {
     setConfigSaved(true);
+    showToast?.(`Model configuration updated for ${currentServiceMeta.title}: ${activeModelVersion} (${confidenceThreshold}% threshold)`, 'success');
     setTimeout(() => {
       setConfigSaved(false);
       setShowConfigModal(false);
-    }, 1200);
+    }, 900);
   };
 
   return (
@@ -423,7 +546,16 @@ export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService 
             </p>
           </div>
           <div className="workspace-banner-quick-actions">
-            <button className="btn-outline-white sm" onClick={() => setShowConfigModal(true)}>
+            <button 
+              className={`btn-outline-white sm ${isRestarting ? 'running' : ''}`} 
+              onClick={handleRestartService}
+              disabled={isRestarting}
+              title="Restart service container"
+            >
+              <RotateCw size={13} className={isRestarting ? 'spin-icon' : ''} />
+              <span>{isRestarting ? 'Restarting...' : 'Restart Pod'}</span>
+            </button>
+            <button className="btn-solid-teal sm" onClick={() => setShowConfigModal(true)}>
               <Sliders size={13} />
               <span>Configure Model</span>
             </button>
@@ -454,19 +586,91 @@ export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService 
 
           {/* Right Column: Multi-line / Trend Chart */}
           <div className="ai-white-card">
-            <h3 className="card-section-title">{currentServiceMeta.title} Trend</h3>
-
-            <div className="chart-legend-row">
-              <span className="legend-item"><i style={{ backgroundColor: '#2563eb' }}></i> Primary</span>
-              <span className="legend-item"><i style={{ backgroundColor: '#16a34a' }}></i> Secondary</span>
-              <span className="legend-item"><i style={{ backgroundColor: '#ea580c' }}></i> Escalated</span>
-              <span className="legend-item"><i style={{ backgroundColor: '#dc2626' }}></i> Anomalies</span>
-              <span className="legend-item"><i style={{ backgroundColor: '#8b5cf6' }}></i> Automated</span>
+            <div className="card-header-flex">
+              <h3 className="card-section-title">{currentServiceMeta.title} Trend</h3>
+              <span className="badge-sync-live" style={{ fontSize: '11px' }}>
+                <i className="green-bullet"></i> Active Telemetry
+              </span>
             </div>
 
-            <div className="svg-trend-container">
+            {/* Interactive Series Legend */}
+            <div className="chart-legend-row" style={{ flexWrap: 'wrap', gap: '8px', marginTop: '6px' }}>
+              {[
+                { key: 'primary', label: 'Primary', color: '#2563eb' },
+                { key: 'secondary', label: 'Secondary', color: '#16a34a' },
+                { key: 'escalated', label: 'Escalated', color: '#ea580c' },
+                { key: 'anomalies', label: 'Anomalies', color: '#dc2626' },
+                { key: 'automated', label: 'Automated', color: '#8b5cf6' }
+              ].map(item => {
+                const isVisible = activeSeries[item.key];
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setActiveSeries(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
+                    className="legend-item interactive"
+                    style={{
+                      background: isVisible ? 'transparent' : '#f1f5f9',
+                      opacity: isVisible ? 1 : 0.45,
+                      border: '1px solid',
+                      borderColor: isVisible ? '#e2e8f0' : 'transparent',
+                      borderRadius: '20px',
+                      padding: '3px 10px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '11.5px',
+                      fontWeight: isVisible ? 600 : 500,
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={`Click to ${isVisible ? 'hide' : 'show'} ${item.label}`}
+                  >
+                    <i style={{ 
+                      backgroundColor: item.color, 
+                      width: '8px', 
+                      height: '8px', 
+                      borderRadius: '50%',
+                      display: 'inline-block' 
+                    }}></i> 
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="svg-trend-container" style={{ position: 'relative' }}>
               <div className="y-axis-label-vertical">Events / Hour</div>
-              <svg viewBox="0 0 600 230" className="trend-line-svg" preserveAspectRatio="none">
+              <svg 
+                viewBox="0 0 600 230" 
+                className="trend-line-svg" 
+                preserveAspectRatio="none"
+                onMouseLeave={() => setHoveredPoint(null)}
+              >
+                <defs>
+                  <linearGradient id="wsGradPrimary" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#2563eb" stopOpacity="0.22" />
+                    <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="wsGradSecondary" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#16a34a" stopOpacity="0.20" />
+                    <stop offset="100%" stopColor="#16a34a" stopOpacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="wsGradEscalated" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ea580c" stopOpacity="0.20" />
+                    <stop offset="100%" stopColor="#ea580c" stopOpacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="wsGradAnomalies" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#dc2626" stopOpacity="0.20" />
+                    <stop offset="100%" stopColor="#dc2626" stopOpacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="wsGradAutomated" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.20" />
+                    <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Gridlines */}
                 <line x1="45" y1="20" x2="585" y2="20" stroke="#f1f5f9" strokeWidth="1" />
                 <line x1="45" y1="58" x2="585" y2="58" stroke="#f1f5f9" strokeWidth="1" />
                 <line x1="45" y1="96" x2="585" y2="96" stroke="#f1f5f9" strokeWidth="1" />
@@ -481,45 +685,124 @@ export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService 
                 <text x="35" y="176" className="chart-axis-text" textAnchor="end">20</text>
                 <text x="35" y="213" className="chart-axis-text" textAnchor="end">0</text>
 
-                {/* Primary Curve */}
-                <path d="M 65 155 Q 150 95 235 125 T 415 65 T 565 30" fill="none" stroke="#2563eb" strokeWidth="2.5" />
-                <circle cx="65" cy="155" r="3.5" fill="#2563eb" />
-                <circle cx="150" cy="108" r="3.5" fill="#2563eb" />
-                <circle cx="235" cy="125" r="3.5" fill="#2563eb" />
-                <circle cx="325" cy="72" r="3.5" fill="#2563eb" />
-                <circle cx="415" cy="75" r="3.5" fill="#2563eb" />
-                <circle cx="500" cy="58" r="3.5" fill="#2563eb" />
-                <circle cx="565" cy="30" r="3.5" fill="#2563eb" />
+                {/* Vertical Scrubber Line when hovering */}
+                {hoveredPoint && (
+                  <line 
+                    x1={hoveredPoint.x} 
+                    y1="20" 
+                    x2={hoveredPoint.x} 
+                    y2="210" 
+                    stroke="#94a3b8" 
+                    strokeWidth="1.5" 
+                    strokeDasharray="4 3" 
+                  />
+                )}
 
-                {/* Secondary Curve */}
-                <path d="M 65 178 Q 150 160 235 168 T 415 140 T 565 110" fill="none" stroke="#dc2626" strokeWidth="2.5" />
-                <circle cx="65" cy="178" r="3.5" fill="#dc2626" />
-                <circle cx="150" cy="160" r="3.5" fill="#dc2626" />
-                <circle cx="235" cy="168" r="3.5" fill="#dc2626" />
-                <circle cx="325" cy="148" r="3.5" fill="#dc2626" />
-                <circle cx="415" cy="140" r="3.5" fill="#dc2626" />
-                <circle cx="500" cy="148" r="3.5" fill="#dc2626" />
-                <circle cx="565" cy="110" r="3.5" fill="#dc2626" />
+                {/* Render Each Active Series with Exact Spline Curves & Centered Circles */}
+                {computedTrendSeries.map(series => {
+                  if (!activeSeries[series.key]) return null;
+                  return (
+                    <g key={series.key} className="chart-series-group">
+                      {/* Gradient Fill under curve */}
+                      <path 
+                        d={series.areaPath} 
+                        fill={`url(#${series.fillId})`} 
+                      />
 
-                {/* Automation Curve */}
-                <path d="M 65 190 Q 150 170 235 178 T 415 165 T 565 145" fill="none" stroke="#16a34a" strokeWidth="2.5" />
-                <circle cx="65" cy="190" r="3.5" fill="#16a34a" />
-                <circle cx="150" cy="170" r="3.5" fill="#16a34a" />
-                <circle cx="235" cy="178" r="3.5" fill="#16a34a" />
-                <circle cx="325" cy="172" r="3.5" fill="#16a34a" />
-                <circle cx="415" cy="165" r="3.5" fill="#16a34a" />
-                <circle cx="500" cy="162" r="3.5" fill="#16a34a" />
-                <circle cx="565" cy="145" r="3.5" fill="#16a34a" />
+                      {/* Smooth cubic Bézier stroke passing through all points */}
+                      <path 
+                        d={series.linePath} 
+                        fill="none" 
+                        stroke={series.color} 
+                        strokeWidth="2.5" 
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+
+                      {/* Discrete Points guaranteed to align with the curve */}
+                      {series.points.map((pt, pIdx) => {
+                        const isHovered = hoveredPoint?.dayIdx === pIdx;
+                        return (
+                          <g key={pIdx}>
+                            <circle 
+                              cx={pt.x} 
+                              cy={pt.y} 
+                              r={isHovered ? 6 : 3.5} 
+                              fill={isHovered ? '#ffffff' : series.color}
+                              stroke={series.color}
+                              strokeWidth={isHovered ? 3 : 1.5}
+                              style={{ transition: 'r 0.15s ease, stroke-width 0.15s ease', cursor: 'pointer' }}
+                            />
+                            {/* Transparent hitbox for easy hovering */}
+                            <rect
+                              x={pt.x - 25}
+                              y="15"
+                              width="50"
+                              height="200"
+                              fill="transparent"
+                              style={{ cursor: 'pointer' }}
+                              onMouseEnter={() => setHoveredPoint({ x: pt.x, dayIdx: pIdx, day: pt.day })}
+                            />
+                          </g>
+                        );
+                      })}
+                    </g>
+                  );
+                })}
               </svg>
 
+              {/* Dynamic Floating Tooltip */}
+              {hoveredPoint && (
+                <div 
+                  className="trend-tooltip-card"
+                  style={{
+                    position: 'absolute',
+                    top: '20px',
+                    left: `${Math.min(Math.max((hoveredPoint.x / 600) * 100, 15), 78)}%`,
+                    transform: 'translateX(-50%)',
+                    background: 'rgba(15, 23, 42, 0.92)',
+                    backdropFilter: 'blur(8px)',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    padding: '8px 12px',
+                    fontSize: '11px',
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)',
+                    pointerEvents: 'none',
+                    zIndex: 20,
+                    minWidth: '150px'
+                  }}
+                >
+                  <div style={{ fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.15)', paddingBottom: '4px', marginBottom: '6px', color: '#38bdf8' }}>
+                    {hoveredPoint.day} · Telemetry
+                  </div>
+                  {computedTrendSeries.map(s => {
+                    if (!activeSeries[s.key]) return null;
+                    const val = s.values[hoveredPoint.dayIdx];
+                    return (
+                      <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginTop: '3px' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: s.color }}></span>
+                          <span style={{ color: '#cbd5e1' }}>{s.label}:</span>
+                        </span>
+                        <strong style={{ color: '#ffffff' }}>{val} / hr</strong>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               <div className="x-axis-labels-row">
-                <span>Oct 21</span>
-                <span>Oct 22</span>
-                <span>Oct 23</span>
-                <span>Oct 24</span>
-                <span>Oct 25</span>
-                <span>Oct 26</span>
-                <span>Oct 27</span>
+                {trendDates.map((d, i) => (
+                  <span 
+                    key={d} 
+                    style={{ 
+                      fontWeight: hoveredPoint?.dayIdx === i ? 700 : 500,
+                      color: hoveredPoint?.dayIdx === i ? '#059669' : '#64748b'
+                    }}
+                  >
+                    {d}
+                  </span>
+                ))}
               </div>
             </div>
           </div>

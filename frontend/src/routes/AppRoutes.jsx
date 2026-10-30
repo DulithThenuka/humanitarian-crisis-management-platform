@@ -55,8 +55,9 @@ export const AppRoutes = () => {
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
       {/* Coordinator routes */}
-      <Route path="/ai-operations" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer /></ProtectedRoute>} />
-      <Route path="/coordinator/ai-ops" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer /></ProtectedRoute>} />
+      <Route path="/ai-ops" element={<DashboardOverviewPage initialTab="ai-ops" />} />
+      <Route path="/ai-operations" element={<DashboardOverviewPage initialTab="ai-ops" />} />
+      <Route path="/coordinator/ai-ops" element={<DashboardOverviewPage initialTab="ai-ops" />} />
       <Route path="/ai-workspaces" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="workspace" /></ProtectedRoute>} />
       <Route path="/ai-governance" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="governance" /></ProtectedRoute>} />
       <Route path="/coordinator/triage" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><RequestTriagePage /></ProtectedRoute>} />

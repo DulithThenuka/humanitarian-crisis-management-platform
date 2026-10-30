@@ -22,10 +22,12 @@ import {
   X,
   Activity,
   Key,
-  ShieldAlert
+  ShieldAlert,
+  RotateCcw,
+  Save
 } from 'lucide-react';
 
-export const AIGovernanceSettings = ({ onNavigateWorkspace, onBackOverview }) => {
+export const AIGovernanceSettings = ({ onNavigateWorkspace, onBackOverview, showToast }) => {
   const [activeTab, setActiveTab] = useState('Approval Rules');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -101,7 +103,14 @@ export const AIGovernanceSettings = ({ onNavigateWorkspace, onBackOverview }) =>
 
   const handleSaveChanges = () => {
     setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+    showToast?.('AI Governance guardrails and ethical safety policies saved to cluster', 'success');
+    setTimeout(() => setSaveSuccess(false), 2000);
+  };
+
+  const handleResetDefaults = () => {
+    setPriorityRules({ critical: true, high: true, medium: false, low: false });
+    setEscalationRules({ medical: true, childProtection: true, fatality: true, resourceShortage: false, highMedia: true });
+    showToast?.('Governance settings restored to UN-OCHA humanitarian baseline', 'info');
   };
 
   const servicesConfigList = [
@@ -222,6 +231,20 @@ export const AIGovernanceSettings = ({ onNavigateWorkspace, onBackOverview }) =>
           <p className="ai-main-subheading">
             Manage AI services and organisation controls with clear policies and access control.
           </p>
+        </div>
+
+        <div className="ai-head-btn-group">
+          <button className="btn-outline-white" onClick={handleResetDefaults} title="Reset to standard policies">
+            <RotateCcw size={14} />
+            <span>Reset Baseline</span>
+          </button>
+          <button 
+            className={`btn-solid-teal ${saveSuccess ? 'saved' : ''}`}
+            onClick={handleSaveChanges}
+          >
+            {saveSuccess ? <Check size={14} /> : <Save size={14} />}
+            <span>{saveSuccess ? 'Policies Saved!' : 'Save Policies'}</span>
+          </button>
         </div>
       </div>
 

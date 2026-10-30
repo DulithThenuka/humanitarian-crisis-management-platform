@@ -749,7 +749,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
   const searchParams = new URLSearchParams(location.search);
   const tabFromQuery = searchParams.get('tab');
   const [activeNav, setActiveNav] = useState(
-    tabFromQuery || (location.pathname.includes('reports') ? 'reports' : initialTab)
+    tabFromQuery || (location.pathname.includes('reports') ? 'reports' : location.pathname.includes('ai-ops') || location.pathname.includes('ai-operations') ? 'ai-ops' : location.pathname.includes('maps') ? 'maps' : initialTab)
   );
   const [searchVal, setSearchVal] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('Western Province');
