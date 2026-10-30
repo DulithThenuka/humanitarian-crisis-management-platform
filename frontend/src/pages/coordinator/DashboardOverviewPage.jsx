@@ -49,6 +49,11 @@ import { ReportsAnalyticsView } from "../reports-and-analysis/ReportsAnalyticsVi
 import { OperationalMapView } from "../map/OperationalMapView";
 import { AssistanceRequestDetailPage } from "./AssistanceRequestDetailPage";
 import { AssistanceRequestsListView } from "./AssistanceRequestsListView";
+import { ResourceInventoryPage } from "../logistics/ResourceInventoryPage";
+import { ShelterDirectoryPage } from "../shelters/ShelterDirectoryPage";
+import { VolunteerRosterPage } from "../volunteers/VolunteerRosterPage";
+import { AllocationDispatchPage } from "../logistics/AllocationDispatchPage";
+import { AIDecisionReviewPage } from "./AIDecisionReviewPage";
 
 import './DashboardOverviewPage.css';
 
@@ -129,23 +134,23 @@ export const DashboardOverviewPage = () => {
       setActiveNav('maps');
     } else if (location.pathname === '/reports' || location.pathname === '/analytics') {
       setActiveNav('reports');
+    } else if (location.pathname === '/logistics/inventory' || location.pathname === '/coordinator/resources') {
+      setActiveNav('resources');
+    } else if (location.pathname === '/shelters/directory' || location.pathname === '/coordinator/shelters') {
+      setActiveNav('shelters');
+    } else if (location.pathname === '/volunteers/roster' || location.pathname === '/coordinator/volunteers') {
+      setActiveNav('volunteers');
+    } else if (location.pathname === '/logistics/dispatch' || location.pathname === '/coordinator/dispatch') {
+      setActiveNav('donations');
+    } else if (location.pathname === '/coordinator/ai-review' || location.pathname === '/coordinator/ai-ops') {
+      setActiveNav('ai-ops');
     } else if (location.pathname === '/coordinator/dashboard') {
       setActiveNav('dashboard');
     }
   }, [location.pathname, params.id]);
 
   const handleNavClick = (itemId) => {
-    if (itemId === 'resources') {
-      navigate('/logistics/inventory');
-    } else if (itemId === 'shelters') {
-      navigate('/shelters/directory');
-    } else if (itemId === 'volunteers') {
-      navigate('/volunteers/roster');
-    } else if (itemId === 'ai-ops') {
-      navigate('/coordinator/ai-review');
-    } else if (itemId === 'crisis') {
-      setShowCreateCrisisModal(true);
-    } else if (itemId === 'requests') {
+    if (itemId === 'requests') {
       setActiveNav('requests');
       setRequestViewMode('list');
     } else {
@@ -357,6 +362,14 @@ export const DashboardOverviewPage = () => {
     if (activeNav === 'reports') return 'Operations Intelligence';
     if (activeNav === 'audit') return 'Governance & Audit Center';
     if (activeNav === 'maps') return 'Operational GIS & Logistics Map';
+    if (activeNav === 'resources') return 'Resource Inventory & Logistics';
+    if (activeNav === 'shelters') return 'Shelter Directory & Capacity';
+    if (activeNav === 'volunteers') return 'Volunteer Operations Roster';
+    if (activeNav === 'donations') return 'Supply Dispatch & Allocation';
+    if (activeNav === 'ai-ops') return 'AI Decision Review & Governance';
+    if (activeNav === 'crisis') return 'Crisis Event Management';
+    if (activeNav === 'notifications') return 'Operational Notifications';
+    if (activeNav === 'settings') return 'Platform Configuration & Settings';
     return 'Crisis Command Center';
   };
 
@@ -364,6 +377,14 @@ export const DashboardOverviewPage = () => {
     if (activeNav === 'reports') return 'Real-time insights to improve humanitarian response';
     if (activeNav === 'audit') return 'Cryptographically verifiable tracking of AI recommendations & decisions';
     if (activeNav === 'maps') return 'Geospatial service coverage, road routing, and proximity matching';
+    if (activeNav === 'resources') return 'Regional warehouse stockpiles, provisions, water, and pharmaceuticals';
+    if (activeNav === 'shelters') return 'Evacuation centers, shelter capacity, and occupancy monitoring';
+    if (activeNav === 'volunteers') return 'Certified field responders, skill sets, and deployment schedules';
+    if (activeNav === 'donations') return 'Multi-constraint relief dispatch and convoy distribution';
+    if (activeNav === 'ai-ops') return 'Human-in-the-loop review board for automated AI incident scoring';
+    if (activeNav === 'crisis') return 'Active incident declarations, hazard zones, and severity triage';
+    if (activeNav === 'notifications') return 'Urgent incident dispatch pings and SLA breach alerts';
+    if (activeNav === 'settings') return 'System parameters, governance rules, and API connections';
     return 'Real-time overview of humanitarian operations';
   };
 
@@ -506,7 +527,14 @@ export const DashboardOverviewPage = () => {
             requestViewMode === 'detail' ? (
               <AssistanceRequestDetailPage 
                 isEmbedded={true}
-                onNavigateTab={() => setRequestViewMode('list')}
+                requestId={selectedRequestId}
+                onNavigateTab={(tab) => {
+                  if (!tab || tab === 'list' || tab === 'requests') {
+                    setRequestViewMode('list');
+                  } else {
+                    setActiveNav(tab);
+                  }
+                }}
                 onOpenMap={() => setActiveNav('maps')}
               />
             ) : (
@@ -523,6 +551,106 @@ export const DashboardOverviewPage = () => {
             <ReportsAnalyticsView />
           ) : activeNav === 'maps' ? (
             <OperationalMapView />
+          ) : activeNav === 'resources' ? (
+            <ResourceInventoryPage />
+          ) : activeNav === 'shelters' ? (
+            <ShelterDirectoryPage />
+          ) : activeNav === 'volunteers' ? (
+            <VolunteerRosterPage />
+          ) : activeNav === 'donations' ? (
+            <AllocationDispatchPage />
+          ) : activeNav === 'ai-ops' ? (
+            <AIDecisionReviewPage />
+          ) : activeNav === 'crisis' ? (
+            <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div>
+                  <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', margin: 0 }}>Active Crisis Management</h2>
+                  <p style={{ color: '#94a3b8', fontSize: '12.5px', marginTop: '4px' }}>Coordinated disaster response operations across monitored provinces.</p>
+                </div>
+                <button 
+                  onClick={() => setShowCreateCrisisModal(true)}
+                  style={{ background: '#0e6f76', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  + Declare New Crisis Event
+                </button>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+                <div style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '12px' }}>LEVEL 4 CRITICAL</span>
+                    <span style={{ color: '#94a3b8', fontSize: '11px' }}>Kelani River Basin Sector 3</span>
+                  </div>
+                  <h3 style={{ color: '#f8fafc', fontSize: '15px', margin: '0 0 8px 0' }}>Flood Response - Western Province</h3>
+                  <p style={{ color: '#94a3b8', fontSize: '12px', lineHeight: 1.4 }}>Rapid inundation affecting Colombo and Gampaha lowlands. Evacuation routes active.</p>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button onClick={() => setActiveNav('maps')} style={{ background: '#334155', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>View on Map</button>
+                    <button onClick={() => { setActiveNav('requests'); setRequestViewMode('list'); }} style={{ background: '#0284c7', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>View 186 Requests</button>
+                  </div>
+                </div>
+                <div style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: '#f97316', fontWeight: 700, fontSize: '12px' }}>LEVEL 2 MODERATE</span>
+                    <span style={{ color: '#94a3b8', fontSize: '11px' }}>Southern Coastal Belt</span>
+                  </div>
+                  <h3 style={{ color: '#f8fafc', fontSize: '15px', margin: '0 0 8px 0' }}>Coastal Surge - Southern Province</h3>
+                  <p style={{ color: '#94a3b8', fontSize: '12px', lineHeight: 1.4 }}>High tide warnings in Galle and Matara districts. Fisherfolk pre-evacuation staged.</p>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button onClick={() => setActiveNav('maps')} style={{ background: '#334155', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>View on Map</button>
+                    <button onClick={() => setActiveNav('shelters')} style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>Check Shelters</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : activeNav === 'notifications' ? (
+            <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '24px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '16px' }}>Operational Notifications & Alerts (3 Unread)</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ background: '#0f172a', borderLeft: '4px solid #ef4444', padding: '14px', borderRadius: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: '#94a3b8' }}>
+                    <span style={{ color: '#ef4444', fontWeight: 700 }}>CRITICAL INCIDENT</span>
+                    <span>2 min ago</span>
+                  </div>
+                  <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '13px', marginTop: '4px' }}>Request #REQ-2026-01842 requires urgent medical team dispatch</div>
+                  <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>Trapped resident on upper terrace with medical emergency in Kelani Flood Zone.</div>
+                  <button onClick={() => { setSelectedRequestId('REQ-2026-01842'); setRequestViewMode('detail'); setActiveNav('requests'); }} style={{ background: '#0e6f76', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer', marginTop: '8px' }}>Open Request</button>
+                </div>
+                <div style={{ background: '#0f172a', borderLeft: '4px solid #f97316', padding: '14px', borderRadius: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: '#94a3b8' }}>
+                    <span style={{ color: '#f97316', fontWeight: 700 }}>SLA BREACH ALERT</span>
+                    <span>14 min ago</span>
+                  </div>
+                  <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '13px', marginTop: '4px' }}>Shelter allocation overdue in Gampaha District Zone B</div>
+                  <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>Family of 6 awaiting shelter unit dispatch. Response threshold exceeded.</div>
+                  <button onClick={() => setActiveNav('shelters')} style={{ background: '#334155', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer', marginTop: '8px' }}>View Shelters</button>
+                </div>
+                <div style={{ background: '#0f172a', borderLeft: '4px solid #0284c7', padding: '14px', borderRadius: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: '#94a3b8' }}>
+                    <span style={{ color: '#0284c7', fontWeight: 700 }}>INVENTORY NOTICE</span>
+                    <span>42 min ago</span>
+                  </div>
+                  <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '13px', marginTop: '4px' }}>Drinking water supplies below minimum safety threshold at Kandy Depot</div>
+                  <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>Current stock: 400 bottles (Threshold: 1,000). Automated restock requisition staged.</div>
+                  <button onClick={() => setActiveNav('resources')} style={{ background: '#334155', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer', marginTop: '8px' }}>Check Inventory</button>
+                </div>
+              </div>
+            </div>
+          ) : activeNav === 'settings' ? (
+            <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '24px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '16px' }}>Platform Operations & Dispatch Settings</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '600px' }}>
+                <div style={{ background: '#0f172a', padding: '14px', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '13px' }}>AI Auto-Triage Threshold</div>
+                  <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>Requests scoring above 90% confidence automatically flag for priority dispatch.</div>
+                  <input type="range" min="70" max="95" defaultValue="90" style={{ width: '100%', marginTop: '10px', accentColor: '#0e6f76' }} />
+                </div>
+                <div style={{ background: '#0f172a', padding: '14px', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '13px' }}>Cryptographic Governance Logging</div>
+                  <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>SHA-256 block auditing enabled for all triage and override decisions.</div>
+                  <div style={{ color: '#10b981', fontWeight: 700, fontSize: '12px', marginTop: '6px' }}>Status: ACTIVE & VERIFIED</div>
+                </div>
+              </div>
+            </div>
           ) : activeNav === 'audit' ? (
             /* AUDIT LOGS VIEW */
             <div className="audit-embedded-wrapper">

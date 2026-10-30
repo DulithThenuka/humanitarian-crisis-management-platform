@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, PlusSquare } from 'lucide-react';
 import { requestService } from '../../services/requestService';
 import { DataTable } from '../../components/common/DataTable';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
@@ -7,6 +8,7 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 export const TrackRequestsPage = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadRequests();
@@ -89,7 +91,43 @@ export const TrackRequestsPage = () => {
   if (loading) return <LoadingSpinner message="Fetching your requests..." />;
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <Link 
+          to="/citizen" 
+          style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '6px', 
+            color: '#38bdf8', 
+            fontSize: '13px', 
+            textDecoration: 'none',
+            fontWeight: 500
+          }}
+        >
+          <ArrowLeft size={16} /> Return to Citizen Portal
+        </Link>
+
+        <button
+          onClick={() => navigate('/citizen/submit')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            backgroundColor: '#dc2626',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '8px 14px',
+            fontSize: '13px',
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}
+        >
+          <PlusSquare size={15} /> Log New Request
+        </button>
+      </div>
+
       <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>My Incident Reports</h2>
       <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '24px' }}>Real-time lifecycle and progress tracker for your logged assistance requests.</p>
       <div style={{ backgroundColor: '#1e293b', borderRadius: '12px', border: '1px solid #334155', padding: '16px' }}>

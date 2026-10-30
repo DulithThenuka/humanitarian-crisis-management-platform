@@ -45,7 +45,8 @@ import './AssistanceRequestDetailPage.css';
 export const AssistanceRequestDetailPage = ({ 
   isEmbedded = false,
   onNavigateTab,
-  onOpenMap
+  onOpenMap,
+  requestId = 'REQ-2026-01842'
 }) => {
   const navigate = useNavigate();
   const { showAlert } = useAlert();
@@ -225,7 +226,7 @@ export const AssistanceRequestDetailPage = ({
       <div className="req-header-section">
         <div className="req-header-row-top">
           <div className="req-title-cluster">
-            <h1 className="req-page-title">Request #REQ-2026-01842</h1>
+            <h1 className="req-page-title">Request #{requestId}</h1>
             <span className="req-badge-review">{requestStatus}</span>
             <span className="req-badge-critical">
               <Star size={12} fill="#ffffff" stroke="#ffffff" />
