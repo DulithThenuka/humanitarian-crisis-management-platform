@@ -49,6 +49,7 @@ export const AppRoutes = () => {
       <Route path="/landing" element={<LandingHomePage />} />
       <Route path="/dashboard" element={<DashboardOverviewPage />} />
       <Route path="/coordinator/dashboard" element={<DashboardOverviewPage />} />
+      <Route path="/coordinator/resources" element={<DashboardOverviewPage initialTab="resources" />} />
       <Route path="/coordinator/requests" element={<DashboardOverviewPage />} />
       <Route path="/coordinator/requests/:id" element={<DashboardOverviewPage />} />
       <Route path="/requests/:id" element={<DashboardOverviewPage />} />
