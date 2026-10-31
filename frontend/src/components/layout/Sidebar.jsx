@@ -20,6 +20,7 @@ export const Sidebar = () => {
     { label: 'Evacuee Allocation', to: '/shelters/allocation', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
     { label: 'Volunteer Roster', to: '/volunteers/roster', roles: ['Coordinator', 'Admin'] },
     { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
+    { label: 'Notifications', to: '/coordinator/notifications', roles: ['Coordinator', 'Admin'] },
   ];
 
   const allowedLinks = links.filter(l => !role || l.roles.includes(role));

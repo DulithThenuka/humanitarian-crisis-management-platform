@@ -14,7 +14,10 @@ function AppLayout() {
     location.pathname === '/dashboard' ||
     location.pathname.startsWith('/coordinator') || 
     location.pathname.startsWith('/audit') ||
+    location.pathname.startsWith('/reports') ||
+    location.pathname.startsWith('/notifications') ||
     location.pathname.startsWith('/ai-operations') ||
+    location.pathname.startsWith('/ai-ops') ||
     location.pathname.startsWith('/ai-workspaces') ||
     location.pathname.startsWith('/ai-governance') ||
     location.pathname.startsWith('/map') ||

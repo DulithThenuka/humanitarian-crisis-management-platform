@@ -56,6 +56,7 @@ import { ReportsAnalyticsView } from "../reports-and-analysis/ReportsAnalyticsVi
 import { OperationalMapView } from "../map/OperationalMapView";
 import { INITIAL_AUDIT_DATA } from "../audit/AuditCenterPage";
 import { AIOperationsContainer } from "../ai-operations/AIOperationsContainer";
+import { NotificationCenterContainer } from "../notifications/NotificationCenterContainer";
 
 import './DashboardOverviewPage.css';
 
@@ -749,7 +750,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
   const searchParams = new URLSearchParams(location.search);
   const tabFromQuery = searchParams.get('tab');
   const [activeNav, setActiveNav] = useState(
-    tabFromQuery || (location.pathname.includes('reports') ? 'reports' : location.pathname.includes('ai-ops') || location.pathname.includes('ai-operations') ? 'ai-ops' : location.pathname.includes('maps') ? 'maps' : initialTab)
+    tabFromQuery || (location.pathname.includes('notifications') ? 'notifications' : location.pathname.includes('reports') ? 'reports' : location.pathname.includes('ai-ops') || location.pathname.includes('ai-operations') ? 'ai-ops' : location.pathname.includes('maps') ? 'maps' : initialTab)
   );
   const [searchVal, setSearchVal] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('Western Province');
@@ -904,6 +905,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
     if (activeNav === 'audit') return 'Governance & Audit Center';
     if (activeNav === 'maps') return 'Operational GIS & Logistics Map';
     if (activeNav === 'ai-ops') return 'AI Decision-Support System';
+    if (activeNav === 'notifications') return 'Notification Centre';
     return 'Crisis Command Center';
   };
 
@@ -912,6 +914,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
     if (activeNav === 'audit') return 'Cryptographically verifiable tracking of AI recommendations & decisions';
     if (activeNav === 'maps') return 'Geospatial service coverage, road routing, and proximity matching';
     if (activeNav === 'ai-ops') return 'Human-in-the-loop triage, automated classification, and model governance';
+    if (activeNav === 'notifications') return 'Manage multi-channel crisis broadcasts, recipient delivery telemetry, and dispatch failovers';
     return 'Real-time overview of humanitarian operations';
   };
 
@@ -973,7 +976,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
               </div>
             </div>
 
-            {activeNav !== 'audit' && activeNav !== 'maps' && (
+            {activeNav !== 'audit' && activeNav !== 'maps' && activeNav !== 'notifications' && (
               <div className="header-center-search">
                 <Search size={14} className="header-search-icon" />
                 <input
@@ -987,7 +990,12 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
             )}
 
             <div className="header-right-tools">
-              <button className="header-bell-btn" aria-label="Notifications">
+              <button 
+                className={`header-bell-btn ${activeNav === 'notifications' ? 'active' : ''}`} 
+                aria-label="Notifications"
+                onClick={() => setActiveNav('notifications')}
+                title="Go to Notification Centre"
+              >
                 <Bell size={18} />
                 <span className="header-bell-dot">3</span>
               </button>
@@ -1003,13 +1011,15 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
           </header>
         )}
 
-        <div className={`coord-body-padding ${activeNav === 'maps' ? 'maps-full-dock' : activeNav === 'ai-ops' ? 'p-0' : ''}`}>
+        <div className={`coord-body-padding ${activeNav === 'maps' ? 'maps-full-dock' : (activeNav === 'ai-ops' || activeNav === 'notifications') ? 'p-0' : ''}`}>
           {activeNav === 'reports' ? (
             <ReportsAnalyticsView />
           ) : activeNav === 'maps' ? (
             <OperationalMapView />
           ) : activeNav === 'ai-ops' ? (
             <AIOperationsContainer key="ai-ops" initialSubView="overview" />
+          ) : activeNav === 'notifications' ? (
+            <NotificationCenterContainer />
           ) : activeNav === 'audit' ? (
             <div className="audit-embedded-wrapper">
               <div className="audit-hero-banner">
