@@ -5,6 +5,8 @@ import { TrackRequestsPage } from './TrackRequestsPage';
 import { FindShelterPage } from './FindShelterPage';
 import { EmergencyAlertsPage } from './EmergencyAlertsPage';
 import { SafetyGuidePage } from './SafetyGuidePage';
+import { CitizenSupportPage } from './CitizenSupportPage';
+import { CitizenProfilePage } from './CitizenProfilePage';
 import { 
   Home, 
   PlusSquare, 
@@ -53,6 +55,8 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
     if (p.includes('/shelter')) return 'shelters';
     if (p.includes('/alert')) return 'alerts';
     if (p.includes('/safety')) return 'safety';
+    if (p.includes('/support') || p.includes('/help')) return 'support';
+    if (p.includes('/profile')) return 'profile';
     return initialTab;
   };
 
@@ -72,6 +76,10 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
       setActiveTab('alerts');
     } else if (p.includes('/safety')) {
       setActiveTab('safety');
+    } else if (p.includes('/support') || p.includes('/help')) {
+      setActiveTab('support');
+    } else if (p.includes('/profile')) {
+      setActiveTab('profile');
     } else if (p === '/citizen' || p === '/citizen/home' || p === '/citizen/portal') {
       setActiveTab('home');
     }
@@ -203,7 +211,14 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
             <ChevronDown size={14} />
           </button>
 
-          <div className="user-profile-badge">
+          <div 
+            className="user-profile-badge" 
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              setActiveTab('profile');
+              navigate('/citizen/profile');
+            }}
+          >
             <div className="user-info-left">
               <div className="user-avatar-circle">
                 <User size={18} color="#0f172a" />
@@ -245,6 +260,10 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
           <EmergencyAlertsPage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
         ) : activeTab === 'safety' ? (
           <SafetyGuidePage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
+        ) : activeTab === 'support' ? (
+          <CitizenSupportPage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
+        ) : activeTab === 'profile' ? (
+          <CitizenProfilePage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
         ) : (
           <>
             {/* Hero Section Banner */}
@@ -263,6 +282,17 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
                 placeholder="Search for shelters, alerts or support..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const q = searchQuery.toLowerCase();
+                    if (q.includes('support') || q.includes('help')) navigate('/citizen/support');
+                    else if (q.includes('shelter')) navigate('/citizen/shelters');
+                    else if (q.includes('alert')) navigate('/citizen/alerts');
+                    else if (q.includes('safe')) navigate('/citizen/safety');
+                    else if (q.includes('track') || q.includes('my')) navigate('/citizen/track');
+                    else navigate('/citizen/submit');
+                  }
+                }}
               />
             </div>
           </div>

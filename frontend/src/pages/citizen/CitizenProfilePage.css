@@ -1,0 +1,521 @@
+/* ==========================================================================
+   RELIEFCORE CITIZEN PROFILE PAGE STYLES
+   Visual design system aligned with ReliefCore Platform (#082128 / #0e6f76)
+   ========================================================================== */
+
+.profile-page-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0f172a;
+}
+
+/* ---------------------------------------------------------
+   1. Top Navigation Bar
+   --------------------------------------------------------- */
+.profile-top-nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.profile-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #0e6f76;
+  border: 1px solid #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.profile-back-btn:hover {
+  background: #f0fdfa;
+  border-color: #0e6f76;
+  color: #0f766e;
+  transform: translateX(-2px);
+}
+
+.profile-actions-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-profile-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #0e6f76;
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.btn-profile-edit:hover {
+  background: #0b595e;
+  box-shadow: 0 4px 12px rgba(14, 111, 118, 0.25);
+}
+
+.btn-profile-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.btn-profile-save:hover {
+  background: #059669;
+}
+
+.btn-profile-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-profile-cancel:hover {
+  background: #e2e8f0;
+}
+
+/* ---------------------------------------------------------
+   2. Hero Profile Banner
+   --------------------------------------------------------- */
+.profile-hero-card {
+  background: linear-gradient(135deg, #05161b 0%, #082128 55%, #0e6f76 100%);
+  border-radius: 16px;
+  padding: 28px 32px;
+  color: #ffffff;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(8, 33, 40, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.profile-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profile-avatar-large {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5eead4, #0e6f76);
+  border: 3px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #082128;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.profile-name-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.profile-meta-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.profile-tag-nic {
+  font-size: 12px;
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-tag-verified {
+  font-size: 11.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.profile-tag-hazard {
+  font-size: 11.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.profile-hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 12px 20px;
+  border-radius: 12px;
+}
+
+.profile-stat-box {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 18px;
+  font-weight: 800;
+  color: #5eead4;
+}
+
+.stat-label-text {
+  font-size: 11px;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------
+   3. Profile Tabs Switcher
+   --------------------------------------------------------- */
+.profile-tabs-row {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 12px;
+  margin-bottom: 22px;
+  overflow-x: auto;
+}
+
+.profile-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748b;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.profile-tab-btn:hover {
+  color: #0e6f76;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.profile-tab-btn.active {
+  background: #0e6f76;
+  color: #ffffff;
+  border-color: #0e6f76;
+  box-shadow: 0 2px 6px rgba(14, 111, 118, 0.3);
+}
+
+/* ---------------------------------------------------------
+   4. Section Card Layouts
+   --------------------------------------------------------- */
+.profile-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.profile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 14px;
+}
+
+.profile-card-title {
+  font-size: 16px;
+  font-weight: 750;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 768px) {
+  .profile-grid-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-field-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 6px;
+}
+
+.field-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  padding: 8px 0;
+}
+
+.field-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #0f172a;
+  outline: none;
+  background: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.field-input:focus {
+  border-color: #0e6f76;
+  box-shadow: 0 0 0 3px rgba(14, 111, 118, 0.12);
+}
+
+/* ---------------------------------------------------------
+   5. Family Roster Cards
+   --------------------------------------------------------- */
+.family-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.family-member-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  position: relative;
+  transition: all 0.18s ease;
+}
+
+.family-member-card:hover {
+  border-color: #0e6f76;
+  box-shadow: 0 4px 12px rgba(14, 111, 118, 0.08);
+}
+
+.member-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.member-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.member-relation-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.member-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #475569;
+}
+
+.member-badge-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.btn-add-member {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #ffffff;
+  color: #0e6f76;
+  border: 1.5px dashed #0e6f76;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-add-member:hover {
+  background: #f0fdfa;
+}
+
+/* ---------------------------------------------------------
+   6. Medical & Vulnerability Alert Box
+   --------------------------------------------------------- */
+.medical-alert-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #ef4444;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.medical-alert-banner p {
+  margin: 0;
+  font-size: 13px;
+  color: #991b1b;
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------
+   7. Notification Switches
+   --------------------------------------------------------- */
+.notif-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.notif-setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.setting-text-col h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 3px 0;
+}
+
+.setting-text-col p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.toggle-switch-btn {
+  width: 48px;
+  height: 26px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.toggle-switch-btn.on {
+  background: #0e6f76;
+}
+
+.toggle-knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch-btn.on .toggle-knob {
+  transform: translateX(22px);
+}
