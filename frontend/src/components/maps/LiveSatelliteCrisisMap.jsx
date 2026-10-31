@@ -109,7 +109,8 @@ export const LiveSatelliteCrisisMap = ({ onProvinceChange }) => {
       center: config.center,
       zoom: config.zoom,
       zoomControl: false, // Custom zoom buttons used
-      attributionControl: false
+      attributionControl: false,
+      scrollWheelZoom: false // Prevents accidental scroll zoom when scrolling dashboard
     });
 
     // Real High-Resolution Esri Satellite Imagery
@@ -163,6 +164,16 @@ export const LiveSatelliteCrisisMap = ({ onProvinceChange }) => {
       dashArray: '4, 4'
     }).bindPopup(`
       <div class="custom-map-popup">
+
+
+
+
+
+
+
+
+
+      
         <div class="popup-badge red">Level 4 Critical Alert</div>
         <h4>Kelani River Flood Zone</h4>
         <p>Severe inundation along river corridor. Evacuation orders active for lowlands.</p>
@@ -207,6 +218,7 @@ export const LiveSatelliteCrisisMap = ({ onProvinceChange }) => {
           <h4>${item.id}</h4>
           <p>${item.type}</p>
           <div class="popup-meta">Status: Under Review</div>
+          <a href="/coordinator/requests/${item.id}" style="display:inline-block; margin-top:8px; padding:4px 8px; background:#0e6f76; color:#ffffff; border-radius:4px; font-size:11px; font-weight:600; text-decoration:none;">View Request Details &rarr;</a>
         </div>
       `);
       layerGroups.requests.addLayer(marker);
@@ -479,7 +491,10 @@ export const LiveSatelliteCrisisMap = ({ onProvinceChange }) => {
       </div>
 
       {/* Bottom Right Satellite Badge */}
-      <div className="map-satellite-badge">Satellite</div>
+      <div className="map-satellite-badge">
+        <span className="map-satellite-thumb-sq"></span>
+        <span>Satellite</span>
+      </div>
     </div>
   );
 };

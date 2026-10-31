@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { CitizenAssistanceRequestForm } from './CitizenAssistanceRequestForm';
+import { TrackRequestsPage } from './TrackRequestsPage';
+import { FindShelterPage } from './FindShelterPage';
+import { EmergencyAlertsPage } from './EmergencyAlertsPage';
+import { SafetyGuidePage } from './SafetyGuidePage';
 import { 
   Home, 
   PlusSquare, 
@@ -37,11 +42,40 @@ import robot3D from '../../assets/robot-3d.png';
 import familyPopout from '../../assets/family-popout.png';
 import './CitizenPortalPage.css';
 
-export const CitizenPortalPage = () => {
-  const [activeTab, setActiveTab] = useState('home');
+export const CitizenPortalPage = ({ initialTab = 'home' }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getInitialTab = () => {
+    const p = (location.pathname || '').toLowerCase().replace(/\/$/, '');
+    if (p.includes('/submit') || p.includes('/request-assistance')) return 'request';
+    if (p.includes('/track')) return 'requests';
+    if (p.includes('/shelter')) return 'shelters';
+    if (p.includes('/alert')) return 'alerts';
+    if (p.includes('/safety')) return 'safety';
+    return initialTab;
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLang, setSelectedLang] = useState('English');
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    const p = (location.pathname || '').toLowerCase().replace(/\/$/, '');
+    if (p.includes('/submit') || p.includes('/request-assistance')) {
+      setActiveTab('request');
+    } else if (p.includes('/track')) {
+      setActiveTab('requests');
+    } else if (p.includes('/shelter')) {
+      setActiveTab('shelters');
+    } else if (p.includes('/alert')) {
+      setActiveTab('alerts');
+    } else if (p.includes('/safety')) {
+      setActiveTab('safety');
+    } else if (p === '/citizen' || p === '/citizen/home' || p === '/citizen/portal') {
+      setActiveTab('home');
+    }
+  }, [location.pathname, initialTab]);
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/citizen' },
@@ -201,8 +235,20 @@ export const CitizenPortalPage = () => {
           </button>
         </header>
 
-        {/* Hero Section Banner */}
-        <section className="citizen-hero-card">
+        {activeTab === 'request' ? (
+          <CitizenAssistanceRequestForm onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
+        ) : activeTab === 'requests' ? (
+          <TrackRequestsPage />
+        ) : activeTab === 'shelters' ? (
+          <FindShelterPage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
+        ) : activeTab === 'alerts' ? (
+          <EmergencyAlertsPage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
+        ) : activeTab === 'safety' ? (
+          <SafetyGuidePage onBack={() => { setActiveTab('home'); navigate('/citizen'); }} />
+        ) : (
+          <>
+            {/* Hero Section Banner */}
+            <section className="citizen-hero-card">
           <div className="hero-text-block">
             <h1 className="hero-main-heading">How can we help you?</h1>
             <p className="hero-sub-text">
@@ -271,7 +317,12 @@ export const CitizenPortalPage = () => {
               </Link>
             </div>
 
-            <div className="request-summary-card">
+            <div 
+              className="request-summary-card"
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigate('/coordinator/requests/REQ-2026-01842')}
+              title="Click to view live tracking details for REQ-2026-01842"
+            >
               <div className="request-card-info-side">
                 <div className="request-red-bar"></div>
                 <div>
@@ -522,6 +573,8 @@ export const CitizenPortalPage = () => {
             <ArrowRight size={14} />
           </button>
         </section>
+          </>
+        )}
 
         {/* Floating 3D AI Assistant Widget */}
         <div className="floating-ai-widget" onClick={() => navigate('/citizen/support')} title="Talk with AI Support Assistant">

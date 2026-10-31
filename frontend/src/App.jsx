@@ -11,6 +11,8 @@ function AppLayout() {
   const location = useLocation();
   const isDedicatedLayout = 
     location.pathname === '/' || 
+    location.pathname === '/home' ||
+    location.pathname === '/landing' ||
     location.pathname === '/dashboard' ||
     location.pathname.startsWith('/coordinator') || 
     location.pathname.startsWith('/audit') ||
@@ -22,6 +24,17 @@ function AppLayout() {
     location.pathname.startsWith('/ai-governance') ||
     location.pathname.startsWith('/map') ||
     location.pathname.startsWith('/citizen') || 
+    location.pathname.startsWith('/citize') || 
+    location.pathname.startsWith('/alerts') || 
+    location.pathname.startsWith('/safety') || 
+    location.pathname.startsWith('/shelters') || 
+    location.pathname.startsWith('/track') || 
+    location.pathname.startsWith('/emergency') || 
+    location.pathname.startsWith('/assistance') || 
+    location.pathname.startsWith('/requests') ||
+    location.pathname === '/request-detail' ||
+    location.pathname === '/reports' ||
+    location.pathname === '/analytics' || 
     location.pathname === '/login' || 
     location.pathname === '/register';
 

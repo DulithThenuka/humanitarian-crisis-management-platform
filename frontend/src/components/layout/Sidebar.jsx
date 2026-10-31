@@ -8,10 +8,14 @@ export const Sidebar = () => {
   const role = user?.role;
 
   const links = [
-    { label: 'Citizen Portal', to: '/citizen/submit', roles: ['Citizen', 'Coordinator', 'Admin'] },
+    { label: 'Citizen Portal', to: '/citizen', roles: ['Citizen', 'Coordinator', 'Admin'] },
+    { label: 'Submit Request', to: '/citizen/submit', roles: ['Citizen', 'Coordinator', 'Admin'] },
     { label: 'My Requests', to: '/citizen/track', roles: ['Citizen', 'Coordinator', 'Admin'] },
     { label: 'Find Shelters', to: '/citizen/shelters', roles: ['Citizen', 'Coordinator', 'LogisticsManager', 'Volunteer', 'Admin'] },
     { label: 'Emergency Overview', to: '/coordinator/dashboard', roles: ['Coordinator', 'Admin'] },
+    { label: 'Assistance Requests', to: '/coordinator/requests', roles: ['Coordinator', 'Admin', 'Citizen'] },
+    { label: 'Operational Map', to: '/map', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
+    { label: 'Reports & Analytics', to: '/reports', roles: ['Coordinator', 'Admin'] },
     { label: 'Request Triage', to: '/coordinator/triage', roles: ['Coordinator', 'Admin'] },
     { label: 'AI Review & Governance', to: '/coordinator/ai-review', roles: ['Coordinator', 'Admin'] },
     { label: 'Resource Inventory', to: '/logistics/inventory', roles: ['LogisticsManager', 'Coordinator', 'Admin'] },
