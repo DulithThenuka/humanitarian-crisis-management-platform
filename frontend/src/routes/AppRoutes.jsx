@@ -58,6 +58,10 @@ export const AppRoutes = () => {
       <Route path="/coordinator/resources" element={<EmergencyCoordinatorPortal initialActiveTab="resources" />} />
       <Route path="/coordinator/shelters" element={<EmergencyCoordinatorPortal initialActiveTab="shelters" />} />
       <Route path="/coordinator/alerts" element={<EmergencyCoordinatorPortal initialActiveTab="alerts" />} />
+      <Route path="/coordinator/reports" element={<EmergencyCoordinatorPortal initialActiveTab="reports" />} />
+      <Route path="/coordinator/history" element={<EmergencyCoordinatorPortal initialActiveTab="history" />} />
+      <Route path="/coordinator/notifications" element={<EmergencyCoordinatorPortal initialActiveTab="notifications" />} />
+      <Route path="/coordinator/settings" element={<EmergencyCoordinatorPortal initialActiveTab="settings" />} />
       <Route path="/emergency-coordinator" element={<EmergencyCoordinatorPortal />} />
       <Route path="/emergency-coordinator/:tab" element={<EmergencyCoordinatorPortal />} />
 
@@ -69,11 +73,8 @@ export const AppRoutes = () => {
       <Route path="/requests/:id" element={<DashboardOverviewPage />} />
       <Route path="/request-detail" element={<DashboardOverviewPage />} />
       <Route path="/map" element={<DashboardOverviewPage />} />
-      <Route path="/reports" element={<DashboardOverviewPage />} />
       <Route path="/analytics" element={<DashboardOverviewPage />} />
-      <Route path="/coordinator/reports" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage initialTab="reports" /></ProtectedRoute>} />
       <Route path="/reports" element={<DashboardOverviewPage initialTab="reports" />} />
-      <Route path="/coordinator/notifications" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage initialTab="notifications" /></ProtectedRoute>} />
       <Route path="/notifications" element={<DashboardOverviewPage initialTab="notifications" />} />
       
       {/* Citizen routes */}

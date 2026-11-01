@@ -775,3 +775,201 @@ export const EMERGENCY_ALERTS_LIST = [
   }
 ];
 
+// Reports & Response Analytics Dataset (Screenshots 1 & 2)
+export const REPORTS_ANALYTICS_DATA = {
+  metrics: {
+    incomingRequests: { value: '1,284', trend: '↑ 12.4%', isPositive: true },
+    avgInitialReview: { value: '18m', target: 'Target: 20m' },
+    avgResolutionTime: { value: '9.4h', trend: '+ 1.2h' },
+    openVsResolved: { value: '38 / 62%', sub: 'Current period' },
+    resourceFulfillment: { value: '68%', sub: 'Approved needs' }
+  },
+  requestsOverTime: [
+    { time: '06', count: 14 },
+    { time: '08', count: 23 },
+    { time: '10', count: 17 },
+    { time: '12', count: 30 },
+    { time: '14', count: 24 },
+    { time: '16', count: 38 },
+    { time: '18', count: 29 },
+    { time: '20', count: 44 },
+    { time: '22', count: 39 },
+    { time: '00', count: 52, isPeak: true },
+    { time: '02', count: 42 },
+    { time: '04', count: 48 }
+  ],
+  priorityDistribution: {
+    total: '1,284',
+    slices: [
+      { name: 'Critical', pct: 17, count: 218, color: '#ef4444' },
+      { name: 'High', pct: 26, count: 334, color: '#f59e0b' },
+      { name: 'Medium', pct: 39, count: 501, color: '#0284c7' },
+      { name: 'Low', pct: 18, count: 231, color: '#64748b' }
+    ]
+  },
+  requestsByCategory: [
+    { category: 'Emergency Shelter', pct: 31, count: 398 },
+    { category: 'Drinking Water', pct: 24, count: 308 },
+    { category: 'Medicine', pct: 18, count: 231 },
+    { category: 'Food', pct: 16, count: 205 },
+    { category: 'Transport & other', pct: 11, count: 142 }
+  ],
+  operationalProgress: [
+    { label: 'Shelter occupancy trend', value: '82%', type: 'Measured', typeClass: 'pill-measured' },
+    { label: 'Volunteer task completion', value: '76%', type: 'Measured', typeClass: 'pill-measured' },
+    { label: 'Expected water shortage', value: '140 units', type: 'Estimate', typeClass: 'pill-estimate' },
+    { label: 'Resource dispatch completion', value: '53%', type: 'Measured', typeClass: 'pill-measured' }
+  ]
+};
+
+// Decision History Dataset (Screenshot 3)
+export const DECISION_HISTORY_DATA = {
+  summary: {
+    decisionsToday: 24,
+    aiReviews: 8,
+    escalations: 4
+  },
+  records: [
+    {
+      id: 'AUD-88219',
+      action: 'Resource allocation recommendation',
+      relatedRecord: 'RES-021',
+      coordinator: 'Maya Fernando',
+      status: 'Approved',
+      statusClass: 'pill-approved',
+      time: '09:56',
+      category: 'Resource'
+    },
+    {
+      id: 'AUD-88214',
+      action: 'AI recommendation review',
+      relatedRecord: 'AID-2051 / HMR-1042',
+      coordinator: 'Maya Fernando',
+      status: 'Accepted',
+      statusClass: 'pill-approved',
+      time: '09:51',
+      category: 'AI Review'
+    },
+    {
+      id: 'AUD-88206',
+      action: 'Request status changed',
+      relatedRecord: 'HMR-1039',
+      coordinator: 'Maya Fernando',
+      status: 'Verified',
+      statusClass: 'pill-approved',
+      time: '08:54',
+      category: 'Request'
+    },
+    {
+      id: 'AUD-88192',
+      action: 'Incident escalated',
+      relatedRecord: 'CR-2026-011',
+      coordinator: 'Ruwan Perera',
+      status: 'Escalated',
+      statusClass: 'pill-critical',
+      time: '08:22',
+      category: 'Incident'
+    },
+    {
+      id: 'AUD-88185',
+      action: 'Shelter capacity threshold raised',
+      relatedRecord: 'SH-008',
+      coordinator: 'Maya Fernando',
+      status: 'Approved',
+      statusClass: 'pill-approved',
+      time: '07:40',
+      category: 'Shelter'
+    },
+    {
+      id: 'AUD-88172',
+      action: 'Volunteer deployment priority override',
+      relatedRecord: 'VOL-0212',
+      coordinator: 'Maya Fernando',
+      status: 'Approved',
+      statusClass: 'pill-approved',
+      time: '07:15',
+      category: 'Volunteer'
+    }
+  ]
+};
+
+// Notifications & Reminders Dataset (Screenshot 4)
+export const NOTIFICATIONS_REMINDERS_DATA = {
+  summary: {
+    awaitingReview: 12,
+    alertsAttention: 3,
+    overdueActions: 5
+  },
+  records: [
+    {
+      id: 'REM-081',
+      reminder: 'Critical request awaiting review',
+      relatedRecord: 'HMR-1042',
+      timing: 'Due in 8 minutes',
+      status: 'Critical',
+      statusClass: 'pill-critical'
+    },
+    {
+      id: 'REM-078',
+      reminder: 'Draft alert requires completion',
+      relatedRecord: 'ALT-198',
+      timing: 'Updated 1 hour ago',
+      status: 'Warning',
+      statusClass: 'pill-warning'
+    },
+    {
+      id: 'REM-074',
+      reminder: 'Resource shortage unresolved',
+      relatedRecord: 'RES-021',
+      timing: '140 units outstanding',
+      status: 'Critical',
+      statusClass: 'pill-critical'
+    },
+    {
+      id: 'REM-069',
+      reminder: 'Incident update due',
+      relatedRecord: 'CR-2026-014',
+      timing: 'Due at 10:30',
+      status: 'Information',
+      statusClass: 'pill-info'
+    },
+    {
+      id: 'REM-064',
+      reminder: 'Shelter occupancy approaching 90%',
+      relatedRecord: 'SH-003',
+      timing: 'Updated 14 min ago',
+      status: 'Warning',
+      statusClass: 'pill-warning'
+    },
+    {
+      id: 'REM-058',
+      reminder: 'Volunteer shift handoff checklist',
+      relatedRecord: 'VOL-0184',
+      timing: 'Scheduled 11:00',
+      status: 'Information',
+      statusClass: 'pill-info'
+    }
+  ]
+};
+
+// Profile & Settings Default Data (Screenshot 5)
+export const PROFILE_SETTINGS_DATA = {
+  fullName: 'Maya Fernando',
+  role: 'Emergency Coordinator',
+  organization: 'National Relief Unit',
+  email: 'maya.fernando@example.test',
+  operationalArea: 'Western Province Flood Response',
+  language: 'English',
+  reviewReminder: '5 minutes before due',
+  compactDensity: 'Enabled',
+  permissions: [
+    'Review assigned assistance requests',
+    'Record human AI decisions',
+    'Coordinate operational resources',
+    'Create alerts within approval policy',
+    'View coordinator reports'
+  ],
+  restrictionNote: 'Administrator accounts, system-wide security, private credentials and audit modification.'
+};
+
+

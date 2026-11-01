@@ -1,0 +1,50 @@
+/* =========================================================
+   DECISION HISTORY VIEW STYLESHEET
+   RELIEFCORE Crisis Operations System - Modern Project Blue Theme
+   ========================================================= */
+
+.ec-history-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ec-hsum-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+  transition: all 0.2s ease;
+}
+
+.ec-hsum-card:hover {
+  border-color: #0284c7;
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.1);
+  transform: translateY(-2px);
+}
+
+.ec-hsum-lbl {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ec-hsum-val {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 768px) {
+  .ec-history-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

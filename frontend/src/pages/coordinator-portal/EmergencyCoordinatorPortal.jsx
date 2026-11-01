@@ -32,6 +32,10 @@ import { CrisisManagementView } from './crisis-management/CrisisManagementView';
 import { ResourceCoordinationView } from './resource-coordination/ResourceCoordinationView';
 import { ShelterVolunteerCoordinationView } from './shelter-volunteer/ShelterVolunteerCoordinationView';
 import { EmergencyAlertsView } from './emergency-alerts/EmergencyAlertsView';
+import { ReportsResponseAnalyticsView } from './reports/ReportsResponseAnalyticsView';
+import { DecisionHistoryView } from './decision-history/DecisionHistoryView';
+import { NotificationsRemindersView } from './notifications/NotificationsRemindersView';
+import { ProfileSettingsView } from './profile-settings/ProfileSettingsView';
 
 import './EmergencyCoordinatorPortal.css';
 
@@ -336,6 +340,32 @@ export const EmergencyCoordinatorPortal = ({
 
         {activeTab === 'alerts' && (
           <EmergencyAlertsView
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'reports' && (
+          <ReportsResponseAnalyticsView
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'history' && (
+          <DecisionHistoryView
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'notifications' && (
+          <NotificationsRemindersView
+            onOpenCaseReview={handleOpenCaseReview}
+            onNavigateTab={setActiveTab}
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'settings' && (
+          <ProfileSettingsView
             showToast={showToast}
           />
         )}
