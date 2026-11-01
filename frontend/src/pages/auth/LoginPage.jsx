@@ -28,7 +28,7 @@ export const LoginPage = () => {
       if (response?.succeeded) {
         login(response.data);
         showAlert("Login successful", "success");
-        navigate('/coordinator/dashboard');
+        navigate('/coordinator');
       } else {
         showAlert(response?.errors?.[0] || "Invalid credentials", "error");
       }
@@ -43,7 +43,7 @@ export const LoginPage = () => {
       };
       login(demoUser);
       showAlert("Logged in successfully (Demo Mode)", "success");
-      navigate('/coordinator/dashboard');
+      navigate('/coordinator');
     } finally {
       setLoading(false);
     }

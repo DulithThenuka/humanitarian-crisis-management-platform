@@ -125,7 +125,7 @@ export const LandingHomePage = () => {
     {
       title: 'Emergency Coordinator',
       desc: 'Live operational overview, automated AI triage review, priority queues, and incident management.',
-      path: '/coordinator/dashboard',
+      path: '/coordinator',
       badge: 'Command Center',
       icon: Radio,
       color: '#0284c7',

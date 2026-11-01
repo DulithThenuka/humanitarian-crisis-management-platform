@@ -18,6 +18,7 @@ import { FindShelterPage } from '../pages/citizen/FindShelterPage';
 
 // Coordinator Pages
 import { DashboardOverviewPage } from '../pages/coordinator/DashboardOverviewPage';
+import { EmergencyCoordinatorPortal } from '../pages/coordinator-portal/EmergencyCoordinatorPortal';
 import { RequestTriagePage } from '../pages/coordinator/RequestTriagePage';
 import { AIDecisionReviewPage } from '../pages/coordinator/AIDecisionReviewPage';
 import { AssistanceRequestDetailPage } from '../pages/coordinator/AssistanceRequestDetailPage';
@@ -47,8 +48,19 @@ export const AppRoutes = () => {
       <Route path="/" element={<LandingHomePage />} />
       <Route path="/home" element={<LandingHomePage />} />
       <Route path="/landing" element={<LandingHomePage />} />
+
+      {/* Emergency Coordinator Portal (HumanAid / Western Province Operations) */}
+      <Route path="/coordinator" element={<EmergencyCoordinatorPortal />} />
+      <Route path="/coordinator/portal" element={<EmergencyCoordinatorPortal />} />
+      <Route path="/coordinator/overview" element={<EmergencyCoordinatorPortal initialActiveTab="overview" />} />
+      <Route path="/coordinator/review" element={<EmergencyCoordinatorPortal initialActiveTab="review" />} />
+      <Route path="/coordinator/review/:id" element={<EmergencyCoordinatorPortal initialActiveTab="review" />} />
+      <Route path="/emergency-coordinator" element={<EmergencyCoordinatorPortal />} />
+      <Route path="/emergency-coordinator/:tab" element={<EmergencyCoordinatorPortal />} />
+
       <Route path="/dashboard" element={<DashboardOverviewPage />} />
       <Route path="/coordinator/dashboard" element={<DashboardOverviewPage />} />
+
       <Route path="/coordinator/requests" element={<DashboardOverviewPage />} />
       <Route path="/coordinator/requests/:id" element={<DashboardOverviewPage />} />
       <Route path="/requests/:id" element={<DashboardOverviewPage />} />
