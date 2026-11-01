@@ -90,6 +90,8 @@ export const AppRoutes = () => {
       {/* Auth routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/signup" element={<RegisterPage />} />
+      <Route path="/sign-up" element={<RegisterPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
       {/* Coordinator routes */}

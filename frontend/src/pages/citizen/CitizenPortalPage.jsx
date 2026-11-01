@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { CitizenAssistanceRequestForm } from './CitizenAssistanceRequestForm';
 import { TrackRequestsPage } from './TrackRequestsPage';
 import { FindShelterPage } from './FindShelterPage';
@@ -47,6 +48,7 @@ import './CitizenPortalPage.css';
 export const CitizenPortalPage = ({ initialTab = 'home' }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   const getInitialTab = () => {
     const p = (location.pathname || '').toLowerCase().replace(/\/$/, '');
@@ -224,11 +226,17 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
                 <User size={18} color="#0f172a" />
               </div>
               <div className="user-details">
-                <span className="user-name">Dinithi Perera</span>
-                <span className="user-role">Citizen</span>
+                <span className="user-name">{user?.fullName || 'Dinithi Perera'}</span>
+                <span className="user-role">{user?.role || 'Citizen'}</span>
               </div>
             </div>
             <ChevronRight size={16} color="#94a3b8" />
+          </div>
+
+          <div className="citizen-auth-links-row">
+            <Link to="/login" className="citizen-auth-link" title="Sign In to another account">Sign In</Link>
+            <span className="citizen-auth-sep">•</span>
+            <Link to="/signup" className="citizen-auth-link" title="Register a new citizen or responder account">Sign Up</Link>
           </div>
         </div>
       </aside>

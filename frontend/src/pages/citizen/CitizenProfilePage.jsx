@@ -26,6 +26,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useAlert } from '../../context/AlertContext';
+import { useAuth } from '../../context/AuthContext';
 import './CitizenProfilePage.css';
 
 const DEFAULT_PROFILE = {
@@ -138,6 +139,18 @@ export const CitizenProfilePage = ({ onBack }) => {
   useEffect(() => {
     setEditFormData(profile);
   }, [profile]);
+
+  const { user } = useAuth();
+  useEffect(() => {
+    if (user?.fullName && user.fullName !== 'Amara Chen') {
+      setProfile(prev => ({
+        ...prev,
+        fullName: user.fullName,
+        email: user.email || prev.email,
+        phone: user.phoneNumber || prev.phone
+      }));
+    }
+  }, [user]);
 
   const handleSaveProfile = () => {
     setProfile(editFormData);

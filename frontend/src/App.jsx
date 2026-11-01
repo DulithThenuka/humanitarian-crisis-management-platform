@@ -33,7 +33,9 @@ function AppLayout() {
     location.pathname === '/reports' ||
     location.pathname === '/analytics' || 
     location.pathname === '/login' || 
-    location.pathname === '/register';
+    location.pathname === '/register' ||
+    location.pathname === '/signup' ||
+    location.pathname === '/sign-up';
 
   if (isDedicatedLayout) {
     return (

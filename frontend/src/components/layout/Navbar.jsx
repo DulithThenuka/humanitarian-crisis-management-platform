@@ -55,8 +55,8 @@ export const Navbar = () => {
             <Link to="/login" style={{ textDecoration: 'none' }}>
               <Button variant="outline" style={{ padding: '6px 14px', fontSize: '12px' }}>Login</Button>
             </Link>
-            <Link to="/register" style={{ textDecoration: 'none' }}>
-              <Button variant="primary" style={{ padding: '6px 14px', fontSize: '12px' }}>Register</Button>
+            <Link to="/signup" style={{ textDecoration: 'none' }}>
+              <Button variant="primary" style={{ padding: '6px 14px', fontSize: '12px' }}>Sign Up</Button>
             </Link>
           </div>
         )}

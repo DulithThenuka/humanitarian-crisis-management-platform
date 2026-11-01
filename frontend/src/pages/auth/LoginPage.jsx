@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ChevronDown } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 import { authService } from '../../services/authService';
@@ -64,11 +64,13 @@ export const LoginPage = () => {
       <section className="login-hero">
         {/* Brand Header */}
         <div className="hero-brand">
-          <img
-            src={reliefcoreLogoWhite}
-            alt="RELIEFCORE Humanitarian Operations"
-            className="hero-brand-logo-img"
-          />
+          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Return to Homepage">
+            <img
+              src={reliefcoreLogoWhite}
+              alt="RELIEFCORE Humanitarian Operations"
+              className="hero-brand-logo-img"
+            />
+          </Link>
         </div>
 
         {/* Center Main Slogan */}
@@ -105,13 +107,20 @@ export const LoginPage = () => {
         <div style={{ height: '10px' }}></div>
 
         <div className="login-form-container">
+          <Link to="/" className="auth-back-link" title="Return to Homepage">
+            <ArrowLeft size={15} />
+            <span>Back to Homepage</span>
+          </Link>
+
           <div className="login-header">
             <div className="login-brand-badge">
-              <img
-                src={reliefcoreLogo}
-                alt="RELIEFCORE Humanitarian Operations"
-                className="login-brand-img"
-              />
+              <Link to="/" title="Return to Homepage">
+                <img
+                  src={reliefcoreLogo}
+                  alt="RELIEFCORE Humanitarian Operations"
+                  className="login-brand-img"
+                />
+              </Link>
             </div>
             <h2 className="login-title">Welcome back</h2>
             <p className="login-subtitle">Secure access to humanitarian operations</p>
@@ -229,6 +238,14 @@ export const LoginPage = () => {
               </svg>
               <span>Microsoft</span>
             </button>
+          </div>
+
+          {/* Sign Up Link */}
+          <div className="signup-prompt-row">
+            <span>Don't have an account?</span>
+            <Link to="/signup" className="signup-link" id="signup-nav-link">
+              Sign up
+            </Link>
           </div>
 
           {/* Citizen Portal Link */}
