@@ -55,6 +55,7 @@ import { VolunteerRosterPage } from "../volunteers/VolunteerRosterPage";
 import { AllocationDispatchPage } from "../logistics/AllocationDispatchPage";
 import { AIDecisionReviewPage } from "./AIDecisionReviewPage";
 import { AIOperationsContainer } from "../ai-operations/AIOperationsContainer";
+import { NotificationCenterContainer } from "../notifications/NotificationCenterContainer";
 
 import './DashboardOverviewPage.css';
 
@@ -123,6 +124,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
   const getInitialActiveNav = () => {
     if (tabFromQuery) return tabFromQuery;
     if (params.id) return 'requests';
+    if (location.pathname.includes('notifications')) return 'notifications';
     if (location.pathname.startsWith('/map')) return 'maps';
     if (location.pathname.includes('reports') || location.pathname.includes('analytics')) return 'reports';
     if (location.pathname.includes('resource') || location.pathname.includes('inventory')) return 'resources';
@@ -369,9 +371,9 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
     if (activeNav === 'shelters') return 'Shelter Directory & Capacity';
     if (activeNav === 'volunteers') return 'Volunteer Operations Roster';
     if (activeNav === 'donations') return 'Supply Dispatch & Allocation';
-    if (activeNav === 'ai-ops') return 'AI Decision Review & Governance';
+    if (activeNav === 'ai-ops') return 'AI Decision-Support System';
     if (activeNav === 'crisis') return 'Crisis Event Management';
-    if (activeNav === 'notifications') return 'Operational Notifications';
+    if (activeNav === 'notifications') return 'Notification Centre';
     if (activeNav === 'settings') return 'Platform Configuration & Settings';
     return 'Crisis Command Center';
   };
@@ -384,9 +386,9 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
     if (activeNav === 'shelters') return 'Evacuation centers, shelter capacity, and occupancy monitoring';
     if (activeNav === 'volunteers') return 'Certified field responders, skill sets, and deployment schedules';
     if (activeNav === 'donations') return 'Multi-constraint relief dispatch and convoy distribution';
-    if (activeNav === 'ai-ops') return 'Human-in-the-loop review board for automated AI incident scoring';
+    if (activeNav === 'ai-ops') return 'Human-in-the-loop triage, automated classification, and model governance';
     if (activeNav === 'crisis') return 'Active incident declarations, hazard zones, and severity triage';
-    if (activeNav === 'notifications') return 'Urgent incident dispatch pings and SLA breach alerts';
+    if (activeNav === 'notifications') return 'Manage multi-channel crisis broadcasts, recipient delivery telemetry, and dispatch failovers';
     if (activeNav === 'settings') return 'System parameters, governance rules, and API connections';
     return 'Real-time overview of humanitarian operations';
   };
@@ -495,7 +497,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
             </div>
           )}
 
-          {activeNav !== 'audit' && activeNav !== 'maps' && (
+          {activeNav !== 'audit' && activeNav !== 'maps' && activeNav !== 'notifications' && (
             <div className="header-center-search">
               <Search size={14} className="header-search-icon" />
               <input
@@ -509,7 +511,12 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
           )}
 
           <div className="header-right-tools">
-            <button className="header-bell-btn" aria-label="Notifications">
+            <button 
+              className={`header-bell-btn ${activeNav === 'notifications' ? 'active' : ''}`} 
+              aria-label="Notifications"
+              onClick={() => setActiveNav('notifications')}
+              title="Go to Notification Centre"
+            >
               <Bell size={18} />
               <span className="header-bell-dot">{activeNav === 'requests' && requestViewMode === 'detail' ? '1' : '3'}</span>
             </button>
@@ -525,7 +532,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
         </header>
 
         {/* Content Body */}
-        <div className={`coord-body-padding ${activeNav === 'maps' ? 'maps-full-dock' : ''} ${activeNav === 'requests' ? 'requests-full-dock' : ''}`}>
+        <div className={`coord-body-padding ${activeNav === 'maps' ? 'maps-full-dock' : ''} ${activeNav === 'requests' ? 'requests-full-dock' : ''} ${(activeNav === 'ai-ops' || activeNav === 'notifications') ? 'p-0' : ''}`}>
           {activeNav === 'requests' ? (
             requestViewMode === 'detail' ? (
               <AssistanceRequestDetailPage 
@@ -564,6 +571,8 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
             <AllocationDispatchPage />
           ) : activeNav === 'ai-ops' ? (
             <AIOperationsContainer key="ai-ops" initialSubView="overview" />
+          ) : activeNav === 'notifications' ? (
+            <NotificationCenterContainer />
           ) : activeNav === 'crisis' ? (
             <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -597,44 +606,11 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
                     <span style={{ color: '#94a3b8', fontSize: '11px' }}>Southern Coastal Belt</span>
                   </div>
                   <h3 style={{ color: '#f8fafc', fontSize: '15px', margin: '0 0 8px 0' }}>Coastal Surge - Southern Province</h3>
-                  <p style={{ color: '#94a3b8', fontSize: '12px', lineHeight: 1.4 }}>High tide warnings in Galle and Matara districts. Fisherfolk pre-evacuation staged.</p>
+                  <p style={{ color: '#94a3b8', fontSize: 1.4 }}>High tide warnings in Galle and Matara districts. Fisherfolk pre-evacuation staged.</p>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                     <button onClick={() => setActiveNav('maps')} style={{ background: '#334155', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>View on Map</button>
                     <button onClick={() => setActiveNav('shelters')} style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>Check Shelters</button>
                   </div>
-                </div>
-              </div>
-            </div>
-          ) : activeNav === 'notifications' ? (
-            <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '16px' }}>Operational Notifications & Alerts (3 Unread)</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ background: '#0f172a', borderLeft: '4px solid #ef4444', padding: '14px', borderRadius: '6px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: '#94a3b8' }}>
-                    <span style={{ color: '#ef4444', fontWeight: 700 }}>CRITICAL INCIDENT</span>
-                    <span>2 min ago</span>
-                  </div>
-                  <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '13px', marginTop: '4px' }}>Request #REQ-2026-01842 requires urgent medical team dispatch</div>
-                  <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>Trapped resident on upper terrace with medical emergency in Kelani Flood Zone.</div>
-                  <button onClick={() => { setSelectedRequestId('REQ-2026-01842'); setRequestViewMode('detail'); setActiveNav('requests'); }} style={{ background: '#0e6f76', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer', marginTop: '8px' }}>Open Request</button>
-                </div>
-                <div style={{ background: '#0f172a', borderLeft: '4px solid #f97316', padding: '14px', borderRadius: '6px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: '#94a3b8' }}>
-                    <span style={{ color: '#f97316', fontWeight: 700 }}>SLA BREACH ALERT</span>
-                    <span>14 min ago</span>
-                  </div>
-                  <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '13px', marginTop: '4px' }}>Shelter allocation overdue in Gampaha District Zone B</div>
-                  <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>Family of 6 awaiting shelter unit dispatch. Response threshold exceeded.</div>
-                  <button onClick={() => setActiveNav('shelters')} style={{ background: '#334155', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer', marginTop: '8px' }}>View Shelters</button>
-                </div>
-                <div style={{ background: '#0f172a', borderLeft: '4px solid #0284c7', padding: '14px', borderRadius: '6px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: '#94a3b8' }}>
-                    <span style={{ color: '#0284c7', fontWeight: 700 }}>INVENTORY NOTICE</span>
-                    <span>42 min ago</span>
-                  </div>
-                  <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '13px', marginTop: '4px' }}>Drinking water supplies below minimum safety threshold at Kandy Depot</div>
-                  <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>Current stock: 400 bottles (Threshold: 1,000). Automated restock requisition staged.</div>
-                  <button onClick={() => setActiveNav('resources')} style={{ background: '#334155', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer', marginTop: '8px' }}>Check Inventory</button>
                 </div>
               </div>
             </div>
