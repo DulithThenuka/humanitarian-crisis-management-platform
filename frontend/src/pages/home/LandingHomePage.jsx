@@ -265,6 +265,12 @@ export const LandingHomePage = () => {
               <span className="lnd-status-beacon"></span>
               <span>LIVE OPS</span>
             </div>
+            <Link to="/login" className="lnd-nav-auth-link" title="Sign In to Platform">
+              Sign In
+            </Link>
+            <Link to="/signup" className="lnd-nav-signup-link" title="Create Citizen or Volunteer Account">
+              Sign Up
+            </Link>
             <Link to="/citizen/submit" className="lnd-btn-request-nav">
               <span>Request Assistance</span>
               <ArrowRight size={14} />
@@ -340,6 +346,13 @@ export const LandingHomePage = () => {
                 <span>How It Works</span>
                 <ChevronRight size={14} />
               </button>
+            </div>
+
+            {/* Quick Signup Prompt */}
+            <div className="lnd-hero-auth-hint">
+              <span>New to RELIEFCORE? </span>
+              <Link to="/signup">Create an Account (Sign Up)</Link>
+              <span> to manage disaster requests or join field responder teams.</span>
             </div>
 
             {/* Language Selection Bar */}
@@ -808,6 +821,7 @@ export const LandingHomePage = () => {
                 <li><Link to="/citizen/track">Track Request Ticket</Link></li>
                 <li><Link to="/citizen/shelters">Find Evacuation Shelters</Link></li>
                 <li><Link to="/citizen/alerts">Weather & Flood Alerts</Link></li>
+                <li><Link to="/signup">Citizen Registration (Sign Up)</Link></li>
                 <li><button onClick={() => setShowSafetyModal(true)} className="lnd-footer-link-btn">Flood Safety Protocols</button></li>
               </ul>
             </div>
@@ -821,6 +835,7 @@ export const LandingHomePage = () => {
                 <li><Link to="/logistics/inventory">Relief Inventory & Convoys</Link></li>
                 <li><Link to="/shelters/directory">Shelter Bed Management</Link></li>
                 <li><Link to="/volunteers/roster">Volunteer Response Roster</Link></li>
+                <li><Link to="/signup">Join as Field Volunteer (Sign Up)</Link></li>
               </ul>
             </div>
 
@@ -864,7 +879,9 @@ export const LandingHomePage = () => {
               <span>•</span>
               <button onClick={() => setShowHowItWorksModal(true)}>How It Works</button>
               <span>•</span>
-              <Link to="/login">Coordinator Login</Link>
+              <Link to="/login">Sign In</Link>
+              <span>•</span>
+              <Link to="/signup">Create Account (Sign Up)</Link>
             </div>
           </div>
         </div>
@@ -920,6 +937,19 @@ export const LandingHomePage = () => {
                   </div>
                 );
               })}
+            </div>
+
+            <div className="lnd-modal-footer-auth">
+              <span>Ready to register your personal or volunteer account?</span>
+              <button
+                className="lnd-btn-modal-signup"
+                onClick={() => {
+                  setShowRoleModal(false);
+                  navigate('/signup');
+                }}
+              >
+                Sign Up Now
+              </button>
             </div>
           </div>
         </div>

@@ -96,12 +96,20 @@ export const AppRoutes = () => {
       <Route path="/citizen/safetyguide" element={<CitizenPortalPage initialTab="safety" />} />
       <Route path="/safety" element={<CitizenPortalPage initialTab="safety" />} />
       <Route path="/safety-guide" element={<CitizenPortalPage initialTab="safety" />} />
+      <Route path="/citizen/support" element={<CitizenPortalPage initialTab="support" />} />
+      <Route path="/citizen/help" element={<CitizenPortalPage initialTab="support" />} />
+      <Route path="/support" element={<CitizenPortalPage initialTab="support" />} />
+      <Route path="/help" element={<CitizenPortalPage initialTab="support" />} />
+      <Route path="/citizen/profile" element={<CitizenPortalPage initialTab="profile" />} />
+      <Route path="/profile" element={<CitizenPortalPage initialTab="profile" />} />
       <Route path="/requests/new" element={<SubmitRequestPage />} />
       <Route path="/assistance-request" element={<SubmitRequestPage />} />
 
       {/* Auth routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/signup" element={<RegisterPage />} />
+      <Route path="/sign-up" element={<RegisterPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
       {/* Coordinator routes */}
