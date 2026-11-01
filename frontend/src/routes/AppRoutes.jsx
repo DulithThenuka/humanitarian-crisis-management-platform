@@ -55,6 +55,9 @@ export const AppRoutes = () => {
       <Route path="/coordinator/overview" element={<EmergencyCoordinatorPortal initialActiveTab="overview" />} />
       <Route path="/coordinator/review" element={<EmergencyCoordinatorPortal initialActiveTab="review" />} />
       <Route path="/coordinator/review/:id" element={<EmergencyCoordinatorPortal initialActiveTab="review" />} />
+      <Route path="/coordinator/resources" element={<EmergencyCoordinatorPortal initialActiveTab="resources" />} />
+      <Route path="/coordinator/shelters" element={<EmergencyCoordinatorPortal initialActiveTab="shelters" />} />
+      <Route path="/coordinator/alerts" element={<EmergencyCoordinatorPortal initialActiveTab="alerts" />} />
       <Route path="/emergency-coordinator" element={<EmergencyCoordinatorPortal />} />
       <Route path="/emergency-coordinator/:tab" element={<EmergencyCoordinatorPortal />} />
 
@@ -124,7 +127,6 @@ export const AppRoutes = () => {
       {/* Audit routes */}
       <Route path="/audit" element={<AuditCenterPage />} />
       <Route path="/coordinator/audit" element={<AuditCenterPage />} />
-      <Route path="/coordinator/alerts" element={<Navigate to="/coordinator/dashboard" replace />} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />

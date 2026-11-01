@@ -135,10 +135,7 @@ export const CoordinatorSidebar = ({
 
           <button
             className={`ec-nav-link-btn ${activeTab === 'resources' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('resources');
-              navigate('/logistics/inventory');
-            }}
+            onClick={() => setActiveTab('resources')}
           >
             <div className="ec-nav-item-left">
               <Package size={15} />
@@ -148,10 +145,7 @@ export const CoordinatorSidebar = ({
 
           <button
             className={`ec-nav-link-btn ${activeTab === 'shelters' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('shelters');
-              navigate('/shelters/directory');
-            }}
+            onClick={() => setActiveTab('shelters')}
           >
             <div className="ec-nav-item-left">
               <Users size={15} />
@@ -161,7 +155,7 @@ export const CoordinatorSidebar = ({
 
           <button
             className={`ec-nav-link-btn ${activeTab === 'alerts' ? 'active' : ''}`}
-            onClick={() => onShowAlertModal?.()}
+            onClick={() => setActiveTab('alerts')}
           >
             <div className="ec-nav-item-left">
               <Megaphone size={15} />

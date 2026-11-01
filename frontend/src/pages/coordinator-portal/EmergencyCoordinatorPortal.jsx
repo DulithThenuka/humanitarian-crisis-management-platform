@@ -29,6 +29,9 @@ import { AssistanceRequestsView } from './assistance-requests/AssistanceRequests
 import { RequestReviewView } from './request-review/RequestReviewView';
 import { AIDecisionSupportView } from './ai-decision-support/AIDecisionSupportView';
 import { CrisisManagementView } from './crisis-management/CrisisManagementView';
+import { ResourceCoordinationView } from './resource-coordination/ResourceCoordinationView';
+import { ShelterVolunteerCoordinationView } from './shelter-volunteer/ShelterVolunteerCoordinationView';
+import { EmergencyAlertsView } from './emergency-alerts/EmergencyAlertsView';
 
 import './EmergencyCoordinatorPortal.css';
 
@@ -315,6 +318,24 @@ export const EmergencyCoordinatorPortal = ({
               setShowImagePreview(true);
             }}
             onReviewAIRecommendation={() => setActiveTab('ai-support')}
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'resources' && (
+          <ResourceCoordinationView
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'shelters' && (
+          <ShelterVolunteerCoordinationView
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'alerts' && (
+          <EmergencyAlertsView
             showToast={showToast}
           />
         )}

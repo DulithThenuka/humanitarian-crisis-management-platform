@@ -483,3 +483,295 @@ export const CRISIS_INCIDENTS_DATA = [
     ]
   }
 ];
+
+// Resource Coordination Dataset (Screenshot 1)
+export const RESOURCE_COORDINATION_DATA = [
+  {
+    id: 'RES-001',
+    category: 'Drinking Water',
+    requested: 380,
+    unit: 'units',
+    available: 240,
+    allocated: 240,
+    outstanding: 140,
+    fulfillmentStatus: 'Shortage',
+    destination: 'Kelani East',
+    relatedRecord: 'RES-021 / HMR-1042',
+    priority: 'Critical'
+  },
+  {
+    id: 'RES-002',
+    category: 'Emergency Food Kits',
+    requested: 190,
+    unit: 'kits',
+    available: 320,
+    allocated: 160,
+    outstanding: 0,
+    fulfillmentStatus: 'Approved',
+    destination: 'Zone 03',
+    relatedRecord: 'REQ-302',
+    priority: 'High'
+  },
+  {
+    id: 'RES-003',
+    category: 'Medicine Packs',
+    requested: 75,
+    unit: 'packs',
+    available: 110,
+    allocated: 60,
+    outstanding: 0,
+    fulfillmentStatus: 'Dispatched',
+    destination: 'Wattala South',
+    relatedRecord: 'REQ-303',
+    priority: 'Critical'
+  },
+  {
+    id: 'RES-004',
+    category: 'Temporary Shelter Kits',
+    requested: 48,
+    unit: 'kits',
+    available: 52,
+    allocated: 32,
+    outstanding: 0,
+    fulfillmentStatus: 'Requested',
+    destination: 'Biyagama North',
+    relatedRecord: 'REQ-304',
+    priority: 'Medium'
+  },
+  {
+    id: 'RES-005',
+    category: 'Hygiene & Sanitation Packs',
+    requested: 120,
+    unit: 'kits',
+    available: 150,
+    allocated: 120,
+    outstanding: 0,
+    fulfillmentStatus: 'Delivered',
+    destination: 'Kelani West',
+    relatedRecord: 'REQ-305',
+    priority: 'Medium'
+  }
+];
+
+export const RESOURCE_DISTRIBUTION_STATUS = [
+  { stage: 'Requested', units: 430, total: 450, color: '#0284c7' },
+  { stage: 'Approved', units: 342, total: 450, color: '#0ea5e9' },
+  { stage: 'Dispatched', units: 228, total: 450, color: '#38bdf8' },
+  { stage: 'Delivered', units: 146, total: 450, color: '#10b981' }
+];
+
+// Shelter & Volunteer Coordination Dataset (Screenshot 2)
+export const SHELTERS_DATA = [
+  {
+    id: 'SH-008',
+    name: 'Kelani Community Centre',
+    status: 'Operational',
+    statusPillClass: 'pill-operational',
+    location: 'Kelani East',
+    updatedAgo: 'Updated 5 min ago',
+    occupancy: 164,
+    capacity: 200,
+    remaining: 36,
+    accessibility: 'Step-free access',
+    contact: '+94 11 254 7891'
+  },
+  {
+    id: 'SH-003',
+    name: 'Biyagama School Hall',
+    status: 'Near capacity',
+    statusPillClass: 'pill-warning',
+    location: 'Biyagama North',
+    updatedAgo: 'Updated 14 min ago',
+    occupancy: 194,
+    capacity: 220,
+    remaining: 26,
+    accessibility: 'Accessible toilets',
+    contact: '+94 11 254 8832'
+  },
+  {
+    id: 'SH-011',
+    name: 'Wattala Civic Centre',
+    status: 'Operational',
+    statusPillClass: 'pill-operational',
+    location: 'Wattala South',
+    updatedAgo: 'Updated 20 min ago',
+    occupancy: 112,
+    capacity: 180,
+    remaining: 68,
+    accessibility: 'Family areas',
+    contact: '+94 11 254 9920'
+  },
+  {
+    id: 'SH-015',
+    name: 'Peliyagoda Youth Center',
+    status: 'Operational',
+    statusPillClass: 'pill-operational',
+    location: 'Peliyagoda Central',
+    updatedAgo: 'Updated 42 min ago',
+    occupancy: 84,
+    capacity: 150,
+    remaining: 66,
+    accessibility: 'Medical bay equipped',
+    contact: '+94 11 254 3311'
+  }
+];
+
+export const VOLUNTEERS_DATA = [
+  {
+    ref: 'VOL-0184',
+    skills: 'Logistics, First Aid',
+    availability: 'Available',
+    availabilityClass: 'pill-available',
+    area: 'Kelani East',
+    task: 'Unassigned',
+    taskStatus: 'Available',
+    history: '12 completed'
+  },
+  {
+    ref: 'VOL-0212',
+    skills: 'Driving, Distribution',
+    availability: 'On assignment',
+    availabilityClass: 'pill-assignment',
+    area: 'Biyagama North',
+    task: 'Supply distribution',
+    taskStatus: 'In progress',
+    history: '8 completed'
+  },
+  {
+    ref: 'VOL-0261',
+    skills: 'Translation, Childcare',
+    availability: 'Available',
+    availabilityClass: 'pill-available',
+    area: 'Wattala South',
+    task: 'Unassigned',
+    taskStatus: 'Available',
+    history: '5 completed'
+  },
+  {
+    ref: 'VOL-0309',
+    skills: 'Boat Operations, Search & Rescue',
+    availability: 'Available',
+    availabilityClass: 'pill-available',
+    area: 'Kelani River Sector',
+    task: 'Unassigned',
+    taskStatus: 'Available',
+    history: '19 completed'
+  }
+];
+
+// Emergency Alerts Dataset (Screenshots 3, 4, 5)
+export const EMERGENCY_ALERTS_LIST = [
+  {
+    id: 'ALT-204',
+    title: 'Flood warning for low-lying Kelani East areas',
+    category: 'Flood warning',
+    severity: 'Critical',
+    severityClass: 'pill-critical',
+    area: 'Kelani East',
+    publication: 'Published',
+    tab: 'active',
+    createdBy: 'Maya Fernando',
+    lastUpdated: '5 min ago',
+    startTime: '02/18/2026 10:30 AM',
+    expiryTime: '02/18/2026 08:00 PM',
+    message: 'Water levels are expected to remain elevated. Avoid flooded roads and follow instructions from verified response teams.',
+    safetyInstructions: [
+      'Move essential medicines and documents to safety.',
+      'Do not walk or drive through flood water.',
+      'Use verified shelters only.'
+    ]
+  },
+  {
+    id: 'ALT-201',
+    title: 'Temporary road closure near Biyagama North',
+    category: 'Road closure',
+    severity: 'High',
+    severityClass: 'pill-high',
+    area: 'Biyagama North',
+    publication: 'Published',
+    tab: 'active',
+    createdBy: 'R. Perera',
+    lastUpdated: '32 min ago',
+    startTime: '02/18/2026 09:15 AM',
+    expiryTime: '02/18/2026 06:00 PM',
+    message: 'Bridge access restricted due to minor subsidence. Divert all emergency transit via bypass route B-4.',
+    safetyInstructions: [
+      'Follow detour signage posted at junction 4B.',
+      'Emergency vehicles maintain radio contact on Channel 3.'
+    ]
+  },
+  {
+    id: 'ALT-198',
+    title: 'Potable water distribution schedule for Wattala South',
+    category: 'Resource notice',
+    severity: 'Moderate',
+    severityClass: 'pill-moderate',
+    area: 'Wattala South',
+    publication: 'Draft',
+    tab: 'drafts',
+    createdBy: 'Maya Fernando',
+    lastUpdated: '1 hr ago',
+    startTime: '02/18/2026 01:00 PM',
+    expiryTime: '02/18/2026 07:00 PM',
+    message: 'Water bowsers will arrive at Community Ground from 13:00 to 19:00. Limit 20L per family unit.',
+    safetyInstructions: [
+      'Bring clean, sealed containers.',
+      'Prioritize elderly and pregnant residents in distribution queue.'
+    ]
+  },
+  {
+    id: 'ALT-195',
+    title: 'Night curfew advisory along riverbank settlements',
+    category: 'Civil safety',
+    severity: 'High',
+    severityClass: 'pill-high',
+    area: 'Kelani East - Riverbank',
+    publication: 'Draft',
+    tab: 'drafts',
+    createdBy: 'D. Senanayake',
+    lastUpdated: '2 hrs ago',
+    startTime: '02/18/2026 08:00 PM',
+    expiryTime: '02/19/2026 05:30 AM',
+    message: 'Precautionary curfew implemented from 20:00 to 05:30. River patrols active.',
+    safetyInstructions: [
+      'Remain indoors or within certified evacuation shelters.',
+      'Report any levee seepage immediately via DMC hotline 117.'
+    ]
+  },
+  {
+    id: 'ALT-192',
+    title: 'Scheduled power shutdown for transformer maintenance',
+    category: 'Infrastructure',
+    severity: 'Low',
+    severityClass: 'pill-low',
+    area: 'Biyagama Zone 2',
+    publication: 'Scheduled',
+    tab: 'scheduled',
+    createdBy: 'CEB Grid Controller',
+    lastUpdated: '3 hrs ago',
+    startTime: '02/19/2026 06:00 AM',
+    expiryTime: '02/19/2026 09:00 AM',
+    message: 'Controlled outage for emergency water pump tie-in.',
+    safetyInstructions: [
+      'Keep backup batteries charged.',
+      'Medical equipment users notify sector coordinator.'
+    ]
+  },
+  {
+    id: 'ALT-185',
+    title: 'Resolved: Kelani Bridge debris clearance completed',
+    category: 'Road update',
+    severity: 'Resolved',
+    severityClass: 'pill-resolved',
+    area: 'Kelani Central Bridge',
+    publication: 'Resolved',
+    tab: 'resolved',
+    createdBy: 'Road Development Authority',
+    lastUpdated: 'Yesterday',
+    startTime: '02/17/2026 08:00 AM',
+    expiryTime: '02/17/2026 04:00 PM',
+    message: 'All driftwood cleared. Dual carriageway reopened to normal traffic.',
+    safetyInstructions: ['Normal driving speeds permitted.']
+  }
+];
+
