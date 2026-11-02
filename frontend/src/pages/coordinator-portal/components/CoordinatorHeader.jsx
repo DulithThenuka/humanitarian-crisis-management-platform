@@ -22,13 +22,27 @@ export const CoordinatorHeader = ({
         return 'AI Decision Support & Priority Assessment';
       case 'crisis':
         return 'Crisis & Incident Management';
+      case 'resources':
+        return 'Resource Allocation & Equipment Tracking';
+      case 'shelters':
+        return 'Shelter Capacity & Volunteer Mobilization';
+      case 'alerts':
+        return 'Emergency Broadcast Alerts';
+      case 'reports':
+        return 'Response Analytics & Situation Reports';
+      case 'history':
+        return 'Coordinator Decision Audit History';
+      case 'notifications':
+        return 'Notifications & Action Reminders';
+      case 'settings':
+        return 'Coordinator Profile & Operational Settings';
       default:
         return 'Emergency Coordinator Overview';
     }
   };
 
   return (
-    <>
+    <div className="ec-fixed-navbar-wrapper">
       <header className="ec-top-header">
         <div className="ec-header-titles-col">
           <span className="ec-breadcrumb-tiny">EMERGENCY COORDINATOR PORTAL</span>
@@ -87,6 +101,6 @@ export const CoordinatorHeader = ({
           <strong>Coordinator prototype:</strong> All records are illustrative data. Actions are simulated locally and follow RELIEFCORE operational standards.
         </span>
       </div>
-    </>
+    </div>
   );
 };

@@ -42,7 +42,7 @@ function AppLayout() {
 
   if (isDedicatedLayout) {
     return (
-      <main style={{ minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
+      <main style={{ minHeight: '100vh', width: '100%', overflowX: 'clip' }}>
         <AppRoutes />
       </main>
     );

@@ -6,6 +6,7 @@ import {
   Eye
 } from 'lucide-react';
 import { AI_DECISION_SUPPORT_DATA } from '../data/coordinatorPortalData';
+import { ConsequentialActionModal } from '../components/modals/ConsequentialActionModal';
 import './AIDecisionSupportView.css';
 
 export const AIDecisionSupportView = ({
@@ -17,6 +18,30 @@ export const AIDecisionSupportView = ({
 }) => {
   const [humanFinalPriority, setHumanFinalPriority] = useState('Critical');
   const [humanReviewReason, setHumanReviewReason] = useState('');
+  
+  // Consequential Action Modal State
+  const [aiActionModal, setAiActionModal] = useState(null);
+  const [modalReason, setModalReason] = useState('');
+  const [modalConfirmedCheck, setModalConfirmedCheck] = useState(false);
+
+  const handleOpenAiModal = (type) => {
+    setAiActionModal(type);
+    setModalReason(humanReviewReason || '');
+    setModalConfirmedCheck(false);
+  };
+
+  const handleConfirmAiAction = () => {
+    if (aiActionModal === 'accept') {
+      onAcceptRecommendation?.(humanFinalPriority, modalReason);
+    } else if (aiActionModal === 'adjust') {
+      showToast(`Adjusted priority (${humanFinalPriority}) recorded in decision audit trail`, 'success');
+    } else if (aiActionModal === 'reject') {
+      showToast(`AI recommendation rejected with operational justification`, 'warning');
+    } else if (aiActionModal === 'escalate') {
+      showToast('Escalated for senior operations specialist review', 'info');
+    }
+    setAiActionModal(null);
+  };
 
   return (
     <div className="ec-portal-canvas">
@@ -205,26 +230,26 @@ export const AIDecisionSupportView = ({
             <div className="ec-authorised-actions-stack">
               <button
                 className="ec-btn-verify-primary"
-                onClick={() => onAcceptRecommendation(humanFinalPriority, humanReviewReason)}
+                onClick={() => handleOpenAiModal('accept')}
               >
                 Accept recommendation
               </button>
               <button
                 className="ec-btn-action-outline"
-                onClick={() => showToast('Adjusted priority saved to audit trail', 'info')}
+                onClick={() => handleOpenAiModal('adjust')}
               >
                 Save adjusted priority
               </button>
               <button
                 className="ec-btn-action-outline"
-                onClick={() => showToast('AI recommendation rejected with reason', 'warning')}
+                onClick={() => handleOpenAiModal('reject')}
               >
                 Reject AI recommendation
               </button>
               <button
                 className="ec-panel-link-btn"
                 style={{ textAlign: 'center', marginTop: '4px' }}
-                onClick={() => showToast('Escalated for senior operations specialist review')}
+                onClick={() => handleOpenAiModal('escalate')}
               >
                 Escalate for specialist review
               </button>
@@ -232,6 +257,27 @@ export const AIDecisionSupportView = ({
           </div>
         </div>
       </div>
+
+      {/* Consequential Action Confirmation Modal */}
+      <ConsequentialActionModal
+        isOpen={Boolean(aiActionModal)}
+        onClose={() => setAiActionModal(null)}
+        title={
+          aiActionModal === 'accept'
+            ? `Record ${humanFinalPriority} as the human-reviewed priority?`
+            : aiActionModal === 'adjust'
+            ? `Save ${humanFinalPriority} as the adjusted priority?`
+            : aiActionModal === 'reject'
+            ? `Reject AI recommendation for ${AI_DECISION_SUPPORT_DATA.assessmentId}?`
+            : 'Escalate AI assessment for specialist operations review?'
+        }
+        confirmVariant={aiActionModal === 'reject' ? 'danger' : 'primary'}
+        reason={modalReason}
+        setReason={setModalReason}
+        confirmedCheck={modalConfirmedCheck}
+        setConfirmedCheck={setModalConfirmedCheck}
+        onConfirm={handleConfirmAiAction}
+      />
     </div>
   );
 };

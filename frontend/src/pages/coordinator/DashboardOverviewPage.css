@@ -152,6 +152,10 @@
   justify-content: space-between;
   padding: 0 22px;
   box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .header-brand-title-wrap {
@@ -2157,6 +2161,10 @@
   justify-content: space-between;
   padding: 0 22px;
   box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .header-brand-title-wrap {
