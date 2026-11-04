@@ -36,6 +36,7 @@ import { ReportsResponseAnalyticsView } from './reports/ReportsResponseAnalytics
 import { DecisionHistoryView } from './decision-history/DecisionHistoryView';
 import { NotificationsRemindersView } from './notifications/NotificationsRemindersView';
 import { ProfileSettingsView } from './profile-settings/ProfileSettingsView';
+import { AIOperationsContainer } from '../ai-operations/AIOperationsContainer';
 
 import './EmergencyCoordinatorPortal.css';
 
@@ -247,6 +248,15 @@ export const EmergencyCoordinatorPortal = ({
     setNewAlertForm({ title: '', severity: 'Critical', area: 'Kelani East - Zone 03' });
     showToast('Emergency broadcast alert queued for dispatch!', 'success');
   };
+
+  if (activeTab === 'ai-ops') {
+    return (
+      <AIOperationsContainer 
+        initialSubView="overview" 
+        onBack={() => setActiveTab('overview')} 
+      />
+    );
+  }
 
   return (
     <div className="ec-portal-wrapper">

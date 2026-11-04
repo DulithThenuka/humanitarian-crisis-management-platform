@@ -1,714 +1,345 @@
 import React, { useState } from 'react';
 import { 
-  ChevronDown, 
   ChevronLeft, 
-  Copy, 
-  Lock, 
+  Home, 
   Sparkles, 
-  Plus, 
-  Truck, 
+  ShieldCheck, 
+  AlertTriangle, 
+  Clock, 
   Users, 
-  FileText, 
-  MapPin, 
-  Layers, 
+  Droplets, 
+  CheckCircle2, 
   ExternalLink,
-  Search,
-  Bell,
-  HelpCircle,
-  Check,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  Phone,
-  Radio,
-  FileCheck,
-  Share2,
-  Volume2,
-  Image,
-  RefreshCw,
-  X
+  Info,
+  Check
 } from 'lucide-react';
-import { MULTILINGUAL_TRANSLATIONS } from './aiOperationsData';
 
 export const AIDecisionReview = ({ 
-  caseId = 'REQ-2026-01842', 
-  queueData = [],
-  onUpdateQueueItem,
+  caseId = 'AID-2051', 
   onBackToQueue, 
-  onViewTrace,
   showToast 
 }) => {
-  // Find case in queueData or fallback
-  const currentCase = queueData.find(q => q.id === caseId) || {
-    id: caseId,
-    category: 'Medical Assistance',
-    location: 'Colombo 07 - Cinnamon Gardens',
-    priority: 'CRITICAL',
-    confidence: '94%',
-    urgencyScore: 92,
-    caller: 'Dr. Priyantha Silva',
-    phone: '+94 77 123 4567',
-    summary: 'Elderly care home with 6 trapped residents requiring continuous oxygen and insulin. Basement generator inundated.'
-  };
+  const [selectedDecision, setSelectedDecision] = useState('approve'); // 'approve' | 'modify' | 'reject' | 'defer'
+  const [reviewerNotes, setReviewerNotes] = useState('');
+  const [confirmedCheck, setConfirmedCheck] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showFullRequestModal, setShowFullRequestModal] = useState(false);
 
-  const [activeTab, setActiveTab] = useState('AI Analysis');
-  const [activeRecTab, setActiveRecTab] = useState('Resources');
-  const [selectedPriority, setSelectedPriority] = useState(currentCase.priority === 'CRITICAL' ? 'Critical' : 'High');
-  const [selectedDecision, setSelectedDecision] = useState('Modify');
-  const [selectedResources, setSelectedResources] = useState(['mobile-unit', 'ambulance']);
-  const [reasonText, setReasonText] = useState(
-    'Approved with modification. Send nearest available mobile medical unit and high-clearance ambulance. Monitor situation and update in 1 hour.'
-  );
+  const handleRecordDecision = () => {
+    if (!confirmedCheck) {
+      showToast?.('Please check the confirmation box before recording the decision', 'warning');
+      return;
+    }
 
-  // Multilingual state
-  const [selectedLanguage, setSelectedLanguage] = useState('English');
-  const [showLangMenu, setShowLangMenu] = useState(false);
-  const [copiedResponse, setCopiedResponse] = useState(false);
-  const [isRegeneratingResp, setIsRegeneratingResp] = useState(false);
-
-  // More Header dropdown
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const [savedSuccess, setSavedSuccess] = useState(false);
-
-  const toggleResource = (id) => {
-    setSelectedResources(prev => 
-      prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
-    );
-  };
-
-  const handleCopyResponse = () => {
-    const textToCopy = MULTILINGUAL_TRANSLATIONS[selectedLanguage] || MULTILINGUAL_TRANSLATIONS.English;
-    navigator.clipboard.writeText(textToCopy);
-    setCopiedResponse(true);
-    showToast?.('Citizen response text copied to clipboard', 'info');
-    setTimeout(() => setCopiedResponse(false), 2200);
-  };
-
-  const handleRegenerateResponse = () => {
-    setIsRegeneratingResp(true);
+    setIsSubmitting(true);
     setTimeout(() => {
-      setIsRegeneratingResp(false);
-      showToast?.('AI regenerated empathetic citizen notification with dynamic GPS ETA', 'success');
+      setIsSubmitting(false);
+      showToast?.(`Decision for ${caseId} (${selectedDecision.toUpperCase()}) recorded in immutable audit trail`, 'success');
+      setTimeout(() => {
+        onBackToQueue?.();
+      }, 700);
     }, 600);
   };
 
-  const handleSaveDecision = () => {
-    setSavedSuccess(true);
-    onUpdateQueueItem(currentCase.id, {
-      priority: selectedPriority.toUpperCase(),
-      priorityColor: selectedPriority.toLowerCase(),
-      reviewStatus: selectedDecision === 'Approve' ? 'Approved' : selectedDecision === 'Reject' ? 'Rejected' : selectedDecision === 'Refer' ? 'Deferred' : 'Modified',
-      reviewStatusType: selectedDecision === 'Approve' ? 'approved' : selectedDecision === 'Reject' ? 'critical' : selectedDecision === 'Refer' ? 'deferred' : 'approved',
-      humanDecision: `${selectedDecision} by Sarah Johnson (Coordinator): ${reasonText}`,
-      actionType: 'trace'
-    });
-
-    showToast?.(`Decision recorded: ${selectedDecision} for ${currentCase.id}`, 'success');
-
-    setTimeout(() => {
-      setSavedSuccess(false);
-      onBackToQueue();
-    }, 900);
-  };
+  const decisionOptions = [
+    {
+      id: 'approve',
+      title: 'Approve',
+      desc: 'Accept the recommendation as proposed'
+    },
+    {
+      id: 'modify',
+      title: 'Modify',
+      desc: 'Record a different priority with reason'
+    },
+    {
+      id: 'reject',
+      title: 'Reject',
+      desc: 'Do not use this recommendation'
+    },
+    {
+      id: 'defer',
+      title: 'Defer',
+      desc: 'Return to queue for later review'
+    }
+  ];
 
   return (
-    <div className="ai-page-canvas">
-      {/* Top Breadcrumb Bar */}
-      <div className="ai-top-breadcrumb-bar">
-        <div className="ai-breadcrumb-path">
-          <span className="crumb-root clickable" onClick={onBackToQueue}>AI Operations</span>
-          <span className="crumb-sep">&gt;</span>
-          <span className="crumb-parent clickable" onClick={onBackToQueue}>Decision Support Queue</span>
-          <span className="crumb-sep">&gt;</span>
-          <span className="crumb-current">{caseId}</span>
-        </div>
+    <div className="ai-review-canvas">
+      {/* Top Breadcrumb & Decision Identifier */}
+      <div className="ai-review-top-bar">
+        <button className="btn-back-queue" onClick={() => onBackToQueue?.()}>
+          <ChevronLeft size={16} />
+          <span>Back to decision queue</span>
+        </button>
 
-        <div className="ai-top-header-controls">
-          <div className="ai-header-search">
-            <Search size={14} className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search case notes, triage factors..." 
-              className="ai-search-input"
-            />
-          </div>
+        <span className="ai-review-case-id-tag">Decision AID-2051</span>
+      </div>
 
-          <div className="ai-header-actions">
-            <button className="header-icon-pill" title="Notifications">
-              <Bell size={16} />
-              <span className="badge-count">3</span>
-            </button>
-            <div className="user-avatar-badge">
-              <span>SJ</span>
-              <ChevronDown size={12} className="chevron" />
-            </div>
+      {/* Main Title Row */}
+      <div className="ai-review-title-row">
+        <div className="review-title-left">
+          <span className="ai-category-badge-tiny">AI DECISION REVIEW</span>
+          <h1 className="ai-review-heading">Urgency &amp; Priority Recommendation</h1>
+          <div className="ai-review-sub-meta">
+            <span>Related request <strong>HMR-1042</strong></span>
+            <span className="dot-sep">·</span>
+            <span>Generated 18 Feb 2026, 09:42</span>
+            <span className="dot-sep">·</span>
+            <span className="pill-pending-approval">● Pending Human Approval</span>
           </div>
         </div>
       </div>
 
-      {/* Case Header Card (Picture 3) */}
-      <div className="review-case-header-card">
-        <div className="case-header-left">
-          <div className="red-medical-cross-box">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff">
-              <path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3z" />
-            </svg>
+      {/* Two-Column Split Layout (Screenshot 4 & 5 exact match) */}
+      <div className="ai-review-split-grid">
+        {/* LEFT COLUMN: Request details, AI recommendation, Rationale & Risks */}
+        <div className="review-left-column">
+          {/* 1. Original Assistance Request Card */}
+          <div className="review-panel-card">
+            <div className="panel-card-header">
+              <div>
+                <h3 className="panel-card-title">Original assistance request</h3>
+                <p className="panel-card-subtitle">Submitted by affected person · Sensitive access controlled</p>
+              </div>
+              <button 
+                className="link-view-full"
+                onClick={() => setShowFullRequestModal(true)}
+              >
+                View full request
+              </button>
+            </div>
+
+            {/* Request Summary Lead */}
+            <div className="request-lead-box">
+              <div className="request-lead-top">
+                <div className="request-icon-box">
+                  <Home size={18} className="text-red" />
+                </div>
+                <div className="request-titles">
+                  <h4 className="req-main-name">Emergency shelter for displaced household</h4>
+                  <span className="req-sub-geo">HMR-1042 · Kelani East, Zone 03</span>
+                </div>
+                <span className="pill-reported-urgent">● Reported urgent</span>
+              </div>
+
+              {/* 4 Metadata Points Grid */}
+              <div className="request-meta-4grid">
+                <div className="meta-point">
+                  <span className="meta-lbl">PEOPLE AFFECTED</span>
+                  <strong className="meta-val">6 people</strong>
+                </div>
+                <div className="meta-point">
+                  <span className="meta-lbl">CURRENT SAFETY</span>
+                  <strong className="meta-val">Temporary roadside location</strong>
+                </div>
+                <div className="meta-point">
+                  <span className="meta-lbl">ACCESSIBILITY</span>
+                  <strong className="meta-val">Older adult with limited mobility</strong>
+                </div>
+                <div className="meta-point">
+                  <span className="meta-lbl">SUBMITTED</span>
+                  <strong className="meta-val">8 minutes ago</strong>
+                </div>
+              </div>
+
+              {/* Citizen Quote Box */}
+              <div className="citizen-statement-quote">
+                <p>
+                  "Flood water entered our home overnight. We have two children and my mother cannot walk far. We need a safe place before the water rises again."
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="case-header-titles">
-            <div className="case-id-badges-line">
-              <h1 className="case-id-heading">{currentCase.id}</h1>
-              <span className={`badge-priority ${currentCase.priority?.toLowerCase() || 'critical'}`}>
-                {currentCase.priority}
+          {/* 2. AI Recommendation Card */}
+          <div className="review-panel-card ai-recommendation-hero-card">
+            <div className="ai-rec-hero-header">
+              <div className="ai-rec-left">
+                <div className="ai-rec-sparkle-box">
+                  <Sparkles size={18} />
+                </div>
+                <div>
+                  <span className="ai-rec-tag">AI recommendation</span>
+                  <h3 className="ai-rec-bold-title">Assign Critical priority for immediate human coordination</h3>
+                </div>
+              </div>
+
+              <div className="ai-confidence-score-box">
+                <span className="score-num">0.89</span>
+                <span className="score-lbl">confidence</span>
+              </div>
+            </div>
+
+            {/* Disclaimer strip */}
+            <div className="ai-rec-disclaimer-strip">
+              <ShieldCheck size={16} className="text-blue shrink-0" />
+              <span>
+                This is decision support, not a final determination. A qualified reviewer must consider context and record the final action.
               </span>
-              <span className="badge-review-status pending">
-                {currentCase.reviewStatus || 'Pending Review'}
+            </div>
+          </div>
+
+          {/* 3. Supporting Rationale Section */}
+          <div className="review-panel-card">
+            <h3 className="section-small-title">SUPPORTING RATIONALE</h3>
+
+            <div className="rationale-cards-2x2-grid">
+              <div className="rationale-card">
+                <div className="rationale-top">
+                  <Droplets size={16} className="text-blue" />
+                  <strong>Immediate hazard exposure</strong>
+                </div>
+                <p>Rising floodwater mentioned in report</p>
+                <span className="impact-tag high">High impact</span>
+              </div>
+
+              <div className="rationale-card">
+                <div className="rationale-top">
+                  <Users size={16} className="text-blue" />
+                  <strong>Household vulnerability</strong>
+                </div>
+                <p>Children and an older adult with mobility needs</p>
+                <span className="impact-tag high">High impact</span>
+              </div>
+
+              <div className="rationale-card">
+                <div className="rationale-top">
+                  <Home size={16} className="text-blue" />
+                  <strong>No safe accommodation</strong>
+                </div>
+                <p>Household currently located roadside</p>
+                <span className="impact-tag high">High impact</span>
+              </div>
+
+              <div className="rationale-card">
+                <div className="rationale-top">
+                  <Clock size={16} className="text-amber" />
+                  <strong>Time sensitivity</strong>
+                </div>
+                <p>Conditions may worsen before nightfall</p>
+                <span className="impact-tag medium">Medium impact</span>
+              </div>
+            </div>
+
+            {/* Evidence Limitations Banner */}
+            <div className="evidence-limitations-box">
+              <div className="evidence-title">Evidence limitations</div>
+              <p>
+                Location evidence has not yet been independently verified. No shelter availability is considered by this priority service.
+              </p>
+            </div>
+          </div>
+
+          {/* 4. Alternatives & Risk Considerations */}
+          <div className="review-panel-card">
+            <div className="panel-card-header">
+              <div>
+                <h3 className="panel-card-title">Alternatives &amp; risk considerations</h3>
+                <p className="panel-card-subtitle">Options to consider before recording a decision</p>
+              </div>
+            </div>
+
+            {/* Alternative priority row */}
+            <div className="alt-priority-row">
+              <span className="alt-dot amber">●</span>
+              <strong className="alt-name">High</strong>
+              <span className="alt-desc">
+                Alternative priority: Use if immediate exposure cannot be verified and safe temporary accommodation is confirmed.
               </span>
             </div>
-            <div className="case-meta-subline">
-              <span>{currentCase.category}</span>
-              <span className="sep-bullet">|</span>
-              <span>{currentCase.location}</span>
-              <span className="sep-bullet">|</span>
-              <span>Caller: {currentCase.caller || 'Dr. Priyantha Silva'} ({currentCase.phone || '+94 77 123 4567'})</span>
-            </div>
-            <div className="case-channel-subline">
-              Submitted via Citizen Mobile App • AI Model: ReliefCore-BERT-Triage-v4
+
+            {/* Two Risk Cards */}
+            <div className="risk-cards-stack">
+              <div className="risk-item-card">
+                <AlertTriangle size={16} className="risk-icon amber shrink-0" />
+                <div className="risk-text">
+                  <strong>Risk of under-prioritisation</strong>
+                  <span>Delay could leave a vulnerable household exposed to worsening conditions.</span>
+                </div>
+              </div>
+
+              <div className="risk-item-card">
+                <AlertTriangle size={16} className="risk-icon amber shrink-0" />
+                <div className="risk-text">
+                  <strong>Risk of over-prioritisation</strong>
+                  <span>Critical handling may delay other verified life-threatening cases. Confirm evidence promptly.</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="case-header-actions">
-          <button className="btn-outline-white" onClick={() => onViewTrace(caseId)} title="View cryptographic audit trace">
-            <FileText size={14} />
-            <span>View Trace</span>
-          </button>
-
-          <div className="relative-more-menu-wrap">
-            <button 
-              className="btn-outline-white dropdown"
-              onClick={() => setShowMoreMenu(!showMoreMenu)}
-            >
-              <span>Actions</span>
-              <ChevronDown size={13} className={showMoreMenu ? 'rotate-180' : ''} />
-            </button>
-
-            {showMoreMenu && (
-              <div className="ai-more-dropdown-menu">
-                <button 
-                  className="menu-action-item"
-                  onClick={() => {
-                    setShowMoreMenu(false);
-                    showToast?.('Exporting complete case dossier PDF...', 'info');
-                  }}
-                >
-                  <FileCheck size={14} />
-                  <span>Print Case Dossier</span>
-                </button>
-                <button 
-                  className="menu-action-item"
-                  onClick={() => {
-                    setShowMoreMenu(false);
-                    showToast?.('Re-running neural inference on case data...', 'info');
-                  }}
-                >
-                  <RefreshCw size={14} />
-                  <span>Re-evaluate with AI</span>
-                </button>
-                <button 
-                  className="menu-action-item"
-                  onClick={() => {
-                    setShowMoreMenu(false);
-                    showToast?.('Case flagged for Human Rights &amp; Ethics review', 'info');
-                  }}
-                >
-                  <AlertTriangle size={14} />
-                  <span>Flag for Ethics Review</span>
-                </button>
+        {/* RIGHT COLUMN: Record Human Decision Form (Screenshots 4 & 5) */}
+        <div className="review-right-column">
+          <div className="record-decision-panel-card">
+            <div className="record-decision-head">
+              <div className="record-decision-icon-box">
+                <ShieldCheck size={18} />
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Underline Sub-tabs Bar (Picture 3) - NOW FULLY WORKING */}
-      <div className="review-horizontal-subtabs">
-        {[
-          { id: 'AI Analysis', label: 'AI Analysis', icon: Sparkles },
-          { id: 'Request Details', label: 'Request Details', icon: FileText },
-          { id: 'Location & Map', label: 'Location & Map', icon: MapPin },
-          { id: 'Recommended Resources', label: 'Recommended Resources', icon: Truck },
-          { id: 'Similar Requests', label: 'Similar Requests', icon: Layers },
-          { id: 'Files & Evidence', label: 'Files & Evidence', icon: Image }
-        ].map(tab => {
-          const IconComp = tab.icon;
-          return (
-            <button 
-              key={tab.id}
-              className={`subtab-btn ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <IconComp size={14} className="tab-icon-svg" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* DYNAMIC CONTENT SWITCHER BASED ON ACTIVE SUB-TAB */}
-      {activeTab === 'AI Analysis' && (
-        <div className="ai-charts-split-grid review-split-grid">
-          {/* Left Card: AI Analysis Results */}
-          <div className="ai-white-card">
-            <div className="card-header-flex title-with-icon">
-              <div className="green-brain-icon-badge">
-                <Sparkles size={16} color="#059669" />
+              <div>
+                <h3 className="record-decision-title">Record human decision</h3>
+                <p className="record-decision-sub">Your identity and rationale will be audited.</p>
               </div>
-              <h2 className="card-section-title">AI Analysis Results</h2>
             </div>
 
-            <div className="analysis-classification-block">
-              <div className="classification-label">AI Classification</div>
-              <div className="classification-bold-val">{currentCase.category}</div>
-              <div className="classification-conf-sub">Confidence: {currentCase.confidence} match</div>
-            </div>
-
-            <div className="metric-progress-line-group">
-              <div className="progress-stat-header">
-                <span className="stat-name">Urgency Score</span>
-                <span className="stat-number-val red-text">{currentCase.urgencyScore || 92} / 100</span>
-              </div>
-              <div className="progress-track-bg">
+            {/* Decision Radio Choice Cards (Project Blue Theme) */}
+            <div className="decision-radio-list">
+              {decisionOptions.map(opt => (
                 <div 
-                  className="progress-fill-bar red-gradient" 
-                  style={{ width: `${currentCase.urgencyScore || 92}%` }}
-                ></div>
-              </div>
-            </div>
-
-            <div className="metric-progress-line-group">
-              <div className="progress-stat-header">
-                <span className="stat-name">Confidence</span>
-                <span className="stat-number-val purple-text">{currentCase.confidence}</span>
-              </div>
-              <div className="progress-track-bg">
-                <div 
-                  className="progress-fill-bar purple-gradient" 
-                  style={{ width: currentCase.confidence }}
-                ></div>
-              </div>
-            </div>
-
-            <div className="key-factors-container">
-              <h3 className="key-factors-heading">Key Explainability Factors</h3>
-              <ul className="factors-dots-list">
-                <li>
-                  <span className="factor-dot green"></span>
-                  <span>Matches medical emergency life-threat pattern (keyword cluster: oxygen, insulin, elderly)</span>
-                </li>
-                <li>
-                  <span className="factor-dot green"></span>
-                  <span>Critical urban location in inundation path</span>
-                </li>
-                <li>
-                  <span className="factor-dot green"></span>
-                  <span>Vulnerable demographic count: 6 elderly citizens</span>
-                </li>
-                <li>
-                  <span className="factor-dot yellow"></span>
-                  <span>Road blockage alert detected on primary access route (Ward Place)</span>
-                </li>
-                <li>
-                  <span className="factor-dot gray"></span>
-                  <span>Nearest medical hospital (National Hospital) at 88% capacity</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Right Card: AI Recommendations & Multilingual Generator */}
-          <div className="ai-white-card">
-            <div className="card-header-flex title-with-icon">
-              <div className="green-brain-icon-badge">
-                <Sparkles size={16} color="#059669" />
-              </div>
-              <h2 className="card-section-title">AI Recommendations</h2>
-            </div>
-
-            {/* Sub-tabs: Resources, Shelter, Volunteers, Communication */}
-            <div className="rec-category-pills-bar">
-              {['Resources', 'Shelter', 'Volunteers', 'Communication'].map(tab => (
-                <button 
-                  key={tab}
-                  className={`rec-cat-btn ${activeRecTab === tab ? 'active' : ''}`}
-                  onClick={() => setActiveRecTab(tab)}
+                  key={opt.id}
+                  className={`decision-radio-option-card ${selectedDecision === opt.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedDecision(opt.id)}
                 >
-                  {tab}
-                </button>
+                  <div className="radio-circle-indicator">
+                    {selectedDecision === opt.id && <div className="inner-dot"></div>}
+                  </div>
+                  <div className="radio-option-text">
+                    <strong>{opt.title}</strong>
+                    <span>{opt.desc}</span>
+                  </div>
+                </div>
               ))}
             </div>
 
-            {/* Recommended Resource items */}
-            <div className="recommended-resources-list">
-              {/* Resource 1 */}
-              <div className={`rec-resource-item ${selectedResources.includes('mobile-unit') ? 'selected' : ''}`}>
-                <div className="rec-item-left">
-                  <div className="rec-avatar-circle green">
-                    <Plus size={16} color="#16a34a" />
-                  </div>
-                  <div className="rec-info-col">
-                    <div className="rec-title-row">
-                      <span className="rec-name">Mobile Medical Unit #2</span>
-                      <span className="badge-avail-pill">Available</span>
-                    </div>
-                    <div className="rec-detail-text">From Colombo Health District Station</div>
-                    <div className="rec-eta-text">ETA: 30 mins • Oxygen &amp; Vitals Equip</div>
-                  </div>
-                </div>
-                <button 
-                  className={`btn-select-rec ${selectedResources.includes('mobile-unit') ? 'selected' : ''}`}
-                  onClick={() => toggleResource('mobile-unit')}
-                >
-                  {selectedResources.includes('mobile-unit') ? 'Selected' : 'Select'}
-                </button>
-              </div>
-
-              {/* Resource 2 */}
-              <div className={`rec-resource-item ${selectedResources.includes('ambulance') ? 'selected' : ''}`}>
-                <div className="rec-item-left">
-                  <div className="rec-avatar-circle red">
-                    <Truck size={16} color="#dc2626" />
-                  </div>
-                  <div className="rec-info-col">
-                    <div className="rec-title-row">
-                      <span className="rec-name">High-Clearance Ambulance 4x4</span>
-                      <span className="badge-avail-pill">Available</span>
-                    </div>
-                    <div className="rec-detail-text">Colombo Disaster Management Emergency Unit</div>
-                    <div className="rec-eta-text">ETA: 45 mins • Capable of 0.8m fording</div>
-                  </div>
-                </div>
-                <button 
-                  className={`btn-select-rec ${selectedResources.includes('ambulance') ? 'selected' : ''}`}
-                  onClick={() => toggleResource('ambulance')}
-                >
-                  {selectedResources.includes('ambulance') ? 'Selected' : 'Select'}
-                </button>
-              </div>
-
-              {/* Resource 3 */}
-              <div className={`rec-resource-item ${selectedResources.includes('medical-team') ? 'selected' : ''}`}>
-                <div className="rec-item-left">
-                  <div className="rec-avatar-circle blue">
-                    <Users size={16} color="#2563eb" />
-                  </div>
-                  <div className="rec-info-col">
-                    <div className="rec-title-row">
-                      <span className="rec-name">Rapid Nurse &amp; Paramedic Team</span>
-                      <span className="badge-avail-pill">Available</span>
-                    </div>
-                    <div className="rec-detail-text">Red Cross Emergency Medical Volunteer Network</div>
-                    <div className="rec-eta-text">ETA: 55 mins • 3 Certified Paramedics</div>
-                  </div>
-                </div>
-                <button 
-                  className={`btn-select-rec ${selectedResources.includes('medical-team') ? 'selected' : ''}`}
-                  onClick={() => toggleResource('medical-team')}
-                >
-                  {selectedResources.includes('medical-team') ? 'Selected' : 'Select'}
-                </button>
-              </div>
+            {/* Reviewer Notes Textarea */}
+            <div className="reviewer-notes-group">
+              <label className="notes-label">REVIEWER NOTES (OPTIONAL)</label>
+              <textarea
+                rows={3}
+                placeholder="Add context supporting your decision..."
+                value={reviewerNotes}
+                onChange={(e) => setReviewerNotes(e.target.value)}
+                className="reviewer-notes-textarea"
+              />
             </div>
 
-            {/* Multilingual Citizen Response Sub-Box with REAL Language Switcher */}
-            <div className="multilingual-response-container">
-              <div className="multi-resp-head">
-                <span className="multi-resp-title">Multilingual Citizen Response (AI Generated)</span>
-                <div className="multi-resp-controls">
-                  <div className="relative-lang-selector">
-                    <button 
-                      className="lang-dropdown-pill"
-                      onClick={() => setShowLangMenu(!showLangMenu)}
-                    >
-                      <span>{selectedLanguage}</span>
-                      <ChevronDown size={12} className={showLangMenu ? 'rotate-180' : ''} />
-                    </button>
+            {/* Confirmation Checkbox */}
+            <label className="decision-confirm-checkbox-row">
+              <input 
+                type="checkbox"
+                checked={confirmedCheck}
+                onChange={(e) => setConfirmedCheck(e.target.checked)}
+                className="custom-checkbox"
+              />
+              <span>I have reviewed the original request, supporting rationale and relevant risks.</span>
+            </label>
 
-                    {showLangMenu && (
-                      <div className="lang-popover-menu">
-                        {Object.keys(MULTILINGUAL_TRANSLATIONS).map(lang => (
-                          <button
-                            key={lang}
-                            className={`lang-opt-item ${selectedLanguage === lang ? 'active' : ''}`}
-                            onClick={() => {
-                              setSelectedLanguage(lang);
-                              setShowLangMenu(false);
-                            }}
-                          >
-                            <span>{lang}</span>
-                            {selectedLanguage === lang && <Check size={12} color="#0f766e" />}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+            {/* Primary Action Button (Blue gradient) */}
+            <button 
+              className="btn-record-approve-decision"
+              onClick={handleRecordDecision}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Recording Decision...' : `Record ${selectedDecision} decision`}
+            </button>
 
-                  <button 
-                    className="copy-icon-btn" 
-                    onClick={handleRegenerateResponse}
-                    title="Regenerate with AI"
-                    disabled={isRegeneratingResp}
-                  >
-                    <RefreshCw size={13} className={isRegeneratingResp ? 'spin-icon' : ''} />
-                  </button>
-
-                  <button className="copy-icon-btn" onClick={handleCopyResponse} title="Copy to clipboard">
-                    {copiedResponse ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="multi-resp-textbox">
-                "{MULTILINGUAL_TRANSLATIONS[selectedLanguage] || MULTILINGUAL_TRANSLATIONS.English}"
-              </div>
+            {/* Audit Reference Footer */}
+            <div className="decision-audit-footer-note">
+              <CheckCircle2 size={13} className="text-muted" />
+              <span>Recorded with reviewer, timestamp and audit reference</span>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* SUB-TAB 2: Request Details */}
-      {activeTab === 'Request Details' && (
-        <div className="ai-white-card">
-          <h2 className="card-section-title">Request Dossier &amp; Incident Telemetry</h2>
-          <div className="dossier-grid">
-            <div className="dossier-item">
-              <span className="dossier-label">Request Identifier</span>
-              <span className="dossier-value code-font">{currentCase.id}</span>
-            </div>
-            <div className="dossier-item">
-              <span className="dossier-label">Reporting Party</span>
-              <span className="dossier-value">{currentCase.caller}</span>
-            </div>
-            <div className="dossier-item">
-              <span className="dossier-label">Contact Phone</span>
-              <span className="dossier-value text-teal">{currentCase.phone}</span>
-            </div>
-            <div className="dossier-item">
-              <span className="dossier-label">Incident Location</span>
-              <span className="dossier-value">{currentCase.location}</span>
-            </div>
-            <div className="dossier-item">
-              <span className="dossier-label">Vulnerable Persons Count</span>
-              <span className="dossier-value font-bold">{currentCase.affectedCount || 6} persons</span>
-            </div>
-            <div className="dossier-item">
-              <span className="dossier-label">Submission Channel</span>
-              <span className="dossier-value">Citizen Mobile App (v2.8) • GPS Verified</span>
-            </div>
-          </div>
-          <div className="incident-raw-block">
-            <span className="dossier-label">Raw Citizen Message</span>
-            <blockquote className="raw-quote">
-              "{currentCase.summary}"
-            </blockquote>
-          </div>
-        </div>
-      )}
-
-      {/* SUB-TAB 3: Location & Map */}
-      {activeTab === 'Location & Map' && (
-        <div className="ai-white-card">
-          <h2 className="card-section-title">Geospatial Context &amp; Proximity Matching</h2>
-          <div className="map-context-layout">
-            <div className="mock-map-visual-box">
-              <div className="map-radar-ring"></div>
-              <MapPin size={32} color="#dc2626" className="pin-center" />
-              <div className="map-hud-overlay">
-                <span>Lat: 6.9147° N, Lon: 79.8732° E</span>
-                <span>Flood Stage: 2.1m (High Risk)</span>
-              </div>
-            </div>
-            <div className="map-facilities-list">
-              <h4>Nearest Verified Facilities</h4>
-              <div className="facility-row">
-                <span>Colombo National Hospital (Emergency Trauma)</span>
-                <span className="badge-avail-pill">1.8 km</span>
-              </div>
-              <div className="facility-row">
-                <span>Kollupitiya Fire &amp; Rescue Depot</span>
-                <span className="badge-avail-pill">2.4 km</span>
-              </div>
-              <div className="facility-row">
-                <span>St. Peter's College Evacuation Shelter</span>
-                <span className="badge-avail-pill">3.1 km (Headroom: 140 beds)</span>
-              </div>
-              <div className="road-warning-box">
-                <AlertTriangle size={15} color="#ea580c" />
-                <span>Road closure: Ward Place submerged. Routing algorithm directing emergency vehicles via Horton Place.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SUB-TAB 4: Recommended Resources */}
-      {activeTab === 'Recommended Resources' && (
-        <div className="ai-white-card">
-          <h2 className="card-section-title">Full Logistics &amp; Resource Allocation Matrix</h2>
-          <div className="resources-matrix-grid">
-            <div className="resource-matrix-card">
-              <h4>Primary Medical Unit</h4>
-              <p>Mobile Medical Unit #2 equipped with 4 oxygen concentrators and insulin refrigeration.</p>
-              <span className="badge-avail-pill green">Dispatched to Ward Place Route</span>
-            </div>
-            <div className="resource-matrix-card">
-              <h4>Evacuation Transport</h4>
-              <p>2x 4x4 High-Clearance Amphibious Land Cruisers with paramedic escort.</p>
-              <span className="badge-avail-pill blue">En Route (ETA 35 mins)</span>
-            </div>
-            <div className="resource-matrix-card">
-              <h4>Auxiliary Generator</h4>
-              <p>15kVA Diesel Generator from Colombo Central Depot for emergency ICU power backup.</p>
-              <span className="badge-avail-pill amber">Ready for Dispatch</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SUB-TAB 5: Similar Requests (Deduplication) */}
-      {activeTab === 'Similar Requests' && (
-        <div className="ai-white-card">
-          <h2 className="card-section-title">Geospatial Deduplication Cluster (AI Cluster #412)</h2>
-          <p className="section-desc">AI has detected 2 similar incident reports in the same 500m radius within the last 45 minutes.</p>
-          <div className="similar-cluster-list">
-            <div className="similar-cluster-item">
-              <div>
-                <strong>REQ-2026-01844</strong> • 150m from location
-                <p>"Elderly home ground floor flooded near Cinnamon Gardens."</p>
-              </div>
-              <button className="btn-outline-white" onClick={() => showToast?.('Merged REQ-01844 into primary case REQ-01842', 'success')}>
-                Merge with Case
-              </button>
-            </div>
-            <div className="similar-cluster-item">
-              <div>
-                <strong>REQ-2026-01837</strong> • 350m from location
-                <p>"Need boat for senior citizens on Barnes Place."</p>
-              </div>
-              <button className="btn-outline-white" onClick={() => showToast?.('Linked REQ-01837 as correlated incident', 'info')}>
-                Link as Correlated
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SUB-TAB 6: Files & Evidence */}
-      {activeTab === 'Files & Evidence' && (
-        <div className="ai-white-card">
-          <h2 className="card-section-title">Verified Citizen Evidence &amp; Telemetry Audio</h2>
-          <div className="evidence-grid">
-            <div className="evidence-card">
-              <div className="evidence-head">
-                <Volume2 size={16} color="#0f766e" />
-                <span>Citizen 911 Call Audio Stream (42s)</span>
-              </div>
-              <div className="audio-wave-box">
-                <div className="audio-wave-bars">
-                  {[40, 65, 80, 45, 90, 75, 30, 85, 95, 60, 40, 70, 85, 50].map((h, i) => (
-                    <span key={i} style={{ height: `${h}%` }}></span>
-                  ))}
-                </div>
-                <button className="btn-solid-teal" onClick={() => showToast?.('Playing recorded caller dispatch audio...', 'info')}>
-                  Play Transcript
-                </button>
-              </div>
-            </div>
-            <div className="evidence-card">
-              <div className="evidence-head">
-                <Image size={16} color="#0f766e" />
-                <span>Geo-Tagged Inundation Photo (Verified Exif)</span>
-              </div>
-              <div className="mock-evidence-photo">
-                <span>Flood Stage: 1.2m on Ward Place Marker</span>
-                <span className="photo-time">Captured today, 10:14 AM</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bottom Card: Human Decision (Picture 3) */}
-      <div className="human-decision-card">
-        <div className="decision-header-row">
-          <div className="decision-title-group">
-            <div className="orange-user-circle">
-              <Users size={16} color="#ea580c" />
-            </div>
-            <h2 className="decision-heading">Human Coordinator Sign-off</h2>
-          </div>
-        </div>
-
-        {/* Radio Option 1: Final Priority */}
-        <div className="decision-radio-group">
-          <span className="radio-group-label">Final Priority</span>
-          <div className="radios-inline-list">
-            {['Critical', 'High', 'Medium', 'Low'].map(p => (
-              <label key={p} className="custom-radio-item">
-                <input 
-                  type="radio" 
-                  name="finalPriority" 
-                  value={p} 
-                  checked={selectedPriority === p}
-                  onChange={(e) => setSelectedPriority(e.target.value)}
-                />
-                <span className="radio-custom-disc"></span>
-                <span className={`radio-text priority-${p.toLowerCase()}`}>{p}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Radio Option 2: Decision */}
-        <div className="decision-radio-group">
-          <span className="radio-group-label">Decision Action</span>
-          <div className="radios-inline-list">
-            {['Approve', 'Modify', 'Reject', 'Refer'].map(d => (
-              <label key={d} className="custom-radio-item">
-                <input 
-                  type="radio" 
-                  name="decisionAction" 
-                  value={d} 
-                  checked={selectedDecision === d}
-                  onChange={(e) => setSelectedDecision(e.target.value)}
-                />
-                <span className="radio-custom-disc"></span>
-                <span className="radio-text font-semibold">{d}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Reason for decision & Save Button */}
-        <div className="decision-reason-row">
-          <div className="reason-input-col">
-            <label className="reason-field-label">Audit Rationale &amp; Operational Directives (Cryptographically Logged)</label>
-            <input 
-              type="text" 
-              className="reason-text-input" 
-              value={reasonText}
-              onChange={(e) => setReasonText(e.target.value)}
-              placeholder="Specify rationale for modifying or approving AI recommendation..."
-            />
-          </div>
-
-          <button 
-            className={`btn-solid-teal save-decision-btn ${savedSuccess ? 'saved' : ''}`} 
-            onClick={handleSaveDecision}
-          >
-            <Lock size={14} />
-            <span>{savedSuccess ? 'Decision Saved!' : 'Save & Execute'}</span>
-          </button>
         </div>
       </div>
     </div>
