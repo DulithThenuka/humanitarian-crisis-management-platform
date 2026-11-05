@@ -1,6 +1,9 @@
+using Microsoft.OpenApi.Models;
 using HumanitarianCrisisPlatform.API.Extensions;
 using HumanitarianCrisisPlatform.API.Filters;
 using HumanitarianCrisisPlatform.API.Middleware;
+using HumanitarianCrisisPlatform.Infrastructure.Data.Context;
+using HumanitarianCrisisPlatform.Infrastructure.Data.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +14,39 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "RELIEFCORE Humanitarian Operations API",
+        Version = "v1",
+        Description = "Backend services for crisis management, authentication, triage, and resource allocation."
+    });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // Clean Architecture registrations
 builder.Services.AddApplicationServices(builder.Configuration);
@@ -30,10 +65,29 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Automatically seed database and ensure operational accounts exist
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await DatabaseSeeder.SeedAsync(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding initial database users.");
+    }
+}
+
+if (app.Environment.IsDevelopment() || true)
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "RELIEFCORE Humanitarian API v1");
+        c.RoutePrefix = "swagger";
+    });
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();

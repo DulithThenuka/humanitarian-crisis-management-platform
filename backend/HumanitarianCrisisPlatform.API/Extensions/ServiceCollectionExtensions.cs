@@ -18,9 +18,20 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
     {
-        // Database
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection") ?? "Server=(localdb)\\mssqllocaldb;Database=HumanitarianCrisisDb;Trusted_Connection=True;MultipleActiveResultSets=true"));
+        // Database Configuration: supports InMemory or SQL Server
+        var useInMemory = config.GetValue<bool>("UseInMemoryDatabase", false);
+        var connectionString = config.GetConnectionString("DefaultConnection");
+
+        if (useInMemory || string.IsNullOrWhiteSpace(connectionString) || connectionString.Contains("localdb", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseInMemoryDatabase("HumanitarianCrisisDb"));
+        }
+        else
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
+        }
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
