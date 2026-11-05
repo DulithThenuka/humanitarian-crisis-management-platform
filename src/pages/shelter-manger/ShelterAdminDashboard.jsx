@@ -40,6 +40,7 @@ import { ShelterReportsView } from './views/ShelterReportsView';
 // Modals
 import { CreateRecordModal } from './components/CreateRecordModal';
 import { ExportReportModal } from './components/ExportReportModal';
+import { ReviewActionModal } from './components/ReviewActionModal';
 
 // Styles
 import './ShelterManager.css';
@@ -65,6 +66,11 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [reviewModalState, setReviewModalState] = useState({
+    isOpen: false,
+    actionType: 'allocation',
+    shelter: null
+  });
 
   // Toast
   const [toastMessage, setToastMessage] = useState(null);
@@ -106,64 +112,86 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
     }
   };
 
-  const handleConfirmAllocation = (shelterId, note) => {
-    const target = shelters.find((s) => s.id === shelterId);
+  // Open the Confirmation Action Modal (matching Figma)
+  const handleOpenReviewAction = (shelterId, actionType = 'allocation') => {
+    const target = shelters.find((s) => s.id === shelterId) || selectedShelter;
+    setReviewModalState({
+      isOpen: true,
+      actionType,
+      shelter: target
+    });
+  };
+
+  // Execute the Reviewed Action
+  const handleExecuteReviewedAction = ({ shelterId, actionType, reason }) => {
+    const target = shelters.find((s) => s.id === shelterId) || selectedShelter;
     if (!target) return;
 
-    if (target.available <= 0) {
-      showToast(`Warning: ${target.name} has 0 spaces available! Cannot confirm allocation without overflow.`);
-      return;
-    }
-
-    // Decrement available, increment occupied
-    const updated = shelters.map((s) => {
-      if (s.id === shelterId) {
-        const newOccupied = s.occupied + 1;
-        const newAvailable = Math.max(0, s.capacity - newOccupied);
-        const newStatus = newAvailable === 0 ? 'Full' : newAvailable <= 10 ? 'Near capacity' : 'Operational';
-        return {
-          ...s,
-          occupied: newOccupied,
-          available: newAvailable,
-          status: newStatus
-        };
-      }
-      return s;
-    });
-
-    setShelters(updated);
-
-    // Log recent activity
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const newLog = {
-      id: `ACT-${Date.now()}`,
-      time: timeStr,
-      title: `${target.name} - ${target.area}`,
-      action: note ? `Allocation confirmed: "${note}"` : 'Allocation confirmed by Shelter Administrator',
-      shelterId
-    };
-    setRecentActivity([newLog, ...recentActivity.slice(0, 4)]);
 
-    // Update metrics
-    setMetrics((prev) => ({
-      ...prev,
-      currentOccupancy: prev.currentOccupancy + 1,
-      remainingCapacity: Math.max(0, prev.remainingCapacity - 1),
-      admissionsToday: prev.admissionsToday + 1
-    }));
+    if (actionType === 'allocation') {
+      if (target.available <= 0) {
+        showToast(`Warning: ${target.name} has 0 spaces available! Cannot confirm allocation without overflow.`);
+        return;
+      }
 
-    showToast(`Allocation confirmed for ${target.name} (1 bed deducted)`);
-  };
+      // Decrement available, increment occupied
+      const updated = shelters.map((s) => {
+        if (s.id === shelterId) {
+          const newOccupied = s.occupied + 1;
+          const newAvailable = Math.max(0, s.capacity - newOccupied);
+          const newStatus = newAvailable === 0 ? 'Full' : newAvailable <= 10 ? 'Near capacity' : 'Operational';
+          return {
+            ...s,
+            occupied: newOccupied,
+            available: newAvailable,
+            status: newStatus
+          };
+        }
+        return s;
+      });
 
-  const handleRequestClarification = (shelterId, note) => {
-    const target = shelters.find((s) => s.id === shelterId);
-    showToast(`Clarification requested from triage team regarding ${target?.facilityName || 'shelter'}`);
-  };
+      setShelters(updated);
 
-  const handleEscalate = (shelterId, note) => {
-    const target = shelters.find((s) => s.id === shelterId);
-    showToast(`Escalated to Emergency Coordinator: Priority review requested for ${target?.facilityName || 'shelter'}`);
+      const newLog = {
+        id: `ACT-${Date.now()}`,
+        time: timeStr,
+        title: `${target.name} - ${target.area}`,
+        action: `Allocation confirmed by ${currentUser.name}: "${reason}"`,
+        shelterId
+      };
+      setRecentActivity([newLog, ...recentActivity.slice(0, 4)]);
+
+      setMetrics((prev) => ({
+        ...prev,
+        currentOccupancy: prev.currentOccupancy + 1,
+        remainingCapacity: Math.max(0, prev.remainingCapacity - 1),
+        admissionsToday: prev.admissionsToday + 1
+      }));
+
+      showToast(`Action confirmed: Allocation committed for ${target.name} (Audit logged)`);
+    } else if (actionType === 'clarification') {
+      const newLog = {
+        id: `ACT-${Date.now()}`,
+        time: timeStr,
+        title: `${target.name} - Clarification Request`,
+        action: `Clarification requested: "${reason}"`,
+        shelterId
+      };
+      setRecentActivity([newLog, ...recentActivity.slice(0, 4)]);
+      showToast(`Clarification request sent to Triage for ${target.facilityName}`);
+    } else if (actionType === 'escalation') {
+      const newLog = {
+        id: `ACT-${Date.now()}`,
+        time: timeStr,
+        title: `${target.name} - Priority Escalation`,
+        action: `Escalated by ${currentUser.name}: "${reason}"`,
+        shelterId
+      };
+      setRecentActivity([newLog, ...recentActivity.slice(0, 4)]);
+      showToast(`Record escalated to Emergency Coordinator with high priority`);
+    }
   };
 
   const handleSaveNewShelter = (newShelter) => {
@@ -184,7 +212,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
 
   return (
     <div className="sh-portal-container">
-      {/* 1. Left Dark Forest Green Sidebar */}
+      {/* 1. Left Project Slate Navy Sidebar */}
       <aside className="sh-sidebar">
         <div>
           {/* Brand Header */}
@@ -328,7 +356,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
 
           {/* Search Box */}
           <div className="sh-top-search-box">
-            <Search size={16} color="#6f8576" />
+            <Search size={16} color="#64748b" />
             <input
               type="text"
               className="sh-top-search-input"
@@ -366,7 +394,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         <main className="sh-content-body">
           {/* Coursework Demonstration Banner */}
           <div className="sh-demo-banner">
-            <ShieldCheck size={18} color="#15803d" />
+            <ShieldCheck size={18} color="#0284c7" />
             <span>
               <span className="sh-demo-badge-bold">Coursework prototype</span>: All records, AI results and transactions are fictional demonstration data. Actions are local UI simulations.
             </span>
@@ -391,9 +419,9 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
               onSelectShelter={(s) => setSelectedShelterId(s.id)}
               onOpenCreateModal={() => setIsCreateModalOpen(true)}
               onOpenExportModal={() => setIsExportModalOpen(true)}
-              onConfirmAllocation={handleConfirmAllocation}
-              onRequestClarification={handleRequestClarification}
-              onEscalate={handleEscalate}
+              onConfirmAllocation={(id) => handleOpenReviewAction(id, 'allocation')}
+              onRequestClarification={(id) => handleOpenReviewAction(id, 'clarification')}
+              onEscalate={(id) => handleOpenReviewAction(id, 'escalation')}
             />
           )}
 
@@ -404,9 +432,9 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
               onSelectShelter={(s) => setSelectedShelterId(s.id)}
               onOpenCreateModal={() => setIsCreateModalOpen(true)}
               onOpenExportModal={() => setIsExportModalOpen(true)}
-              onConfirmAllocation={handleConfirmAllocation}
-              onRequestClarification={handleRequestClarification}
-              onEscalate={handleEscalate}
+              onConfirmAllocation={(id) => handleOpenReviewAction(id, 'allocation')}
+              onRequestClarification={(id) => handleOpenReviewAction(id, 'clarification')}
+              onEscalate={(id) => handleOpenReviewAction(id, 'escalation')}
             />
           )}
 
@@ -418,9 +446,9 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
               onSelectShelter={(s) => setSelectedShelterId(s.id)}
               onOpenCreateModal={() => setIsCreateModalOpen(true)}
               onOpenExportModal={() => setIsExportModalOpen(true)}
-              onConfirmAllocation={handleConfirmAllocation}
-              onRequestClarification={handleRequestClarification}
-              onEscalate={handleEscalate}
+              onConfirmAllocation={(id) => handleOpenReviewAction(id, 'allocation')}
+              onRequestClarification={(id) => handleOpenReviewAction(id, 'clarification')}
+              onEscalate={(id) => handleOpenReviewAction(id, 'escalation')}
             />
           )}
 
@@ -432,9 +460,9 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
               onSelectShelter={(s) => setSelectedShelterId(s.id)}
               onOpenCreateModal={() => setIsCreateModalOpen(true)}
               onOpenExportModal={() => setIsExportModalOpen(true)}
-              onConfirmAllocation={handleConfirmAllocation}
-              onRequestClarification={handleRequestClarification}
-              onEscalate={handleEscalate}
+              onConfirmAllocation={(id) => handleOpenReviewAction(id, 'allocation')}
+              onRequestClarification={(id) => handleOpenReviewAction(id, 'clarification')}
+              onEscalate={(id) => handleOpenReviewAction(id, 'escalation')}
             />
           )}
 
@@ -447,13 +475,23 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         </main>
       </div>
 
-      {/* Modals */}
+      {/* Action Review Confirmation Modal Card (Figma Match) */}
+      <ReviewActionModal
+        isOpen={reviewModalState.isOpen}
+        actionType={reviewModalState.actionType}
+        shelter={reviewModalState.shelter}
+        onClose={() => setReviewModalState({ ...reviewModalState, isOpen: false })}
+        onConfirm={handleExecuteReviewedAction}
+      />
+
+      {/* Prototype Record Creation Modal */}
       <CreateRecordModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSave={handleSaveNewShelter}
       />
 
+      {/* Export Report Modal */}
       <ExportReportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
@@ -464,7 +502,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
       {toastMessage && (
         <div className="sh-toast-container">
           <div className="sh-toast">
-            <CheckCircle2 size={18} color="#dcfce7" />
+            <CheckCircle2 size={18} color="#38bdf8" />
             <span>{toastMessage}</span>
           </div>
         </div>
@@ -474,4 +512,3 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
 };
 
 export default ShelterAdminDashboard;
-
