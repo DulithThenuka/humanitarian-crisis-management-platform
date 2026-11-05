@@ -58,11 +58,10 @@ export const Sidebar = () => {
             padding: '10px 14px',
             borderRadius: '8px',
             textDecoration: 'none',
-            fontSize: '13px',
-            fontWeight: 500,
-            color: isActive ? '#ffffff' : '#94a3b8',
-            backgroundColor: isActive ? '#1e293b' : 'transparent',
-            borderLeft: isActive ? '3px solid #3b82f6' : '3px solid transparent',
+            fontSize: '13.5px',
+            fontWeight: isActive ? 700 : 500,
+            color: isActive ? '#38bdf8' : '#94a3b8',
+            backgroundColor: isActive ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
             transition: 'all 0.15s ease'
           })}
         >

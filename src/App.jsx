@@ -16,6 +16,11 @@ function AppLayout() {
     location.pathname.startsWith('/audit') ||
     location.pathname.startsWith('/map') ||
     location.pathname.startsWith('/citizen') || 
+    location.pathname.startsWith('/shelters') || 
+    location.pathname.startsWith('/shelter-admin') || 
+    location.pathname.startsWith('/shelter-manager') || 
+    location.pathname.startsWith('/shelter-manger') || 
+    location.pathname.startsWith('/shelter-dashboard') || 
     location.pathname === '/login' || 
     location.pathname === '/register';
 
