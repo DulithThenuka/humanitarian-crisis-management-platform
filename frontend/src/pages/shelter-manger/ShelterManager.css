@@ -1,35 +1,38 @@
 /* =========================================================
-   SHELTER ADMINISTRATOR PORTAL - HumanAid Design System
-   Exact Figma Matching: Forest Green, Sage Accents, Clean Surfaces
+   SHELTER ADMINISTRATOR PORTAL - Project Standard Palette
+   Deep Slate Navy Sidebar, Ocean Blue Accents, Clean Slate Canvas
+   Matching Emergency Coordinator & Audit Operations Design System
    ========================================================= */
 
 :root {
-  /* Brand Forest Green Theme */
-  --sh-sidebar-bg: #153322;
-  --sh-sidebar-hover: #1f422e;
-  --sh-sidebar-active-bg: #d2e5ce;
-  --sh-sidebar-active-text: #153322;
-  --sh-sidebar-text: #c4d7c9;
-  --sh-sidebar-muted: #8ca393;
+  /* Signature Project Deep Slate Navy Palette */
+  --sh-sidebar-bg: #091a2b;
+  --sh-sidebar-hover: #132d4a;
+  --sh-sidebar-active-bg: #0284c7;
+  --sh-sidebar-active-text: #ffffff;
+  --sh-sidebar-text: #cbd5e1;
+  --sh-sidebar-muted: #94a3b8;
 
   /* Canvas & Cards */
-  --sh-canvas-bg: #f6f8f5;
+  --sh-canvas-bg: #f8fafc;
   --sh-card-bg: #ffffff;
-  --sh-border: #e2e8e0;
-  --sh-border-subtle: #edf2eb;
+  --sh-border: #e2e8f0;
+  --sh-border-subtle: #f1f5f9;
 
   /* Typography */
-  --sh-text-primary: #12281b;
-  --sh-text-secondary: #4b6152;
-  --sh-text-muted: #6f8576;
-  --sh-text-light: #94a89b;
+  --sh-text-primary: #0f172a;
+  --sh-text-secondary: #475569;
+  --sh-text-muted: #64748b;
+  --sh-text-light: #94a3b8;
 
-  /* Accent & Action Colors */
-  --sh-primary-green: #183526;
-  --sh-primary-green-hover: #224432;
-  --sh-sage-light: #edf3ea;
-  --sh-sage-border: #dbe7d7;
-  --sh-sage-accent: #d2e5ce;
+  /* Brand Blues & Accents matching project */
+  --sh-primary-blue: #0284c7;
+  --sh-primary-blue-hover: #0369a1;
+  --sh-accent-blue: #38bdf8;
+  --sh-accent-glow: rgba(2, 132, 199, 0.3);
+  --sh-ice-blue-light: #f0f9ff;
+  --sh-ice-blue-border: #bae6fd;
+  --sh-ice-blue-pill: #e0f2fe;
 
   /* Status Colors */
   --sh-success-bg: #dcfce7;
@@ -65,13 +68,13 @@
 }
 
 /* =========================================================
-   1. Left Sidebar
+   1. Left Sidebar (Project Navy Style)
    ========================================================= */
 .sh-sidebar {
   width: 260px;
   min-width: 260px;
   background-color: var(--sh-sidebar-bg);
-  background-image: linear-gradient(180deg, #153322 0%, #0f2619 100%);
+  background-image: linear-gradient(180deg, #091a2b 0%, #071422 100%);
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -90,21 +93,22 @@
 .sh-brand-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 4px 8px 16px 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sh-brand-icon-box {
-  width: 32px;
-  height: 32px;
-  border: 1.5px solid rgba(210, 229, 206, 0.6);
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #d2e5ce;
-  background: rgba(210, 229, 206, 0.1);
+  color: #ffffff;
+  background: linear-gradient(135deg, #0284c7 0%, #0e6f76 100%);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
 }
 
 .sh-brand-title {
@@ -125,8 +129,8 @@
 /* User Profile Switcher Card */
 .sh-user-card {
   margin: 14px 0 16px 0;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   padding: 10px 12px;
   display: flex;
@@ -144,13 +148,14 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #d2e5ce;
-  color: #153322;
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  color: #ffffff;
   font-size: 12px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
 }
 
 .sh-user-role-label {
@@ -196,7 +201,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #3b5243;
+  background-color: #334155;
   transition: 0.3s;
   border-radius: 20px;
 }
@@ -214,7 +219,7 @@
 }
 
 .sh-toggle-switch input:checked + .sh-toggle-slider {
-  background-color: #22c55e;
+  background-color: #0284c7;
 }
 
 .sh-toggle-switch input:checked + .sh-toggle-slider:before {
@@ -254,9 +259,10 @@
 }
 
 .sh-nav-btn.active {
-  background-color: var(--sh-sidebar-active-bg);
-  color: var(--sh-sidebar-active-text);
+  background-color: var(--sh-primary-blue);
+  color: #ffffff;
   font-weight: 700;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
 }
 
 .sh-nav-btn-content {
@@ -266,7 +272,7 @@
 }
 
 .sh-nav-badge {
-  background-color: #dc2626;
+  background-color: #ef4444;
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
@@ -289,7 +295,7 @@
 }
 
 .sh-boundary-box {
-  background: rgba(0, 0, 0, 0.18);
+  background: rgba(15, 23, 42, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 8px;
   padding: 10px 12px;
@@ -301,7 +307,7 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #d2e5ce;
+  color: #38bdf8;
   margin-bottom: 4px;
 }
 
@@ -380,8 +386,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #f4f6f3;
-  border: 1px solid #dce4da;
+  background-color: #f8fafc;
+  border: 1px solid var(--sh-border);
   border-radius: 8px;
   padding: 6px 14px;
   width: 380px;
@@ -411,20 +417,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #edf4eb;
-  border: 1px solid #d5e2d2;
+  background-color: var(--sh-ice-blue-pill);
+  border: 1px solid var(--sh-ice-blue-border);
   border-radius: 20px;
   padding: 5px 12px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--sh-text-primary);
+  color: #0369a1;
 }
 
 .sh-op-indicator-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: #22c55e;
+  background-color: #0284c7;
 }
 
 .sh-bell-btn {
@@ -449,7 +455,7 @@
   position: absolute;
   top: 2px;
   right: 2px;
-  background-color: #dc2626;
+  background-color: #ef4444;
   color: #ffffff;
   font-size: 10px;
   font-weight: 700;
@@ -473,8 +479,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #d2e5ce;
-  color: #153322;
+  background: #e0f2fe;
+  color: #0284c7;
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -514,17 +520,17 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background-color: var(--sh-sage-light);
-  border: 1px solid var(--sh-sage-border);
+  background-color: var(--sh-ice-blue-light);
+  border: 1px solid var(--sh-ice-blue-border);
   border-radius: 8px;
   padding: 10px 16px;
-  font-size: 12px;
-  color: #2e4736;
+  font-size: 12.5px;
+  color: #0369a1;
 }
 
 .sh-demo-badge-bold {
   font-weight: 700;
-  color: #1a3826;
+  color: #0284c7;
 }
 
 /* View Header */
@@ -569,19 +575,21 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background-color: var(--sh-primary-green);
+  background-color: var(--sh-primary-blue);
   color: #ffffff;
   border: none;
   border-radius: 8px;
   padding: 10px 18px;
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
 }
 
 .sh-btn-primary:hover {
-  background-color: var(--sh-primary-green-hover);
+  background-color: var(--sh-primary-blue-hover);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
 }
 
 .sh-btn-outline {
@@ -590,7 +598,7 @@
   gap: 8px;
   background-color: #ffffff;
   color: var(--sh-text-primary);
-  border: 1px solid #d2dcd0;
+  border: 1px solid var(--sh-border);
   border-radius: 8px;
   padding: 9px 16px;
   font-size: 13.5px;
@@ -600,12 +608,12 @@
 }
 
 .sh-btn-outline:hover {
-  background-color: #f7f9f6;
-  border-color: #bccbc0;
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
 /* =========================================================
-   4. Shelter Dashboard View (Image 1)
+   4. Metric Cards & Section Boxes
    ========================================================= */
 
 /* Metric Cards Grid */
@@ -624,6 +632,12 @@
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sh-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .sh-metric-card-top {
@@ -641,14 +655,15 @@
 }
 
 .sh-metric-icon-tile {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  background-color: #edf4eb;
-  color: #234833;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: var(--sh-ice-blue-pill);
+  color: var(--sh-primary-blue);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--sh-ice-blue-border);
 }
 
 .sh-metric-value {
@@ -722,7 +737,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid var(--sh-border-subtle);
+  border: 1px solid var(--sh-border);
   border-radius: 8px;
   padding: 12px 14px;
   background-color: #ffffff;
@@ -731,8 +746,9 @@
 }
 
 .sh-priority-item:hover {
-  background-color: #f9fbf8;
-  border-color: #d8e4d6;
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateX(2px);
 }
 
 .sh-priority-left {
@@ -745,8 +761,8 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: #f1f5f2;
-  color: #3b5043;
+  background-color: #f1f5f9;
+  color: #334155;
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -844,7 +860,7 @@
 }
 
 .sh-step-indicator-done {
-  color: #16a34a;
+  color: #0284c7;
   margin-top: 1px;
 }
 
@@ -852,8 +868,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 1.5px solid #a3b8aa;
-  color: #435b4c;
+  border: 1.5px solid #cbd5e1;
+  color: #64748b;
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -898,7 +914,7 @@
 .sh-activity-time {
   font-size: 11px;
   font-weight: 700;
-  color: var(--sh-text-muted);
+  color: var(--sh-primary-blue);
   width: 44px;
   margin-top: 2px;
 }
@@ -922,19 +938,19 @@
 
 /* Privacy Boundary Notice */
 .sh-privacy-card {
-  background-color: #f3f7f2;
-  border: 1px solid #d8e5d6;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
   border-radius: 8px;
   padding: 14px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #274332;
+  color: #166534;
   font-size: 12.5px;
 }
 
 /* =========================================================
-   5. Master-Detail Layout (Images 2, 3, 4, 5)
+   5. Master-Detail Layout (Directory, Capacity, Placements)
    ========================================================= */
 
 /* Filter Row */
@@ -972,7 +988,7 @@
 }
 
 .sh-dropdown-select {
-  border: 1px solid #d5dfd3;
+  border: 1px solid var(--sh-border);
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 12.5px;
@@ -980,6 +996,10 @@
   color: var(--sh-text-primary);
   cursor: pointer;
   outline: none;
+}
+
+.sh-dropdown-select:focus {
+  border-color: var(--sh-primary-blue);
 }
 
 /* Master-Detail Split Grid */
@@ -1006,7 +1026,7 @@
 }
 
 .sh-data-table th {
-  background-color: #fafbf9;
+  background-color: #f8fafc;
   border-bottom: 1px solid var(--sh-border);
   padding: 12px 14px;
   font-size: 10.5px;
@@ -1029,17 +1049,17 @@
 }
 
 .sh-data-table tr:hover {
-  background-color: #f7f9f6;
+  background-color: #f1f5f9;
 }
 
 .sh-data-table tr.selected-row {
-  background-color: #edf4eb;
-  border-left: 3px solid #183526;
+  background-color: #f0f9ff;
+  border-left: 3px solid var(--sh-primary-blue);
 }
 
 .sh-shelter-title-cell {
   font-weight: 700;
-  color: #142e1f;
+  color: #0f172a;
 }
 
 /* Right Detail Panel */
@@ -1090,8 +1110,8 @@
 }
 
 .sh-detail-stat-tile {
-  background-color: #f7f9f6;
-  border: 1px solid #e3eae0;
+  background-color: #f8fafc;
+  border: 1px solid var(--sh-border);
   border-radius: 8px;
   padding: 10px 12px;
 }
@@ -1152,7 +1172,7 @@
 
 .sh-note-textarea {
   width: 100%;
-  border: 1px solid #d5ded3;
+  border: 1px solid var(--sh-border);
   border-radius: 6px;
   padding: 10px;
   font-size: 12px;
@@ -1165,7 +1185,8 @@
 }
 
 .sh-note-textarea:focus {
-  border-color: #183526;
+  border-color: var(--sh-primary-blue);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
 }
 
 /* Action Button Stack */
@@ -1177,7 +1198,7 @@
 
 .sh-btn-confirm-full {
   width: 100%;
-  background-color: var(--sh-primary-green);
+  background-color: var(--sh-primary-blue);
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -1185,22 +1206,24 @@
   font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
 }
 
 .sh-btn-confirm-full:hover {
-  background-color: var(--sh-primary-green-hover);
+  background-color: var(--sh-primary-blue-hover);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
 }
 
 .sh-btn-secondary-full {
   width: 100%;
   background-color: #ffffff;
   color: var(--sh-text-primary);
-  border: 1px solid #d5ded3;
+  border: 1px solid var(--sh-border);
   border-radius: 8px;
   padding: 10px;
   font-size: 13px;
@@ -1214,17 +1237,179 @@
 }
 
 .sh-btn-secondary-full:hover {
-  background-color: #f7f9f6;
-  border-color: #bccbc0;
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
 /* =========================================================
-   6. Modals & Notifications
+   6. Review Action Modal Card (Exact Figma Match)
+   ========================================================= */
+.sh-action-card-dialog {
+  background-color: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.25);
+  border: 1px solid var(--sh-border);
+  padding: 24px;
+  box-sizing: border-box;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.sh-action-card-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sh-action-card-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--sh-ice-blue-pill);
+  color: var(--sh-primary-blue);
+  border: 1px solid var(--sh-ice-blue-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sh-modal-close-corner-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--sh-text-muted);
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.sh-modal-close-corner-btn:hover {
+  color: var(--sh-text-primary);
+  background-color: #f1f5f9;
+}
+
+.sh-action-card-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--sh-text-primary);
+  margin: 0 0 6px 0;
+  letter-spacing: -0.01em;
+}
+
+.sh-action-card-desc {
+  font-size: 13px;
+  color: var(--sh-text-muted);
+  line-height: 1.45;
+  margin: 0 0 18px 0;
+}
+
+.sh-action-card-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sh-action-card-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sh-text-muted);
+}
+
+.sh-action-card-textarea {
+  width: 100%;
+  border: 1px solid var(--sh-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--sh-text-primary);
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+}
+
+.sh-action-card-textarea:focus {
+  border-color: var(--sh-primary-blue);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.sh-action-card-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 20px 0;
+  font-size: 12.5px;
+  color: var(--sh-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.sh-action-card-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--sh-primary-blue);
+}
+
+.sh-action-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.sh-action-card-btn-cancel {
+  background-color: #ffffff;
+  color: var(--sh-text-primary);
+  border: 1px solid var(--sh-border);
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sh-action-card-btn-cancel:hover {
+  background-color: #f1f5f9;
+}
+
+.sh-action-card-btn-confirm {
+  background-color: var(--sh-primary-blue);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+}
+
+.sh-action-card-btn-confirm:hover:not(:disabled) {
+  background-color: var(--sh-primary-blue-hover);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+.sh-action-card-btn-confirm:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* =========================================================
+   7. Standard Modals & Notifications
    ========================================================= */
 .sh-modal-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 30, 20, 0.55);
+  background-color: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -1298,7 +1483,7 @@
 
 .sh-form-input,
 .sh-form-select {
-  border: 1px solid #d5ded3;
+  border: 1px solid var(--sh-border);
   border-radius: 6px;
   padding: 9px 12px;
   font-size: 13px;
@@ -1309,7 +1494,8 @@
 
 .sh-form-input:focus,
 .sh-form-select:focus {
-  border-color: #183526;
+  border-color: var(--sh-primary-blue);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
 }
 
 .sh-modal-footer {
@@ -1319,7 +1505,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  background-color: #fafbf9;
+  background-color: #f8fafc;
 }
 
 /* Toast Notifications */
@@ -1334,16 +1520,17 @@
 }
 
 .sh-toast {
-  background-color: #183526;
+  background-color: #0f172a;
   color: #ffffff;
   border-radius: 8px;
   padding: 12px 18px;
   font-size: 13.5px;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   animation: slideInUp 0.25s ease-out;
 }
 
@@ -1385,4 +1572,3 @@
     padding: 16px;
   }
 }
-
