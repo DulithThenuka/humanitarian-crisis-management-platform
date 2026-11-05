@@ -7,7 +7,8 @@ import {
   AlertTriangle, 
   HelpCircle, 
   X,
-  ChevronDown
+  ChevronDown,
+  ShieldCheck
 } from 'lucide-react';
 
 export const CaseManagementView = ({
@@ -36,6 +37,12 @@ export const CaseManagementView = ({
     citizenQuote: ''
   });
 
+  // Action confirmation modal state ('update' | 'clarify' | 'escalate' | null)
+  const [activeActionModal, setActiveActionModal] = useState(null);
+  const [modalReason, setModalReason] = useState('');
+  const [modalConfirmed, setModalConfirmed] = useState(false);
+  const [checkboxError, setCheckboxError] = useState(false);
+
   const currentCase = casesList.find((c) => c.id === selectedCaseId) || casesList[0];
 
   // Filtering
@@ -53,40 +60,85 @@ export const CaseManagementView = ({
     return true;
   });
 
-  const handleUpdateStatus = () => {
-    if (!currentCase) return;
-    const targetStatus = newStatus || (currentCase.status === 'Open' ? 'Assigned' : 'Open');
-    onUpdateCase(currentCase.id, {
-      status: targetStatus,
-      statusType: targetStatus.toLowerCase(),
-      note: actionNote.trim()
-    });
-    setActionNote('');
-    showToast?.(`Case ${currentCase.id} updated to '${targetStatus}'`, 'success');
+  // Action Modal Configurations matching Screenshots 1, 2, 3
+  const ACTION_MODAL_CONFIG = {
+    update: {
+      title: 'Confirm this reviewed action?',
+      subtitle: 'UI-only prototype action. No backend transaction occurs. Reviewer, reason and timestamp are represented in the local audit trail.',
+      defaultReason: 'Operational review verified; status updated within assigned scope.',
+      toastMessage: (id, target) => `Case ${id} reviewed and status updated to '${target}'`,
+      execute: (currCase, reason) => {
+        const targetStatus = currCase.status === 'Open' ? 'Assigned' : 'Open';
+        onUpdateCase(currCase.id, {
+          status: targetStatus,
+          statusType: targetStatus.toLowerCase(),
+          note: reason
+        });
+        return targetStatus;
+      }
+    },
+    clarify: {
+      title: 'Request additional information?',
+      subtitle: 'UI-only prototype action. No backend transaction occurs. Reviewer, reason and timestamp are represented in the local audit trail.',
+      defaultReason: 'Clarification requested on citizen contact & operational scope.',
+      toastMessage: (id) => `Clarification request recorded for ${id}`,
+      execute: (currCase, reason) => {
+        onUpdateCase(currCase.id, {
+          verification: 'Need information',
+          verificationType: 'warning',
+          status: 'Pending',
+          statusType: 'pending',
+          note: reason
+        });
+        return 'Pending';
+      }
+    },
+    escalate: {
+      title: 'Escalate for review?',
+      subtitle: 'UI-only prototype action. No backend transaction occurs. Reviewer, reason and timestamp are represented in the local audit trail.',
+      defaultReason: 'Escalated for senior operations specialist review.',
+      toastMessage: (id) => `Case ${id} escalated to Senior Incident Coordinator`,
+      execute: (currCase, reason) => {
+        onUpdateCase(currCase.id, {
+          status: 'Escalated',
+          statusType: 'escalated',
+          priority: 'Critical',
+          priorityType: 'critical',
+          note: reason
+        });
+        return 'Escalated';
+      }
+    }
   };
 
-  const handleRequestClarification = () => {
-    if (!currentCase) return;
-    onUpdateCase(currentCase.id, {
-      verification: 'Need information',
-      verificationType: 'warning',
-      note: actionNote.trim() || 'Clarification requested on citizen contact & evidence'
-    });
-    setActionNote('');
-    showToast?.(`Clarification request dispatched for ${currentCase.id}`, 'info');
+  const handleOpenActionModal = (type) => {
+    setActiveActionModal(type);
+    setModalReason(actionNote || '');
+    setModalConfirmed(false);
+    setCheckboxError(false);
   };
 
-  const handleEscalateCase = () => {
-    if (!currentCase) return;
-    onUpdateCase(currentCase.id, {
-      status: 'Escalated',
-      statusType: 'escalated',
-      priority: 'Critical',
-      priorityType: 'critical',
-      note: actionNote.trim() || 'Escalated for senior operations specialist oversight'
-    });
+  const handleConfirmActionModal = () => {
+    if (!activeActionModal || !currentCase) return;
+
+    if (!modalConfirmed) {
+      setCheckboxError(true);
+      showToast?.('Please review and check the confirmation checkbox before submitting.', 'warning');
+      return;
+    }
+
+    const config = ACTION_MODAL_CONFIG[activeActionModal];
+    if (config) {
+      const finalReason = modalReason.trim() || config.defaultReason;
+      const resultStatus = config.execute(currentCase, finalReason);
+      showToast?.(config.toastMessage(currentCase.id, resultStatus), 'success');
+    }
+
+    setActiveActionModal(null);
+    setModalReason('');
     setActionNote('');
-    showToast?.(`Case ${currentCase.id} escalated to Senior Incident Coordinator`, 'warning');
+    setModalConfirmed(false);
+    setCheckboxError(false);
   };
 
   const handleExportReport = () => {
@@ -290,13 +342,22 @@ export const CaseManagementView = ({
               />
 
               <div className="cm-actions-stack">
-                <button className="cm-btn-update-status" onClick={handleUpdateStatus}>
+                <button 
+                  className="cm-btn-update-status" 
+                  onClick={() => handleOpenActionModal('update')}
+                >
                   Update case status
                 </button>
-                <button className="cm-btn-clarification" onClick={handleRequestClarification}>
+                <button 
+                  className="cm-btn-clarification" 
+                  onClick={() => handleOpenActionModal('clarify')}
+                >
                   Request clarification
                 </button>
-                <button className="cm-btn-escalate" onClick={handleEscalateCase}>
+                <button 
+                  className="cm-btn-escalate" 
+                  onClick={() => handleOpenActionModal('escalate')}
+                >
                   Escalate
                 </button>
               </div>
@@ -304,6 +365,87 @@ export const CaseManagementView = ({
           </div>
         )}
       </div>
+
+      {/* Action Confirmation Modal Card (Screenshots 1, 2, 3) */}
+      {activeActionModal && ACTION_MODAL_CONFIG[activeActionModal] && (
+        <div 
+          className="cm-modal-backdrop" 
+          onClick={() => {
+            setActiveActionModal(null);
+            setCheckboxError(false);
+          }}
+        >
+          <div 
+            className="cm-action-modal-card" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top icon bubble with ShieldCheck */}
+            <div className="cm-action-modal-icon-bubble">
+              <ShieldCheck size={22} className="cm-action-modal-icon" />
+            </div>
+
+            {/* Title & Subtitle */}
+            <h3 className="cm-action-modal-title">
+              {ACTION_MODAL_CONFIG[activeActionModal].title}
+            </h3>
+            <p className="cm-action-modal-subtitle">
+              {ACTION_MODAL_CONFIG[activeActionModal].subtitle}
+            </p>
+
+            {/* Required Reason Input */}
+            <div style={{ marginBottom: '4px' }}>
+              <label className="cm-action-modal-label">
+                REQUIRED REASON
+              </label>
+              <textarea
+                className="cm-action-modal-textarea"
+                rows={3}
+                placeholder="Provide an operational reason..."
+                value={modalReason}
+                onChange={(e) => setModalReason(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            {/* Checkbox row */}
+            <label className={`cm-action-modal-checkbox-row ${checkboxError && !modalConfirmed ? 'has-error' : ''}`}>
+              <input
+                type="checkbox"
+                checked={modalConfirmed}
+                onChange={(e) => {
+                  setModalConfirmed(e.target.checked);
+                  if (e.target.checked) setCheckboxError(false);
+                }}
+                className="cm-action-modal-checkbox"
+              />
+              <span className="cm-action-modal-checkbox-text">
+                I reviewed the available information and role scope.
+              </span>
+            </label>
+
+            {/* Footer Buttons */}
+            <div className="cm-action-modal-footer">
+              <button
+                type="button"
+                className="cm-action-modal-btn-cancel"
+                onClick={() => {
+                  setActiveActionModal(null);
+                  setCheckboxError(false);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="cm-action-modal-btn-confirm"
+                onClick={handleConfirmActionModal}
+              >
+                Confirm prototype action
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create Prototype Record Modal */}
       {showCreateModal && (

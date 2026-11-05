@@ -1216,18 +1216,19 @@
   width: 100%;
   height: 38px;
   border-radius: 8px;
-  border: 1px solid #fed7aa;
-  background: #fff7ed;
-  color: #c2410c;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
   font-size: 12.5px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .cm-btn-escalate:hover {
-  background: #ffedd5;
-  border-color: #fb923c;
+  border-color: #94a3b8;
+  color: #0f172a;
+  background: #f8fafc;
 }
 
 /* =========================================================
@@ -1584,4 +1585,182 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* =========================================================
+   ACTION CONFIRMATION MODAL CARDS (SCREENSHOTS 1, 2, 3)
+   ========================================================= */
+.cm-action-modal-card {
+  max-width: 490px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px 28px 24px 28px;
+  box-shadow: 0 25px 60px -15px rgba(9, 26, 43, 0.4), 0 0 0 1px rgba(2, 132, 199, 0.08);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  animation: cmModalPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cmModalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.cm-action-modal-icon-bubble {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.12);
+}
+
+.cm-action-modal-icon {
+  color: var(--cm-primary-blue);
+}
+
+.cm-action-modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--cm-text-main);
+  margin: 0 0 6px 0;
+  letter-spacing: -0.015em;
+}
+
+.cm-action-modal-subtitle {
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.48;
+  margin: 0 0 20px 0;
+}
+
+.cm-action-modal-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #475569;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 7px;
+}
+
+.cm-action-modal-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 11px 13px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--cm-text-main);
+  background: #ffffff;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 84px;
+  transition: all 0.2s ease;
+}
+
+.cm-action-modal-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.cm-action-modal-textarea:focus {
+  border-color: var(--cm-primary-blue);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.cm-action-modal-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 0;
+}
+
+.cm-action-modal-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid #94a3b8;
+  accent-color: var(--cm-primary-blue);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cm-action-modal-checkbox-text {
+  font-size: 12.5px;
+  color: #475569;
+  font-weight: 500;
+  line-height: 1.35;
+  transition: color 0.15s ease;
+}
+
+.cm-action-modal-checkbox-row.has-error .cm-action-modal-checkbox-text {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.cm-action-modal-checkbox-row.has-error .cm-action-modal-checkbox {
+  outline: 2px solid #ef4444;
+}
+
+.cm-action-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 6px;
+}
+
+.cm-action-modal-btn-cancel {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cm-action-modal-btn-cancel:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.cm-action-modal-btn-confirm {
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: none;
+  background: var(--cm-navy-sidebar);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(9, 26, 43, 0.2);
+}
+
+.cm-action-modal-btn-confirm:hover {
+  background: var(--cm-primary-blue);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+  transform: translateY(-1px);
 }
