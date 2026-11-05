@@ -11,18 +11,40 @@ function AppLayout() {
   const location = useLocation();
   const isDedicatedLayout = 
     location.pathname === '/' || 
+    location.pathname === '/home' ||
+    location.pathname === '/landing' ||
     location.pathname === '/dashboard' ||
     location.pathname.startsWith('/coordinator') || 
     location.pathname.startsWith('/audit') ||
+    location.pathname.startsWith('/reports') ||
+    location.pathname.startsWith('/notifications') ||
+    location.pathname.startsWith('/ai-operations') ||
+    location.pathname.startsWith('/ai-ops') ||
+    location.pathname.startsWith('/ai-workspaces') ||
+    location.pathname.startsWith('/ai-governance') ||
     location.pathname.startsWith('/map') ||
     location.pathname.startsWith('/citizen') || 
+    location.pathname.startsWith('/citize') || 
+    location.pathname.startsWith('/alerts') || 
+    location.pathname.startsWith('/safety') || 
     location.pathname.startsWith('/shelters') || 
     location.pathname.startsWith('/shelter-admin') || 
     location.pathname.startsWith('/shelter-manager') || 
     location.pathname.startsWith('/shelter-manger') || 
     location.pathname.startsWith('/shelter-dashboard') || 
+    location.pathname.startsWith('/volunteer') || 
+    location.pathname.startsWith('/volunteer-admin') || 
+    location.pathname.startsWith('/track') || 
+    location.pathname.startsWith('/emergency') || 
+    location.pathname.startsWith('/assistance') || 
+    location.pathname.startsWith('/requests') ||
+    location.pathname === '/request-detail' ||
+    location.pathname === '/reports' ||
+    location.pathname === '/analytics' || 
     location.pathname === '/login' || 
-    location.pathname === '/register';
+    location.pathname === '/register' ||
+    location.pathname === '/signup' ||
+    location.pathname === '/sign-up';
 
   if (isDedicatedLayout) {
     return (

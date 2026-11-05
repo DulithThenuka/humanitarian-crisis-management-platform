@@ -22,6 +22,7 @@ export const Sidebar = () => {
     { label: 'Supply Dispatch', to: '/logistics/dispatch', roles: ['LogisticsManager', 'Coordinator', 'Admin'] },
     { label: 'Shelter Directory', to: '/shelters/directory', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
     { label: 'Evacuee Allocation', to: '/shelters/allocation', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
+    { label: 'Volunteer Portal', to: '/volunteer', roles: ['Coordinator', 'Volunteer', 'Admin'] },
     { label: 'Volunteer Roster', to: '/volunteers/roster', roles: ['Coordinator', 'Admin'] },
     { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
     { label: 'Notifications', to: '/coordinator/notifications', roles: ['Coordinator', 'Admin'] },

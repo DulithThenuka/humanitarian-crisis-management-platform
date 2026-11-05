@@ -32,6 +32,8 @@ function AppLayout() {
     location.pathname.startsWith('/shelter-manager') || 
     location.pathname.startsWith('/shelter-manger') || 
     location.pathname.startsWith('/shelter-dashboard') || 
+    location.pathname.startsWith('/volunteer') || 
+    location.pathname.startsWith('/volunteer-admin') || 
     location.pathname.startsWith('/track') || 
     location.pathname.startsWith('/emergency') || 
     location.pathname.startsWith('/assistance') || 
