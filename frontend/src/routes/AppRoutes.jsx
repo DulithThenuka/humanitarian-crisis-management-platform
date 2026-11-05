@@ -31,6 +31,7 @@ import { AllocationDispatchPage } from '../pages/logistics/AllocationDispatchPag
 // Shelters Pages
 import { ShelterDirectoryPage } from '../pages/shelters/ShelterDirectoryPage';
 import { EvacueeAllocationPage } from '../pages/shelters/EvacueeAllocationPage';
+import { ShelterAdminDashboard } from '../pages/shelter-manger/ShelterAdminDashboard';
 
 // Volunteers Pages
 import { VolunteerRosterPage } from '../pages/volunteers/VolunteerRosterPage';
@@ -42,6 +43,7 @@ import { ReportsAnalyticsView } from '../pages/reports-and-analysis/ReportsAnaly
 
 import { AuditCenterPage } from '../pages/audit/AuditCenterPage';
 import { AIOperationsContainer } from '../pages/ai-operations/AIOperationsContainer';
+
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -125,9 +127,22 @@ export const AppRoutes = () => {
       <Route path="/logistics/inventory" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'Coordinator', 'Admin']}><ResourceInventoryPage /></ProtectedRoute>} />
       <Route path="/logistics/dispatch" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'Coordinator', 'Admin']}><AllocationDispatchPage /></ProtectedRoute>} />
 
-      {/* Shelter routes */}
-      <Route path="/shelters/directory" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin']}><ShelterDirectoryPage /></ProtectedRoute>} />
-      <Route path="/shelters/allocation" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin']}><EvacueeAllocationPage /></ProtectedRoute>} />
+      {/* Shelter Admin / Shelter Manager Portal (Figma Match) */}
+      <Route path="/shelter-admin" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+      <Route path="/shelter-admin/dashboard" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+      <Route path="/shelter-admin/directory" element={<ShelterAdminDashboard initialTab="directory" />} />
+      <Route path="/shelter-admin/capacity" element={<ShelterAdminDashboard initialTab="capacity" />} />
+      <Route path="/shelter-admin/placements" element={<ShelterAdminDashboard initialTab="placements" />} />
+      <Route path="/shelter-admin/resources" element={<ShelterAdminDashboard initialTab="resources" />} />
+      <Route path="/shelter-admin/reports" element={<ShelterAdminDashboard initialTab="reports" />} />
+      <Route path="/shelter-manager" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+      <Route path="/shelter-manger" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+      <Route path="/shelters/admin" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+      <Route path="/shelter-dashboard" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+
+      {/* Legacy Shelter routes */}
+      <Route path="/shelters/directory" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin', 'ShelterAdministrator', 'ShelterAdmin']}><ShelterDirectoryPage /></ProtectedRoute>} />
+      <Route path="/shelters/allocation" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin', 'ShelterAdministrator', 'ShelterAdmin']}><EvacueeAllocationPage /></ProtectedRoute>} />
 
       {/* Volunteer routes */}
       <Route path="/volunteers/roster" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><VolunteerRosterPage /></ProtectedRoute>} />

@@ -8,28 +8,26 @@ export const Sidebar = () => {
   const role = user?.role;
 
   const links = [
-    { label: 'Citizen Portal', to: '/citizen/submit', roles: ['Citizen', 'Coordinator', 'Emergency Coordinator', 'Admin'] },
-    { label: 'My Requests', to: '/citizen/track', roles: ['Citizen', 'Coordinator', 'Emergency Coordinator', 'Admin'] },
-    { label: 'Find Shelters', to: '/citizen/shelters', roles: ['Citizen', 'Coordinator', 'Emergency Coordinator', 'LogisticsManager', 'Logistics Manager', 'Volunteer', 'Admin'] },
-    { label: 'Emergency Overview', to: '/coordinator/dashboard', roles: ['Coordinator', 'Emergency Coordinator', 'Admin'] },
-    { label: 'Request Triage', to: '/coordinator/triage', roles: ['Coordinator', 'Emergency Coordinator', 'Admin'] },
-    { label: 'AI Review & Governance', to: '/coordinator/ai-review', roles: ['Coordinator', 'Emergency Coordinator', 'Admin'] },
-    { label: 'Resource Inventory', to: '/logistics/inventory', roles: ['LogisticsManager', 'Logistics Manager', 'Coordinator', 'Emergency Coordinator', 'Admin'] },
-    { label: 'Supply Dispatch', to: '/logistics/dispatch', roles: ['LogisticsManager', 'Logistics Manager', 'Coordinator', 'Emergency Coordinator', 'Admin'] },
-    { label: 'Shelter Directory', to: '/shelters/directory', roles: ['Coordinator', 'Emergency Coordinator', 'LogisticsManager', 'Logistics Manager', 'Admin'] },
-    { label: 'Evacuee Allocation', to: '/shelters/allocation', roles: ['Coordinator', 'Emergency Coordinator', 'LogisticsManager', 'Logistics Manager', 'Admin'] },
-    { label: 'Volunteer Roster', to: '/volunteers/roster', roles: ['Coordinator', 'Emergency Coordinator', 'Admin'] },
-    { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Emergency Coordinator', 'Volunteer', 'Admin'] },
+    { label: 'Citizen Portal', to: '/citizen', roles: ['Citizen', 'Coordinator', 'Admin'] },
+    { label: 'Submit Request', to: '/citizen/submit', roles: ['Citizen', 'Coordinator', 'Admin'] },
+    { label: 'My Requests', to: '/citizen/track', roles: ['Citizen', 'Coordinator', 'Admin'] },
+    { label: 'Find Shelters', to: '/citizen/shelters', roles: ['Citizen', 'Coordinator', 'LogisticsManager', 'Volunteer', 'Admin'] },
+    { label: 'Emergency Overview', to: '/coordinator/dashboard', roles: ['Coordinator', 'Admin'] },
+    { label: 'Assistance Requests', to: '/coordinator/requests', roles: ['Coordinator', 'Admin', 'Citizen'] },
+    { label: 'Operational Map', to: '/map', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
+    { label: 'Reports & Analytics', to: '/reports', roles: ['Coordinator', 'Admin'] },
+    { label: 'Request Triage', to: '/coordinator/triage', roles: ['Coordinator', 'Admin'] },
+    { label: 'AI Review & Governance', to: '/coordinator/ai-review', roles: ['Coordinator', 'Admin'] },
+    { label: 'Resource Inventory', to: '/logistics/inventory', roles: ['LogisticsManager', 'Coordinator', 'Admin'] },
+    { label: 'Supply Dispatch', to: '/logistics/dispatch', roles: ['LogisticsManager', 'Coordinator', 'Admin'] },
+    { label: 'Shelter Directory', to: '/shelters/directory', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
+    { label: 'Evacuee Allocation', to: '/shelters/allocation', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
+    { label: 'Volunteer Roster', to: '/volunteers/roster', roles: ['Coordinator', 'Admin'] },
+    { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
+    { label: 'Notifications', to: '/coordinator/notifications', roles: ['Coordinator', 'Admin'] },
   ];
 
-  // Role එක flexibly match කර ගැනීමට (Emergency Coordinator වැනි roles සඳහා)
-  const allowedLinks = links.filter(l => {
-    if (!role) return true;
-    return l.roles.some(r => 
-      role.toLowerCase().includes(r.toLowerCase()) || 
-      r.toLowerCase().includes(role.toLowerCase())
-    );
-  });
+  const allowedLinks = links.filter(l => !role || l.roles.includes(role));
 
   return (
     <aside style={{
@@ -60,11 +58,10 @@ export const Sidebar = () => {
             padding: '10px 14px',
             borderRadius: '8px',
             textDecoration: 'none',
-            fontSize: '13px',
-            fontWeight: 500,
-            color: isActive ? '#ffffff' : '#94a3b8',
-            backgroundColor: isActive ? '#1e293b' : 'transparent',
-            borderLeft: isActive ? '3px solid #3b82f6' : '3px solid transparent',
+            fontSize: '13.5px',
+            fontWeight: isActive ? 700 : 500,
+            color: isActive ? '#38bdf8' : '#94a3b8',
+            backgroundColor: isActive ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
             transition: 'all 0.15s ease'
           })}
         >
