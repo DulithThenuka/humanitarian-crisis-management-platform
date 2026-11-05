@@ -22,6 +22,9 @@ function AppLayout() {
     location.pathname.startsWith('/ai-ops') ||
     location.pathname.startsWith('/ai-workspaces') ||
     location.pathname.startsWith('/ai-governance') ||
+    location.pathname.startsWith('/case-manager') ||
+    location.pathname.startsWith('/incident') ||
+    location.pathname.startsWith('/cases') ||
     location.pathname.startsWith('/map') ||
     location.pathname.startsWith('/citizen') || 
     location.pathname.startsWith('/citize') || 

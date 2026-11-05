@@ -42,6 +42,7 @@ import { ReportsAnalyticsView } from '../pages/reports-and-analysis/ReportsAnaly
 
 import { AuditCenterPage } from '../pages/audit/AuditCenterPage';
 import { AIOperationsContainer } from '../pages/ai-operations/AIOperationsContainer';
+import { CaseManagerPortal } from '../pages/incident/case-manager/CaseManagerPortal';
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -120,6 +121,19 @@ export const AppRoutes = () => {
       <Route path="/ai-governance" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="governance" /></ProtectedRoute>} />
       <Route path="/coordinator/triage" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><RequestTriagePage /></ProtectedRoute>} />
       <Route path="/coordinator/ai-review" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIDecisionReviewPage /></ProtectedRoute>} />
+      
+      {/* Incident / Case Manager routes */}
+      <Route path="/case-manager" element={<CaseManagerPortal initialTab="dashboard" />} />
+      <Route path="/case-manager/dashboard" element={<CaseManagerPortal initialTab="dashboard" />} />
+      <Route path="/case-manager/management" element={<CaseManagerPortal initialTab="management" />} />
+      <Route path="/case-manager/cases" element={<CaseManagerPortal initialTab="management" />} />
+      <Route path="/case-manager/review" element={<CaseManagerPortal initialTab="review" />} />
+      <Route path="/case-manager/communication" element={<CaseManagerPortal initialTab="communication" />} />
+      <Route path="/case-manager/reports" element={<CaseManagerPortal initialTab="reports" />} />
+      <Route path="/case-manager/profile" element={<CaseManagerPortal initialTab="profile" />} />
+      <Route path="/incident/case-manager" element={<CaseManagerPortal initialTab="dashboard" />} />
+      <Route path="/incident-case-manager" element={<CaseManagerPortal initialTab="dashboard" />} />
+      <Route path="/cases" element={<CaseManagerPortal initialTab="management" />} />
 
       {/* Logistics routes */}
       <Route path="/logistics/inventory" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'Coordinator', 'Admin']}><ResourceInventoryPage /></ProtectedRoute>} />
