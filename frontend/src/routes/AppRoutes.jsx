@@ -27,6 +27,11 @@ import { ShelterDirectoryPage } from '../pages/shelters/ShelterDirectoryPage';
 import { EvacueeAllocationPage } from '../pages/shelters/EvacueeAllocationPage';
 
 // Volunteers Pages
+<<<<<<< Updated upstream
+=======
+import { VolunteerPortal } from '../pages/volunteer/VolunteerPortal';
+import { VolunteerCoordinatorPortal } from '../pages/volunteer-coordinator/VolunteerCoordinatorPortal';
+>>>>>>> Stashed changes
 import { VolunteerRosterPage } from '../pages/volunteers/VolunteerRosterPage';
 import { TaskAssignmentPage } from '../pages/volunteers/TaskAssignmentPage';
 
@@ -63,7 +68,40 @@ export const AppRoutes = () => {
       <Route path="/shelters/directory" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin']}><ShelterDirectoryPage /></ProtectedRoute>} />
       <Route path="/shelters/allocation" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin']}><EvacueeAllocationPage /></ProtectedRoute>} />
 
+<<<<<<< Updated upstream
       {/* Volunteer routes */}
+=======
+      {/* Volunteer Admin / Volunteer Portal (Figma Match) */}
+      <Route path="/volunteer" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteer/dashboard" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteer/overview" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteer/opportunities" element={<VolunteerPortal initialTab="opportunities" />} />
+      <Route path="/volunteer/assignments" element={<VolunteerPortal initialTab="assignments" />} />
+      <Route path="/volunteer/progress" element={<VolunteerPortal initialTab="progress" />} />
+      <Route path="/volunteer/schedule" element={<VolunteerPortal initialTab="schedule" />} />
+      <Route path="/volunteer/availability" element={<VolunteerPortal initialTab="schedule" />} />
+      <Route path="/volunteer/notifications" element={<VolunteerPortal initialTab="notifications" />} />
+      <Route path="/volunteer/profile" element={<VolunteerPortal initialTab="profile" />} />
+      <Route path="/volunteer/help" element={<VolunteerPortal initialTab="help" />} />
+      <Route path="/volunteer-admin" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteer-admin/dashboard" element={<VolunteerPortal initialTab="overview" />} />
+
+      {/* Volunteer Coordinator Portal (Figma Match) */}
+      <Route path="/volunteer-coordinator" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/dashboard" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/directory" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/scheduling" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/ai-matching" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/activity-safety" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/reports" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator-portal" element={<VolunteerCoordinatorPortal />} />
+
+      {/* Legacy Shelter routes */}
+      <Route path="/shelters/directory" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin', 'ShelterAdministrator', 'ShelterAdmin']}><ShelterDirectoryPage /></ProtectedRoute>} />
+      <Route path="/shelters/allocation" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin', 'ShelterAdministrator', 'ShelterAdmin']}><EvacueeAllocationPage /></ProtectedRoute>} />
+
+      {/* Legacy Volunteer routes */}
+>>>>>>> Stashed changes
       <Route path="/volunteers/roster" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><VolunteerRosterPage /></ProtectedRoute>} />
       <Route path="/volunteers/assignments" element={<ProtectedRoute allowedRoles={['Coordinator', 'Volunteer', 'Admin']}><TaskAssignmentPage /></ProtectedRoute>} />
 

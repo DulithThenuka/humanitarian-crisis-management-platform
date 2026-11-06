@@ -18,6 +18,11 @@ export const Sidebar = () => {
     { label: 'Supply Dispatch', to: '/logistics/dispatch', roles: ['LogisticsManager', 'Coordinator', 'Admin'] },
     { label: 'Shelter Directory', to: '/shelters/directory', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
     { label: 'Evacuee Allocation', to: '/shelters/allocation', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
+<<<<<<< Updated upstream
+=======
+    { label: 'Volunteer Portal', to: '/volunteer', roles: ['Coordinator', 'Volunteer', 'Admin'] },
+    { label: 'Volunteer Coordinator', to: '/volunteer-coordinator', roles: ['Coordinator', 'Admin'] },
+>>>>>>> Stashed changes
     { label: 'Volunteer Roster', to: '/volunteers/roster', roles: ['Coordinator', 'Admin'] },
     { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
   ];
