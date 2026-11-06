@@ -169,6 +169,12 @@ export const AppRoutes = () => {
       <Route path="/volunteer/help" element={<VolunteerPortal initialTab="help" />} />
       <Route path="/volunteer-admin" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteer-admin/dashboard" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteer-manager" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteer-manager/dashboard" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteer-manager/*" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteer-management" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteers/manager" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteers/dashboard" element={<VolunteerPortal initialTab="overview" />} />
 
       {/* Legacy Shelter routes */}
       <Route path="/shelters/directory" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin', 'ShelterAdministrator', 'ShelterAdmin']}><ShelterDirectoryPage /></ProtectedRoute>} />
