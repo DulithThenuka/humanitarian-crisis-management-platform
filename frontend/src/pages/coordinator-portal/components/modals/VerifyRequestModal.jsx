@@ -16,7 +16,7 @@ export const VerifyRequestModal = ({
   return (
     <div className="ec-modal-overlay" onClick={onClose}>
       <div className="ec-verify-modal-card" onClick={(e) => e.stopPropagation()}>
-        <div className="ec-modal-shield-icon">
+        <div className="ec-modal-shield-icon icon-primary">
           <ShieldCheck size={22} color="#0284c7" />
         </div>
 
@@ -49,12 +49,12 @@ export const VerifyRequestModal = ({
         </label>
 
         <div className="ec-modal-actions-footer">
-          <button className="ec-btn-hero-outline" onClick={onClose}>
+          <button type="button" className="ec-btn-modal-cancel" onClick={onClose}>
             Cancel
           </button>
           <button
-            className="ec-btn-verify-primary"
-            style={{ width: 'auto', padding: '8px 20px' }}
+            type="button"
+            className="ec-btn-confirm-primary"
             disabled={!verifyReason.trim() || !verifyConfirmedCheck}
             onClick={onConfirm}
           >

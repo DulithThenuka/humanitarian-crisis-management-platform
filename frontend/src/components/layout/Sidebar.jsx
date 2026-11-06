@@ -22,6 +22,7 @@ export const Sidebar = () => {
     { label: 'Supply Dispatch', to: '/logistics/dispatch', roles: ['LogisticsManager', 'Coordinator', 'Admin'] },
     { label: 'Shelter Directory', to: '/shelters/directory', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
     { label: 'Evacuee Allocation', to: '/shelters/allocation', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
+    { label: 'Volunteer Portal', to: '/volunteer', roles: ['Coordinator', 'Volunteer', 'Admin'] },
     { label: 'Volunteer Roster', to: '/volunteers/roster', roles: ['Coordinator', 'Admin'] },
     { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
     { label: 'Notifications', to: '/coordinator/notifications', roles: ['Coordinator', 'Admin'] },
@@ -58,11 +59,10 @@ export const Sidebar = () => {
             padding: '10px 14px',
             borderRadius: '8px',
             textDecoration: 'none',
-            fontSize: '13px',
-            fontWeight: 500,
-            color: isActive ? '#ffffff' : '#94a3b8',
-            backgroundColor: isActive ? '#1e293b' : 'transparent',
-            borderLeft: isActive ? '3px solid #3b82f6' : '3px solid transparent',
+            fontSize: '13.5px',
+            fontWeight: isActive ? 700 : 500,
+            color: isActive ? '#38bdf8' : '#94a3b8',
+            backgroundColor: isActive ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
             transition: 'all 0.15s ease'
           })}
         >

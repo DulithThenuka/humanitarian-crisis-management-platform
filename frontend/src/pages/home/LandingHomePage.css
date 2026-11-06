@@ -27,7 +27,7 @@
   color: #f8fafc;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -134,7 +134,8 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   position: sticky;
   top: 0;
-  z-index: 90;
+  z-index: 999;
+  width: 100%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 

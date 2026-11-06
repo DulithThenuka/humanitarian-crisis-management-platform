@@ -24,7 +24,8 @@ export const Navbar = () => {
       padding: '0 24px',
       position: 'sticky',
       top: 0,
-      zIndex: 50
+      zIndex: 100,
+      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>

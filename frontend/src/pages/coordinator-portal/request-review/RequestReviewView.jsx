@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ChevronLeft,
   Home,
@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   Plus
 } from 'lucide-react';
+import { ConsequentialActionModal } from '../components/modals/ConsequentialActionModal';
 import './RequestReviewView.css';
 
 export const RequestReviewView = ({
@@ -21,6 +22,30 @@ export const RequestReviewView = ({
   onReviewAIRecommendation,
   showToast
 }) => {
+  const [activeModalType, setActiveModalType] = useState(null);
+  const [actionReason, setActionReason] = useState('');
+  const [actionConfirmedCheck, setActionConfirmedCheck] = useState(false);
+
+  const handleOpenActionModal = (type) => {
+    setActiveModalType(type);
+    setActionReason('');
+    setActionConfirmedCheck(false);
+  };
+
+  const handleConfirmAction = () => {
+    if (activeModalType === 'verify') {
+      onOpenVerifyModal?.();
+    } else if (activeModalType === 'info') {
+      showToast(`Information request logged and dispatch notification sent for ${currentCase.id}`, 'success');
+    } else if (activeModalType === 'escalate') {
+      showToast(`Operational priority for ${currentCase.id} escalated to Critical Emergency Command`, 'warning');
+    } else if (activeModalType === 'investigate') {
+      showToast(`Request ${currentCase.id} flagged for authorised field investigation`, 'warning');
+    } else if (activeModalType === 'reject') {
+      showToast(`Request ${currentCase.id} rejected with logged operational rationale`, 'error');
+    }
+    setActiveModalType(null);
+  };
   return (
     <div className="ec-portal-canvas">
       {/* Header Subnav */}
@@ -250,18 +275,14 @@ export const RequestReviewView = ({
 
               <button
                 className="ec-btn-action-outline"
-                onClick={() => {
-                  showToast(`Information request sent to ${currentCase.requesterName || 'citizen'}`);
-                }}
+                onClick={() => handleOpenActionModal('info')}
               >
                 Request additional information
               </button>
 
               <button
                 className="ec-btn-action-outline"
-                onClick={() => {
-                  showToast(`Priority escalated to Urgent Command`);
-                }}
+                onClick={() => handleOpenActionModal('escalate')}
               >
                 Escalate priority
               </button>
@@ -275,18 +296,14 @@ export const RequestReviewView = ({
 
               <button
                 className="ec-btn-action-outline"
-                onClick={() => {
-                  showToast(`Request ${currentCase.id} flagged for field investigation`, 'warning');
-                }}
+                onClick={() => handleOpenActionModal('investigate')}
               >
                 Flag for investigation
               </button>
 
               <button
                 className="ec-btn-reject-red"
-                onClick={() => {
-                  showToast(`Rejection rationale dialog opened for ${currentCase.id}`, 'error');
-                }}
+                onClick={() => handleOpenActionModal('reject')}
               >
                 Reject with reason
               </button>
@@ -294,6 +311,29 @@ export const RequestReviewView = ({
           </div>
         </div>
       </div>
+
+      {/* Consequential Action Confirmation Modal */}
+      <ConsequentialActionModal
+        isOpen={Boolean(activeModalType)}
+        onClose={() => setActiveModalType(null)}
+        title={
+          activeModalType === 'info'
+            ? 'Request additional information?'
+            : activeModalType === 'escalate'
+            ? 'Escalate operational priority?'
+            : activeModalType === 'investigate'
+            ? 'Flag for authorised investigation?'
+            : activeModalType === 'reject'
+            ? 'Reject assistance request with reason?'
+            : 'Mark request as verified?'
+        }
+        confirmVariant={activeModalType === 'reject' ? 'danger' : 'primary'}
+        reason={actionReason}
+        setReason={setActionReason}
+        confirmedCheck={actionConfirmedCheck}
+        setConfirmedCheck={setActionConfirmedCheck}
+        onConfirm={handleConfirmAction}
+      />
     </div>
   );
 };

@@ -165,10 +165,7 @@ export const CoordinatorSidebar = ({
 
           <button
             className={`ec-nav-link-btn ${activeTab === 'reports' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('reports');
-              navigate('/reports');
-            }}
+            onClick={() => setActiveTab('reports')}
           >
             <div className="ec-nav-item-left">
               <BarChart2 size={15} />
@@ -178,10 +175,7 @@ export const CoordinatorSidebar = ({
 
           <button
             className={`ec-nav-link-btn ${activeTab === 'history' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('history');
-              navigate('/audit');
-            }}
+            onClick={() => setActiveTab('history')}
           >
             <div className="ec-nav-item-left">
               <GitBranch size={15} />
@@ -191,10 +185,7 @@ export const CoordinatorSidebar = ({
 
           <button
             className={`ec-nav-link-btn ${activeTab === 'notifications' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('notifications');
-              navigate('/notifications');
-            }}
+            onClick={() => setActiveTab('notifications')}
           >
             <div className="ec-nav-item-left">
               <Bell size={15} />
@@ -205,7 +196,7 @@ export const CoordinatorSidebar = ({
 
           <button
             className={`ec-nav-link-btn ${activeTab === 'settings' ? 'active' : ''}`}
-            onClick={() => showToast('Coordinator settings opened')}
+            onClick={() => setActiveTab('settings')}
           >
             <div className="ec-nav-item-left">
               <Settings size={15} />

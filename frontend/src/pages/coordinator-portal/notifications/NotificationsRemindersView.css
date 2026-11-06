@@ -1,0 +1,27 @@
+/* =========================================================
+   NOTIFICATIONS & REMINDERS VIEW STYLESHEET
+   RELIEFCORE Crisis Operations System - Modern Project Blue Theme
+   ========================================================= */
+
+.ec-btn-action-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.ec-btn-action-outline:hover {
+  border-color: #0284c7;
+  color: #0284c7;
+  background-color: #f0f9ff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.12);
+}

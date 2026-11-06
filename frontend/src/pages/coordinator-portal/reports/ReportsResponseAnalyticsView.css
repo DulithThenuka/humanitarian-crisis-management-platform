@@ -1,0 +1,434 @@
+/* =========================================================
+   REPORTS & RESPONSE ANALYTICS VIEW STYLESHEET
+   RELIEFCORE Crisis Operations System - Modern Project Blue Theme
+   ========================================================= */
+
+.ec-reports-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 1. Top 5 KPI Grid */
+.ec-analytics-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.ec-akpi-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+  transition: all 0.2s ease;
+}
+
+.ec-akpi-card:hover {
+  border-color: #0284c7;
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.1);
+  transform: translateY(-2px);
+}
+
+.ec-akpi-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ec-akpi-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.ec-akpi-icon-wrap {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ec-akpi-val-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ec-akpi-main-val {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.ec-akpi-trend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+}
+
+.ec-akpi-trend-pill.positive {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.ec-akpi-sub-target {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* 2. Charts Grid */
+.ec-analytics-charts-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 0.95fr;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.ec-chart-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.ec-chart-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.ec-chart-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.ec-chart-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+.ec-chart-badge-pill {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0284c7;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 3px 10px;
+  border-radius: 16px;
+}
+
+/* Bar Chart */
+.ec-barchart-container {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 12px;
+  height: 220px;
+  align-items: stretch;
+}
+
+.ec-barchart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  padding-bottom: 24px;
+  text-align: right;
+}
+
+.ec-barchart-bars-area {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1.5px solid #e2e8f0;
+  padding-bottom: 2px;
+}
+
+.ec-bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  cursor: pointer;
+}
+
+.ec-bar-track-vertical {
+  width: 100%;
+  max-width: 28px;
+  height: 190px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.ec-bar-fill-vertical {
+  width: 100%;
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+  border-radius: 6px 6px 0 0;
+  transition: all 0.25s ease;
+}
+
+.ec-bar-fill-vertical.bar-peak {
+  background: linear-gradient(180deg, #0284c7 0%, #091a2b 100%);
+  box-shadow: 0 0 10px rgba(2, 132, 199, 0.4);
+}
+
+.ec-bar-col:hover .ec-bar-fill-vertical {
+  filter: brightness(1.15);
+  transform: scaleY(1.02);
+  transform-origin: bottom;
+}
+
+.ec-bar-x-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin-top: 8px;
+}
+
+.ec-bar-tooltip {
+  position: absolute;
+  top: -30px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* Donut Chart Layout */
+.ec-donut-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 20px;
+  height: 100%;
+}
+
+.ec-donut-svg-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ec-donut-center-info {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ec-donut-center-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.ec-donut-center-lbl {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.ec-donut-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.ec-donut-legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.ec-donut-legend-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ec-donut-slice-name {
+  color: #334155;
+  font-weight: 600;
+}
+
+.ec-donut-slice-pct {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+/* 3. Bottom Grid: Category Progress & Operational Progress */
+.ec-analytics-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.ec-category-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ec-cat-prog-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ec-cat-prog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.ec-cat-prog-name {
+  color: #334155;
+  font-weight: 600;
+}
+
+.ec-cat-prog-pct {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.ec-cat-prog-track {
+  width: 100%;
+  height: 8px;
+  background-color: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ec-cat-prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0284c7 0%, #38bdf8 100%);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+/* Operational Progress Rows */
+.ec-op-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ec-op-progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}
+
+.ec-op-prog-lbl {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.ec-op-prog-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ec-op-prog-val {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ec-op-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.pill-measured {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.pill-measured .ec-rc-status-dot {
+  background-color: #16a34a;
+}
+
+.pill-estimate {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.pill-estimate .ec-rc-status-dot {
+  background-color: #d97706;
+}
+
+@media (max-width: 1200px) {
+  .ec-analytics-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .ec-analytics-charts-grid,
+  .ec-analytics-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .ec-analytics-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
