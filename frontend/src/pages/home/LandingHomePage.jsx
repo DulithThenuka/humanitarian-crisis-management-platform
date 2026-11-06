@@ -34,6 +34,7 @@ import {
   ShieldAlert,
   Headphones,
   User,
+  HeartHandshake,
   Zap
 } from 'lucide-react';
 
@@ -157,6 +158,15 @@ export const LandingHomePage = () => {
       icon: Compass,
       color: '#7c3aed',
       featured: 'Search & rescue teams & ground rosters'
+    },
+    {
+      title: 'Donor / Funding Officer',
+      desc: 'Controlled funding workspace, dual authorization allocations, monetary & in-kind records, and campaign tracking.',
+      path: '/donor',
+      badge: 'Funding Desk',
+      icon: HeartHandshake,
+      color: '#3b82f6',
+      featured: 'Dual authorization & transparent audit trails'
     },
     {
       title: 'Operational GIS Satellite Map',

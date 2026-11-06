@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '../components/layout/ProtectedRoute';
 
@@ -44,8 +44,11 @@ import { ReportsAnalyticsView } from '../pages/reports-and-analysis/ReportsAnaly
 
 import { AuditCenterPage } from '../pages/audit/AuditCenterPage';
 import { AIOperationsContainer } from '../pages/ai-operations/AIOperationsContainer';
-import { CaseManagerPortal } from '../pages/incident/case-manager/CaseManagerPortal';
+// Donor / Funding Officer Portal
+import { DonorFundingOfficerPortal } from '../pages/Donor - Funding - Officer/DonorFundingOfficerPortal';
 
+// Case Manager Portal
+import { CaseManagerPortal } from '../pages/incident/case-manager/CaseManagerPortal';
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -188,8 +191,26 @@ export const AppRoutes = () => {
       <Route path="/audit" element={<AuditCenterPage />} />
       <Route path="/coordinator/audit" element={<AuditCenterPage />} />
 
+      {/* Donor / Funding Officer Portal Routes */}
+      <Route path="/donor" element={<DonorFundingOfficerPortal initialActiveTab="dashboard" />} />
+      <Route path="/donor/dashboard" element={<DonorFundingOfficerPortal initialActiveTab="dashboard" />} />
+      <Route path="/donor/donors" element={<DonorFundingOfficerPortal initialActiveTab="donors" />} />
+      <Route path="/donor/records" element={<DonorFundingOfficerPortal initialActiveTab="donations" />} />
+      <Route path="/donor/campaigns" element={<DonorFundingOfficerPortal initialActiveTab="campaigns" />} />
+      <Route path="/donor/allocations" element={<DonorFundingOfficerPortal initialActiveTab="allocations" />} />
+      <Route path="/donor/suspicious" element={<DonorFundingOfficerPortal initialActiveTab="suspicious" />} />
+      <Route path="/donor/reports" element={<DonorFundingOfficerPortal initialActiveTab="reports" />} />
+      <Route path="/donor-funding-officer" element={<DonorFundingOfficerPortal />} />
+      <Route path="/funding-officer" element={<DonorFundingOfficerPortal />} />
+      <Route path="/donor-management" element={<DonorFundingOfficerPortal initialActiveTab="donors" />} />
+      <Route path="/donations" element={<DonorFundingOfficerPortal initialActiveTab="dashboard" />} />
+      <Route path="/donations/records" element={<DonorFundingOfficerPortal initialActiveTab="donations" />} />
+      <Route path="/donations/campaigns" element={<DonorFundingOfficerPortal initialActiveTab="campaigns" />} />
+      <Route path="/donations/allocations" element={<DonorFundingOfficerPortal initialActiveTab="allocations" />} />
+
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
+
