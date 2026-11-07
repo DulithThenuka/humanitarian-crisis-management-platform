@@ -1,0 +1,1036 @@
+/* ==========================================================================
+   Crisis Management Dashboard View Styles
+   Exact match to the Reference Design
+   ========================================================================== */
+
+.crisis-management-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Base Card */
+.cm-card {
+  background-color: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+.cm-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cm-card-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.cm-card-link-btn {
+  background: transparent;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0284c7;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+  font-family: inherit;
+}
+
+.cm-card-link-btn:hover {
+  color: #0369a1;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   1. Top 4 KPI Metrics Row
+   ========================================================================== */
+.cm-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.cm-kpi-card {
+  background-color: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.cm-kpi-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bg-red-soft { background-color: #fef2f2; }
+.bg-orange-soft { background-color: #fff7ed; }
+.bg-blue-soft { background-color: #eff6ff; }
+.bg-green-soft { background-color: #f0fdf4; }
+.bg-purple-soft { background-color: #faf5ff; }
+.bg-amber-soft { background-color: #fffbeb; }
+.bg-slate-soft { background-color: #f1f5f9; }
+.bg-cyan-soft { background-color: #ecfeff; }
+
+.text-red { color: #ef4444; }
+.text-orange { color: #f97316; }
+.text-blue { color: #0284c7; }
+.text-green { color: #10b981; }
+.text-purple { color: #8b5cf6; }
+.text-amber { color: #d97706; }
+.text-slate { color: #64748b; }
+.text-cyan { color: #06b6d4; }
+.font-semibold { font-weight: 600; }
+
+.cm-kpi-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.cm-kpi-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.cm-kpi-val-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 2px 0;
+}
+
+.cm-kpi-number {
+  font-size: 21px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.cm-kpi-trend {
+  font-size: 11.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.cm-kpi-sub {
+  font-size: 10.5px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.cm-kpi-action-col {
+  display: flex;
+  align-items: center;
+}
+
+.cm-btn-report-crisis {
+  background-color: #e11d48;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0 20px;
+  height: 100%;
+  min-height: 72px;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.28);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.cm-btn-report-crisis:hover {
+  background-color: #be123c;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35);
+}
+
+/* ==========================================================================
+   2. Middle Grid: Crisis Zones Map + Right Column
+   ========================================================================== */
+.cm-middle-grid {
+  display: grid;
+  grid-template-columns: 1.62fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Map Card */
+.cm-map-card {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 14px;
+}
+
+.cm-map-viewport-wrapper {
+  position: relative;
+  height: 410px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.cm-leaflet-container {
+  height: 100%;
+  width: 100%;
+  background-color: #0b1317;
+  z-index: 1;
+}
+
+/* Map Layers Floating Box */
+.cm-map-layers-floating-box {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 400;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+  width: 165px;
+}
+
+.cm-layers-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.01em;
+}
+
+.cm-layers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cm-layer-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cm-layer-checkbox-item input {
+  display: none;
+}
+
+.cm-custom-check {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.cm-layer-checkbox-item input:checked + .cm-custom-check {
+  background-color: #0e7490;
+  border-color: #0e7490;
+}
+
+.cm-layer-icon-badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cm-layer-name {
+  white-space: nowrap;
+}
+
+/* Zoom controls */
+.cm-map-zoom-controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  border: 1px solid #e2e8f0;
+}
+
+.cm-map-zoom-controls button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.cm-map-zoom-controls button:first-child {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cm-map-zoom-controls button:hover {
+  background: #f1f5f9;
+}
+
+/* Floating Full Map Button */
+.cm-btn-view-full-map {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 400;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0e6f76;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.cm-btn-view-full-map:hover {
+  background: #f8fafc;
+  color: #0b595e;
+  transform: translateY(-1px);
+}
+
+/* Map Popup Styled Tooltip */
+.cz-map-popup-card {
+  padding: 4px 2px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #0f172a;
+}
+
+.cz-popup-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  margin-bottom: 4px;
+}
+
+.cz-popup-info {
+  font-size: 11.5px;
+  color: #475569;
+}
+
+.cz-popup-severity {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Right Column */
+.cm-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Active Crises List */
+.cm-active-crises-card {
+  padding: 14px 16px;
+}
+
+.cm-crises-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cm-crisis-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.cm-crisis-item:hover {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.cm-crisis-item.active {
+  background-color: #f0fdfa;
+  border-color: #ccfbf1;
+}
+
+.cm-crisis-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cm-crisis-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.cm-crisis-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cm-crisis-loc {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.cm-crisis-meta-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  margin-right: 6px;
+}
+
+.cm-crisis-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.cm-crisis-time {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.cm-severity-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-align: center;
+  min-width: 48px;
+}
+
+.badge-high {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.badge-medium {
+  background-color: #ffedd5;
+  color: #ea580c;
+}
+
+.badge-low {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+/* Crisis Details Card */
+.cm-crisis-details-card {
+  padding: 14px 16px;
+}
+
+.cm-details-banner {
+  height: 85px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.cm-details-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cm-details-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.cm-details-heading {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.cm-details-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.cm-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #475569;
+}
+
+.cm-details-description {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0 0 12px 0;
+}
+
+.cm-details-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cm-btn-view-details {
+  background-color: #0e6f76;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-family: inherit;
+  flex: 1;
+}
+
+.cm-btn-view-details:hover {
+  background-color: #0a565c;
+}
+
+.cm-btn-assign-team {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  flex: 1.2;
+}
+
+.cm-btn-assign-team:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.cm-btn-more-options {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cm-btn-more-options:hover {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* ==========================================================================
+   3. Bottom Grid: Resource Deployment, Population/Needs, Timeline
+   ========================================================================== */
+.cm-bottom-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1.05fr 0.95fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Resource Deployment Table */
+.cm-table-wrapper {
+  overflow-x: auto;
+}
+
+.cm-resource-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+
+.cm-resource-table th {
+  text-align: left;
+  font-weight: 600;
+  color: #64748b;
+  padding: 8px 10px;
+  border-bottom: 1px solid #eef2f6;
+  white-space: nowrap;
+}
+
+.cm-resource-table td {
+  padding: 10px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.cm-res-type-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.cm-res-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cm-progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 110px;
+}
+
+.cm-progress-track {
+  flex: 1;
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.cm-progress-bar {
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.bg-teal { background-color: #0ea5e9; }
+.bg-orange { background-color: #f97316; }
+.bg-blue { background-color: #3b82f6; }
+.bg-purple { background-color: #8b5cf6; }
+.bg-cyan { background-color: #06b6d4; }
+
+.cm-progress-pct {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
+  min-width: 26px;
+}
+
+/* Population & Needs Card */
+.cm-population-donut-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 0 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cm-donut-wrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.cm-donut-svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.cm-donut-center-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cm-donut-big-num {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.cm-donut-sub-text {
+  font-size: 9.5px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.cm-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cm-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #475569;
+}
+
+.cm-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cm-legend-text {
+  flex: 1;
+}
+
+.cm-legend-pct {
+  font-weight: 700;
+  color: #0f172a;
+  margin-left: 6px;
+}
+
+/* Immediate Needs Sub-section */
+.cm-immediate-needs-section {
+  padding-top: 12px;
+}
+
+.cm-sub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cm-sub-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cm-needs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.cm-need-box {
+  background-color: #f8fafc;
+  border: 1px solid #eef2f6;
+  border-radius: 8px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.cm-need-icon {
+  margin-bottom: 3px;
+}
+
+.cm-need-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.cm-need-val {
+  font-size: 10.5px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+/* Response Timeline Card */
+.cm-timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  padding-left: 6px;
+}
+
+.cm-timeline-list::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 9.5px;
+  width: 2px;
+  background-color: #e2e8f0;
+}
+
+.cm-timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.cm-timeline-node {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px #e2e8f0;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cm-timeline-node.bg-red { background-color: #ef4444; box-shadow: 0 0 0 2px #fee2e2; }
+.cm-timeline-node.bg-blue { background-color: #3b82f6; box-shadow: 0 0 0 2px #dbeafe; }
+.cm-timeline-node.bg-teal { background-color: #0ea5e9; box-shadow: 0 0 0 2px #e0f2fe; }
+.cm-timeline-node.bg-green { background-color: #10b981; box-shadow: 0 0 0 2px #d1fae5; }
+.cm-timeline-node.bg-orange { background-color: #f97316; box-shadow: 0 0 0 2px #ffedd5; }
+
+.cm-timeline-text-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.cm-timeline-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cm-timeline-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+/* ==========================================================================
+   Modals
+   ========================================================================== */
+.cm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.cm-modal-card {
+  background-color: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 540px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+}
+
+.cm-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eef2f6;
+  margin-bottom: 16px;
+}
+
+.cm-modal-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.cm-modal-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.cm-modal-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.cm-modal-close:hover {
+  color: #0f172a;
+}
+
+.cm-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cm-modal-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cm-modal-form-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.cm-modal-form-group input,
+.cm-modal-form-group select,
+.cm-modal-form-group textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: #0f172a;
+  font-family: inherit;
+  outline: none;
+}
+
+.cm-modal-form-group input:focus,
+.cm-modal-form-group select:focus,
+.cm-modal-form-group textarea:focus {
+  border-color: #0e6f76;
+}
+
+.cm-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid #eef2f6;
+}
+
+.cm-btn-secondary {
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cm-btn-primary {
+  background-color: #0e6f76;
+  border: none;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cm-btn-primary:hover {
+  background-color: #0a565c;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+@media (max-width: 1200px) {
+  .cm-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cm-kpi-action-col {
+    grid-column: span 2;
+  }
+  .cm-middle-grid {
+    grid-template-columns: 1fr;
+  }
+  .cm-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .cm-kpi-row {
+    grid-template-columns: 1fr;
+  }
+  .cm-kpi-action-col {
+    grid-column: span 1;
+  }
+}
+

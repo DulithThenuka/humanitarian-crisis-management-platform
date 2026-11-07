@@ -27,7 +27,6 @@ function AppLayout() {
     location.pathname.startsWith('/cases') ||
     location.pathname.startsWith('/map') ||
     location.pathname.startsWith('/citizen') || 
-    location.pathname.startsWith('/citize') || 
     location.pathname.startsWith('/alerts') || 
     location.pathname.startsWith('/safety') || 
     location.pathname.startsWith('/shelters') || 
@@ -36,13 +35,11 @@ function AppLayout() {
     location.pathname.startsWith('/shelter-manger') || 
     location.pathname.startsWith('/shelter-dashboard') || 
     location.pathname.startsWith('/volunteer') || 
-    location.pathname.startsWith('/volunteer-admin') || 
     location.pathname.startsWith('/track') || 
     location.pathname.startsWith('/emergency') || 
     location.pathname.startsWith('/assistance') || 
     location.pathname.startsWith('/requests') ||
     location.pathname === '/request-detail' ||
-    location.pathname === '/reports' ||
     location.pathname === '/analytics' || 
     location.pathname === '/login' || 
     location.pathname === '/register' ||

@@ -90,7 +90,6 @@ export const AppRoutes = () => {
       <Route path="/citizen/track" element={<CitizenPortalPage initialTab="requests" />} />
       <Route path="/track" element={<CitizenPortalPage initialTab="requests" />} />
       <Route path="/citizen/shelters" element={<CitizenPortalPage initialTab="shelters" />} />
-      <Route path="/citize/shelters" element={<CitizenPortalPage initialTab="shelters" />} />
       <Route path="/shelters" element={<CitizenPortalPage initialTab="shelters" />} />
       <Route path="/citizen/alerts" element={<CitizenPortalPage initialTab="alerts" />} />
       <Route path="/alerts" element={<CitizenPortalPage initialTab="alerts" />} />

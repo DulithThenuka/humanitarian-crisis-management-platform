@@ -56,6 +56,7 @@ import { AllocationDispatchPage } from "../logistics/AllocationDispatchPage";
 import { AIDecisionReviewPage } from "./AIDecisionReviewPage";
 import { AIOperationsContainer } from "../ai-operations/AIOperationsContainer";
 import { NotificationCenterContainer } from "../notifications/NotificationCenterContainer";
+import { CrisisManagementDashboardView } from "./CrisisManagementDashboardView";
 
 import './DashboardOverviewPage.css';
 
@@ -367,12 +368,12 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
     if (activeNav === 'reports') return 'Operations Intelligence';
     if (activeNav === 'audit') return 'Governance & Audit Center';
     if (activeNav === 'maps') return 'Operational GIS & Logistics Map';
-    if (activeNav === 'resources') return 'Resource Inventory & Logistics';
+    if (activeNav === 'resources') return 'Resources Management';
     if (activeNav === 'shelters') return 'Shelter Directory & Capacity';
     if (activeNav === 'volunteers') return 'Volunteer Operations Roster';
     if (activeNav === 'donations') return 'Supply Dispatch & Allocation';
     if (activeNav === 'ai-ops') return 'AI Decision-Support System';
-    if (activeNav === 'crisis') return 'Crisis Event Management';
+    if (activeNav === 'crisis') return 'Crisis Management';
     if (activeNav === 'notifications') return 'Notification Centre';
     if (activeNav === 'settings') return 'Platform Configuration & Settings';
     return 'Crisis Command Center';
@@ -382,12 +383,12 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
     if (activeNav === 'reports') return 'Real-time insights to improve humanitarian response';
     if (activeNav === 'audit') return 'Cryptographically verifiable tracking of AI recommendations & decisions';
     if (activeNav === 'maps') return 'Geospatial service coverage, road routing, and proximity matching';
-    if (activeNav === 'resources') return 'Regional warehouse stockpiles, provisions, water, and pharmaceuticals';
+    if (activeNav === 'resources') return 'Track inventory, allocate resources, and manage supply distribution';
     if (activeNav === 'shelters') return 'Evacuation centers, shelter capacity, and occupancy monitoring';
     if (activeNav === 'volunteers') return 'Certified field responders, skill sets, and deployment schedules';
     if (activeNav === 'donations') return 'Multi-constraint relief dispatch and convoy distribution';
     if (activeNav === 'ai-ops') return 'Human-in-the-loop triage, automated classification, and model governance';
-    if (activeNav === 'crisis') return 'Active incident declarations, hazard zones, and severity triage';
+    if (activeNav === 'crisis') return 'Monitor crises, assess impact, coordinate response and track recovery';
     if (activeNav === 'notifications') return 'Manage multi-channel crisis broadcasts, recipient delivery telemetry, and dispatch failovers';
     if (activeNav === 'settings') return 'System parameters, governance rules, and API connections';
     return 'Real-time overview of humanitarian operations';
@@ -477,7 +478,38 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
             )
           ) : (
             <div className="header-brand-title-wrap">
-              <img src={crisisCenterIcon} alt="Command Center" className="header-icon-box" />
+              {activeNav === 'crisis' ? (
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  backgroundColor: '#fee2e2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ef4444',
+                  flexShrink: 0
+                }}>
+                  <AlertTriangle size={18} />
+                </div>
+              ) : activeNav === 'resources' ? (
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  backgroundColor: '#0d9488',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  flexShrink: 0,
+                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)'
+                }}>
+                  <Package size={18} />
+                </div>
+              ) : (
+                <img src={crisisCenterIcon} alt="Command Center" className="header-icon-box" />
+              )}
               <div>
                 <h1 className="header-title-text">{getHeaderTitle()}</h1>
                 <p className="header-subtitle-text">{getHeaderSubtitle()}</p>
@@ -502,7 +534,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
               <Search size={14} className="header-search-icon" />
               <input
                 type="text"
-                placeholder={activeNav === 'requests' && requestViewMode === 'list' ? "Search requests by ID, location, category..." : "Search requests, locations, resources..."}
+                placeholder={activeNav === 'crisis' || activeNav === 'dashboard' ? "Search crises, locations, resources..." : activeNav === 'resources' ? "Search resources, items, locations..." : activeNav === 'requests' && requestViewMode === 'list' ? "Search requests by ID, location, category..." : "Search requests, locations, resources..."}
                 className="header-search-input"
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
@@ -574,46 +606,15 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
           ) : activeNav === 'notifications' ? (
             <NotificationCenterContainer />
           ) : activeNav === 'crisis' ? (
-            <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <div>
-                  <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', margin: 0 }}>Active Crisis Management</h2>
-                  <p style={{ color: '#94a3b8', fontSize: '12.5px', marginTop: '4px' }}>Coordinated disaster response operations across monitored provinces.</p>
-                </div>
-                <button 
-                  onClick={() => setShowCreateCrisisModal(true)}
-                  style={{ background: '#0e6f76', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  + Declare New Crisis Event
-                </button>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
-                <div style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '12px' }}>LEVEL 4 CRITICAL</span>
-                    <span style={{ color: '#94a3b8', fontSize: '11px' }}>Kelani River Basin Sector 3</span>
-                  </div>
-                  <h3 style={{ color: '#f8fafc', fontSize: '15px', margin: '0 0 8px 0' }}>Flood Response - Western Province</h3>
-                  <p style={{ color: '#94a3b8', fontSize: '12px', lineHeight: 1.4 }}>Rapid inundation affecting Colombo and Gampaha lowlands. Evacuation routes active.</p>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setActiveNav('maps')} style={{ background: '#334155', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>View on Map</button>
-                    <button onClick={() => { setActiveNav('requests'); setRequestViewMode('list'); }} style={{ background: '#0284c7', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>View 186 Requests</button>
-                  </div>
-                </div>
-                <div style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: '#f97316', fontWeight: 700, fontSize: '12px' }}>LEVEL 2 MODERATE</span>
-                    <span style={{ color: '#94a3b8', fontSize: '11px' }}>Southern Coastal Belt</span>
-                  </div>
-                  <h3 style={{ color: '#f8fafc', fontSize: '15px', margin: '0 0 8px 0' }}>Coastal Surge - Southern Province</h3>
-                  <p style={{ color: '#94a3b8', fontSize: 1.4 }}>High tide warnings in Galle and Matara districts. Fisherfolk pre-evacuation staged.</p>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setActiveNav('maps')} style={{ background: '#334155', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>View on Map</button>
-                    <button onClick={() => setActiveNav('shelters')} style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>Check Shelters</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CrisisManagementDashboardView 
+              onOpenFullMap={() => setActiveNav('maps')}
+              onDeclareCrisis={() => setShowCreateCrisisModal(true)}
+              onOpenRequestDetail={(id) => {
+                setSelectedRequestId(id);
+                setRequestViewMode('detail');
+                setActiveNav('requests');
+              }}
+            />
           ) : activeNav === 'settings' ? (
             <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '24px' }}>
               <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '16px' }}>Platform Operations & Dispatch Settings</h2>
