@@ -25,7 +25,11 @@ export const Sidebar = () => {
     { label: 'Volunteer Portal', to: '/volunteer', roles: ['Coordinator', 'Volunteer', 'Admin'] },
     { label: 'Volunteer Roster', to: '/volunteers/roster', roles: ['Coordinator', 'Admin'] },
     { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
+<<<<<<< Updated upstream
     { label: 'Notifications', to: '/coordinator/notifications', roles: ['Coordinator', 'Admin'] },
+=======
+    { label: 'Partner Officer Portal', to: '/partner-organisation-officer', roles: ['PartnerOfficer', 'PartnerOrganisationOfficer', 'Coordinator', 'Admin', 'LogisticsManager'] },
+>>>>>>> Stashed changes
   ];
 
   const allowedLinks = links.filter(l => !role || l.roles.includes(role));

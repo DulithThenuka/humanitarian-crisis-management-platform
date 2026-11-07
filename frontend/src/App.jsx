@@ -9,6 +9,7 @@ import './assets/styles.css';
 
 function AppLayout() {
   const location = useLocation();
+<<<<<<< Updated upstream
   const isDedicatedLayout = 
     location.pathname === '/' || 
     location.pathname === '/home' ||
@@ -50,6 +51,12 @@ function AppLayout() {
     location.pathname === '/sign-up';
 
   if (isDedicatedLayout) {
+=======
+  const isAuthPage = location.pathname === '/login';
+  const isPartnerPortal = location.pathname.startsWith('/partner');
+
+  if (isAuthPage || isPartnerPortal) {
+>>>>>>> Stashed changes
     return (
       <main style={{ minHeight: '100vh', width: '100%', overflowX: 'clip' }}>
         <AppRoutes />

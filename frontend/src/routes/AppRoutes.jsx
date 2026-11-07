@@ -38,6 +38,7 @@ import { VolunteerPortal } from '../pages/volunteer/VolunteerPortal';
 import { VolunteerRosterPage } from '../pages/volunteers/VolunteerRosterPage';
 import { TaskAssignmentPage } from '../pages/volunteers/TaskAssignmentPage';
 
+<<<<<<< Updated upstream
 // Map & Analytics
 import { OperationalMapView } from '../pages/map/OperationalMapView';
 import { ReportsAnalyticsView } from '../pages/reports-and-analysis/ReportsAnalyticsView';
@@ -45,6 +46,10 @@ import { ReportsAnalyticsView } from '../pages/reports-and-analysis/ReportsAnaly
 import { AuditCenterPage } from '../pages/audit/AuditCenterPage';
 import { AIOperationsContainer } from '../pages/ai-operations/AIOperationsContainer';
 import { CaseManagerPortal } from '../pages/incident/case-manager/CaseManagerPortal';
+=======
+// Partner Organisation Officer Pages
+import { PartnerOrganisationOfficerPage } from '../pages/partner-organisation-officer/PartnerOrganisationOfficerPage';
+>>>>>>> Stashed changes
 
 export const AppRoutes = () => {
   return (
@@ -184,11 +189,19 @@ export const AppRoutes = () => {
       <Route path="/volunteers/roster" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><VolunteerRosterPage /></ProtectedRoute>} />
       <Route path="/volunteers/assignments" element={<ProtectedRoute allowedRoles={['Coordinator', 'Volunteer', 'Admin']}><TaskAssignmentPage /></ProtectedRoute>} />
 
+<<<<<<< Updated upstream
       {/* Audit routes */}
       <Route path="/audit" element={<AuditCenterPage />} />
       <Route path="/coordinator/audit" element={<AuditCenterPage />} />
 
       {/* Fallback */}
+=======
+      {/* Partner Organisation Officer routes */}
+      <Route path="/partner-organisation-officer" element={<ProtectedRoute allowedRoles={['PartnerOfficer', 'PartnerOrganisationOfficer', 'Coordinator', 'Admin', 'LogisticsManager']}><PartnerOrganisationOfficerPage /></ProtectedRoute>} />
+      <Route path="/partner/dashboard" element={<Navigate to="/partner-organisation-officer" replace />} />
+      <Route path="/partner-officer" element={<Navigate to="/partner-organisation-officer" replace />} />
+
+>>>>>>> Stashed changes
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
