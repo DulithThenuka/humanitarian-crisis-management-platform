@@ -86,26 +86,82 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync();
         }
 
-        // 2. Seed Crisis Event
+        // 2. Seed Crisis Events
         CrisisEvent? activeCrisis = null;
         if (!await context.CrisisEvents.AnyAsync())
         {
-            activeCrisis = new CrisisEvent
+            var crises = new List<CrisisEvent>
             {
-                Id = Guid.Parse("a1111111-1111-1111-1111-111111111111"),
-                Title = "Western Province Monsoon Floods",
-                Description = "Heavy monsoon downpours triggered flash flooding along the Kelani and Kalu Ganga river basins. Multi-agency evacuation, high-ground shelter placement, and emergency ration supply convoys are actively deployed.",
-                DisasterType = DisasterType.Flood,
-                Severity = 4,
-                Latitude = 6.9271m,
-                Longitude = 79.8612m,
-                AffectedAreaRadius = 35.0m,
-                StartDate = DateTime.UtcNow.AddDays(-3),
-                IsActive = true
+                new()
+                {
+                    Id = Guid.Parse("a1111111-1111-1111-1111-111111111111"),
+                    Title = "Western Province Monsoon Floods",
+                    Description = "Heavy monsoon downpours triggered flash flooding along the Kelani and Kalu Ganga river basins. Multi-agency evacuation, high-ground shelter placement, and emergency ration supply convoys are actively deployed.",
+                    DisasterType = DisasterType.Flood,
+                    Severity = 4,
+                    Latitude = 6.9580m,
+                    Longitude = 79.8980m,
+                    AffectedAreaRadius = 35.0m,
+                    StartDate = DateTime.UtcNow.AddDays(-3),
+                    IsActive = true
+                },
+                new()
+                {
+                    Id = Guid.Parse("a2222222-2222-2222-2222-222222222222"),
+                    Title = "Landslide Risk - Gampaha Terraces",
+                    Description = "Soil instability detected on upper slope terraces following continuous rainfall. 140 households ordered to evacuate to Bandaranaike College safe grounds.",
+                    DisasterType = DisasterType.Landslide,
+                    Severity = 3,
+                    Latitude = 7.0910m,
+                    Longitude = 79.9980m,
+                    AffectedAreaRadius = 15.0m,
+                    StartDate = DateTime.UtcNow.AddHours(-18),
+                    IsActive = true
+                },
+                new()
+                {
+                    Id = Guid.Parse("a3333333-3333-3333-3333-333333333333"),
+                    Title = "Severe Coastal Storm & Wind Squall",
+                    Description = "Gale-force coastal winds and squall lines damaging power grids and coastal fishing harbours in Beruwala and Kalutara South.",
+                    DisasterType = DisasterType.Storm,
+                    Severity = 4,
+                    Latitude = 6.5850m,
+                    Longitude = 79.9600m,
+                    AffectedAreaRadius = 25.0m,
+                    StartDate = DateTime.UtcNow.AddDays(-1),
+                    IsActive = true
+                },
+                new()
+                {
+                    Id = Guid.Parse("a4444444-4444-4444-4444-444444444444"),
+                    Title = "Coastal Erosion & Storm Surge",
+                    Description = "High storm surge causing localized shoreline sand spit breach near Negombo lagoon entrance. Temporary rock rip-rap deployed.",
+                    DisasterType = DisasterType.Storm,
+                    Severity = 2,
+                    Latitude = 7.2080m,
+                    Longitude = 79.8350m,
+                    AffectedAreaRadius = 10.0m,
+                    StartDate = DateTime.UtcNow.AddDays(-2),
+                    IsActive = true
+                },
+                new()
+                {
+                    Id = Guid.Parse("a5555555-5555-5555-5555-555555555555"),
+                    Title = "Dry Zone Drought Emergency",
+                    Description = "Agricultural water depletion in dry zone irrigation reservoirs. Tanker drinking water distribution activated across 6 vulnerable villages.",
+                    DisasterType = DisasterType.Storm,
+                    Severity = 3,
+                    Latitude = 6.1240m,
+                    Longitude = 81.1180m,
+                    AffectedAreaRadius = 40.0m,
+                    StartDate = DateTime.UtcNow.AddDays(-5),
+                    IsActive = true
+                }
             };
 
-            await context.CrisisEvents.AddAsync(activeCrisis);
+            await context.CrisisEvents.AddRangeAsync(crises);
             await context.SaveChangesAsync();
+            activeCrisis = crises[0];
         }
         else
         {
