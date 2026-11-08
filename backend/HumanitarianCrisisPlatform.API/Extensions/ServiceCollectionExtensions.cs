@@ -11,6 +11,7 @@ using HumanitarianCrisisPlatform.Infrastructure.Mapping;
 using HumanitarianCrisisPlatform.Infrastructure.Notifications;
 using HumanitarianCrisisPlatform.Infrastructure.Repositories;
 using HumanitarianCrisisPlatform.Infrastructure.Security;
+using HumanitarianCrisisPlatform.Infrastructure.Services;
 
 namespace HumanitarianCrisisPlatform.API.Extensions;
 
@@ -48,6 +49,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IShelterService, ShelterService>();
         services.AddScoped<IResourceAllocationService, ResourceAllocationService>();
         services.AddScoped<IAIDecisionService, AIDecisionService>();
+        services.AddScoped<IHomeService, HomeService>();
         services.AddScoped<VolunteerService>();
 
         // Infrastructure Services

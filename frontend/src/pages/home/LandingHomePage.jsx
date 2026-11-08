@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   AlertTriangle, 
@@ -40,6 +40,7 @@ import {
 import heroCinematicBg from '../../assets/hero-cinematic-bg.jpg';
 import westernProvinceMap from '../../assets/western-province-map-clean.png';
 import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
+import { homeService } from '../../services/homeService';
 import './LandingHomePage.css';
 
 export const LandingHomePage = () => {
@@ -52,6 +53,43 @@ export const LandingHomePage = () => {
   const [currentLang, setCurrentLang] = useState('English');
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [trackingInput, setTrackingInput] = useState('');
+
+  // Live Backend Telemetry State
+  const [telemetry, setTelemetry] = useState({
+    activeCrisis: {
+      title: 'Western Province Monsoon Floods',
+      severity: 'Level 4 Severe',
+      description: 'Kelani & Kalu Ganga river crest advisory in effect'
+    },
+    metrics: {
+      peopleSupported: 12430,
+      activeResponseOperations: 186,
+      requestsReviewedOnTimePercent: 94.0,
+      operationalSheltersCount: 16,
+      shelterOccupancyPercent: 68.0,
+      activeGroundTeams: 42
+    }
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchHomeTelemetry = async () => {
+      try {
+        const res = await homeService.getSummary();
+        if (isMounted && res && res.succeeded && res.data) {
+          setTelemetry({
+            activeCrisis: res.data.activeCrisis,
+            metrics: res.data.metrics
+          });
+        }
+      } catch (err) {
+        // Fallback to default metrics
+        console.debug('Home telemetry service fallback active');
+      }
+    };
+    fetchHomeTelemetry();
+    return () => { isMounted = false; };
+  }, []);
 
   // 6 Primary Assistance Categories Matching CitizenPortalPage
   const quickCategories = [
@@ -405,10 +443,10 @@ export const LandingHomePage = () => {
               <div className="lnd-card-info">
                 <div className="lnd-card-header-row">
                   <span className="lnd-card-label">Active Regional Crisis</span>
-                  <span className="lnd-card-badge-high">Level 4 Severe</span>
+                  <span className="lnd-card-badge-high">{telemetry.activeCrisis.severity}</span>
                 </div>
-                <span className="lnd-card-val">Western Province Monsoon Floods</span>
-                <span className="lnd-card-extra">Kelani & Kalu Ganga river crest advisory in effect</span>
+                <span className="lnd-card-val">{telemetry.activeCrisis.title}</span>
+                <span className="lnd-card-extra">{telemetry.activeCrisis.description}</span>
               </div>
               <ChevronRight size={16} className="lnd-card-chevron" />
             </div>
@@ -424,11 +462,11 @@ export const LandingHomePage = () => {
               <div className="lnd-card-info">
                 <div className="lnd-card-header-row">
                   <span className="lnd-card-label">Verified Evacuation Shelters</span>
-                  <span className="lnd-card-badge-green">68% Capacity</span>
+                  <span className="lnd-card-badge-green">{telemetry.metrics.shelterOccupancyPercent}% Capacity</span>
                 </div>
-                <span className="lnd-card-val">16 Active High-Ground Facilities</span>
+                <span className="lnd-card-val">{telemetry.metrics.operationalSheltersCount} Active High-Ground Facilities</span>
                 <div className="lnd-capacity-bar-wrap">
-                  <div className="lnd-capacity-bar" style={{ width: '68%' }}></div>
+                  <div className="lnd-capacity-bar" style={{ width: `${Math.min(100, telemetry.metrics.shelterOccupancyPercent)}%` }}></div>
                 </div>
               </div>
               <ChevronRight size={16} className="lnd-card-chevron" />
@@ -446,7 +484,7 @@ export const LandingHomePage = () => {
                 <div className="lnd-card-header-row">
                   <span className="lnd-card-label">Ground Field Responders</span>
                   <span className="lnd-card-badge-pulse">
-                    <span className="lnd-pulse-dot"></span> 42 Teams Active
+                    <span className="lnd-pulse-dot"></span> {telemetry.metrics.activeGroundTeams} Teams Active
                   </span>
                 </div>
                 <span className="lnd-card-val">Tri-Forces & Red Cross SAR Units</span>
@@ -505,7 +543,7 @@ export const LandingHomePage = () => {
               </div>
               <div className="lnd-stat-text">
                 <div className="lnd-stat-number-row">
-                  <span className="lnd-stat-number">12,430+</span>
+                  <span className="lnd-stat-number">{telemetry.metrics.peopleSupported.toLocaleString()}+</span>
                   <span className="lnd-stat-trend">
                     <TrendingUp size={12} /> +340 today
                   </span>
@@ -522,7 +560,7 @@ export const LandingHomePage = () => {
               </div>
               <div className="lnd-stat-text">
                 <div className="lnd-stat-number-row">
-                  <span className="lnd-stat-number">186</span>
+                  <span className="lnd-stat-number">{telemetry.metrics.activeResponseOperations}</span>
                   <span className="lnd-stat-trend">Active</span>
                 </div>
                 <span className="lnd-stat-label">Coordinated Field Missions</span>
@@ -554,7 +592,7 @@ export const LandingHomePage = () => {
               </div>
               <div className="lnd-stat-text">
                 <div className="lnd-stat-number-row">
-                  <span className="lnd-stat-number">16 Shelters</span>
+                  <span className="lnd-stat-number">{telemetry.metrics.operationalSheltersCount} Shelters</span>
                   <span className="lnd-stat-trend">Verified</span>
                 </div>
                 <span className="lnd-stat-label">High-Ground Evac Centers</span>
