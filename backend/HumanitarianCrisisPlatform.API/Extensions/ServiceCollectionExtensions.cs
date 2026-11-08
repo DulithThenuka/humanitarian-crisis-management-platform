@@ -50,6 +50,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IResourceAllocationService, ResourceAllocationService>();
         services.AddScoped<IAIDecisionService, AIDecisionService>();
         services.AddScoped<IHomeService, HomeService>();
+        services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<VolunteerService>();
 
         // Infrastructure Services
