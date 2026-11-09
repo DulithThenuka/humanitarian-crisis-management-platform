@@ -45,6 +45,8 @@ import { ReportsAnalyticsView } from '../pages/reports-and-analysis/ReportsAnaly
 import { AuditCenterPage } from '../pages/audit/AuditCenterPage';
 import { AIOperationsContainer } from '../pages/ai-operations/AIOperationsContainer';
 import { CaseManagerPortal } from '../pages/incident/case-manager/CaseManagerPortal';
+import Hero from '../components/Hero';
+import { BloomLandingPage } from '../pages/bloom/BloomLandingPage';
 
 export const AppRoutes = () => {
   return (
@@ -52,6 +54,8 @@ export const AppRoutes = () => {
       <Route path="/" element={<LandingHomePage />} />
       <Route path="/home" element={<LandingHomePage />} />
       <Route path="/landing" element={<LandingHomePage />} />
+      <Route path="/apogee" element={<Hero />} />
+      <Route path="/bloom" element={<BloomLandingPage />} />
 
       {/* Emergency Coordinator Portal (HumanAid / Western Province Operations) */}
       <Route path="/coordinator" element={<EmergencyCoordinatorPortal />} />

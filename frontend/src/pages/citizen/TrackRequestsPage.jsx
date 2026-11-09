@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   ArrowLeft, 
   PlusSquare, 
@@ -119,13 +119,22 @@ export const TrackRequestsPage = ({ onBack }) => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all'); // all, active, review, resolved
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const initialQuery = searchParams.get('id') || searchParams.get('query') || '';
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [activeDrawerRequest, setActiveDrawerRequest] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateText, setUpdateText] = useState('');
   
   const navigate = useNavigate();
   const { showAlert } = useAlert();
+
+  useEffect(() => {
+    const q = searchParams.get('id') || searchParams.get('query');
+    if (q) {
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     loadRequests();

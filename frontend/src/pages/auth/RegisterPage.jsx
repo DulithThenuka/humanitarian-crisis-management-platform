@@ -10,14 +10,16 @@ import {
   EyeOff, 
   ArrowRight, 
   ArrowLeft, 
-  ChevronDown 
+  ChevronDown, 
+  Globe,
+  HeartHandshake,
+  Truck,
+  Users
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 import { authService } from '../../services/authService';
-import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
-import reliefcoreLogo from '../../assets/reliefcore-logo.png';
-import './LoginPage.css';
+import reliefcoreIcon from '../../assets/reliefcore-icon.png';
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -36,6 +38,13 @@ export const RegisterPage = () => {
   const { login } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
+
+  const roleOptions = [
+    { id: 0, title: 'Citizen / Displaced', icon: Users },
+    { id: 3, title: 'Field Volunteer', icon: HeartHandshake },
+    { id: 1, title: 'Coordinator', icon: Shield },
+    { id: 2, title: 'Logistics Manager', icon: Truck },
+  ];
 
   const getRoleDescription = (roleId) => {
     switch (Number(roleId)) {
@@ -98,7 +107,7 @@ export const RegisterPage = () => {
       const response = await authService.register(payload);
       if (response?.succeeded) {
         login(response.data);
-        showAlert('Registration successful! Welcome to RELIEFCORE.', 'success');
+        showAlert('Registration successful! Welcome to the humanitarian platform.', 'success');
         redirectByRole(response.data.role);
       } else {
         showAlert(response?.errors?.[0] || 'Registration failed. Please verify your details.', 'error');
@@ -133,288 +142,394 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="login-wrapper">
-      {/* Left Panel: Hero & Mission Overview */}
-      <section className="login-hero">
-        {/* Brand Header */}
-        <div className="hero-brand">
-          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} title="Return to Homepage">
-            <img
-              src={reliefcoreLogoWhite}
-              alt="RELIEFCORE Humanitarian Operations"
-              className="hero-brand-logo-img"
-            />
-          </Link>
-        </div>
+    <div className="relative w-full min-h-screen overflow-x-hidden font-display text-white selection:bg-white/20 select-none">
+      {/* Background Video */}
+      <video
+        className="fixed inset-0 w-full h-full object-cover z-0"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260315_073750_51473149-4350-4920-ae24-c8214286f323.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+      {/* Grayscale overlay for optimal contrast */}
+      <div className="fixed inset-0 bg-black/45 z-[1] pointer-events-none" />
 
-        {/* Center Main Slogan */}
-        <div className="hero-content">
-          <h1 className="hero-title">
-            Empowering<br />
-            Responders.<br />
-            Protecting Lives.
-          </h1>
-          <p className="hero-description">
-            Join the RELIEFCORE humanitarian network. Register as a citizen to request urgent aid and find safe shelters, or sign up as a verified field responder.
-          </p>
-        </div>
+      {/* Main Two-Panel Split Layout */}
+      <div className="relative z-10 w-full min-h-screen flex flex-col lg:flex-row p-4 lg:p-6 gap-6 items-stretch">
+        
+        {/* =========================================================
+           LEFT PANEL: Hero & Brand Overview (w-[48%] on lg)
+           ========================================================= */}
+        <section className="w-full lg:w-[48%] liquid-glass-strong rounded-3xl p-6 lg:p-10 flex flex-col justify-between relative min-h-[500px] lg:min-h-[calc(100vh-3rem)]">
+          {/* Header */}
+          <header className="flex items-center justify-between w-full">
+            <Link to="/" className="flex items-center gap-3 no-underline group" title="Return to Homepage">
+              <img 
+                src={reliefcoreIcon} 
+                alt="RELIEFCORE Crisis Command" 
+                className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform" 
+              />
+              <span className="font-semibold text-xl tracking-tight text-white uppercase">RELIEFCORE</span>
+              <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white/60 ml-1">
+                Registration
+              </span>
+            </Link>
 
-        {/* Bottom Metrics */}
-        <div className="hero-stats">
-          <div className="stat-item">
-            <span className="stat-value">12,430+</span>
-            <span className="stat-label">PEOPLE</span>
+            <Link
+              to="/"
+              className="liquid-glass rounded-full px-4 py-2 text-xs text-white/80 flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform no-underline"
+            >
+              <ArrowLeft size={14} />
+              <span>Home</span>
+            </Link>
+          </header>
+
+          {/* Hero Center */}
+          <main className="flex-1 flex flex-col items-center justify-center text-center py-10 lg:py-14 px-2">
+            <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform">
+              <img 
+                src={reliefcoreIcon} 
+                alt="RELIEFCORE Emblem" 
+                className="w-13 h-13 object-contain" 
+              />
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl tracking-[-0.05em] font-[500] text-white leading-[1.08] max-w-xl">
+              Empowering responders, <br />
+              <span className="font-serif italic text-white/80">protecting lives.</span>
+            </h1>
+
+            <p className="text-white/60 text-sm lg:text-base max-w-md mx-auto mt-4 font-normal">
+              Join the verified crisis response ecosystem. Request urgent aid, discover safe shelters, or deploy as a responder.
+            </p>
+
+            {/* Three Pills */}
+            <div className="flex flex-wrap items-center justify-center gap-2.5 mt-8">
+              <span className="liquid-glass rounded-full px-4 py-2 text-xs text-white/80 hover:scale-105 transition-transform cursor-default">
+                Verified Responders
+              </span>
+              <span className="liquid-glass rounded-full px-4 py-2 text-xs text-white/80 hover:scale-105 transition-transform cursor-default">
+                Dynamic Allocation
+              </span>
+              <span className="liquid-glass rounded-full px-4 py-2 text-xs text-white/80 hover:scale-105 transition-transform cursor-default">
+                Disaster Hotlines (117)
+              </span>
+            </div>
+          </main>
+
+          {/* Bottom Quote / Crisis Response Protocol */}
+          <footer className="text-center pt-6 flex flex-col items-center">
+            <span className="text-[11px] tracking-widest uppercase text-white/50 mb-2 font-display">
+              CRISIS RESPONSE PROTOCOL
+            </span>
+            <blockquote className="text-[14px] text-white/80 max-w-md">
+              <span className="font-display">"United in crisis, </span>
+              <span className="font-serif italic">delivering hope without delay."</span>
+            </blockquote>
+            <div className="flex items-center gap-3 text-[11px] tracking-wider uppercase text-white/50 mt-3 w-full max-w-xs justify-center">
+              <div className="flex-1 h-px bg-white/10" />
+              <span>DISASTER MANAGEMENT DIRECTIVE</span>
+              <div className="flex-1 h-px bg-white/10" />
+            </div>
+          </footer>
+        </section>
+
+        {/* =========================================================
+           RIGHT PANEL: Registration Form (w-[52%] on lg)
+           ========================================================= */}
+        <section className="w-full lg:w-[52%] liquid-glass-strong rounded-3xl p-6 lg:p-10 flex flex-col justify-between relative min-h-[calc(100vh-3rem)]">
+          {/* Top Bar with Language Selector and Back Link */}
+          <div className="flex items-center justify-between w-full pb-4">
+            <Link 
+              to="/" 
+              className="liquid-glass rounded-full px-4 py-2 text-xs text-white/70 flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform no-underline"
+              title="Return to Homepage"
+            >
+              <ArrowLeft size={14} />
+              <span>Back to Homepage</span>
+            </Link>
+
+            {/* Language Selector Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                className="liquid-glass rounded-full px-3.5 py-1.5 text-xs text-white/80 flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                onClick={() => setShowLangMenu(!showLangMenu)}
+                aria-expanded={showLangMenu}
+              >
+                <Globe size={13} className="text-white/60" />
+                <span>{selectedLang}</span>
+                <ChevronDown size={13} className="text-white/60" />
+              </button>
+
+              {showLangMenu && (
+                <div className="absolute right-0 mt-2 w-36 liquid-glass-strong rounded-2xl py-2 z-50 flex flex-col gap-1 shadow-2xl backdrop-blur-3xl">
+                  {['English', 'සිංහල', 'தமிழ்', 'Español', 'Français'].map((lang) => (
+                    <button
+                      key={lang}
+                      type="button"
+                      className={`text-left px-4 py-1.5 text-xs transition-colors cursor-pointer ${
+                        selectedLang === lang ? 'text-white bg-white/15 font-medium' : 'text-white/70 hover:text-white hover:bg-white/10'
+                      }`}
+                      onClick={() => {
+                        setSelectedLang(lang);
+                        setShowLangMenu(false);
+                      }}
+                    >
+                      {lang}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="stat-item">
-            <span className="stat-value">186 Active</span>
-            <span className="stat-label">SUPPORT</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-value">94%</span>
-            <span className="stat-label">RECOVER</span>
-          </div>
-        </div>
-      </section>
 
-      {/* Right Panel: Registration Form */}
-      <section className="login-panel">
-        <div style={{ height: '10px' }}></div>
-
-        <div className="login-form-container">
-          <Link to="/" className="auth-back-link" title="Return to Homepage">
-            <ArrowLeft size={15} />
-            <span>Back to Homepage</span>
-          </Link>
-
-          <div className="login-header">
-            <div className="login-brand-badge">
-              <Link to="/" title="Return to Homepage">
-                <img
-                  src={reliefcoreLogo}
-                  alt="RELIEFCORE Humanitarian Operations"
-                  className="login-brand-img"
-                />
-              </Link>
+          {/* Form Content */}
+          <div className="w-full max-w-lg mx-auto my-auto py-4">
+            <div className="mb-5 text-center lg:text-left">
+              <h2 className="text-2xl sm:text-3xl font-[500] text-white tracking-[-0.03em]">
+                Create Account
+              </h2>
+              <p className="text-xs sm:text-sm text-white/60 mt-1 font-normal">
+                Join the verified humanitarian coordination network
+              </p>
             </div>
-            <h2 className="login-title">Create Account</h2>
-            <p className="login-subtitle">Join the RELIEFCORE humanitarian network</p>
-          </div>
 
-          <form className="auth-form" onSubmit={handleSubmit}>
-            {/* Full Name Field */}
-            <div className="field-group">
-              <label className="field-label" htmlFor="reg-name-input">Full name</label>
-              <div className="input-wrapper">
-                <User className="input-icon-left" size={18} />
-                <input
-                  id="reg-name-input"
-                  className="custom-input"
-                  type="text"
-                  placeholder="Kasun Perera"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  required
-                  autoComplete="name"
-                />
+            <form className="flex flex-col gap-3.5" onSubmit={handleSubmit}>
+              {/* Full Name Field */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs uppercase tracking-wider text-white/60 font-medium" htmlFor="reg-name-input">
+                  Full name
+                </label>
+                <div className="liquid-glass rounded-2xl px-4 py-2.5 flex items-center gap-3 transition-colors focus-within:bg-white/[0.04]">
+                  <User className="text-white/40 shrink-0" size={17} />
+                  <input
+                    id="reg-name-input"
+                    className="w-full bg-transparent border-none outline-none text-white placeholder-white/30 text-sm font-display focus:ring-0"
+                    type="text"
+                    placeholder="Kasun Perera"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    required
+                    autoComplete="name"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Email Field */}
-            <div className="field-group">
-              <label className="field-label" htmlFor="reg-email-input">Email address</label>
-              <div className="input-wrapper">
-                <Mail className="input-icon-left" size={18} />
-                <input
-                  id="reg-email-input"
-                  className="custom-input"
-                  type="email"
-                  placeholder="you@organisation.org"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                  autoComplete="email"
-                />
+              {/* Email Field */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs uppercase tracking-wider text-white/60 font-medium" htmlFor="reg-email-input">
+                  Email address
+                </label>
+                <div className="liquid-glass rounded-2xl px-4 py-2.5 flex items-center gap-3 transition-colors focus-within:bg-white/[0.04]">
+                  <Mail className="text-white/40 shrink-0" size={17} />
+                  <input
+                    id="reg-email-input"
+                    className="w-full bg-transparent border-none outline-none text-white placeholder-white/30 text-sm font-display focus:ring-0"
+                    type="email"
+                    placeholder="responder@reliefcore.org"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Password Field */}
-            <div className="field-group">
-              <label className="field-label" htmlFor="reg-password-input">Password</label>
-              <div className="input-wrapper">
-                <Lock className="input-icon-left" size={18} />
-                <input
-                  id="reg-password-input"
-                  className="custom-input input-password-field"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="At least 6 characters"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+              {/* Password & Phone Row on larger screens */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {/* Password Field */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs uppercase tracking-wider text-white/60 font-medium" htmlFor="reg-password-input">
+                    Password
+                  </label>
+                  <div className="liquid-glass rounded-2xl px-4 py-2.5 flex items-center gap-3 transition-colors focus-within:bg-white/[0.04]">
+                    <Lock className="text-white/40 shrink-0" size={17} />
+                    <input
+                      id="reg-password-input"
+                      className="w-full bg-transparent border-none outline-none text-white placeholder-white/30 text-sm font-display focus:ring-0"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="At least 6 characters"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      required
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      className="text-white/40 hover:text-white transition-colors cursor-pointer shrink-0"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Phone Number Field */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs uppercase tracking-wider text-white/60 font-medium" htmlFor="reg-phone-input">
+                    Phone number
+                  </label>
+                  <div className="liquid-glass rounded-2xl px-4 py-2.5 flex items-center gap-3 transition-colors focus-within:bg-white/[0.04]">
+                    <Phone className="text-white/40 shrink-0" size={17} />
+                    <input
+                      id="reg-phone-input"
+                      className="w-full bg-transparent border-none outline-none text-white placeholder-white/30 text-sm font-display focus:ring-0"
+                      type="tel"
+                      placeholder="+94 77 123 4567"
+                      value={formData.phoneNumber}
+                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                      autoComplete="tel"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Phone Number Field */}
-            <div className="field-group">
-              <label className="field-label" htmlFor="reg-phone-input">Phone number</label>
-              <div className="input-wrapper">
-                <Phone className="input-icon-left" size={18} />
-                <input
-                  id="reg-phone-input"
-                  className="custom-input"
-                  type="tel"
-                  placeholder="+94 77 123 4567"
-                  value={formData.phoneNumber}
-                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  autoComplete="tel"
-                />
-              </div>
-            </div>
+              {/* Account Role Field */}
+              <div className="flex flex-col gap-1.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs uppercase tracking-wider text-white/60 font-medium" htmlFor="reg-role-select">
+                    Select your primary role
+                  </label>
+                </div>
 
-            {/* Account Role Field */}
-            <div className="field-group">
-              <label className="field-label" htmlFor="reg-role-select">Select your primary role</label>
-              <div className="input-wrapper">
-                <Shield className="input-icon-left" size={18} />
+                {/* Hidden native select for form/test parity */}
                 <select
                   id="reg-role-select"
-                  className="custom-input custom-select"
+                  className="sr-only"
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: parseInt(e.target.value, 10) })}
+                  aria-label="Account Role Select"
                 >
                   <option value={0}>Citizen / Displaced Person</option>
                   <option value={3}>Field Volunteer Responder</option>
                   <option value={1}>Humanitarian Coordinator</option>
                   <option value={2}>Logistics & Supply Manager</option>
                 </select>
+
+                {/* Interactive Liquid Glass Role Chips */}
+                <div className="grid grid-cols-2 gap-2">
+                  {roleOptions.map((opt) => {
+                    const Icon = opt.icon;
+                    const isSelected = Number(formData.role) === opt.id;
+                    return (
+                      <button
+                        type="button"
+                        key={opt.id}
+                        onClick={() => setFormData({ ...formData, role: opt.id })}
+                        className={`rounded-2xl px-3.5 py-2.5 flex items-center gap-2.5 text-left transition-all cursor-pointer ${
+                          isSelected 
+                            ? 'liquid-glass-strong bg-white/15 text-white scale-[1.02]' 
+                            : 'liquid-glass text-white/70 hover:text-white hover:bg-white/[0.04]'
+                        }`}
+                      >
+                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+                          isSelected ? 'bg-white/20 text-white' : 'liquid-glass text-white/50'
+                        }`}>
+                          <Icon size={13} />
+                        </div>
+                        <span className="text-xs font-medium truncate">{opt.title}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Role Description Note */}
+                <div className="liquid-glass rounded-xl px-3 py-2 text-[11px] text-white/60 mt-1 leading-relaxed">
+                  {getRoleDescription(formData.role)}
+                </div>
               </div>
-              <div className="role-helper-note">
-                {getRoleDescription(formData.role)}
-              </div>
+
+              {/* Terms & Privacy Agreement */}
+              <label className="flex items-start gap-2.5 cursor-pointer select-none pt-1">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 mt-0.5 rounded bg-white/10 border-none text-white focus:ring-0 cursor-pointer accent-white/80 shrink-0"
+                  checked={agreeTerms}
+                  onChange={(e) => setAgreeTerms(e.target.checked)}
+                />
+                <span className="text-xs text-white/60 leading-normal">
+                  I agree to the Humanitarian Data Protection & Privacy protocols for emergency crisis response.
+                </span>
+              </label>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="liquid-glass-strong rounded-full w-full py-3.5 px-6 flex items-center justify-center gap-3 text-white font-[500] text-[15px] hover:scale-105 active:scale-95 transition-transform cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-lg"
+                disabled={loading}
+                id="signup-submit-btn"
+              >
+                <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center">
+                  <ArrowRight size={14} className="text-white" />
+                </div>
+                <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 my-4">
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-[11px] uppercase tracking-wider text-white/40 font-medium">or sign up with</span>
+              <div className="flex-1 h-px bg-white/10" />
             </div>
 
-            {/* Terms & Privacy Agreement */}
-            <label className="terms-agreement-row">
-              <input
-                type="checkbox"
-                className="custom-checkbox"
-                checked={agreeTerms}
-                onChange={(e) => setAgreeTerms(e.target.checked)}
-              />
-              <span>
-                I agree to the Humanitarian Data Protection & Privacy protocols for emergency crisis response.
-              </span>
-            </label>
+            {/* Social Auth Buttons (Strict Grayscale) */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                className="liquid-glass rounded-full py-2.5 px-4 flex items-center justify-center gap-2.5 text-xs font-medium text-white/80 hover:text-white hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                onClick={() => handleSocialRegister('Google')}
+                id="google-signup-btn"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" className="text-white/80">
+                  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+                </svg>
+                <span>Google</span>
+              </button>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="btn-submit"
-              disabled={loading}
-              id="signup-submit-btn"
-            >
-              <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
-              <ArrowRight size={18} />
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="divider-row">
-            <div className="divider-line"></div>
-            <span className="divider-text">or sign up with</span>
-            <div className="divider-line"></div>
-          </div>
-
-          {/* Social Auth Buttons */}
-          <div className="social-grid">
-            <button
-              type="button"
-              className="btn-social"
-              onClick={() => handleSocialRegister('Google')}
-              id="google-signup-btn"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
-              </svg>
-              <span>Google</span>
-            </button>
-
-            <button
-              type="button"
-              className="btn-social"
-              onClick={() => handleSocialRegister('Microsoft')}
-              id="microsoft-signup-btn"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <rect x="1" y="1" width="10" height="10" fill="#F25022"/>
-                <rect x="13" y="1" width="10" height="10" fill="#7FBA00"/>
-                <rect x="1" y="13" width="10" height="10" fill="#00A4EF"/>
-                <rect x="13" y="13" width="10" height="10" fill="#FFB900"/>
-              </svg>
-              <span>Microsoft</span>
-            </button>
-          </div>
-
-          {/* Already have an account? Sign in */}
-          <div className="signup-prompt-row">
-            <span>Already have an account?</span>
-            <Link to="/login" className="signin-link" id="login-nav-link">
-              Sign In
-            </Link>
-          </div>
-
-          {/* Citizen Portal Link */}
-          <div className="portal-help-row">
-            <span>Need emergency help?</span>
-            <Link to="/citizen/submit" className="portal-link">
-              Citizen Portal
-            </Link>
-          </div>
-        </div>
-
-        {/* Language Selector */}
-        <div className="lang-selector-container">
-          <button
-            type="button"
-            className="lang-selector-btn"
-            onClick={() => setShowLangMenu(!showLangMenu)}
-            aria-expanded={showLangMenu}
-          >
-            <span>{selectedLang}</span>
-            <ChevronDown size={14} />
-          </button>
-
-          {showLangMenu && (
-            <div className="lang-dropdown-menu">
-              {['English', 'සිංහල', 'தமிழ்', 'Español', 'Français'].map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  className={`lang-option ${selectedLang === lang ? 'active' : ''}`}
-                  onClick={() => {
-                    setSelectedLang(lang);
-                    setShowLangMenu(false);
-                  }}
-                >
-                  {lang}
-                </button>
-              ))}
+              <button
+                type="button"
+                className="liquid-glass rounded-full py-2.5 px-4 flex items-center justify-center gap-2.5 text-xs font-medium text-white/80 hover:text-white hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                onClick={() => handleSocialRegister('Microsoft')}
+                id="microsoft-signup-btn"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" className="text-white/80">
+                  <path d="M0 0h11v11H0zM13 0h11v11H13zM0 13h11v11H0zM13 13h11v11H13z" />
+                </svg>
+                <span>Microsoft</span>
+              </button>
             </div>
-          )}
-        </div>
-      </section>
+
+            {/* Bottom Navigation Prompts */}
+            <div className="flex flex-col items-center gap-2 mt-5 text-xs text-white/60">
+              <div>
+                <span>Already have an account? </span>
+                <Link to="/login" className="text-white underline hover:text-white/80 transition-colors ml-1" id="login-nav-link">
+                  Sign In
+                </Link>
+              </div>
+
+              <div>
+                <span>Need emergency help? </span>
+                <Link to="/citizen/submit" className="text-white/80 underline hover:text-white transition-colors ml-1">
+                  Citizen Portal
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar Info */}
+          <div className="text-center pt-3">
+            <span className="text-[11px] uppercase tracking-widest text-white/40">
+              RELIEF OPERATIONS SECURE GATEWAY
+            </span>
+          </div>
+        </section>
+
+      </div>
     </div>
   );
 };
