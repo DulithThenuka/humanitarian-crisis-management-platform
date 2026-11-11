@@ -7,9 +7,7 @@ import {
   Send, 
   BarChart2, 
   ChevronRight, 
-  ShieldCheck, 
-  Clock, 
-  ExternalLink 
+  ShieldCheck 
 } from 'lucide-react';
 import { 
   INITIAL_METRICS, 
@@ -19,19 +17,36 @@ import {
 } from './caseManagerData';
 
 export const CaseDashboardView = ({ 
+  dashboardData,
+  isLiveApi = false,
   onNavigate, 
   onSelectCase, 
   showToast 
 }) => {
+  const metrics = dashboardData?.metrics || INITIAL_METRICS;
+  const priorityItems = dashboardData?.priorityAttentionItems?.length
+    ? dashboardData.priorityAttentionItems
+    : PRIORITY_ATTENTION_ITEMS;
+  const workflowSteps = dashboardData?.workflowSteps?.length
+    ? dashboardData.workflowSteps
+    : WORKFLOW_STEPS;
+  const recentActivity = dashboardData?.recentActivityItems?.length
+    ? dashboardData.recentActivityItems
+    : RECENT_ACTIVITY_ITEMS;
+
   return (
     <div className="cm-canvas-wrapper">
       {/* Top Header Row with 'Open Case Management' action */}
       <div className="cm-canvas-head-row">
         <div>
-          <span className="cm-tag-uppercase">ILLUSTRATIVE COURSEWORK WORKSPACE</span>
+          <span className="cm-tag-uppercase">
+            {isLiveApi ? 'LIVE BACKEND WORKSPACE · /API/INCIDENTS/DASHBOARD' : 'ILLUSTRATIVE COURSEWORK WORKSPACE (FALLBACK)'}
+          </span>
           <h1 className="cm-canvas-h1">Case Manager Dashboard</h1>
           <p className="cm-canvas-sub">
-            Fictional demonstration data shows role-scoped workload, handoffs and decisions. No live operation is connected.
+            {isLiveApi
+              ? 'Role-scoped workload, handoffs and audit-logged decisions loaded from the HumanAid backend API.'
+              : 'Development fallback data shows role-scoped workload, handoffs and decisions when backend is offline.'}
           </p>
         </div>
 
@@ -63,8 +78,8 @@ export const CaseDashboardView = ({
             </div>
           </div>
           <div className="cm-kpi-bottom">
-            <span className="cm-kpi-num">{INITIAL_METRICS.assignedCases.value}</span>
-            <span className="cm-kpi-sub">{INITIAL_METRICS.assignedCases.sub}</span>
+            <span className="cm-kpi-num">{metrics.assignedCases?.value ?? INITIAL_METRICS.assignedCases.value}</span>
+            <span className="cm-kpi-sub">{metrics.assignedCases?.sub ?? INITIAL_METRICS.assignedCases.sub}</span>
           </div>
         </div>
 
@@ -81,8 +96,8 @@ export const CaseDashboardView = ({
             </div>
           </div>
           <div className="cm-kpi-bottom">
-            <span className="cm-kpi-num">{INITIAL_METRICS.openUnresolved.value}</span>
-            <span className="cm-kpi-sub">{INITIAL_METRICS.openUnresolved.sub}</span>
+            <span className="cm-kpi-num">{metrics.openUnresolved?.value ?? INITIAL_METRICS.openUnresolved.value}</span>
+            <span className="cm-kpi-sub">{metrics.openUnresolved?.sub ?? INITIAL_METRICS.openUnresolved.sub}</span>
           </div>
         </div>
 
@@ -99,8 +114,8 @@ export const CaseDashboardView = ({
             </div>
           </div>
           <div className="cm-kpi-bottom">
-            <span className="cm-kpi-num">{INITIAL_METRICS.escalated.value}</span>
-            <span className="cm-kpi-sub">{INITIAL_METRICS.escalated.sub}</span>
+            <span className="cm-kpi-num">{metrics.escalated?.value ?? INITIAL_METRICS.escalated.value}</span>
+            <span className="cm-kpi-sub">{metrics.escalated?.sub ?? INITIAL_METRICS.escalated.sub}</span>
           </div>
         </div>
 
@@ -117,8 +132,8 @@ export const CaseDashboardView = ({
             </div>
           </div>
           <div className="cm-kpi-bottom">
-            <span className="cm-kpi-num">{INITIAL_METRICS.awaitingVerification.value}</span>
-            <span className="cm-kpi-sub">{INITIAL_METRICS.awaitingVerification.sub}</span>
+            <span className="cm-kpi-num">{metrics.awaitingVerification?.value ?? INITIAL_METRICS.awaitingVerification.value}</span>
+            <span className="cm-kpi-sub">{metrics.awaitingVerification?.sub ?? INITIAL_METRICS.awaitingVerification.sub}</span>
           </div>
         </div>
 
@@ -135,8 +150,8 @@ export const CaseDashboardView = ({
             </div>
           </div>
           <div className="cm-kpi-bottom">
-            <span className="cm-kpi-num">{INITIAL_METRICS.needInformation.value}</span>
-            <span className="cm-kpi-sub">{INITIAL_METRICS.needInformation.sub}</span>
+            <span className="cm-kpi-num">{metrics.needInformation?.value ?? INITIAL_METRICS.needInformation.value}</span>
+            <span className="cm-kpi-sub">{metrics.needInformation?.sub ?? INITIAL_METRICS.needInformation.sub}</span>
           </div>
         </div>
 
@@ -153,8 +168,8 @@ export const CaseDashboardView = ({
             </div>
           </div>
           <div className="cm-kpi-bottom">
-            <span className="cm-kpi-num">{INITIAL_METRICS.medianResponse.value}</span>
-            <span className="cm-kpi-sub">{INITIAL_METRICS.medianResponse.sub}</span>
+            <span className="cm-kpi-num">{metrics.medianResponse?.value ?? INITIAL_METRICS.medianResponse.value}</span>
+            <span className="cm-kpi-sub">{metrics.medianResponse?.sub ?? INITIAL_METRICS.medianResponse.sub}</span>
           </div>
         </div>
       </div>
@@ -170,11 +185,11 @@ export const CaseDashboardView = ({
                 <h3 className="cm-panel-title">Priority attention</h3>
                 <p className="cm-panel-sub">Role-scoped records requiring review</p>
               </div>
-              <span className="cm-badge-count-pill">● 3 items</span>
+              <span className="cm-badge-count-pill">● {priorityItems.length} items</span>
             </div>
 
             <div className="cm-priority-list">
-              {PRIORITY_ATTENTION_ITEMS.map((item) => (
+              {priorityItems.map((item) => (
                 <div 
                   key={item.id} 
                   className="cm-priority-item"
@@ -210,7 +225,7 @@ export const CaseDashboardView = ({
             </div>
 
             <div className="cm-activity-list">
-              {RECENT_ACTIVITY_ITEMS.map((act) => (
+              {recentActivity.map((act) => (
                 <div key={act.id} className="cm-activity-item">
                   <span className="cm-act-time">{act.time}</span>
                   <div className="cm-act-detail">
@@ -235,7 +250,7 @@ export const CaseDashboardView = ({
             </div>
 
             <div className="cm-workflow-list">
-              {WORKFLOW_STEPS.map((step) => (
+              {workflowSteps.map((step) => (
                 <div key={step.step} className="cm-workflow-step-item">
                   <div className={`cm-step-indicator ${step.status}`}>
                     {step.status === 'completed' ? (

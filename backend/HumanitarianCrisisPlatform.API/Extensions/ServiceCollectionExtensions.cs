@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
         var useInMemory = config.GetValue<bool>("UseInMemoryDatabase", false);
         var connectionString = config.GetConnectionString("DefaultConnection");
 
-        if (useInMemory || string.IsNullOrWhiteSpace(connectionString) || connectionString.Contains("localdb", StringComparison.OrdinalIgnoreCase))
+        if (useInMemory || string.IsNullOrWhiteSpace(connectionString))
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseInMemoryDatabase("HumanitarianCrisisDb"));
@@ -42,6 +42,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IShelterRepository, ShelterRepository>();
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<IAIDecisionAuditRepository, AIDecisionAuditRepository>();
+        services.AddScoped<IIncidentRepository, IncidentRepository>();
 
         // Domain & Application Services
         services.AddScoped<IAssistanceRequestService, AssistanceRequestService>();
@@ -49,10 +50,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IResourceAllocationService, ResourceAllocationService>();
         services.AddScoped<IAIDecisionService, AIDecisionService>();
         services.AddScoped<VolunteerService>();
+        services.AddScoped<IIncidentService, IncidentService>();
+        services.AddScoped<ICaseAssignmentService, CaseAssignmentService>();
+        services.AddScoped<IIncidentAIReviewService, IncidentAIReviewService>();
+        services.AddScoped<IIncidentReportingService, IncidentReportingService>();
+        services.AddScoped<IIncidentDuplicateDetectionService, RuleBasedIncidentDuplicateDetectionService>();
 
         // Infrastructure Services
         services.AddHttpClient<OpenAIServiceClient>();
         services.AddSingleton<RuleBasedFallbackAIService>();
+        services.AddSingleton<IIncidentAIProvider, RuleBasedIncidentAIProvider>();
         services.AddScoped<IAIServiceClient, OpenAIServiceClient>();
         services.AddSingleton<IMappingService, OpenStreetMapService>();
         services.AddScoped<INotificationService, EmailNotificationService>();

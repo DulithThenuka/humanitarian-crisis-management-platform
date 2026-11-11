@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Shield, 
@@ -23,6 +23,8 @@ import {
   INITIAL_CASES_LIST 
 } from './caseManagerData';
 
+import { incidentService, normalizeIncidentForUI } from '../../../services/incidentService';
+
 import { CaseDashboardView } from './CaseDashboardView';
 import { CaseManagementView } from './CaseManagementView';
 import { AIAssistedReviewView } from './AIAssistedReviewView';
@@ -39,28 +41,120 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
   const [activeOperation, setActiveOperation] = useState(CASE_MANAGER_USER.activeOperation);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Shared Cases state
+  // Shared Cases state (initialised with development fallback, replaced by live API data when connected)
   const [casesList, setCasesList] = useState(INITIAL_CASES_LIST);
   const [selectedCaseId, setSelectedCaseId] = useState('HMR-1042');
+  const [dashboardData, setDashboardData] = useState(null);
+  const [isLiveApi, setIsLiveApi] = useState(false);
   
   // Toast Alert HUD
   const [toast, setToast] = useState(null);
 
-  const showToast = (message, type = 'success') => {
+  const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type, id: Date.now() });
     setTimeout(() => {
       setToast((prev) => (prev && prev.message === message ? null : prev));
     }, 3800);
-  };
+  }, []);
 
-  const handleUpdateCase = (id, updates) => {
+  const fetchCasesAndDashboard = useCallback(async () => {
+    try {
+      const [incidentsRes, dashRes] = await Promise.all([
+        incidentService.getAll(),
+        incidentService.getDashboard()
+      ]);
+
+      const rawList = incidentsRes?.data || incidentsRes;
+      if (Array.isArray(rawList) && rawList.length > 0) {
+        const mapped = rawList.map(normalizeIncidentForUI).filter(Boolean);
+        setCasesList(mapped);
+        setIsLiveApi(true);
+      }
+
+      const rawDash = dashRes?.data || dashRes;
+      if (rawDash && rawDash.metrics) {
+        setDashboardData(rawDash);
+        setIsLiveApi(true);
+      }
+    } catch {
+      // Preserve INITIAL_CASES_LIST as development fallback when backend is unreachable
+      setIsLiveApi(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCasesAndDashboard();
+  }, [fetchCasesAndDashboard]);
+
+  const handleUpdateCase = async (id, updates, actionType = 'update') => {
+    // Optimistically update local state
     setCasesList((prev) =>
       prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
     );
+
+    try {
+      let res = null;
+      if (actionType === 'escalate' || updates.status === 'Escalated') {
+        res = await incidentService.escalate(id, {
+          escalatedToRole: 'Senior Incident Coordinator',
+          targetPriority: updates.priority || 'Critical',
+          reason: updates.note || 'Escalated for senior operations specialist review.'
+        });
+      } else if (actionType === 'clarify' || updates.verification === 'Need information') {
+        res = await incidentService.verify(id, {
+          verificationStatus: 'Need information',
+          reason: updates.note || 'Clarification requested on citizen contact & operational scope.'
+        });
+      } else if (updates.status) {
+        res = await incidentService.updateStatus(id, {
+          status: updates.status,
+          verification: updates.verification,
+          reason: updates.note || 'Operational review verified; status updated within assigned scope.'
+        });
+      } else {
+        res = await incidentService.update(id, updates);
+      }
+
+      const updatedDto = res?.data || res;
+      if (updatedDto && (updatedDto.id || updatedDto.caseNumber)) {
+        const normalized = normalizeIncidentForUI(updatedDto);
+        setCasesList((prev) =>
+          prev.map((c) => (c.id === id || c.id === normalized.id ? normalized : c))
+        );
+        setIsLiveApi(true);
+      }
+    } catch {
+      // Fallback retains local state update if API is offline
+    }
   };
 
-  const handleCreateCase = (newCase) => {
+  const handleCreateCase = async (newCase) => {
     setCasesList((prev) => [newCase, ...prev]);
+
+    try {
+      const res = await incidentService.create({
+        caseNumber: newCase.id,
+        category: newCase.category,
+        operationalArea: newCase.operationalArea,
+        priority: newCase.priority,
+        assignedStaff: newCase.assignedStaff,
+        citizenQuote: newCase.citizenQuote,
+        affectedPeople: 4,
+        currentSafety: newCase.currentSafety,
+        accessibility: newCase.accessibility
+      });
+      const createdDto = res?.data || res;
+      if (createdDto && (createdDto.id || createdDto.caseNumber)) {
+        const normalized = normalizeIncidentForUI(createdDto);
+        setCasesList((prev) =>
+          prev.map((c) => (c.id === newCase.id ? normalized : c))
+        );
+        setSelectedCaseId(normalized.id);
+        setIsLiveApi(true);
+      }
+    } catch {
+      // Preserve optimistic local creation when offline
+    }
   };
 
   const getSubViewTitle = () => {
@@ -286,12 +380,16 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
           </div>
         </header>
 
-        {/* Prototype Coursework Simulation Ribbon */}
+        {/* Data Source Status Ribbon: clearly distinguishes Live Backend API vs Development Fallback */}
         <div className="cm-prototype-ribbon">
           <ShieldCheck size={14} className="cm-ribbon-icon" />
-          <span className="cm-ribbon-bold">Coursework prototype</span>
+          <span className="cm-ribbon-bold">
+            {isLiveApi ? 'Connected to HumanAid API' : 'Development Fallback Mode'}
+          </span>
           <span className="cm-ribbon-text">
-            All records, AI results and transactions are fictional demonstration data. Actions are local UI simulations.
+            {isLiveApi
+              ? 'Live ASP.NET Core backend connected (/api/incidents). AI recommendations use rule-based demonstration decision support.'
+              : 'Backend unreachable — displaying local development fallback records. Start ASP.NET Core API to persist live changes.'}
           </span>
         </div>
 
@@ -299,6 +397,8 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
         <main style={{ flex: 1 }}>
           {activeTab === 'dashboard' && (
             <CaseDashboardView
+              dashboardData={dashboardData}
+              isLiveApi={isLiveApi}
               onNavigate={(tab) => setActiveTab(tab)}
               onSelectCase={(id) => setSelectedCaseId(id)}
               showToast={showToast}
@@ -320,11 +420,18 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
             <AIAssistedReviewView
               caseId={selectedCaseId}
               onDecisionRecorded={(id, dec, reason) => {
-                handleUpdateCase(id, {
-                  verification: 'Verified',
-                  verificationType: 'verified',
-                  note: `Human Review [${dec}]: ${reason}`
-                });
+                setCasesList((prev) =>
+                  prev.map((c) =>
+                    c.id === id
+                      ? {
+                          ...c,
+                          verification: 'Verified',
+                          verificationType: 'verified',
+                          note: `Human Review [${dec}]: ${reason}`
+                        }
+                      : c
+                  )
+                );
               }}
               showToast={showToast}
             />

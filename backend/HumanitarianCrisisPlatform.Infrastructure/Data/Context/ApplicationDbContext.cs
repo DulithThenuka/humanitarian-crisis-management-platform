@@ -21,6 +21,15 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<VolunteerAssignment> VolunteerAssignments => Set<VolunteerAssignment>();
     public DbSet<Donation> Donations => Set<Donation>();
 
+    // Incident / Case Manager Module DbSets
+    public DbSet<Incident> Incidents => Set<Incident>();
+    public DbSet<IncidentAssignment> IncidentAssignments => Set<IncidentAssignment>();
+    public DbSet<IncidentStatusHistory> IncidentStatusHistories => Set<IncidentStatusHistory>();
+    public DbSet<IncidentEscalation> IncidentEscalations => Set<IncidentEscalation>();
+    public DbSet<IncidentCommunication> IncidentCommunications => Set<IncidentCommunication>();
+    public DbSet<IncidentAIReview> IncidentAIReviews => Set<IncidentAIReview>();
+    public DbSet<IncidentAuditLog> IncidentAuditLogs => Set<IncidentAuditLog>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

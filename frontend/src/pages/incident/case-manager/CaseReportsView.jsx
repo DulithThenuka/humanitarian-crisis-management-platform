@@ -1,15 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Download, 
-  BarChart2, 
-  Filter, 
-  ChevronDown 
+  Download 
 } from 'lucide-react';
 import { REPORT_BARS_DATA, REPORT_BREAKDOWN } from './caseManagerData';
+import { incidentService } from '../../../services/incidentService';
 
 export const CaseReportsView = ({ showToast }) => {
   const [selectedOperation, setSelectedOperation] = useState('Current operation');
   const [hoveredBar, setHoveredBar] = useState(null);
+  const [reportBars, setReportBars] = useState(REPORT_BARS_DATA);
+  const [reportBreakdown, setReportBreakdown] = useState(REPORT_BREAKDOWN);
+  const [isLiveReport, setIsLiveReport] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const loadSummary = async () => {
+      try {
+        const res = await incidentService.getReportSummary(selectedOperation);
+        if (!active) return;
+        const summary = res?.data || res;
+        if (summary) {
+          if (Array.isArray(summary.reportBarsData) && summary.reportBarsData.length > 0) {
+            setReportBars(summary.reportBarsData);
+          }
+          if (Array.isArray(summary.reportBreakdown) && summary.reportBreakdown.length > 0) {
+            setReportBreakdown(summary.reportBreakdown);
+          }
+          setIsLiveReport(true);
+        }
+      } catch {
+        if (!active) return;
+        setIsLiveReport(false);
+      }
+    };
+
+    loadSummary();
+    return () => {
+      active = false;
+    };
+  }, [selectedOperation]);
 
   const handleExportCSV = () => {
     showToast?.('Exporting Case Manager reporting metrics (CSV)...', 'info');
@@ -23,10 +52,14 @@ export const CaseReportsView = ({ showToast }) => {
       {/* Header */}
       <div className="cm-management-head-row">
         <div>
-          <span className="cm-tag-uppercase">ILLUSTRATIVE REPORTING · NOT LIVE METRICS</span>
+          <span className="cm-tag-uppercase">
+            {isLiveReport ? 'OPERATIONAL REPORTING · /API/INCIDENTS/REPORTS/SUMMARY' : 'ILLUSTRATIVE REPORTING · FALLBACK METRICS'}
+          </span>
           <h1 className="cm-canvas-h1">Case Manager Reports</h1>
           <p className="cm-canvas-sub">
-            Filterable demonstration summaries use fictional coursework records.
+            {isLiveReport
+              ? 'Aggregated incident status, escalation, and AI governance metrics from the backend service.'
+              : 'Filterable demonstration summaries use fallback records when the API is offline.'}
           </p>
         </div>
 
@@ -58,11 +91,11 @@ export const CaseReportsView = ({ showToast }) => {
               <h3 className="cm-panel-title">Unresolved cases over time</h3>
               <p className="cm-panel-sub">Illustrative trend across monitored shift intervals</p>
             </div>
-            <span className="cm-pill-tag purple">● Demo</span>
+            <span className="cm-pill-tag purple">● {isLiveReport ? 'API Summary' : 'Demo'}</span>
           </div>
 
           <div className="cm-barchart-container">
-            {REPORT_BARS_DATA.map((bar) => {
+            {reportBars.map((bar) => {
               const isHovered = hoveredBar === bar.hour;
               return (
                 <div 
@@ -103,7 +136,7 @@ export const CaseReportsView = ({ showToast }) => {
           </div>
 
           <div className="cm-breakdown-list">
-            {REPORT_BREAKDOWN.map((item) => (
+            {reportBreakdown.map((item) => (
               <div key={item.label} className="cm-breakdown-item">
                 <div className="cm-breakdown-header">
                   <span className="cm-breakdown-label">{item.label}</span>
@@ -120,7 +153,7 @@ export const CaseReportsView = ({ showToast }) => {
           </div>
 
           <div style={{ marginTop: '24px', padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11.5px', color: '#64748b', lineHeight: 1.4 }}>
-            <strong>System Safeguard Note:</strong> Fictional demonstration summaries reflect simulated incident records only. No production PII or external citizen metrics are stored.
+            <strong>System Safeguard Note:</strong> Summaries reflect role-scoped incident records only. No private citizen credentials or redacted notes are exposed.
           </div>
         </div>
       </div>

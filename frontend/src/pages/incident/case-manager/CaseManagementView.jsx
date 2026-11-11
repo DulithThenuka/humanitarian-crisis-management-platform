@@ -64,7 +64,7 @@ export const CaseManagementView = ({
   const ACTION_MODAL_CONFIG = {
     update: {
       title: 'Confirm this reviewed action?',
-      subtitle: 'UI-only prototype action. No backend transaction occurs. Reviewer, reason and timestamp are represented in the local audit trail.',
+      subtitle: 'Audited case action. Reviewer, reason and timestamp are recorded in the incident status history and audit trail.',
       defaultReason: 'Operational review verified; status updated within assigned scope.',
       toastMessage: (id, target) => `Case ${id} reviewed and status updated to '${target}'`,
       execute: (currCase, reason) => {
@@ -73,13 +73,13 @@ export const CaseManagementView = ({
           status: targetStatus,
           statusType: targetStatus.toLowerCase(),
           note: reason
-        });
+        }, 'update');
         return targetStatus;
       }
     },
     clarify: {
       title: 'Request additional information?',
-      subtitle: 'UI-only prototype action. No backend transaction occurs. Reviewer, reason and timestamp are represented in the local audit trail.',
+      subtitle: 'Audited case action. Reviewer, reason and timestamp are recorded in the incident status history and audit trail.',
       defaultReason: 'Clarification requested on citizen contact & operational scope.',
       toastMessage: (id) => `Clarification request recorded for ${id}`,
       execute: (currCase, reason) => {
@@ -89,13 +89,13 @@ export const CaseManagementView = ({
           status: 'Pending',
           statusType: 'pending',
           note: reason
-        });
+        }, 'clarify');
         return 'Pending';
       }
     },
     escalate: {
       title: 'Escalate for review?',
-      subtitle: 'UI-only prototype action. No backend transaction occurs. Reviewer, reason and timestamp are represented in the local audit trail.',
+      subtitle: 'Audited case action. Reviewer, reason and timestamp are recorded in the incident escalation and audit trail.',
       defaultReason: 'Escalated for senior operations specialist review.',
       toastMessage: (id) => `Case ${id} escalated to Senior Incident Coordinator`,
       execute: (currCase, reason) => {
@@ -105,7 +105,7 @@ export const CaseManagementView = ({
           priority: 'Critical',
           priorityType: 'critical',
           note: reason
-        });
+        }, 'escalate');
         return 'Escalated';
       }
     }

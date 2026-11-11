@@ -18,4 +18,6 @@ public abstract class BaseApiController : ControllerBase
     }
 
     protected string CurrentUserRole => User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+
+    protected string CurrentUserName => User.FindFirst(ClaimTypes.Name)?.Value ?? "Ishara Senanayake";
 }

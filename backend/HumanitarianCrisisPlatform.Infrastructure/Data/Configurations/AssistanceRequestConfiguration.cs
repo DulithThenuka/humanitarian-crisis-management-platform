@@ -14,6 +14,15 @@ public class AssistanceRequestConfiguration : IEntityTypeConfiguration<Assistanc
         builder.Property(x => x.Latitude).HasPrecision(9, 6);
         builder.Property(x => x.Longitude).HasPrecision(9, 6);
         builder.Property(x => x.Address).HasMaxLength(500);
+        builder.Property(x => x.ContactPhone).HasMaxLength(50);
+        builder.Property(x => x.AttachmentUrl).HasMaxLength(1000);
+        builder.Property(x => x.AIPriorityScore).HasPrecision(5, 2);
+        builder.Property(x => x.AIConfidence).HasPrecision(5, 4);
+
+        builder.HasIndex(x => x.Status);
+        builder.HasIndex(x => x.Urgency);
+        builder.HasIndex(x => x.RequestorId);
+        builder.HasIndex(x => x.CrisisEventId);
 
         builder.HasOne(x => x.Requestor)
                .WithMany(u => u.AssistanceRequests)

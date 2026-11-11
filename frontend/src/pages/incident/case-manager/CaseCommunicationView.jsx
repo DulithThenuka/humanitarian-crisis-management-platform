@@ -1,13 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Send, 
-  Clock, 
-  ShieldCheck, 
-  MessageSquare, 
-  CheckCircle2, 
-  AlertCircle 
+  ShieldCheck 
 } from 'lucide-react';
 import { TIMELINE_COMMUNICATION_EVENTS } from './caseManagerData';
+import { incidentService } from '../../../services/incidentService';
 
 export const CaseCommunicationView = ({
   caseId = 'HMR-1042',
@@ -17,8 +13,39 @@ export const CaseCommunicationView = ({
   const [recipient, setRecipient] = useState('Resource & Logistics Manager');
   const [messageText, setMessageText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLiveComms, setIsLiveComms] = useState(false);
 
-  const handleRecordUpdate = (e) => {
+  useEffect(() => {
+    let active = true;
+    const loadCommunications = async () => {
+      try {
+        const res = await incidentService.getCommunications(caseId);
+        if (!active) return;
+        const list = res?.data || res;
+        if (Array.isArray(list) && list.length > 0) {
+          setTimeline(
+            list.map((item) => ({
+              id: item.id,
+              time: item.time || '10:00',
+              title: item.title,
+              caseTag: item.caseTag || `${caseId} - authorised participants only`
+            }))
+          );
+          setIsLiveComms(true);
+        }
+      } catch {
+        if (!active) return;
+        setIsLiveComms(false);
+      }
+    };
+
+    loadCommunications();
+    return () => {
+      active = false;
+    };
+  }, [caseId]);
+
+  const handleRecordUpdate = async (e) => {
     e.preventDefault();
     if (!messageText.trim()) {
       showToast?.('Please enter an operational message before recording', 'warning');
@@ -26,7 +53,26 @@ export const CaseCommunicationView = ({
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const res = await incidentService.addCommunication(caseId, {
+        recipient,
+        message: messageText.trim(),
+        title: `Handoff update dispatched to ${recipient}`,
+        isInternal: !recipient.toLowerCase().includes('citizen'),
+        isVisibleToCitizen: recipient.toLowerCase().includes('citizen')
+      });
+      const created = res?.data || res;
+      const newEvent = {
+        id: created?.id || `comm-${Date.now()}`,
+        time: created?.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        title: created?.title || `Handoff update dispatched to ${recipient}`,
+        caseTag: created?.caseTag || `${caseId} - authorised participants only`
+      };
+      setTimeline((prev) => [newEvent, ...prev]);
+      setMessageText('');
+      setIsLiveComms(true);
+      showToast?.(`Scoped coordination update logged for ${recipient}`, 'success');
+    } catch {
       const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const newEvent = {
         id: `comm-${Date.now()}`,
@@ -34,11 +80,12 @@ export const CaseCommunicationView = ({
         title: `Handoff update dispatched to ${recipient}`,
         caseTag: `${caseId} - authorised participants only`
       };
-      setTimeline([newEvent, ...timeline]);
+      setTimeline((prev) => [newEvent, ...prev]);
       setMessageText('');
+      showToast?.(`Scoped coordination update logged locally for ${recipient}`, 'success');
+    } finally {
       setIsSubmitting(false);
-      showToast?.(`Scoped coordination update logged for ${recipient}`, 'success');
-    }, 500);
+    }
   };
 
   return (
@@ -46,10 +93,12 @@ export const CaseCommunicationView = ({
       {/* Header */}
       <div className="cm-canvas-head-row">
         <div>
-          <span className="cm-tag-uppercase">ACCESS-CONTROLLED COORDINATION</span>
+          <span className="cm-tag-uppercase">
+            {isLiveComms ? 'ACCESS-CONTROLLED COORDINATION · LIVE API' : 'ACCESS-CONTROLLED COORDINATION (FALLBACK)'}
+          </span>
           <h1 className="cm-canvas-h1">Case Communication</h1>
           <p className="cm-canvas-sub">
-            Only necessary operational information is shared. All messages are fictional demonstration records.
+            Only necessary operational information is shared. Citizen-restricted internal notes are enforced by backend authorization.
           </p>
         </div>
       </div>
@@ -61,7 +110,7 @@ export const CaseCommunicationView = ({
           <div className="cm-panel-header">
             <div>
               <h3 className="cm-panel-title">Coordination timeline</h3>
-              <p className="cm-panel-sub">Role-scoped message exchange & audit stamps</p>
+              <p className="cm-panel-sub">Role-scoped message exchange &amp; audit stamps</p>
             </div>
           </div>
 
@@ -97,7 +146,7 @@ export const CaseCommunicationView = ({
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
               >
-                <option value="Resource & Logistics Manager">Resource & Logistics Manager</option>
+                <option value="Resource & Logistics Manager">Resource &amp; Logistics Manager</option>
                 <option value="Shelter Coordinator">Shelter Coordinator</option>
                 <option value="Volunteer Task Lead">Volunteer Task Lead</option>
                 <option value="Medical Dispatch Unit">Medical Dispatch Unit</option>
@@ -120,7 +169,7 @@ export const CaseCommunicationView = ({
 
             <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11.5px', color: '#64748b', display: 'flex', gap: '8px', alignItems: 'center' }}>
               <ShieldCheck size={16} color="#0284c7" style={{ flexShrink: 0 }} />
-              <span>No real email, SMS or notification will be sent.</span>
+              <span>Internal coordination messages are not exposed to citizen accounts.</span>
             </div>
 
             <button 

@@ -15,7 +15,7 @@ public class AIDecisionAuditConfiguration : IEntityTypeConfiguration<AIDecisionA
         builder.HasOne(x => x.AssistanceRequest)
                .WithMany(r => r.AIDecisionAudits)
                .HasForeignKey(x => x.AssistanceRequestId)
-               .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.Overrider)
                .WithMany()
