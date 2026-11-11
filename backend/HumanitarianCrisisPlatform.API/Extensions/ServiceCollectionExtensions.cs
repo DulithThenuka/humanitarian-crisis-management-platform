@@ -11,6 +11,7 @@ using HumanitarianCrisisPlatform.Infrastructure.Mapping;
 using HumanitarianCrisisPlatform.Infrastructure.Notifications;
 using HumanitarianCrisisPlatform.Infrastructure.Repositories;
 using HumanitarianCrisisPlatform.Infrastructure.Security;
+using HumanitarianCrisisPlatform.Infrastructure.Services;
 
 namespace HumanitarianCrisisPlatform.API.Extensions;
 
@@ -18,9 +19,20 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
     {
-        // Database
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection") ?? "Server=(localdb)\\mssqllocaldb;Database=HumanitarianCrisisDb;Trusted_Connection=True;MultipleActiveResultSets=true"));
+        // Database Configuration: supports InMemory or SQL Server
+        var useInMemory = config.GetValue<bool>("UseInMemoryDatabase", false);
+        var connectionString = config.GetConnectionString("DefaultConnection");
+
+        if (useInMemory || string.IsNullOrWhiteSpace(connectionString) || connectionString.Contains("localdb", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseInMemoryDatabase("HumanitarianCrisisDb"));
+        }
+        else
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
+        }
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -37,6 +49,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IShelterService, ShelterService>();
         services.AddScoped<IResourceAllocationService, ResourceAllocationService>();
         services.AddScoped<IAIDecisionService, AIDecisionService>();
+        services.AddScoped<IHomeService, HomeService>();
+        services.AddScoped<ICrisisService, CrisisService>();
+        services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<VolunteerService>();
 
         // Infrastructure Services

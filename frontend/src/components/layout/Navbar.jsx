@@ -24,7 +24,8 @@ export const Navbar = () => {
       padding: '0 24px',
       position: 'sticky',
       top: 0,
-      zIndex: 50
+      zIndex: 100,
+      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
@@ -55,8 +56,8 @@ export const Navbar = () => {
             <Link to="/login" style={{ textDecoration: 'none' }}>
               <Button variant="outline" style={{ padding: '6px 14px', fontSize: '12px' }}>Login</Button>
             </Link>
-            <Link to="/register" style={{ textDecoration: 'none' }}>
-              <Button variant="primary" style={{ padding: '6px 14px', fontSize: '12px' }}>Register</Button>
+            <Link to="/signup" style={{ textDecoration: 'none' }}>
+              <Button variant="primary" style={{ padding: '6px 14px', fontSize: '12px' }}>Sign Up</Button>
             </Link>
           </div>
         )}
