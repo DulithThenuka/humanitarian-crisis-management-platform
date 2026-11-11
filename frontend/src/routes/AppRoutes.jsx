@@ -31,7 +31,11 @@ import { AllocationDispatchPage } from '../pages/logistics/AllocationDispatchPag
 // Shelters Pages
 import { ShelterDirectoryPage } from '../pages/shelters/ShelterDirectoryPage';
 import { EvacueeAllocationPage } from '../pages/shelters/EvacueeAllocationPage';
-import { ShelterAdminDashboard } from '../pages/shelter-manger/ShelterAdminDashboard';
+import { ShelterAdminDashboard } from '../pages/shelter-manager/ShelterAdminDashboard';
+
+// Administration & Donations Pages
+import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
+import DonationsPage from '../pages/donations/DonationsPage';
 
 // Volunteers Pages
 import { VolunteerPortal } from '../pages/volunteer/VolunteerPortal';
@@ -154,9 +158,19 @@ export const AppRoutes = () => {
       <Route path="/shelter-admin/resources" element={<ShelterAdminDashboard initialTab="resources" />} />
       <Route path="/shelter-admin/reports" element={<ShelterAdminDashboard initialTab="reports" />} />
       <Route path="/shelter-manager" element={<ShelterAdminDashboard initialTab="dashboard" />} />
-      <Route path="/shelter-manger" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+      <Route path="/shelter-manager/*" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+      <Route path="/shelter-manger" element={<Navigate to="/shelter-manager" replace />} />
       <Route path="/shelters/admin" element={<ShelterAdminDashboard initialTab="dashboard" />} />
       <Route path="/shelter-dashboard" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+
+      {/* Platform Administration routes */}
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="overview" /></ProtectedRoute>} />
+      <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="overview" /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="users" /></ProtectedRoute>} />
+      <Route path="/administration" element={<Navigate to="/admin" replace />} />
+
+      {/* Donations routes */}
+      <Route path="/donations" element={<DonationsPage />} />
 
       {/* Volunteer Admin / Volunteer Portal (Figma Match) */}
       <Route path="/volunteer" element={<VolunteerPortal initialTab="overview" />} />

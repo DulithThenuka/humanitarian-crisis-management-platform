@@ -77,6 +77,7 @@ public class HomeService : IHomeService
         var waterCount = await _context.AssistanceRequests.CountAsync(r => r.Category.Contains("Water"), cancellationToken);
         var shelterCount = await _context.AssistanceRequests.CountAsync(r => r.Category.Contains("Shelter"), cancellationToken);
         var transCount = await _context.AssistanceRequests.CountAsync(r => r.Category.Contains("Transport"), cancellationToken);
+        var accessCount = await _context.AssistanceRequests.CountAsync(r => r.Category.Contains("Access") || r.Category.Contains("Special") || r.Category.Contains("Vulnerab"), cancellationToken);
 
         var quickCategories = new List<HomeAssistanceCategoryDto>
         {
@@ -124,6 +125,15 @@ public class HomeService : IHomeService
                 Icon = "Bus",
                 CategoryParam = "Transport",
                 OpenRequestsCount = transCount > 0 ? transCount : 12
+            },
+            new()
+            {
+                Key = "access",
+                Title = "Vulnerable & Special Care",
+                Description = "Priority assistance for infants, expectant mothers and disabled",
+                Icon = "Accessibility",
+                CategoryParam = "Accessibility",
+                OpenRequestsCount = accessCount > 0 ? accessCount : 18
             }
         };
 
@@ -201,27 +211,8 @@ public class HomeService : IHomeService
         }
 
         // 5. Active Safety Alerts
-        var safetyAlerts = new List<HomeAlertDto>
-        {
-            new()
-            {
-                Id = "ALT-2026-001",
-                Level = "CRITICAL",
-                Title = "Kelani River Crest Warning - Sector 3",
-                Message = "Water levels have exceeded minor flood thresholds. Residents in low-lying riverside areas are advised to relocate to designated high-ground shelters.",
-                Region = "Colombo & Gampaha Lowlands",
-                IssuedAt = DateTime.UtcNow.AddHours(-1)
-            },
-            new()
-            {
-                Id = "ALT-2026-002",
-                Level = "WARNING",
-                Title = "A1 Highway Detour Near Gampaha",
-                Message = "Mudslide debris has closed westbound lanes on the A1 corridor. Emergency convoys are being rerouted through alternative high ground corridors.",
-                Region = "Gampaha District",
-                IssuedAt = DateTime.UtcNow.AddHours(-3)
-            }
-        };
+        var alertsResult = await GetActiveAlertsAsync(cancellationToken);
+        var safetyAlerts = alertsResult.Data?.ToList() ?? new List<HomeAlertDto>();
 
         var summary = new HomeSummaryDto
         {
@@ -261,7 +252,8 @@ public class HomeService : IHomeService
                 .Include(r => r.CrisisEvent)
                 .FirstOrDefaultAsync(r => 
                     (r.ContactPhone != null && r.ContactPhone.Contains(cleanRef)) ||
-                    r.Description.Contains(cleanRef),
+                    (!string.IsNullOrEmpty(r.Description) && r.Description.Contains(cleanRef)) ||
+                    (!string.IsNullOrEmpty(r.Category) && r.Category.Contains(cleanRef)),
                     cancellationToken);
         }
 
@@ -271,10 +263,20 @@ public class HomeService : IHomeService
             var isResolved = request.Status == RequestStatus.Resolved;
             var isInProgress = request.Status == RequestStatus.InProgress;
 
+            var publicRef = $"REQ-2026-{request.Id.ToString()[..5].ToUpper()}";
+            if (!string.IsNullOrEmpty(request.Description) && request.Description.StartsWith("[REQ-"))
+            {
+                var endBracket = request.Description.IndexOf(']');
+                if (endBracket > 1)
+                {
+                    publicRef = request.Description.Substring(1, endBracket - 1);
+                }
+            }
+
             var result = new TrackRequestResultDto
             {
                 Id = request.Id,
-                PublicReference = $"REQ-2026-{request.Id.ToString()[..5].ToUpper()}",
+                PublicReference = publicRef,
                 Category = request.Category,
                 Status = request.Status.ToString(),
                 Urgency = request.Urgency.ToString(),
@@ -383,35 +385,41 @@ public class HomeService : IHomeService
         return Result<TrackRequestResultDto>.Success(demoResult);
     }
 
-    public Task<Result<IReadOnlyList<SafetyGuidanceDto>>> GetSafetyGuidanceAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<SafetyGuidanceDto>>> GetSafetyGuidanceAsync(CancellationToken cancellationToken = default)
     {
+        var activeDisasters = await _context.CrisisEvents
+            .Where(c => c.IsActive)
+            .Select(c => c.DisasterType)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
         var guidance = new List<SafetyGuidanceDto>
         {
             new()
             {
                 HazardType = "Flood",
-                Title = "Monsoon Flood Evacuation & Safety",
-                Description = "Essential actions to take before and during rapid river water level rising in urban and rural lowland zones.",
+                Title = "Monsoon Flood Evacuation & River Basin Safety",
+                Description = "Essential actions before and during rapid river water level rising in urban and rural lowland zones (Kelani, Kalu Ganga).",
                 ActionItems = new List<string>
                 {
-                    "Move immediately to designated multi-story high-ground shelters or school centers.",
+                    "Move immediately to designated multi-story high-ground shelters or school relief centers.",
                     "Turn off main circuit breakers and gas cylinders before evacuating.",
-                    "Never attempt to drive or walk through moving floodwater higher than 6 inches.",
-                    "Keep communication devices sealed in waterproof ziplock pouches."
+                    "Never attempt to drive or walk through moving floodwaters higher than 15 cm.",
+                    "Keep communication devices and national ID cards sealed in waterproof ziplock pouches."
                 },
                 PackItems = new List<string>
                 {
-                    "Government National ID cards, birth certificates, and land titles in waterproof sleeves",
-                    "3-day supply of prescription medication and oral rehydration salts",
+                    "National ID cards (NIC), birth certificates, and deeds in waterproof sleeves",
+                    "3-day supply of prescription medication and oral rehydration salts (ORS)",
                     "Battery-powered emergency LED torch and spare power banks",
-                    "Clean drinking water bottles and dry high-calorie biscuits/rations"
+                    "Clean drinking water bottles (2L per person) and dry high-calorie biscuits/rations"
                 }
             },
             new()
             {
                 HazardType = "Landslide",
                 Title = "Hill Country & Slope Failure Precautions",
-                Description = "NBRO red alert response procedures for unstable slopes and hillside communities.",
+                Description = "NBRO Level 3 Red Alert procedures for unstable slopes and hillside communities.",
                 ActionItems = new List<string>
                 {
                     "Evacuate slope-adjacent dwellings immediately if continuous rainfall exceeds 100mm in 24 hours.",
@@ -428,34 +436,87 @@ public class HomeService : IHomeService
             }
         };
 
-        return Task.FromResult(Result<IReadOnlyList<SafetyGuidanceDto>>.Success(guidance));
+        if (activeDisasters.Contains(DisasterType.Storm))
+        {
+            guidance.Add(new SafetyGuidanceDto
+            {
+                HazardType = "Storm",
+                Title = "Coastal Storm & Gale Wind Precautions",
+                Description = "Protective advisories for coastal fisher communities and high-wind risk corridors.",
+                ActionItems = new List<string>
+                {
+                    "Secure loose corrugated roofing sheets, solar panels, and water storage tanks.",
+                    "Avoid coastal breakwaters, river mouth sand spits, and low-lying coastal roads.",
+                    "Keep emergency transport vehicles fueled and parked on high ground clear of large trees."
+                },
+                PackItems = new List<string>
+                {
+                    "Waterproof heavy-duty plastic sheeting and ropes",
+                    "Portable battery radio tuned to SLBC emergency weather broadcast"
+                }
+            });
+        }
+
+        return Result<IReadOnlyList<SafetyGuidanceDto>>.Success(guidance);
     }
 
-    public Task<Result<IReadOnlyList<HomeAlertDto>>> GetActiveAlertsAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<HomeAlertDto>>> GetActiveAlertsAsync(CancellationToken cancellationToken = default)
     {
-        var alerts = new List<HomeAlertDto>
-        {
-            new()
-            {
-                Id = "ALT-2026-001",
-                Level = "CRITICAL",
-                Title = "Kelani River Crest Warning - Sector 3",
-                Message = "Water levels have exceeded minor flood thresholds. Residents in low-lying riverside areas are advised to relocate to designated high-ground shelters.",
-                Region = "Colombo & Gampaha Lowlands",
-                IssuedAt = DateTime.UtcNow.AddHours(-1)
-            },
-            new()
-            {
-                Id = "ALT-2026-002",
-                Level = "WARNING",
-                Title = "A1 Highway Detour Near Gampaha",
-                Message = "Mudslide debris has closed westbound lanes on the A1 corridor. Emergency convoys are being rerouted through alternative high ground corridors.",
-                Region = "Gampaha District",
-                IssuedAt = DateTime.UtcNow.AddHours(-3)
-            }
-        };
+        var dbCrises = await _context.CrisisEvents
+            .Where(c => c.IsActive)
+            .OrderByDescending(c => c.Severity)
+            .ThenByDescending(c => c.StartDate)
+            .ToListAsync(cancellationToken);
 
-        return Task.FromResult(Result<IReadOnlyList<HomeAlertDto>>.Success(alerts));
+        var alerts = new List<HomeAlertDto>();
+
+        if (dbCrises.Count > 0)
+        {
+            foreach (var crisis in dbCrises)
+            {
+                var level = crisis.Severity >= 4 ? "CRITICAL" : crisis.Severity == 3 ? "WARNING" : "ADVISORY";
+                var id = $"ALT-{crisis.StartDate.Year}-{crisis.Id.ToString()[..5].ToUpper()}";
+                alerts.Add(new HomeAlertDto
+                {
+                    Id = id,
+                    Level = level,
+                    Title = $"{crisis.Title} (Level {crisis.Severity})",
+                    Message = !string.IsNullOrWhiteSpace(crisis.Description) 
+                        ? crisis.Description 
+                        : $"{crisis.DisasterType} warning active. Emergency response operations deployed.",
+                    Region = !string.IsNullOrWhiteSpace(crisis.Title) && crisis.Title.Contains("Western", StringComparison.OrdinalIgnoreCase)
+                        ? "Western Province Lowlands"
+                        : "Disaster Perimeter Zone",
+                    IssuedAt = crisis.StartDate
+                });
+            }
+        }
+        else
+        {
+            alerts.AddRange(new List<HomeAlertDto>
+            {
+                new()
+                {
+                    Id = "ALT-2026-001",
+                    Level = "CRITICAL",
+                    Title = "Kelani River Crest Warning - Sector 3",
+                    Message = "Water levels have exceeded minor flood thresholds. Residents in low-lying riverside areas are advised to relocate to designated high-ground shelters.",
+                    Region = "Colombo & Gampaha Lowlands",
+                    IssuedAt = DateTime.UtcNow.AddHours(-1)
+                },
+                new()
+                {
+                    Id = "ALT-2026-002",
+                    Level = "WARNING",
+                    Title = "A1 Highway Detour Near Gampaha",
+                    Message = "Mudslide debris has closed westbound lanes on the A1 corridor. Emergency convoys are being rerouted through alternative high ground corridors.",
+                    Region = "Gampaha District",
+                    IssuedAt = DateTime.UtcNow.AddHours(-3)
+                }
+            });
+        }
+
+        return Result<IReadOnlyList<HomeAlertDto>>.Success(alerts);
     }
 
     public Task<Result<IReadOnlyList<EmergencyContactDto>>> GetEmergencyHotlinesAsync(CancellationToken cancellationToken = default)

@@ -5,7 +5,13 @@ namespace HumanitarianCrisisPlatform.Application.Interfaces.Services;
 
 public interface IShelterService
 {
-    Task<Result<IReadOnlyList<ShelterDto>>> GetAllSheltersAsync(CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<ShelterDto>>> GetAllSheltersAsync(
+        string? query = null,
+        string? district = null,
+        string? status = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<ShelterSummaryDto>> GetShelterSummaryAsync(CancellationToken cancellationToken = default);
     Task<Result<ShelterDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<ShelterDto>>> FindNearestSheltersAsync(decimal lat, decimal lon, double radiusKm = 25, CancellationToken cancellationToken = default);
     Task<Result<bool>> AllocateShelterAsync(AllocateShelterDto dto, CancellationToken cancellationToken = default);

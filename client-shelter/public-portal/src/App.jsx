@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -22,13 +22,45 @@ export default function App() {
   const [selectedZone, setSelectedZone] = useState('All');
   const [selectedShelter, setSelectedShelter] = useState(null);
 
-  const [shelters] = useState([
+  const DEFAULT_SHELTERS = [
     { id: 1, name: 'Colombo Central Relief Center', location: 'Colombo', capacity: 500, currentOccupancy: 420, status: 'Open', contact: '011-2345678', facilities: 'Food, Medical, Beds', address: 'Independence Avenue, Colombo 07', lat: 6.9022, lng: 79.8612 },
     { id: 2, name: 'Gampaha Community Hall Shelter', location: 'Gampaha', capacity: 300, currentOccupancy: 210, status: 'Open', contact: '033-2234567', facilities: 'Water, Food, Rest Area', address: 'Main Street, Gampaha', lat: 7.0840, lng: 79.9930 },
     { id: 3, name: 'Kalutara Disaster Care Hub', location: 'Kalutara', capacity: 250, currentOccupancy: 200, status: 'Open', contact: '034-2256789', facilities: 'First Aid, Temporary Housing', address: 'Station Road, Kalutara', lat: 6.5854, lng: 79.9607 },
     { id: 4, name: 'Negombo Coastal Safe House', location: 'Negombo', capacity: 200, currentOccupancy: 190, status: 'Filling Fast', contact: '031-2223344', facilities: 'Emergency Shelter', address: 'Beach Road, Negombo', lat: 7.2094, lng: 79.8383 },
     { id: 5, name: 'Kelani Valley Safe Zone', location: 'Colombo', capacity: 400, currentOccupancy: 395, status: 'Full', contact: '011-2998877', facilities: 'Dry Rations, Medical', address: 'Low Level Road, Kaduwela', lat: 6.9344, lng: 79.9800 }
-  ]);
+  ];
+
+  const [shelters, setShelters] = useState(DEFAULT_SHELTERS);
+
+  useEffect(() => {
+    const fetchShelters = async () => {
+      try {
+        const response = await fetch('/api/shelters');
+        if (response.ok) {
+          const json = await response.json();
+          const list = json?.data || json?.Data || json;
+          if (Array.isArray(list) && list.length > 0) {
+            setShelters(list.map((s, idx) => ({
+              id: s.id || idx + 1,
+              name: s.name,
+              location: s.district || (s.address?.includes('Gampaha') ? 'Gampaha' : s.address?.includes('Kalutara') ? 'Kalutara' : s.address?.includes('Negombo') ? 'Negombo' : 'Colombo'),
+              capacity: s.totalCapacity,
+              currentOccupancy: s.currentOccupancy,
+              status: s.status || ((s.currentOccupancy >= s.totalCapacity) ? 'Full' : (s.currentOccupancy / s.totalCapacity > 0.85) ? 'Filling Fast' : 'Open'),
+              contact: s.contactPhone || '011-2345678',
+              facilities: s.facilities || 'Food, Medical, Clean Water',
+              address: s.address,
+              lat: Number(s.latitude) || 6.9022,
+              lng: Number(s.longitude) || 79.8612
+            })));
+          }
+        }
+      } catch (err) {
+        console.debug('Shelters API fallback to default data', err);
+      }
+    };
+    fetchShelters();
+  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();

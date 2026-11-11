@@ -61,6 +61,11 @@ export const LandingHomePage = () => {
   const [alerts, setAlerts] = useState([]);
   const [hotlines, setHotlines] = useState([]);
   const [safetyGuides, setSafetyGuides] = useState([]);
+  const [sheltersPreview, setSheltersPreview] = useState([]);
+  const [trackingModalData, setTrackingModalData] = useState(null);
+  const [isTrackingLoading, setIsTrackingLoading] = useState(false);
+  const [trackingError, setTrackingError] = useState(null);
+
   const [telemetry, setTelemetry] = useState({
     activeCrisis: {
       title: 'Western Province Monsoon Floods',
@@ -74,7 +79,9 @@ export const LandingHomePage = () => {
       operationalSheltersCount: 16,
       shelterOccupancyPercent: 68.0,
       activeGroundTeams: 42
-    }
+    },
+    quickCategories: [],
+    verifiedShelters: []
   });
 
   useEffect(() => {
@@ -88,12 +95,23 @@ export const LandingHomePage = () => {
           if (data.activeCrisis && data.metrics) {
             setTelemetry({
               activeCrisis: data.activeCrisis,
-              metrics: data.metrics
+              metrics: data.metrics,
+              quickCategories: data.quickCategories || [],
+              verifiedShelters: data.verifiedShelters || []
             });
+          }
+          if (Array.isArray(data.verifiedShelters) && data.verifiedShelters.length > 0) {
+            setSheltersPreview(data.verifiedShelters);
+          }
+          if (Array.isArray(data.safetyAlerts) && data.safetyAlerts.length > 0) {
+            setAlerts(data.safetyAlerts);
+          }
+          if (Array.isArray(data.emergencyHotlines) && data.emergencyHotlines.length > 0) {
+            setHotlines(data.emergencyHotlines);
           }
         }
       } catch (err) {
-        console.debug('Home telemetry service fallback active');
+        console.debug('Home telemetry service fallback active', err);
       }
 
       // 2. Fetch live crisis alerts
@@ -104,7 +122,7 @@ export const LandingHomePage = () => {
           setAlerts(aData);
         }
       } catch (err) {
-        console.debug('Alerts service fallback active');
+        console.debug('Alerts service fallback active', err);
       }
 
       // 3. Fetch emergency hotlines
@@ -115,7 +133,7 @@ export const LandingHomePage = () => {
           setHotlines(hData);
         }
       } catch (err) {
-        console.debug('Hotlines service fallback active');
+        console.debug('Hotlines service fallback active', err);
       }
 
       // 4. Fetch safety guidance
@@ -126,7 +144,7 @@ export const LandingHomePage = () => {
           setSafetyGuides(sData);
         }
       } catch (err) {
-        console.debug('Safety guidance service fallback active');
+        console.debug('Safety guidance service fallback active', err);
       }
     };
 
@@ -134,10 +152,11 @@ export const LandingHomePage = () => {
     return () => { isMounted = false; };
   }, []);
 
-  // 6 Primary Assistance Categories Matching CitizenPortal
+  // 6 Primary Assistance Categories Matching CitizenPortal & Backend Database
   const quickCategories = [
     {
       id: 'food',
+      key: 'food',
       title: 'Emergency Food & Rations',
       desc: 'Pre-packed family ration hampers, baby nutrition & clean meal packs.',
       icon: UtensilsCrossed,
@@ -146,6 +165,7 @@ export const LandingHomePage = () => {
     },
     {
       id: 'medical',
+      key: 'medicine',
       title: 'Critical Medical Care',
       desc: 'Emergency trauma first aid, chronic medicine kits & mobile clinics.',
       icon: Plus,
@@ -154,6 +174,7 @@ export const LandingHomePage = () => {
     },
     {
       id: 'shelter',
+      key: 'shelter',
       title: 'Verified Open Shelters',
       desc: 'High-ground relief centers with real-time bed capacity & meals.',
       icon: Building2,
@@ -162,6 +183,7 @@ export const LandingHomePage = () => {
     },
     {
       id: 'transport',
+      key: 'transport',
       title: 'Search & Flood Rescue',
       desc: 'Amphibious rescue boats, stranded resident extraction & SOS airlift.',
       icon: Bus,
@@ -170,6 +192,7 @@ export const LandingHomePage = () => {
     },
     {
       id: 'water',
+      key: 'water',
       title: 'Potable Clean Water',
       desc: 'Purified water bowsers, portable filtration & sanitary hydration packs.',
       icon: Droplets,
@@ -178,6 +201,7 @@ export const LandingHomePage = () => {
     },
     {
       id: 'access',
+      key: 'access',
       title: 'Vulnerable & Special Care',
       desc: 'Priority assistance for infants, expectant mothers, elderly & disabled citizens.',
       icon: Accessibility,
@@ -218,7 +242,7 @@ export const LandingHomePage = () => {
     {
       title: 'Shelter Manager',
       desc: 'Live bed occupancy, evacuee intake registration, facility amenities, and capacity management.',
-      path: '/shelters/directory',
+      path: '/shelter-manager',
       badge: 'Facilities',
       icon: Building2,
       color: '#f87171',
@@ -244,17 +268,34 @@ export const LandingHomePage = () => {
     }
   ];
 
-  const handleTrackSubmit = (e) => {
+  const handleTrackSubmit = async (e) => {
     e.preventDefault();
-    if (trackingInput.trim()) {
-      navigate(`/citizen/track?id=${encodeURIComponent(trackingInput.trim())}`);
-    } else {
+    const query = trackingInput.trim();
+    if (!query) {
       navigate('/citizen/track');
+      return;
+    }
+
+    setIsTrackingLoading(true);
+    setTrackingError(null);
+    try {
+      const res = await homeService.trackRequest(query);
+      const data = res?.data || res?.Data || res;
+      if (data && (data.publicReference || data.status)) {
+        setTrackingModalData(data);
+      } else {
+        navigate(`/citizen/track?id=${encodeURIComponent(query)}`);
+      }
+    } catch (err) {
+      console.warn('Direct track API fallback, navigating to portal:', err);
+      navigate(`/citizen/track?id=${encodeURIComponent(query)}`);
+    } finally {
+      setIsTrackingLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#080A19] text-white font-['Suisse_Intl',-apple-system,BlinkMacSystemFont,sans-serif] -webkit-font-smoothing-antialiased overflow-x-hidden selection:bg-white/20 selection:text-white flex flex-col">
+    <div className="min-h-screen w-full bg-[#080A19] text-white font-display font-['Poppins','Suisse_Intl',-apple-system,BlinkMacSystemFont,sans-serif] -webkit-font-smoothing-antialiased overflow-x-hidden selection:bg-white/20 selection:text-white flex flex-col">
       {/* =========================================================
          1. Top Prototype Notice Banner
          ========================================================= */}
@@ -341,7 +382,7 @@ export const LandingHomePage = () => {
           secondaryCtaLink="/citizen/shelters"
           extraLeftContent={
             <div className="mt-5 max-w-[440px]">
-              <form className="flex items-center gap-2 p-1.5 rounded-[14px] bg-[rgba(17,16,15,0.45)] backdrop-blur-[20px] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.37)]" onSubmit={handleTrackSubmit}>
+              <form className="flex items-center gap-2 p-1.5 rounded-[14px] bg-slate-900/60 backdrop-blur-[20px] border border-white/[0.15] shadow-[0_8px_32px_rgba(0,0,0,0.4)] focus-within:border-white/40 focus-within:ring-1 focus-within:ring-white/20 transition-all" onSubmit={handleTrackSubmit}>
                 <Search size={16} className="text-white/50 ml-3 shrink-0" />
                 <input 
                   type="text" 
@@ -350,9 +391,19 @@ export const LandingHomePage = () => {
                   onChange={(e) => setTrackingInput(e.target.value)}
                   className="w-full bg-transparent border-0 outline-none text-white text-[13.5px] font-[450] placeholder:text-white/40 px-2"
                 />
-                <button type="submit" className="h-[38px] px-4 rounded-[10px] bg-[#E9E9E9] hover:bg-white text-[#0A0707] text-[13px] font-[500] shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer border-0">
-                  <span>Track Status</span>
-                  <ArrowRight size={13} />
+                <button 
+                  type="submit" 
+                  disabled={isTrackingLoading}
+                  className="h-[38px] px-4 rounded-[10px] bg-[#E9E9E9] hover:bg-white text-[#0A0707] text-[13px] font-[500] shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer border-0 disabled:opacity-60"
+                >
+                  {isTrackingLoading ? (
+                    <span>Searching...</span>
+                  ) : (
+                    <>
+                      <span>Track Status</span>
+                      <ArrowRight size={13} />
+                    </>
+                  )}
                 </button>
               </form>
               <div className="flex items-center justify-between mt-3 text-[12px] text-white/60 px-1">
@@ -369,7 +420,7 @@ export const LandingHomePage = () => {
           }
           rightContent={
             <Animate delay={900} direction="scale" className="w-full max-w-[440px] mx-auto lg:mx-0">
-              <div className="w-full rounded-[24px] sm:rounded-[33px] bg-[rgba(17,16,15,0.45)] backdrop-blur-[24px] p-5 sm:p-7 pb-5 sm:pb-6 border border-white/[0.1] shadow-[0_24px_50px_rgba(0,0,0,0.5)]">
+              <div className="w-full rounded-[24px] sm:rounded-[33px] bg-slate-900/60 backdrop-blur-[24px] p-5 sm:p-7 pb-5 sm:pb-6 border border-white/[0.12] shadow-[0_24px_50px_rgba(0,0,0,0.55)]">
                 {/* HUD Header */}
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
                   <div className="flex items-center gap-2">
@@ -564,65 +615,65 @@ export const LandingHomePage = () => {
         <div className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px]">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {/* Stat 1 */}
-            <div className="rounded-[22px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
+            <div className="rounded-[22px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
               <div className="w-12 h-12 rounded-[14px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
                 <Users size={22} />
               </div>
               <div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[26px] font-[450] text-white tracking-tight">{telemetry.metrics.peopleSupported.toLocaleString()}+</span>
-                  <span className="text-[11px] font-[450] text-emerald-400 flex items-center gap-0.5">
+                  <span className="text-[26px] font-[500] text-white tracking-tight">{telemetry.metrics.peopleSupported.toLocaleString()}+</span>
+                  <span className="text-[11px] font-[500] text-emerald-400 flex items-center gap-0.5">
                     <TrendingUp size={11} /> +340 today
                   </span>
                 </div>
-                <h4 className="text-[14px] font-[450] text-white/90 mt-0.5">Citizens Supported</h4>
+                <h4 className="text-[14px] font-[500] text-white/90 mt-0.5">Citizens Supported</h4>
                 <p className="text-[12px] text-white/50 mt-1 leading-snug">Western Province relief coverage across 3 flooded districts</p>
               </div>
             </div>
 
             {/* Stat 2 */}
-            <div className="rounded-[22px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
+            <div className="rounded-[22px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
               <div className="w-12 h-12 rounded-[14px] bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
                 <Layers size={22} />
               </div>
               <div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[26px] font-[450] text-white tracking-tight">{telemetry.metrics.activeResponseOperations}</span>
+                  <span className="text-[26px] font-[500] text-white tracking-tight">{telemetry.metrics.activeResponseOperations}</span>
                   <span className="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 text-[10px] font-semibold">Active</span>
                 </div>
-                <h4 className="text-[14px] font-[450] text-white/90 mt-0.5">Field Operations</h4>
+                <h4 className="text-[14px] font-[500] text-white/90 mt-0.5">Field Operations</h4>
                 <p className="text-[12px] text-white/50 mt-1 leading-snug">Rescue boats, dry ration convoys & potable water bowsers</p>
               </div>
             </div>
 
             {/* Stat 3 */}
-            <div className="rounded-[22px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
+            <div className="rounded-[22px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
               <div className="w-12 h-12 rounded-[14px] bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
                 <Zap size={22} />
               </div>
               <div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[26px] font-[450] text-white tracking-tight">4.2 min</span>
-                  <span className="text-[11px] font-[450] text-amber-300 flex items-center gap-0.5">
+                  <span className="text-[26px] font-[500] text-white tracking-tight">4.2 min</span>
+                  <span className="text-[11px] font-[500] text-amber-300 flex items-center gap-0.5">
                     <Activity size={11} /> -82% SLA
                   </span>
                 </div>
-                <h4 className="text-[14px] font-[450] text-white/90 mt-0.5">AI Triage Speed</h4>
+                <h4 className="text-[14px] font-[500] text-white/90 mt-0.5">AI Triage Speed</h4>
                 <p className="text-[12px] text-white/50 mt-1 leading-snug">Automated NLP hazard classification & priority queueing</p>
               </div>
             </div>
 
             {/* Stat 4 */}
-            <div className="rounded-[22px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
+            <div className="rounded-[22px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
               <div className="w-12 h-12 rounded-[14px] bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
                 <Building2 size={22} />
               </div>
               <div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[26px] font-[450] text-white tracking-tight">{telemetry.metrics.operationalSheltersCount} Shelters</span>
+                  <span className="text-[26px] font-[500] text-white tracking-tight">{telemetry.metrics.operationalSheltersCount} Shelters</span>
                   <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-semibold">Verified</span>
                 </div>
-                <h4 className="text-[14px] font-[450] text-white/90 mt-0.5">Evacuation Centers</h4>
+                <h4 className="text-[14px] font-[500] text-white/90 mt-0.5">Evacuation Centers</h4>
                 <p className="text-[12px] text-white/50 mt-1 leading-snug">{telemetry.metrics.shelterOccupancyPercent}% bed capacity currently occupied</p>
               </div>
             </div>
@@ -660,11 +711,16 @@ export const LandingHomePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {quickCategories.map((cat) => {
             const IconComponent = cat.icon;
+            const backendCategory = telemetry.quickCategories?.find(
+              (q) => q.key?.toLowerCase() === cat.key?.toLowerCase() || q.key?.toLowerCase() === cat.id?.toLowerCase()
+            );
+            const openCount = backendCategory?.openRequestsCount;
+
             return (
               <div 
                 key={cat.id} 
                 onClick={() => navigate(cat.link)}
-                className="rounded-[24px] bg-[rgba(17,16,15,0.35)] hover:bg-[rgba(17,16,15,0.6)] backdrop-blur-[20px] border border-white/[0.08] hover:border-white/25 p-7 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[190px] shadow-[0_12px_30px_rgba(0,0,0,0.3)]"
+                className="rounded-[24px] bg-slate-900/40 hover:bg-slate-900/70 backdrop-blur-[20px] border border-white/[0.08] hover:border-white/25 p-7 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[190px] shadow-[0_12px_30px_rgba(0,0,0,0.3)]"
               >
                 <div className="flex items-start justify-between">
                   <div 
@@ -673,13 +729,20 @@ export const LandingHomePage = () => {
                   >
                     <IconComponent size={22} />
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-white text-white/70 group-hover:text-[#0A0707] flex items-center justify-center transition-all">
-                    <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                  <div className="flex items-center gap-2">
+                    {openCount !== undefined && openCount > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-[11px] font-semibold">
+                        {openCount} Active
+                      </span>
+                    )}
+                    <div className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-white text-white/70 group-hover:text-[#0A0707] flex items-center justify-center transition-all">
+                      <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                    </div>
                   </div>
                 </div>
 
                 <div className="mt-6">
-                  <h3 className="text-white text-[19px] sm:text-[20px] font-[450] leading-snug group-hover:text-emerald-300 transition-colors">
+                  <h3 className="text-white text-[19px] sm:text-[20px] font-[500] leading-snug group-hover:text-emerald-300 transition-colors">
                     {cat.title}
                   </h3>
                   <p className="text-white/60 text-[13.5px] font-[450] mt-1.5 leading-relaxed">
@@ -711,12 +774,12 @@ export const LandingHomePage = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Capability 1 */}
-            <div className="rounded-[28px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-8 flex flex-col justify-between hover:border-white/20 transition-all">
+            <div className="rounded-[28px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-8 flex flex-col justify-between hover:border-white/20 transition-all">
               <div>
                 <div className="w-14 h-14 rounded-[16px] bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center mb-6">
                   <Cpu size={26} />
                 </div>
-                <h3 className="text-white text-[22px] font-[450] mb-3">
+                <h3 className="text-white text-[22px] font-[500] mb-3">
                   Automated AI Triage & NLP
                 </h3>
                 <p className="text-white/70 text-[14.5px] font-[450] leading-relaxed mb-6">
@@ -740,12 +803,12 @@ export const LandingHomePage = () => {
             </div>
 
             {/* Capability 2 */}
-            <div className="rounded-[28px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-8 flex flex-col justify-between hover:border-white/20 transition-all">
+            <div className="rounded-[28px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-8 flex flex-col justify-between hover:border-white/20 transition-all">
               <div>
                 <div className="w-14 h-14 rounded-[16px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-6">
                   <Truck size={26} />
                 </div>
-                <h3 className="text-white text-[22px] font-[450] mb-3">
+                <h3 className="text-white text-[22px] font-[500] mb-3">
                   Resource Logistics & Dispatch
                 </h3>
                 <p className="text-white/70 text-[14.5px] font-[450] leading-relaxed mb-6">
@@ -769,12 +832,12 @@ export const LandingHomePage = () => {
             </div>
 
             {/* Capability 3 */}
-            <div className="rounded-[28px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-8 flex flex-col justify-between hover:border-white/20 transition-all">
+            <div className="rounded-[28px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-8 flex flex-col justify-between hover:border-white/20 transition-all">
               <div>
                 <div className="w-14 h-14 rounded-[16px] bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mb-6">
                   <Building2 size={26} />
                 </div>
-                <h3 className="text-white text-[22px] font-[450] mb-3">
+                <h3 className="text-white text-[22px] font-[500] mb-3">
                   Verified Shelter Capacity
                 </h3>
                 <p className="text-white/70 text-[14.5px] font-[450] leading-relaxed mb-6">
@@ -807,7 +870,7 @@ export const LandingHomePage = () => {
         <div className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Column (5 Cols) */}
-            <div className="lg:col-span-5 rounded-[28px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-8 sm:p-10 flex flex-col justify-between">
+            <div className="lg:col-span-5 rounded-[28px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-8 sm:p-10 flex flex-col justify-between">
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[11px] font-semibold tracking-wider uppercase mb-5">
                   <MapPin size={12} />
@@ -841,7 +904,7 @@ export const LandingHomePage = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/map')}
-                  className="h-[48px] sm:h-[51px] px-6 sm:px-[27px] bg-[#E9E9E9] hover:bg-white text-[#0A0707] text-[14px] sm:text-[15.5px] font-[450] rounded-[12px] transition-colors inline-flex items-center gap-2 cursor-pointer border-0"
+                  className="h-[48px] sm:h-[51px] px-6 sm:px-[27px] bg-[#E9E9E9] hover:bg-white text-[#0A0707] text-[14px] sm:text-[15.5px] font-[500] rounded-[12px] transition-colors inline-flex items-center gap-2 cursor-pointer border-0 shadow-lg"
                 >
                   <span>Inspect GIS Map</span>
                   <ArrowRight size={14} />
@@ -851,7 +914,7 @@ export const LandingHomePage = () => {
             </div>
 
             {/* Right Column (7 Cols): Satellite Map Visual Preview */}
-            <div className="lg:col-span-7 rounded-[28px] overflow-hidden border border-white/[0.1] relative bg-[rgba(17,16,15,0.5)] backdrop-blur-[20px] min-h-[440px] flex items-center justify-center p-6 shadow-[0_24px_50px_rgba(0,0,0,0.5)]">
+            <div className="lg:col-span-7 rounded-[28px] overflow-hidden border border-white/[0.1] relative bg-slate-900/60 backdrop-blur-[20px] min-h-[440px] flex items-center justify-center p-6 shadow-[0_24px_50px_rgba(0,0,0,0.5)]">
               <div className="relative w-full max-w-[540px] flex items-center justify-center">
                 <img 
                   src={westernProvinceMap} 
@@ -921,7 +984,7 @@ export const LandingHomePage = () => {
               <div 
                 key={i} 
                 onClick={() => navigate(r.path)}
-                className="rounded-[24px] bg-[rgba(17,16,15,0.35)] hover:bg-[rgba(17,16,15,0.6)] backdrop-blur-[20px] border border-white/[0.08] hover:border-white/25 p-7 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[260px] shadow-[0_12px_30px_rgba(0,0,0,0.3)]"
+                className="rounded-[24px] bg-slate-900/40 hover:bg-slate-900/70 backdrop-blur-[20px] border border-white/[0.08] hover:border-white/25 p-7 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[260px] shadow-[0_12px_30px_rgba(0,0,0,0.3)]"
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
@@ -939,7 +1002,7 @@ export const LandingHomePage = () => {
                     </span>
                   </div>
 
-                  <h3 className="text-white text-[20px] font-[450] group-hover:text-emerald-300 transition-colors">
+                  <h3 className="text-white text-[20px] font-[500] group-hover:text-emerald-300 transition-colors">
                     {r.title}
                   </h3>
                   <p className="text-white/60 text-[13.5px] font-[450] mt-2 leading-relaxed">
@@ -949,7 +1012,7 @@ export const LandingHomePage = () => {
 
                 <div className="mt-6 pt-5 border-t border-white/[0.08] flex items-center justify-between">
                   <span className="text-[12px] text-white/50 line-clamp-1">{r.featured}</span>
-                  <span className="text-white/80 group-hover:text-white text-[13px] font-[450] flex items-center gap-1 shrink-0 ml-2">
+                  <span className="text-white/80 group-hover:text-white text-[13px] font-[500] flex items-center gap-1 shrink-0 ml-2">
                     Launch <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
                   </span>
                 </div>
@@ -988,47 +1051,34 @@ export const LandingHomePage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Hotline 1: DMC */}
-            <div className="rounded-[22px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
-              <div className="w-12 h-12 rounded-[14px] bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
-                <PhoneCall size={22} />
-              </div>
-              <div>
-                <a href="tel:117" className="text-[28px] font-mono font-[450] text-rose-400 hover:text-rose-300 transition-colors text-decoration-none">
-                  117
-                </a>
-                <h4 className="text-[14px] font-[450] text-white mt-1">Disaster Management Centre</h4>
-                <p className="text-[12px] text-white/50 mt-0.5">National 24/7 toll-free crisis response intake</p>
-              </div>
-            </div>
+            {(hotlines && hotlines.length > 0 ? hotlines : [
+              { name: 'Disaster Management Centre', number: '117', service: 'National 24/7 toll-free crisis response intake' },
+              { name: 'Suwa Seriya Ambulance', number: '1990', service: 'Pre-hospital emergency care & rapid dispatch' },
+              { name: 'Police Emergency Service', number: '119', service: 'Ground rescue & emergency security operations' }
+            ]).slice(0, 3).map((item, idx) => {
+              const styles = [
+                { bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-400', hover: 'hover:text-rose-300', icon: PhoneCall },
+                { bg: 'bg-sky-500/10', border: 'border-sky-500/20', text: 'text-sky-400', hover: 'hover:text-sky-300', icon: HeartPulse },
+                { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', hover: 'hover:text-emerald-300', icon: ShieldAlert },
+              ];
+              const cur = styles[idx % styles.length];
+              const IconComp = cur.icon;
 
-            {/* Hotline 2: 1990 */}
-            <div className="rounded-[22px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
-              <div className="w-12 h-12 rounded-[14px] bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
-                <HeartPulse size={22} />
-              </div>
-              <div>
-                <a href="tel:1990" className="text-[28px] font-mono font-[450] text-sky-400 hover:text-sky-300 transition-colors text-decoration-none">
-                  1990
-                </a>
-                <h4 className="text-[14px] font-[450] text-white mt-1">Suwa Seriya Ambulance</h4>
-                <p className="text-[12px] text-white/50 mt-0.5">Pre-hospital emergency care & rapid dispatch</p>
-              </div>
-            </div>
-
-            {/* Hotline 3: 119 */}
-            <div className="rounded-[22px] bg-[rgba(17,16,15,0.4)] backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
-              <div className="w-12 h-12 rounded-[14px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                <ShieldAlert size={22} />
-              </div>
-              <div>
-                <a href="tel:119" className="text-[28px] font-mono font-[450] text-emerald-400 hover:text-emerald-300 transition-colors text-decoration-none">
-                  119
-                </a>
-                <h4 className="text-[14px] font-[450] text-white mt-1">Police Emergency Service</h4>
-                <p className="text-[12px] text-white/50 mt-0.5">Ground rescue & emergency security operations</p>
-              </div>
-            </div>
+              return (
+                <div key={idx} className="rounded-[22px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
+                  <div className={`w-12 h-12 rounded-[14px] ${cur.bg} border ${cur.border} ${cur.text} flex items-center justify-center shrink-0`}>
+                    <IconComp size={22} />
+                  </div>
+                  <div>
+                    <a href={`tel:${item.number.replace(/\s+/g, '')}`} className={`text-[28px] font-mono font-[500] ${cur.text} ${cur.hover} transition-colors text-decoration-none`}>
+                      {item.number}
+                    </a>
+                    <h4 className="text-[14px] font-[500] text-white mt-1">{item.name}</h4>
+                    <p className="text-[12px] text-white/50 mt-0.5">{item.service || '24/7 Emergency Line'}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -1103,13 +1153,13 @@ export const LandingHomePage = () => {
          ========================================================= */}
       {showRoleModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080A19]/90 backdrop-blur-[24px]" onClick={() => setShowRoleModal(false)}>
-          <div className="w-full max-w-[680px] rounded-[28px] bg-[rgba(17,16,15,0.85)] backdrop-blur-[30px] border border-white/[0.1] p-7 sm:p-9 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-[680px] rounded-[28px] bg-[#0B1120]/95 backdrop-blur-[32px] border border-white/[0.12] p-7 sm:p-9 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-6 pb-5 border-b border-white/[0.08]">
               <div>
                 <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold tracking-wider uppercase mb-2 inline-block">
                   RAPID ROLE SWITCHER
                 </span>
-                <h3 className="text-white text-[24px] font-[450]">Select Operational Workspace</h3>
+                <h3 className="text-white text-[24px] font-[500]">Select Operational Workspace</h3>
                 <p className="text-white/60 text-[13.5px] font-[450] mt-1">
                   Click any role to jump directly into that user experience.
                 </p>
@@ -1139,7 +1189,7 @@ export const LandingHomePage = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <h4 className="text-white text-[14px] font-[450] truncate group-hover:text-emerald-300 transition-colors">{r.title}</h4>
+                        <h4 className="text-white text-[14px] font-[500] truncate group-hover:text-emerald-300 transition-colors">{r.title}</h4>
                       </div>
                       <p className="text-white/50 text-[12px] font-[450] mt-0.5 line-clamp-1">{r.badge}</p>
                     </div>
@@ -1153,7 +1203,7 @@ export const LandingHomePage = () => {
               <span>Need a new personal or volunteer account?</span>
               <button
                 type="button"
-                className="h-[38px] px-5 bg-[#E9E9E9] hover:bg-white text-[#0A0707] font-[450] rounded-[10px] transition-colors cursor-pointer border-0 text-[13px]"
+                className="h-[38px] px-5 bg-[#E9E9E9] hover:bg-white text-[#0A0707] font-[500] rounded-[10px] transition-colors cursor-pointer border-0 text-[13px]"
                 onClick={() => {
                   setShowRoleModal(false);
                   navigate('/signup');
@@ -1171,13 +1221,13 @@ export const LandingHomePage = () => {
          ========================================================= */}
       {showSafetyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080A19]/90 backdrop-blur-[24px]" onClick={() => setShowSafetyModal(false)}>
-          <div className="w-full max-w-[680px] rounded-[28px] bg-[rgba(17,16,15,0.85)] backdrop-blur-[30px] border border-white/[0.1] p-7 sm:p-9 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-[680px] rounded-[28px] bg-[#0B1120]/95 backdrop-blur-[32px] border border-white/[0.12] p-7 sm:p-9 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-6 pb-5 border-b border-white/[0.08]">
               <div>
                 <span className="px-2.5 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[11px] font-semibold tracking-wider uppercase mb-2 inline-block">
                   OFFICIAL PROTOCOLS
                 </span>
-                <h3 className="text-white text-[24px] font-[450]">Field Safety Guidance & Hotlines</h3>
+                <h3 className="text-white text-[24px] font-[500]">Field Safety Guidance & Hotlines</h3>
                 <p className="text-white/60 text-[13.5px] font-[450] mt-1">
                   Official procedures for Western Province flood basin advisories.
                 </p>
@@ -1187,47 +1237,69 @@ export const LandingHomePage = () => {
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 max-h-[65vh] overflow-y-auto pr-1">
               {/* Hotlines */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-4 rounded-[16px] bg-white/[0.04] border border-white/[0.08]">
-                  <div className="text-rose-400 font-mono text-[22px] font-[450]">117</div>
-                  <div className="text-white text-[13px] font-[450] mt-1">DMC Operations</div>
-                  <div className="text-white/50 text-[11px]">Toll-Free 24/7 Hotline</div>
-                </div>
-
-                <div className="p-4 rounded-[16px] bg-white/[0.04] border border-white/[0.08]">
-                  <div className="text-sky-400 font-mono text-[22px] font-[450]">1990</div>
-                  <div className="text-white text-[13px] font-[450] mt-1">Suwa Seriya</div>
-                  <div className="text-white/50 text-[11px]">Ambulance Dispatch</div>
-                </div>
-
-                <div className="p-4 rounded-[16px] bg-white/[0.04] border border-white/[0.08]">
-                  <div className="text-emerald-400 font-mono text-[22px] font-[450]">119</div>
-                  <div className="text-white text-[13px] font-[450] mt-1">Police Rescue</div>
-                  <div className="text-white/50 text-[11px]">Emergency Response</div>
-                </div>
+                {(hotlines && hotlines.length > 0 ? hotlines : [
+                  { name: 'DMC Operations', number: '117', service: 'Toll-Free 24/7 Hotline' },
+                  { name: 'Suwa Seriya', number: '1990', service: 'Ambulance Dispatch' },
+                  { name: 'Police Rescue', number: '119', service: 'Emergency Response' }
+                ]).slice(0, 3).map((h, i) => (
+                  <div key={i} className="p-4 rounded-[16px] bg-white/[0.04] border border-white/[0.08]">
+                    <a href={`tel:${h.number.replace(/\s+/g, '')}`} className="text-rose-400 font-mono text-[22px] font-[500] hover:underline text-decoration-none block">
+                      {h.number}
+                    </a>
+                    <div className="text-white text-[13px] font-[500] mt-1 truncate">{h.name}</div>
+                    <div className="text-white/50 text-[11px] truncate">{h.service || 'Emergency Hotline'}</div>
+                  </div>
+                ))}
               </div>
 
-              {/* Protocol Card */}
-              <div className="p-5 rounded-[18px] bg-white/[0.04] border border-white/[0.08]">
-                <div className="flex items-center gap-2 text-emerald-400 text-[14.5px] font-[450] mb-3">
-                  <CheckCircle2 size={16} />
-                  <span>Flash Flood Evacuation Safety Protocol</span>
+              {/* Dynamic Safety Guides from Backend */}
+              {safetyGuides && safetyGuides.length > 0 ? (
+                safetyGuides.map((guide, idx) => (
+                  <div key={idx} className="p-5 rounded-[18px] bg-white/[0.04] border border-white/[0.08]">
+                    <div className="flex items-center gap-2 text-emerald-400 text-[14.5px] font-[500] mb-2">
+                      <CheckCircle2 size={16} />
+                      <span>{guide.title}</span>
+                    </div>
+                    <p className="text-[12.5px] text-white/60 mb-3">{guide.description}</p>
+                    {guide.actionItems && guide.actionItems.length > 0 && (
+                      <ul className="space-y-1.5 text-[13px] text-white/70 leading-relaxed list-disc pl-5 mb-3">
+                        {guide.actionItems.map((item, aIdx) => (
+                          <li key={aIdx}>{item}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {guide.packItems && guide.packItems.length > 0 && (
+                      <div className="pt-2 border-t border-white/[0.06] text-[12px] text-amber-200/80">
+                        <strong className="text-white font-[500]">Emergency Bag Pack:</strong>{' '}
+                        {guide.packItems.join(' · ')}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                /* Fallback static protocol */
+                <div className="p-5 rounded-[18px] bg-white/[0.04] border border-white/[0.08]">
+                  <div className="flex items-center gap-2 text-emerald-400 text-[14.5px] font-[500] mb-3">
+                    <CheckCircle2 size={16} />
+                    <span>Flash Flood Evacuation Safety Protocol</span>
+                  </div>
+                  <ul className="space-y-2 text-[13px] text-white/70 leading-relaxed">
+                    <li><strong>Avoid Floodwaters:</strong> Never attempt to walk, swim, or drive through moving water. 15 cm of rapid flow can sweep adults away.</li>
+                    <li><strong>Electrical Isolation:</strong> Shut off main circuit breakers before floodwaters enter building entrances. Avoid wet power points.</li>
+                    <li><strong>Secure Critical Documents:</strong> Place identification, deeds, and prescription medicines in sealed waterproof bags on upper floors.</li>
+                    <li><strong>Evacuate Proactively:</strong> If residing along Kelani or Kalu Ganga riverbanks, evacuate early to designated high-ground shelters.</li>
+                  </ul>
                 </div>
-                <ul className="space-y-2 text-[13px] text-white/70 leading-relaxed">
-                  <li><strong>Avoid Floodwaters:</strong> Never attempt to walk, swim, or drive through moving water. 15 cm of rapid flow can sweep adults away.</li>
-                  <li><strong>Electrical Isolation:</strong> Shut off main circuit breakers before floodwaters enter building entrances. Avoid wet power points.</li>
-                  <li><strong>Secure Critical Documents:</strong> Place identification, deeds, and prescription medicines in sealed waterproof bags on upper floors.</li>
-                  <li><strong>Evacuate Proactively:</strong> If residing along Kelani or Kalu Ganga riverbanks, evacuate early to designated high-ground shelters.</li>
-                </ul>
-              </div>
+              )}
 
               <div className="pt-2 flex justify-end">
                 <button 
                   type="button"
                   onClick={() => setShowSafetyModal(false)}
-                  className="h-[44px] px-6 bg-[#E9E9E9] hover:bg-white text-[#0A0707] font-[450] text-[14px] rounded-[11px] transition-colors cursor-pointer border-0"
+                  className="h-[44px] px-6 bg-[#E9E9E9] hover:bg-white text-[#0A0707] font-[500] text-[14px] rounded-[11px] transition-colors cursor-pointer border-0 shadow-md"
                 >
                   Understood & Saved
                 </button>
@@ -1242,7 +1314,7 @@ export const LandingHomePage = () => {
          ========================================================= */}
       {showHowItWorksModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080A19]/90 backdrop-blur-[24px]" onClick={() => setShowHowItWorksModal(false)}>
-          <div className="w-full max-w-[680px] rounded-[28px] bg-[rgba(17,16,15,0.85)] backdrop-blur-[30px] border border-white/[0.1] p-7 sm:p-9 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-[680px] rounded-[28px] bg-[#0B1120]/95 backdrop-blur-[32px] border border-white/[0.12] p-7 sm:p-9 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-6 pb-5 border-b border-white/[0.08]">
               <div>
                 <span className="px-2.5 py-1 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-300 text-[11px] font-semibold tracking-wider uppercase mb-2 inline-block">
@@ -1300,6 +1372,117 @@ export const LandingHomePage = () => {
               >
                 Close Workflow
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
+         13. Instant Live Request Tracking Modal
+         ========================================================= */}
+      {trackingModalData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080A19]/90 backdrop-blur-[24px]" onClick={() => setTrackingModalData(null)}>
+          <div className="w-full max-w-[620px] rounded-[28px] bg-[#0B1120]/95 backdrop-blur-[32px] border border-white/[0.12] p-6 sm:p-8 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between pb-4 border-b border-white/[0.08]">
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-[11px] font-semibold">
+                    {trackingModalData.publicReference || 'REQ-LIVE'}
+                  </span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase ${
+                    trackingModalData.urgency === 'Critical' ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300' :
+                    trackingModalData.urgency === 'High' ? 'bg-amber-500/15 border border-amber-500/30 text-amber-300' :
+                    'bg-sky-500/15 border border-sky-500/30 text-sky-300'
+                  }`}>
+                    {trackingModalData.urgency || 'Active'}
+                  </span>
+                </div>
+                <h3 className="text-white text-[22px] font-[500]">
+                  {trackingModalData.category || 'Humanitarian Assistance Request'}
+                </h3>
+                <p className="text-white/60 text-[13px] font-[450] mt-0.5">
+                  {trackingModalData.coarseLocation} · {trackingModalData.peopleCount} individuals in household
+                </p>
+              </div>
+              <button 
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer border-0 transition-colors" 
+                onClick={() => setTrackingModalData(null)}
+                title="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-4">
+              {/* Status Highlight Banner */}
+              <div className="p-4 rounded-[16px] bg-slate-900/60 border border-white/[0.08] flex items-start gap-3">
+                <Activity size={18} className="text-emerald-400 mt-0.5 shrink-0" />
+                <div>
+                  <div className="flex items-center gap-2 text-white text-[13.5px] font-[500]">
+                    <span>Status: <strong className="text-emerald-300">{trackingModalData.status}</strong></span>
+                    <span className="text-white/30">·</span>
+                    <span className="text-white/70">Assigned: {trackingModalData.assignedTeam || 'Rapid Response Unit'}</span>
+                  </div>
+                  <p className="text-white/60 text-[12.5px] mt-1 leading-relaxed">
+                    {trackingModalData.statusNote || 'Your ticket is synchronized with provincial coordinator dispatch.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Milestone Timeline */}
+              {trackingModalData.timeline && trackingModalData.timeline.length > 0 && (
+                <div className="p-4 rounded-[16px] bg-white/[0.02] border border-white/[0.06]">
+                  <h4 className="text-white/80 text-[12px] font-[500] uppercase tracking-wider mb-3">Response Milestones</h4>
+                  <div className="space-y-3">
+                    {trackingModalData.timeline.map((step, idx) => (
+                      <div key={idx} className="flex items-start gap-3 text-[13px]">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                          step.isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' :
+                          step.isCurrent ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse' :
+                          'bg-white/5 text-white/30 border border-white/10'
+                        }`}>
+                          {step.isCompleted ? <Check size={11} /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <span className={`font-[500] ${step.isCompleted ? 'text-white' : step.isCurrent ? 'text-amber-300' : 'text-white/40'}`}>
+                              {step.title}
+                            </span>
+                            {step.timestamp && (
+                              <span className="text-[11px] font-mono text-white/40">
+                                {new Date(step.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[12px] text-white/50 mt-0.5 leading-snug">{step.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-2 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setTrackingModalData(null)}
+                  className="h-[42px] px-5 rounded-[11px] border border-white/20 text-white/80 hover:text-white hover:bg-white/5 text-[13.5px] font-[450] transition-colors cursor-pointer bg-transparent"
+                >
+                  Dismiss
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const ref = trackingModalData.publicReference || trackingModalData.id;
+                    setTrackingModalData(null);
+                    navigate(`/citizen/track?id=${encodeURIComponent(ref)}`);
+                  }}
+                  className="h-[42px] px-6 bg-[#E9E9E9] hover:bg-white text-[#0A0707] font-[500] text-[13.5px] rounded-[11px] transition-colors cursor-pointer border-0 shadow-md inline-flex items-center gap-1.5"
+                >
+                  <span>Open in Citizen Portal</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
             </div>
           </div>
         </div>

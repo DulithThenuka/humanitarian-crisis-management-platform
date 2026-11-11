@@ -99,7 +99,7 @@ export function RevenueCard({
 
   return (
     <Animate delay={900} direction="scale" className="w-full max-w-[405px] mx-auto lg:mx-0">
-      <div className="w-full rounded-[24px] sm:rounded-[33px] bg-[rgba(17,16,15,0.35)] backdrop-blur-[20px] p-5 sm:p-8 pb-5 sm:pb-6">
+      <div className="w-full rounded-[24px] sm:rounded-[33px] bg-slate-900/50 backdrop-blur-[24px] border border-white/[0.08] p-5 sm:p-8 pb-5 sm:pb-6 shadow-[0_16px_36px_rgba(0,0,0,0.4)]">
         {/* 1. Label */}
         <p className="text-white text-[16px] sm:text-[20px] font-[450] leading-[20px] mb-3 sm:mb-4">
           {cardLabel}
@@ -236,7 +236,7 @@ export default function Hero({
   };
 
   return (
-    <section className="relative w-full h-screen overflow-hidden bg-[#080A19]">
+    <section className="relative w-full min-h-screen bg-[#080A19] flex flex-col justify-between overflow-hidden">
       {/* Background video — first child, absolutely positioned, covering */}
       <video
         className="absolute inset-0 w-full h-full object-cover"
@@ -246,9 +246,11 @@ export default function Hero({
         muted
         playsInline
       />
+      {/* Contrast Overlay for optimal text readability */}
+      <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none" />
 
       {/* Content wrapper */}
-      <div className="relative z-10 h-full flex flex-col justify-between">
+      <div className="relative z-10 w-full flex-1 flex flex-col justify-between">
         <Nav
           brandName={brandName}
           brandLogo={brandLogo}
@@ -265,10 +267,10 @@ export default function Hero({
           liveOpsBadge={liveOpsBadge}
         />
 
-        <div className="flex-1 flex items-center py-8">
-          <div className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px] flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10 lg:gap-12">
+        <div className="flex-1 flex items-center py-6 sm:py-10">
+          <div className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px] flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-12">
             {/* Copy block (left column) */}
-            <div className="max-w-[593px]">
+            <div className="max-w-[620px]">
               {/* Optional Badge Tag */}
               {badgeTag && (
                 <Animate delay={200} direction="up" className="mb-4">
@@ -278,14 +280,14 @@ export default function Hero({
 
               {/* 1. Headline */}
               <Animate delay={300} direction="up">
-                <h1 className="text-white text-[36px] sm:text-[52px] md:text-[64px] lg:text-[72px] font-normal leading-[0.95] mb-5 sm:mb-8">
+                <h1 className="text-white text-[32px] sm:text-[46px] md:text-[56px] lg:text-[64px] font-normal leading-[1.02] tracking-[-0.03em] mb-4 sm:mb-6">
                   {headline}
                 </h1>
               </Animate>
 
               {/* 2. Subtitle */}
               <Animate delay={500} direction="up">
-                <p className="text-white/80 text-[16px] sm:text-[18px] md:text-[20px] font-[450] leading-[1.3] max-w-[370px] mb-7 sm:mb-10">
+                <p className="text-white/80 text-[15px] sm:text-[17px] md:text-[19px] font-[450] leading-[1.4] max-w-[500px] mb-6 sm:mb-8">
                   {subheadline}
                 </p>
               </Animate>
@@ -593,7 +595,7 @@ export function Nav({
 
         {/* Panel */}
         <div
-          className={`absolute top-[76px] sm:top-[86px] left-4 right-4 sm:left-6 sm:right-6 bg-[rgba(17,16,15,0.6)] backdrop-blur-[30px] rounded-[20px] border border-white/[0.06] p-6 sm:p-8 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] origin-top ${
+          className={`absolute top-[76px] sm:top-[86px] left-4 right-4 sm:left-6 sm:right-6 bg-[#0B1120]/95 backdrop-blur-[30px] rounded-[20px] border border-white/[0.1] p-6 sm:p-8 shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] origin-top ${
             isOpen
               ? 'opacity-100 translate-y-0 scale-100'
               : 'opacity-0 -translate-y-4 scale-[0.97]'

@@ -201,23 +201,24 @@ export const FindShelterPage = ({ onBack }) => {
     setLoading(true);
     try {
       const res = await shelterService.getAll();
-      if (res && res.succeeded && Array.isArray(res.data) && res.data.length > 0) {
+      const rawData = res?.data || res?.Data || res;
+      if (Array.isArray(rawData) && rawData.length > 0) {
         // Merge API data with rich visual assets
-        const mappedApi = res.data.map((item, idx) => ({
+        const mappedApi = rawData.map((item, idx) => ({
           id: item.id ? String(item.id) : `API-${idx}`,
           name: item.name || 'Emergency Relief Camp',
           address: item.address || 'Western Province Sector',
-          district: item.address?.includes('Gampaha') ? 'Gampaha' : item.address?.includes('Kalutara') ? 'Kalutara' : 'Colombo',
+          district: item.district || (item.address?.includes('Gampaha') ? 'Gampaha' : item.address?.includes('Kalutara') ? 'Kalutara' : 'Colombo'),
           latitude: Number(item.latitude) || 6.9271,
           longitude: Number(item.longitude) || 79.8612,
           totalCapacity: item.totalCapacity || 300,
           currentOccupancy: item.currentOccupancy || 150,
           facilities: item.facilities || 'Clean Water, Meals, Medical Desk',
           contactPhone: item.contactPhone || '+94 11 269 1111',
-          distanceKm: item.distanceKm ? Number(item.distanceKm.toFixed(1)) : 3.5,
-          status: (item.currentOccupancy >= item.totalCapacity) ? 'Full' : (item.currentOccupancy / item.totalCapacity > 0.85) ? 'Limited' : 'Open',
+          distanceKm: item.distanceKm ? Number(item.distanceKm.toFixed(1)) : Number((2.0 + (idx * 1.2)).toFixed(1)),
+          status: item.status || ((item.currentOccupancy >= item.totalCapacity) ? 'Full' : (item.currentOccupancy / item.totalCapacity > 0.85) ? 'Limited' : 'Open'),
           photo: idx % 3 === 0 ? shelter1 : idx % 3 === 1 ? shelter2 : shelter3,
-          amenities: ['water', 'food', 'medical']
+          amenities: (Array.isArray(item.amenities) && item.amenities.length > 0) ? item.amenities : ['water', 'food', 'medical']
         }));
         setShelters(mappedApi);
         setSelectedShelter(mappedApi[0]);
@@ -225,7 +226,8 @@ export const FindShelterPage = ({ onBack }) => {
         setShelters(DEFAULT_SHELTERS_DATA);
         setSelectedShelter(DEFAULT_SHELTERS_DATA[0]);
       }
-    } catch {
+    } catch (err) {
+      console.warn('Shelters API fallback active:', err);
       setShelters(DEFAULT_SHELTERS_DATA);
       setSelectedShelter(DEFAULT_SHELTERS_DATA[0]);
     } finally {

@@ -8,11 +8,13 @@ export const Sidebar = () => {
   const role = user?.role;
 
   const links = [
+    { label: 'Platform Administration', to: '/admin', roles: ['Admin'] },
     { label: 'Citizen Portal', to: '/citizen', roles: ['Citizen', 'Coordinator', 'Admin'] },
     { label: 'Submit Request', to: '/citizen/submit', roles: ['Citizen', 'Coordinator', 'Admin'] },
     { label: 'My Requests', to: '/citizen/track', roles: ['Citizen', 'Coordinator', 'Admin'] },
     { label: 'Find Shelters', to: '/citizen/shelters', roles: ['Citizen', 'Coordinator', 'LogisticsManager', 'Volunteer', 'Admin'] },
     { label: 'Emergency Overview', to: '/coordinator/dashboard', roles: ['Coordinator', 'Admin'] },
+    { label: 'Case Manager Portal', to: '/case-manager', roles: ['Coordinator', 'Admin'] },
     { label: 'Assistance Requests', to: '/coordinator/requests', roles: ['Coordinator', 'Admin', 'Citizen'] },
     { label: 'Operational Map', to: '/map', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
     { label: 'Reports & Analytics', to: '/reports', roles: ['Coordinator', 'Admin'] },
@@ -20,11 +22,13 @@ export const Sidebar = () => {
     { label: 'AI Review & Governance', to: '/coordinator/ai-review', roles: ['Coordinator', 'Admin'] },
     { label: 'Resource Inventory', to: '/logistics/inventory', roles: ['LogisticsManager', 'Coordinator', 'Admin'] },
     { label: 'Supply Dispatch', to: '/logistics/dispatch', roles: ['LogisticsManager', 'Coordinator', 'Admin'] },
+    { label: 'Shelter Manager Portal', to: '/shelter-manager', roles: ['ShelterAdministrator', 'ShelterAdmin', 'Coordinator', 'Admin'] },
     { label: 'Shelter Directory', to: '/shelters/directory', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
     { label: 'Evacuee Allocation', to: '/shelters/allocation', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
     { label: 'Volunteer Portal', to: '/volunteer', roles: ['Coordinator', 'Volunteer', 'Admin'] },
     { label: 'Volunteer Roster', to: '/volunteers/roster', roles: ['Coordinator', 'Admin'] },
     { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
+    { label: 'Donations Management', to: '/donations', roles: ['Coordinator', 'LogisticsManager', 'Admin'] },
     { label: 'Notifications', to: '/coordinator/notifications', roles: ['Coordinator', 'Admin'] },
   ];
 
