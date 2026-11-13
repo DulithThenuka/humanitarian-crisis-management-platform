@@ -48,7 +48,7 @@ public class ResourceAllocationService : IResourceAllocationService
             DispatchedAt = DateTime.UtcNow
         };
 
-        resource.Allocations.Add(allocation);
+        await _repository.AddAllocationAsync(allocation, cancellationToken);
         await _repository.UpdateAsync(resource, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
 

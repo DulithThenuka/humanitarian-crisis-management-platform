@@ -14,4 +14,9 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
 
     public async Task<IReadOnlyList<Resource>> GetByCategoryAsync(string category, CancellationToken cancellationToken = default)
         => await _dbSet.Where(r => r.Category == category).AsNoTracking().ToListAsync(cancellationToken);
+
+    public async Task AddAllocationAsync(ResourceAllocation allocation, CancellationToken cancellationToken = default)
+    {
+        await _context.ResourceAllocations.AddAsync(allocation, cancellationToken);
+    }
 }

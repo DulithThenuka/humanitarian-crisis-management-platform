@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Download 
+import {
+  Download
 } from 'lucide-react';
 import { REPORT_BARS_DATA, REPORT_BREAKDOWN } from './caseManagerData';
 import { incidentService } from '../../../services/incidentService';
@@ -41,10 +41,26 @@ export const CaseReportsView = ({ showToast }) => {
   }, [selectedOperation]);
 
   const handleExportCSV = () => {
-    showToast?.('Exporting Case Manager reporting metrics (CSV)...', 'info');
-    setTimeout(() => {
-      showToast?.('Reports exported: 12-hour workload trend & breakdown saved.', 'success');
-    }, 700);
+    showToast?.('Generating Case Manager reporting metrics CSV...', 'info');
+    try {
+      const headers1 = 'Interval_Hour,Unresolved_Cases_Count,Bar_Height_Pct\n';
+      const rows1 = reportBars.map((b) => `"${b.hour}",${b.count},${b.height}%`).join('\n');
+
+      const headers2 = '\n\nMetric_Label,Percentage\n';
+      const rows2 = reportBreakdown.map((r) => `"${r.label}",${r.pct}%`).join('\n');
+
+      const csvContent = `data:text/csv;charset=utf-8,HumanAid Case Manager Report - ${selectedOperation}\nGenerated: ${new Date().toISOString()}\n\n${headers1}${rows1}${headers2}${rows2}`;
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `humanaid-casemanager-report-${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast?.('Reports exported: workload trend & breakdown saved to CSV.', 'success');
+    } catch {
+      showToast?.('Failed to export CSV report.', 'error');
+    }
   };
 
   return (
@@ -98,8 +114,8 @@ export const CaseReportsView = ({ showToast }) => {
             {reportBars.map((bar) => {
               const isHovered = hoveredBar === bar.hour;
               return (
-                <div 
-                  key={bar.hour} 
+                <div
+                  key={bar.hour}
                   className="cm-bar-col"
                   onMouseEnter={() => setHoveredBar(bar.hour)}
                   onMouseLeave={() => setHoveredBar(null)}
@@ -109,8 +125,8 @@ export const CaseReportsView = ({ showToast }) => {
                       {bar.count}
                     </span>
                   )}
-                  <div 
-                    className="cm-bar-pillar" 
+                  <div
+                    className="cm-bar-pillar"
                     style={{ height: `${bar.height}%` }}
                     title={`Interval ${bar.hour}: ${bar.count} unresolved cases`}
                   />
@@ -143,7 +159,7 @@ export const CaseReportsView = ({ showToast }) => {
                   <span className="cm-breakdown-pct">{item.pct}%</span>
                 </div>
                 <div className="cm-progress-track">
-                  <div 
+                  <div
                     className="cm-progress-bar-fill"
                     style={{ width: `${item.pct}%` }}
                   />

@@ -122,7 +122,7 @@ public static class IncidentStatusTransitionValidator
         if (string.IsNullOrWhiteSpace(statusText))
             return fallback;
 
-        var normalized = statusText.Trim().Replace(" ", "").Replace("-", "");
+        var normalized = statusText.Trim().Replace(" ", "").Replace("-", "").Replace("_", "");
         if (Enum.TryParse<IncidentStatus>(normalized, true, out var parsed))
             return parsed;
 

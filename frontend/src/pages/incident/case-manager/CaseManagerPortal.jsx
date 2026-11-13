@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { 
   Shield, 
   ShieldCheck, 
@@ -12,7 +12,6 @@ import {
   Search, 
   Bell, 
   ChevronDown, 
-  LogOut, 
   CheckCircle2, 
   X,
   AlertCircle
@@ -23,6 +22,7 @@ import {
   INITIAL_CASES_LIST 
 } from './caseManagerData';
 
+import { useAuth } from '../../../context/AuthContext';
 import { incidentService, normalizeIncidentForUI } from '../../../services/incidentService';
 
 import { CaseDashboardView } from './CaseDashboardView';
@@ -36,19 +36,39 @@ import './CaseManager.css';
 
 export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
+
   const [activeTab, setActiveTab] = useState(initialTab);
   const [dutyActive, setDutyActive] = useState(true);
   const [activeOperation, setActiveOperation] = useState(CASE_MANAGER_USER.activeOperation);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Shared Cases state (initialised with development fallback, replaced by live API data when connected)
-  const [casesList, setCasesList] = useState(INITIAL_CASES_LIST);
+  // Live API state
+  const [casesList, setCasesList] = useState([]);
+  const [myAssignedCases, setMyAssignedCases] = useState([]);
+  const [unassignedCases, setUnassignedCases] = useState([]);
   const [selectedCaseId, setSelectedCaseId] = useState('HMR-1042');
+  const [selectedCaseDetail, setSelectedCaseDetail] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [isLiveApi, setIsLiveApi] = useState(false);
+  const [isLoadingApi, setIsLoadingApi] = useState(true);
+  const [apiOfflineError, setApiOfflineError] = useState(false);
   
   // Toast Alert HUD
   const [toast, setToast] = useState(null);
+
+  const activeUser = {
+    ...CASE_MANAGER_USER,
+    name: user?.fullName || user?.name || CASE_MANAGER_USER.name,
+    initials: user?.initials || CASE_MANAGER_USER.initials,
+    role:
+      user?.role === 'CaseManager'
+        ? 'Incident / Case Manager'
+        : user?.role || CASE_MANAGER_USER.role,
+    shortRole: user?.role || CASE_MANAGER_USER.shortRole,
+    email: user?.email || ''
+  };
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type, id: Date.now() });
@@ -57,34 +77,133 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
     }, 3800);
   }, []);
 
-  const fetchCasesAndDashboard = useCallback(async () => {
+  const fetchCaseById = useCallback(async (caseId) => {
+    if (!caseId || !isAuthenticated) return null;
     try {
-      const [incidentsRes, dashRes] = await Promise.all([
+      const detailRes = await incidentService.getById(caseId);
+      const rawDetail = detailRes?.data || detailRes;
+      if (rawDetail && (rawDetail.id || rawDetail.caseNumber)) {
+        const normalized = normalizeIncidentForUI(rawDetail);
+        setSelectedCaseDetail(normalized);
+        setCasesList((prev) =>
+          prev.some((c) => c.id === normalized.id)
+            ? prev.map((c) => (c.id === normalized.id ? normalized : c))
+            : prev
+        );
+        return normalized;
+      }
+    } catch {
+      // Retain existing list item if individual fetch fails
+    }
+    return null;
+  }, [isAuthenticated]);
+
+  const fetchCasesAndDashboard = useCallback(async () => {
+    if (!isAuthenticated) return;
+    setIsLoadingApi(true);
+    try {
+      const [dashRes, incidentsRes, myAssignedRes, unassignedRes] = await Promise.all([
+        incidentService.getDashboard(),
         incidentService.getAll(),
-        incidentService.getDashboard()
+        incidentService.getMyAssigned(),
+        incidentService.getUnassigned()
       ]);
 
-      const rawList = incidentsRes?.data || incidentsRes;
-      if (Array.isArray(rawList) && rawList.length > 0) {
-        const mapped = rawList.map(normalizeIncidentForUI).filter(Boolean);
-        setCasesList(mapped);
-        setIsLiveApi(true);
-      }
+      let loadedLive = false;
 
       const rawDash = dashRes?.data || dashRes;
       if (rawDash && rawDash.metrics) {
         setDashboardData(rawDash);
-        setIsLiveApi(true);
+        loadedLive = true;
       }
-    } catch {
-      // Preserve INITIAL_CASES_LIST as development fallback when backend is unreachable
+
+      const rawList = incidentsRes?.data || incidentsRes;
+      let initialTargetCaseId = 'HMR-1042';
+      if (Array.isArray(rawList)) {
+        const mapped = rawList.map(normalizeIncidentForUI).filter(Boolean);
+        setCasesList(mapped);
+        if (mapped.length > 0) {
+          const preferred = mapped.find((c) => c.id === 'HMR-1042') || mapped[0];
+          initialTargetCaseId = preferred.id;
+          setSelectedCaseId((prev) => (mapped.some((c) => c.id === prev) ? prev : preferred.id));
+        }
+        loadedLive = true;
+      }
+
+      const rawMyAssigned = myAssignedRes?.data || myAssignedRes;
+      if (Array.isArray(rawMyAssigned)) {
+        setMyAssignedCases(rawMyAssigned.map(normalizeIncidentForUI).filter(Boolean));
+        loadedLive = true;
+      }
+
+      const rawUnassigned = unassignedRes?.data || unassignedRes;
+      if (Array.isArray(rawUnassigned)) {
+        setUnassignedCases(rawUnassigned.map(normalizeIncidentForUI).filter(Boolean));
+        loadedLive = true;
+      }
+
+      if (loadedLive) {
+        setIsLiveApi(true);
+        setApiOfflineError(false);
+        await fetchCaseById(initialTargetCaseId);
+      }
+    } catch (err) {
+      // If 401 occurred, apiClient clears auth and redirects to /login
+      if (err?.status === 401) return;
+      setCasesList((prev) => (prev.length > 0 ? prev : INITIAL_CASES_LIST));
       setIsLiveApi(false);
+      setApiOfflineError(true);
+    } finally {
+      setIsLoadingApi(false);
     }
-  }, []);
+  }, [isAuthenticated, fetchCaseById]);
 
   useEffect(() => {
-    fetchCasesAndDashboard();
-  }, [fetchCasesAndDashboard]);
+    if (isAuthenticated) {
+      fetchCasesAndDashboard();
+    }
+  }, [isAuthenticated, fetchCasesAndDashboard]);
+
+  const handleSelectCase = useCallback(
+    (caseId) => {
+      setSelectedCaseId(caseId);
+      fetchCaseById(caseId);
+    },
+    [fetchCaseById]
+  );
+
+  const handleRefreshScope = useCallback(
+    async (scope) => {
+      if (!isAuthenticated) return;
+      try {
+        if (scope === 'MyAssigned') {
+          const res = await incidentService.getMyAssigned();
+          const list = res?.data || res;
+          if (Array.isArray(list)) {
+            setMyAssignedCases(list.map(normalizeIncidentForUI).filter(Boolean));
+            setIsLiveApi(true);
+          }
+        } else if (scope === 'Unassigned') {
+          const res = await incidentService.getUnassigned();
+          const list = res?.data || res;
+          if (Array.isArray(list)) {
+            setUnassignedCases(list.map(normalizeIncidentForUI).filter(Boolean));
+            setIsLiveApi(true);
+          }
+        } else {
+          const res = await incidentService.getAll();
+          const list = res?.data || res;
+          if (Array.isArray(list)) {
+            setCasesList(list.map(normalizeIncidentForUI).filter(Boolean));
+            setIsLiveApi(true);
+          }
+        }
+      } catch {
+        // Keep current scope data if refresh fails
+      }
+    },
+    [isAuthenticated]
+  );
 
   const handleUpdateCase = async (id, updates, actionType = 'update') => {
     // Optimistically update local state
@@ -121,7 +240,19 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
         setCasesList((prev) =>
           prev.map((c) => (c.id === id || c.id === normalized.id ? normalized : c))
         );
+        setMyAssignedCases((prev) =>
+          prev.map((c) => (c.id === id || c.id === normalized.id ? normalized : c))
+        );
+        setSelectedCaseDetail(normalized);
         setIsLiveApi(true);
+        setApiOfflineError(false);
+
+        // Refresh dashboard KPIs after mutation
+        const dashRes = await incidentService.getDashboard();
+        const rawDash = dashRes?.data || dashRes;
+        if (rawDash && rawDash.metrics) {
+          setDashboardData(rawDash);
+        }
       }
     } catch {
       // Fallback retains local state update if API is offline
@@ -150,7 +281,9 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
           prev.map((c) => (c.id === newCase.id ? normalized : c))
         );
         setSelectedCaseId(normalized.id);
+        setSelectedCaseDetail(normalized);
         setIsLiveApi(true);
+        setApiOfflineError(false);
       }
     } catch {
       // Preserve optimistic local creation when offline
@@ -169,12 +302,16 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
     }
   };
 
-  const handleSignOut = () => {
-    showToast('Signed out of Incident / Case Manager workspace', 'info');
-    setTimeout(() => {
-      navigate('/login');
-    }, 800);
+  const handleSignOut = async () => {
+    showToast('Signing out of Incident / Case Manager workspace...', 'info');
+    await logout();
+    navigate('/login', { replace: true });
   };
+
+  if (!isAuthenticated) {
+    const redirectTarget = `${location.pathname}${location.search}`;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(redirectTarget)}`} replace />;
+  }
 
   return (
     <div className="cm-portal-shell">
@@ -208,7 +345,7 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
         </div>
       )}
 
-      {/* 1. Left Docked Navy Sidebar (Screenshots 1-5 exact match) */}
+      {/* 1. Left Docked Navy Sidebar */}
       <aside className="cm-sidebar">
         <div>
           {/* Brand Header */}
@@ -226,12 +363,12 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
           <div className="cm-user-status-card">
             <div className="cm-user-meta-left">
               <div className="cm-avatar-circle">
-                {CASE_MANAGER_USER.initials}
+                {activeUser.initials}
               </div>
               <div>
                 <span className="cm-user-tag-tiny">SIGNED IN AS</span>
-                <div className="cm-user-role">{CASE_MANAGER_USER.role}</div>
-                <div className="cm-user-name">{CASE_MANAGER_USER.name}</div>
+                <div className="cm-user-role">{activeUser.role}</div>
+                <div className="cm-user-name">{activeUser.name}</div>
               </div>
             </div>
             <div 
@@ -266,7 +403,7 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
                 <Briefcase size={16} />
                 <span>Case Management</span>
               </div>
-              <span className="cm-badge-red">{casesList.length + 5}</span>
+              <span className="cm-badge-red">{casesList.length}</span>
             </button>
 
             <button
@@ -354,44 +491,59 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
             <div className="cm-op-dropdown">
               <span className="cm-op-lbl">Active operation</span>
               <div className="cm-op-val">
-                <strong>{activeOperation}</strong>
-                <ChevronDown size={13} />
+                <select
+                  value={activeOperation}
+                  onChange={(e) => setActiveOperation(e.target.value)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#f8fafc',
+                    fontWeight: 600,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    padding: 0
+                  }}
+                >
+                  <option value="Western Province Flood" style={{ background: '#0f172a', color: '#f8fafc' }}>Western Province Flood</option>
+                  <option value="2024 Southern Province Floods" style={{ background: '#0f172a', color: '#f8fafc' }}>2024 Southern Province Floods</option>
+                  <option value="Badulla District Landslide" style={{ background: '#0f172a', color: '#f8fafc' }}>Badulla District Landslide</option>
+                  <option value="All Active Operations" style={{ background: '#0f172a', color: '#f8fafc' }}>All Active Operations</option>
+                </select>
               </div>
             </div>
 
             <button 
               className="cm-bell-btn"
-              onClick={() => showToast('5 urgent case notifications requiring review', 'info')}
+              onClick={() => showToast(`${casesList.length || 5} active case records in scope`, 'info')}
               title="Notifications"
             >
               <Bell size={18} />
-              <span className="cm-bell-dot">{CASE_MANAGER_USER.badgeCount}</span>
+              <span className="cm-bell-dot">{casesList.length || CASE_MANAGER_USER.badgeCount}</span>
             </button>
 
             <div className="cm-user-badge">
               <div className="cm-user-badge-avatar">
-                {CASE_MANAGER_USER.initials}
+                {activeUser.initials}
               </div>
               <div className="cm-user-badge-text">
-                <span className="cm-user-badge-name">{CASE_MANAGER_USER.name}</span>
-                <span className="cm-user-badge-role">{CASE_MANAGER_USER.shortRole}</span>
+                <span className="cm-user-badge-name">{activeUser.name}</span>
+                <span className="cm-user-badge-role">{activeUser.shortRole}</span>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Data Source Status Ribbon: clearly distinguishes Live Backend API vs Development Fallback */}
-        <div className="cm-prototype-ribbon">
-          <ShieldCheck size={14} className="cm-ribbon-icon" />
-          <span className="cm-ribbon-bold">
-            {isLiveApi ? 'Connected to HumanAid API' : 'Development Fallback Mode'}
-          </span>
-          <span className="cm-ribbon-text">
-            {isLiveApi
-              ? 'Live ASP.NET Core backend connected (/api/incidents). AI recommendations use rule-based demonstration decision support.'
-              : 'Backend unreachable — displaying local development fallback records. Start ASP.NET Core API to persist live changes.'}
-          </span>
-        </div>
+        {/* Only display fallback warning banner if the backend API is genuinely unreachable */}
+        {!isLoadingApi && !isLiveApi && apiOfflineError && (
+          <div className="cm-prototype-ribbon">
+            <AlertCircle size={14} className="cm-ribbon-icon" />
+            <span className="cm-ribbon-bold">Development Fallback Mode</span>
+            <span className="cm-ribbon-text">
+              Backend unreachable — displaying local development fallback records. Start ASP.NET Core API to persist live changes.
+            </span>
+          </div>
+        )}
 
         {/* 3. Subview Body */}
         <main style={{ flex: 1 }}>
@@ -400,7 +552,7 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
               dashboardData={dashboardData}
               isLiveApi={isLiveApi}
               onNavigate={(tab) => setActiveTab(tab)}
-              onSelectCase={(id) => setSelectedCaseId(id)}
+              onSelectCase={(id) => handleSelectCase(id)}
               showToast={showToast}
             />
           )}
@@ -408,8 +560,14 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
           {activeTab === 'management' && (
             <CaseManagementView
               casesList={casesList}
+              myAssignedCases={myAssignedCases}
+              unassignedCases={unassignedCases}
               selectedCaseId={selectedCaseId}
-              onSelectCase={(id) => setSelectedCaseId(id)}
+              selectedCaseDetail={selectedCaseDetail}
+              isLiveApi={isLiveApi}
+              globalSearchQuery={searchQuery}
+              onSelectCase={(id) => handleSelectCase(id)}
+              onRefreshScope={handleRefreshScope}
               onUpdateCase={handleUpdateCase}
               onCreateCase={handleCreateCase}
               showToast={showToast}
@@ -452,6 +610,7 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
 
           {activeTab === 'profile' && (
             <CasePermissionsProfileView
+              activeUser={activeUser}
               showToast={showToast}
             />
           )}

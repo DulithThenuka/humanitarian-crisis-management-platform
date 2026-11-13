@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
@@ -8,9 +8,30 @@ import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
 import reliefcoreLogo from '../../assets/reliefcore-logo.png';
 import './LoginPage.css';
 
+const resolvePostLoginRoute = (role, redirectParam) => {
+  if (redirectParam && typeof redirectParam === 'string' && redirectParam.startsWith('/') && !redirectParam.startsWith('/login')) {
+    return redirectParam;
+  }
+
+  const normalizedRole = (role || '').toString().trim().toLowerCase();
+  if (normalizedRole === 'casemanager' || normalizedRole === 'incidentmanager' || normalizedRole.includes('case manager')) {
+    return '/case-manager';
+  }
+  if (normalizedRole === 'logisticsmanager') {
+    return '/logistics';
+  }
+  if (normalizedRole === 'volunteer') {
+    return '/volunteers';
+  }
+  if (normalizedRole === 'citizen') {
+    return '/citizen';
+  }
+  return '/coordinator';
+};
+
 export const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedLang, setSelectedLang] = useState('English');
@@ -19,31 +40,33 @@ export const LoginPage = () => {
   const { login } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const redirectParam = searchParams.get('redirect') || location.state?.from;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await authService.login(formData);
-      if (response?.succeeded) {
-        login(response.data);
-        showAlert("Login successful", "success");
-        navigate('/coordinator');
+      const response = await authService.login({
+        email: formData.email.trim(),
+        password: formData.password
+      });
+      if (response?.succeeded && response?.data?.token) {
+        login(response.data, rememberMe);
+        showAlert(response.message || 'Login successful', 'success');
+        const targetRoute = resolvePostLoginRoute(response.data.role, redirectParam);
+        navigate(targetRoute, { replace: true });
       } else {
-        showAlert(response?.errors?.[0] || "Invalid credentials", "error");
+        showAlert(response?.errors?.[0] || response?.message || 'Invalid credentials', 'error');
       }
     } catch (err) {
-      // Frontend-only / offline demo mode fallback
-      const demoUser = {
-        id: 'usr-001',
-        fullName: formData.email ? (formData.email.split('@')[0].charAt(0).toUpperCase() + formData.email.split('@')[0].slice(1)) : 'Amara Chen',
-        role: 'Coordinator',
-        email: formData.email || 'amara.chen@reliefcore.org',
-        token: 'reliefcore-session-token'
-      };
-      login(demoUser);
-      showAlert("Logged in successfully (Demo Mode)", "success");
-      navigate('/coordinator');
+      const errorMessage =
+        err?.errors?.[0] ||
+        err?.message ||
+        'Unable to sign in. Please verify your email and password.';
+      showAlert(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

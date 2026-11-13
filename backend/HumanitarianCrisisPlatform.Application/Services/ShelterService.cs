@@ -81,7 +81,7 @@ public class ShelterService : IShelterService
             CheckInDate = DateTime.UtcNow
         };
 
-        shelter.Allocations.Add(allocation);
+        await _repository.AddAllocationAsync(allocation, cancellationToken);
         await _repository.UpdateAsync(shelter, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
 

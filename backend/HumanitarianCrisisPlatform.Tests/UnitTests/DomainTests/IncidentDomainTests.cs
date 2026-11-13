@@ -63,5 +63,42 @@ public class IncidentDomainTests
 
         Assert.False(result.Succeeded);
     }
+
+    [Theory]
+    [InlineData(IncidentStatus.Open, "Open", 0, "open")]
+    [InlineData(IncidentStatus.Assigned, "Assigned", 1, "assigned")]
+    [InlineData(IncidentStatus.Pending, "Pending", 2, "pending")]
+    [InlineData(IncidentStatus.Verified, "Verified", 3, "verified")]
+    [InlineData(IncidentStatus.InProgress, "In Progress", 4, "in-progress")]
+    [InlineData(IncidentStatus.Escalated, "Escalated", 5, "escalated")]
+    [InlineData(IncidentStatus.Resolved, "Resolved", 6, "resolved")]
+    [InlineData(IncidentStatus.Closed, "Closed", 7, "closed")]
+    [InlineData(IncidentStatus.Merged, "Merged", 8, "merged")]
+    public void IncidentMapper_ToDto_ShouldMapStatusAndStatusEnumAndStatusTypeConsistently(
+        IncidentStatus status,
+        string expectedStatusDisplay,
+        int expectedStatusEnumValue,
+        string expectedStatusType)
+    {
+        var incident = new Incident
+        {
+            Id = Guid.NewGuid(),
+            CaseNumber = "HMR-1042",
+            Title = "Emergency Shelter Request",
+            Description = "Flood water entered our home overnight.",
+            Category = IncidentCategory.EmergencyShelter,
+            CategoryDisplay = "Emergency Shelter",
+            OperationalArea = "Kelani East - Zone 03",
+            AffectedPeople = 6,
+            Status = status
+        };
+
+        var dto = HumanitarianCrisisPlatform.Application.Services.IncidentMapper.ToDto(incident);
+
+        Assert.Equal(expectedStatusDisplay, dto.Status);
+        Assert.Equal(status, dto.StatusEnum);
+        Assert.Equal(expectedStatusEnumValue, (int)dto.StatusEnum);
+        Assert.Equal(expectedStatusType, dto.StatusType);
+    }
 }
 

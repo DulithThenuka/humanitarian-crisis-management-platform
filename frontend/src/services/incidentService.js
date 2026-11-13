@@ -1,33 +1,5 @@
 import apiClient from './apiClient';
 
-let authPromise = null;
-
-const ensureCaseManagerSession = async () => {
-  const existingToken = localStorage.getItem('token');
-  if (existingToken) return existingToken;
-
-  if (!authPromise) {
-    authPromise = apiClient
-      .post('/auth/login', {
-        email: 'ishara.senanayake@reliefcore.org',
-        password: 'Password123!'
-      })
-      .then((res) => {
-        const token = res?.data?.token || res?.token;
-        if (token) {
-          localStorage.setItem('token', token);
-        }
-        return token;
-      })
-      .catch(() => null)
-      .finally(() => {
-        authPromise = null;
-      });
-  }
-
-  return await authPromise;
-};
-
 export const normalizeIncidentForUI = (dto) => {
   if (!dto) return null;
   const priority = dto.priority || 'Medium';
@@ -54,6 +26,7 @@ export const normalizeIncidentForUI = (dto) => {
     assignedStaff: dto.assignedStaff || 'I. Senanayake',
     assignedToUserId: dto.assignedToUserId || null,
     status,
+    statusEnum: dto.statusEnum,
     statusType: dto.statusType || status.toLowerCase().replace(/\s+/g, '-'),
     affectedPeople:
       typeof dto.affectedPeople === 'string'
@@ -70,126 +43,101 @@ export const normalizeIncidentForUI = (dto) => {
 
 export const incidentService = {
   getDashboard: async () => {
-    await ensureCaseManagerSession();
     return await apiClient.get('/incidents/dashboard');
   },
 
   getAll: async (params = {}) => {
-    await ensureCaseManagerSession();
     return await apiClient.get('/incidents', { params });
   },
 
   getById: async (id) => {
-    await ensureCaseManagerSession();
     return await apiClient.get(`/incidents/${encodeURIComponent(id)}`);
   },
 
   create: async (data) => {
-    await ensureCaseManagerSession();
     return await apiClient.post('/incidents', data);
   },
 
   update: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.put(`/incidents/${encodeURIComponent(id)}`, data);
   },
 
   getMyAssigned: async () => {
-    await ensureCaseManagerSession();
     return await apiClient.get('/incidents/my-assigned');
   },
 
   getUnassigned: async () => {
-    await ensureCaseManagerSession();
     return await apiClient.get('/incidents/unassigned');
   },
 
   assign: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.post(`/incidents/${encodeURIComponent(id)}/assign`, data);
   },
 
   reassign: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.post(`/incidents/${encodeURIComponent(id)}/reassign`, data);
   },
 
   updateStatus: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.patch(`/incidents/${encodeURIComponent(id)}/status`, data);
   },
 
   updatePriority: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.patch(`/incidents/${encodeURIComponent(id)}/priority`, data);
   },
 
   verify: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.post(`/incidents/${encodeURIComponent(id)}/verify`, data);
   },
 
   escalate: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.post(`/incidents/${encodeURIComponent(id)}/escalate`, data);
   },
 
   resolve: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.post(`/incidents/${encodeURIComponent(id)}/resolve`, data);
   },
 
   close: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.post(`/incidents/${encodeURIComponent(id)}/close`, data);
   },
 
   getHistory: async (id) => {
-    await ensureCaseManagerSession();
     return await apiClient.get(`/incidents/${encodeURIComponent(id)}/history`);
   },
 
   getPossibleDuplicates: async (id) => {
-    await ensureCaseManagerSession();
     return await apiClient.get(`/incidents/${encodeURIComponent(id)}/possible-duplicates`);
   },
 
   merge: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.post(`/incidents/${encodeURIComponent(id)}/merge`, data);
   },
 
   getAIReview: async (id) => {
-    await ensureCaseManagerSession();
     return await apiClient.get(`/incidents/${encodeURIComponent(id)}/ai-review`);
   },
 
   generateAIReview: async (id) => {
-    await ensureCaseManagerSession();
     return await apiClient.post(`/incidents/${encodeURIComponent(id)}/ai-review/generate`, {});
   },
 
   recordAIReviewDecision: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.post(`/incidents/${encodeURIComponent(id)}/ai-review/decision`, data);
   },
 
   getCommunications: async (id) => {
-    await ensureCaseManagerSession();
     return await apiClient.get(`/incidents/${encodeURIComponent(id)}/communications`);
   },
 
   addCommunication: async (id, data) => {
-    await ensureCaseManagerSession();
     return await apiClient.post(`/incidents/${encodeURIComponent(id)}/communications`, data);
   },
 
   getReportSummary: async (operation) => {
-    await ensureCaseManagerSession();
     const params = operation ? { operation } : {};
     return await apiClient.get('/incidents/reports/summary', { params });
   }
 };
 
 export default incidentService;
-

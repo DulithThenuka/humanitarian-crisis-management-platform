@@ -304,5 +304,55 @@ public class IncidentModuleWorkflowTests
         var volunteer = await context.Volunteers.SingleAsync();
         Assert.Equal(existingVolunteerUserId, volunteer.UserId);
     }
+
+    [Fact]
+    public async Task UpdateStatus_FromAssignedToInProgress_ShouldReturnConsistentStatusAndStatusTypeOnGetById()
+    {
+        using var context = _fixture.CreateContext();
+        await DatabaseSeeder.SeedAsync(context);
+
+        var repo = new IncidentRepository(context);
+        var uow = new UnitOfWork(context);
+        var aiProvider = new RuleBasedIncidentAIProvider();
+        var incidentService = new IncidentService(repo, aiProvider, uow);
+        var assignmentService = new CaseAssignmentService(repo, uow);
+
+        var caseManagerId = Guid.Parse("77777777-7777-7777-7777-777777777777");
+
+        // 1. Transition HMR-1042 to Assigned
+        var assignResult = await assignmentService.AssignAsync("HMR-1042", new AssignIncidentDto
+        {
+            AssigneeUserId = caseManagerId,
+            AssigneeName = "I. Senanayake",
+            Reason = "Assigned to Case Manager for field coordination"
+        }, caseManagerId, "Ishara Senanayake", "CaseManager");
+
+        Assert.True(assignResult.Succeeded);
+        Assert.Equal("Assigned", assignResult.Data!.Status);
+        Assert.Equal(IncidentStatus.Assigned, assignResult.Data.StatusEnum);
+        Assert.Equal(1, (int)assignResult.Data.StatusEnum);
+        Assert.Equal("assigned", assignResult.Data.StatusType);
+
+        // 2. Transition HMR-1042 from Assigned to InProgress
+        var inProgressResult = await incidentService.UpdateStatusAsync("HMR-1042", new UpdateIncidentStatusDto
+        {
+            Status = "InProgress",
+            Reason = "Evacuation team dispatched and actively assisting household"
+        }, caseManagerId, "Ishara Senanayake", "CaseManager");
+
+        Assert.True(inProgressResult.Succeeded);
+        Assert.Equal("In Progress", inProgressResult.Data!.Status);
+        Assert.Equal(IncidentStatus.InProgress, inProgressResult.Data.StatusEnum);
+        Assert.Equal(4, (int)inProgressResult.Data.StatusEnum);
+        Assert.Equal("in-progress", inProgressResult.Data.StatusType);
+
+        // 3. Verify GET /api/Incidents/HMR-1042 returns identical persisted status, statusEnum, and statusType
+        var getByIdResult = await incidentService.GetByIdAsync("HMR-1042", caseManagerId, "CaseManager");
+        Assert.True(getByIdResult.Succeeded);
+        Assert.Equal("In Progress", getByIdResult.Data!.Status);
+        Assert.Equal(IncidentStatus.InProgress, getByIdResult.Data.StatusEnum);
+        Assert.Equal(4, (int)getByIdResult.Data.StatusEnum);
+        Assert.Equal("in-progress", getByIdResult.Data.StatusType);
+    }
 }
 

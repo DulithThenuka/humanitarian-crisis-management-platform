@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import { CASE_MANAGER_USER } from './caseManagerData';
 
-export const CasePermissionsProfileView = ({ showToast }) => {
+export const CasePermissionsProfileView = ({ activeUser = CASE_MANAGER_USER, showToast }) => {
+  const profileUser = activeUser || CASE_MANAGER_USER;
   return (
     <div className="cm-canvas-wrapper">
       <div className="cm-canvas-head-row">
@@ -31,26 +32,26 @@ export const CasePermissionsProfileView = ({ showToast }) => {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
             <div className="cm-user-badge-avatar" style={{ width: '56px', height: '56px', fontSize: '20px' }}>
-              {CASE_MANAGER_USER.initials}
+              {profileUser.initials}
             </div>
             <div>
-              <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 800 }}>{CASE_MANAGER_USER.name}</h2>
-              <span className="cm-pill-tag warning">● {CASE_MANAGER_USER.role}</span>
+              <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 800 }}>{profileUser.name}</h2>
+              <span className="cm-pill-tag warning">● {profileUser.role}</span>
             </div>
           </div>
 
           <div className="cm-detail-meta-4grid" style={{ marginBottom: '16px' }}>
             <div className="cm-meta-col">
               <span className="cm-meta-label">CLEARANCE LEVEL</span>
-              <span className="cm-meta-value">{CASE_MANAGER_USER.clearance}</span>
+              <span className="cm-meta-value">{profileUser.clearance}</span>
             </div>
             <div className="cm-meta-col">
               <span className="cm-meta-label">ASSIGNED ZONE</span>
-              <span className="cm-meta-value">{CASE_MANAGER_USER.zone}</span>
+              <span className="cm-meta-value">{profileUser.zone}</span>
             </div>
             <div className="cm-meta-col">
               <span className="cm-meta-label">OPERATION</span>
-              <span className="cm-meta-value">{CASE_MANAGER_USER.activeOperation}</span>
+              <span className="cm-meta-value">{profileUser.activeOperation}</span>
             </div>
             <div className="cm-meta-col">
               <span className="cm-meta-label">STATUS</span>

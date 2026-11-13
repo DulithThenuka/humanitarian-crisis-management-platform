@@ -53,7 +53,9 @@ export const RegisterPage = () => {
 
   const redirectByRole = (role) => {
     const roleStr = (role || '').toString().toLowerCase();
-    if (roleStr === 'volunteer' || roleStr === '3') {
+    if (roleStr === 'casemanager' || roleStr === '5') {
+      navigate('/case-manager');
+    } else if (roleStr === 'volunteer' || roleStr === '3') {
       navigate('/volunteers/assignments');
     } else if (roleStr === 'coordinator' || roleStr === '1' || roleStr === 'admin' || roleStr === '4') {
       navigate('/coordinator/dashboard');
@@ -96,7 +98,7 @@ export const RegisterPage = () => {
 
     try {
       const response = await authService.register(payload);
-      if (response?.succeeded) {
+      if (response?.succeeded && response?.data?.token) {
         login(response.data);
         showAlert('Registration successful! Welcome to RELIEFCORE.', 'success');
         redirectByRole(response.data.role);
@@ -104,25 +106,11 @@ export const RegisterPage = () => {
         showAlert(response?.errors?.[0] || 'Registration failed. Please verify your details.', 'error');
       }
     } catch (err) {
-      // Fallback demo mode if backend is offline or demo environment
-      const roleMap = {
-        0: 'Citizen',
-        1: 'Coordinator',
-        2: 'LogisticsManager',
-        3: 'Volunteer'
-      };
-      const roleName = roleMap[payload.role] || 'Citizen';
-      const demoUser = {
-        id: `usr-${Date.now().toString().slice(-4)}`,
-        fullName: payload.fullName,
-        role: roleName,
-        email: payload.email,
-        phoneNumber: payload.phoneNumber,
-        token: 'reliefcore-session-token'
-      };
-      login(demoUser);
-      showAlert(`Registration successful (Academic Demo Mode) as ${roleName}`, 'success');
-      redirectByRole(roleName);
+      const errorMessage =
+        err?.errors?.[0] ||
+        err?.message ||
+        'Registration failed. Please verify your details and try again.';
+      showAlert(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

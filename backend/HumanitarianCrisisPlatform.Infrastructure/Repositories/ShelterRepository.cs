@@ -27,4 +27,9 @@ public class ShelterRepository : Repository<Shelter>, IShelterRepository
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
+
+    public async Task AddAllocationAsync(ShelterAllocation allocation, CancellationToken cancellationToken = default)
+    {
+        await _context.ShelterAllocations.AddAsync(allocation, cancellationToken);
+    }
 }

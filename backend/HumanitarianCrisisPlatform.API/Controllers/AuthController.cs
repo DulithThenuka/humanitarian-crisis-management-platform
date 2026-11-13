@@ -67,7 +67,7 @@ public class AuthController : BaseApiController
             FullName = user.FullName,
             Email = user.Email,
             Role = user.Role.ToString(),
-            ExpiresAt = DateTime.UtcNow.AddHours(8)
+            ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }, "Login successful"));
     }
 
@@ -108,7 +108,7 @@ public class AuthController : BaseApiController
             FullName = user.FullName,
             Email = user.Email,
             Role = user.Role.ToString(),
-            ExpiresAt = DateTime.UtcNow.AddHours(8)
+            ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }, "Registration successful"));
     }
 
@@ -124,12 +124,12 @@ public class AuthController : BaseApiController
 
         return Ok(Result<AuthResponseDto>.Success(new AuthResponseDto
         {
-            Token = Request.Headers.Authorization.ToString().Replace("Bearer ", "").Trim(),
+            Token = JwtSettings.NormalizeBearerToken(Request.Headers.Authorization.ToString()) ?? string.Empty,
             UserId = user.Id,
             FullName = user.FullName,
             Email = user.Email,
             Role = user.Role.ToString(),
-            ExpiresAt = DateTime.UtcNow.AddHours(8)
+            ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }));
     }
 

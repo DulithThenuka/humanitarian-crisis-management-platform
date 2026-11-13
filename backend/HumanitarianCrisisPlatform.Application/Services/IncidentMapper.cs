@@ -14,20 +14,9 @@ public static class IncidentMapper
         var priorityStr = entity.Priority.ToString();
         var priorityType = priorityStr.ToLowerInvariant();
 
-        var statusStr = FormatStatusDisplay(entity.Status);
-        var statusType = entity.Status switch
-        {
-            IncidentStatus.Open => "open",
-            IncidentStatus.Assigned => "assigned",
-            IncidentStatus.Pending => "pending",
-            IncidentStatus.Verified => "assigned",
-            IncidentStatus.InProgress => "assigned",
-            IncidentStatus.Escalated => "escalated",
-            IncidentStatus.Resolved => "verified",
-            IncidentStatus.Closed => "closed",
-            IncidentStatus.Merged => "closed",
-            _ => "open"
-        };
+        var currentStatus = entity.Status;
+        var statusStr = FormatStatusDisplay(currentStatus);
+        var statusType = FormatStatusType(currentStatus);
 
         var verificationStr = string.IsNullOrWhiteSpace(entity.VerificationStatus)
             ? "Awaiting review"
@@ -77,7 +66,7 @@ public static class IncidentMapper
             AssignedStaff = string.IsNullOrWhiteSpace(entity.AssignedStaffName) ? "Unassigned" : entity.AssignedStaffName,
             AssignedToUserId = entity.AssignedToUserId,
             Status = statusStr,
-            StatusEnum = entity.Status,
+            StatusEnum = currentStatus,
             StatusType = statusType,
             AffectedPeopleCount = entity.AffectedPeople,
             AffectedPeople = entity.AffectedPeople == 1 ? "1 person" : $"{entity.AffectedPeople} people",
@@ -113,6 +102,23 @@ public static class IncidentMapper
         {
             IncidentStatus.InProgress => "In Progress",
             _ => status.ToString()
+        };
+    }
+
+    public static string FormatStatusType(IncidentStatus status)
+    {
+        return status switch
+        {
+            IncidentStatus.Open => "open",
+            IncidentStatus.Assigned => "assigned",
+            IncidentStatus.Pending => "pending",
+            IncidentStatus.Verified => "verified",
+            IncidentStatus.InProgress => "in-progress",
+            IncidentStatus.Escalated => "escalated",
+            IncidentStatus.Resolved => "resolved",
+            IncidentStatus.Closed => "closed",
+            IncidentStatus.Merged => "merged",
+            _ => FormatStatusDisplay(status).ToLowerInvariant().Replace(' ', '-')
         };
     }
 

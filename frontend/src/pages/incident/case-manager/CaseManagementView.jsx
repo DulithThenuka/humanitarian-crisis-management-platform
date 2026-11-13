@@ -3,29 +3,30 @@ import {
   Search, 
   Download, 
   Plus, 
-  CheckCircle2, 
-  AlertTriangle, 
-  HelpCircle, 
   X,
-  ChevronDown,
   ShieldCheck
 } from 'lucide-react';
 
 export const CaseManagementView = ({
   casesList = [],
+  myAssignedCases = [],
+  unassignedCases = [],
   selectedCaseId,
+  selectedCaseDetail,
+  isLiveApi = false,
   onSelectCase,
+  onRefreshScope,
   onUpdateCase,
   onCreateCase,
   showToast
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [assignmentScope, setAssignmentScope] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [areaFilter, setAreaFilter] = useState('All');
   
   // Detail action form state
   const [actionNote, setActionNote] = useState('');
-  const [newStatus, setNewStatus] = useState('');
 
   // Create record modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -43,16 +44,32 @@ export const CaseManagementView = ({
   const [modalConfirmed, setModalConfirmed] = useState(false);
   const [checkboxError, setCheckboxError] = useState(false);
 
-  const currentCase = casesList.find((c) => c.id === selectedCaseId) || casesList[0];
+  const sourceList =
+    assignmentScope === 'MyAssigned'
+      ? myAssignedCases
+      : assignmentScope === 'Unassigned'
+      ? unassignedCases
+      : casesList;
+
+  const listMatch =
+    sourceList.find((c) => c.id === selectedCaseId) ||
+    casesList.find((c) => c.id === selectedCaseId) ||
+    sourceList[0] ||
+    casesList[0];
+
+  const currentCase =
+    selectedCaseDetail && listMatch && selectedCaseDetail.id === listMatch.id
+      ? { ...listMatch, ...selectedCaseDetail }
+      : listMatch;
 
   // Filtering
-  const filteredCases = casesList.filter((item) => {
+  const filteredCases = sourceList.filter((item) => {
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
-      const matchId = item.id.toLowerCase().includes(q);
-      const matchCat = item.category.toLowerCase().includes(q);
-      const matchArea = item.operationalArea.toLowerCase().includes(q);
-      const matchStaff = item.assignedStaff.toLowerCase().includes(q);
+      const matchId = (item.id || '').toLowerCase().includes(q);
+      const matchCat = (item.category || '').toLowerCase().includes(q);
+      const matchArea = (item.operationalArea || '').toLowerCase().includes(q);
+      const matchStaff = (item.assignedStaff || '').toLowerCase().includes(q);
       if (!matchId && !matchCat && !matchArea && !matchStaff) return false;
     }
     if (statusFilter !== 'All' && item.status !== statusFilter) return false;
@@ -60,7 +77,7 @@ export const CaseManagementView = ({
     return true;
   });
 
-  // Action Modal Configurations matching Screenshots 1, 2, 3
+  // Action Modal Configurations
   const ACTION_MODAL_CONFIG = {
     update: {
       title: 'Confirm this reviewed action?',
@@ -68,10 +85,15 @@ export const CaseManagementView = ({
       defaultReason: 'Operational review verified; status updated within assigned scope.',
       toastMessage: (id, target) => `Case ${id} reviewed and status updated to '${target}'`,
       execute: (currCase, reason) => {
-        const targetStatus = currCase.status === 'Open' ? 'Assigned' : 'Open';
+        let targetStatus = 'In Progress';
+        if (currCase.status === 'Open') targetStatus = 'Assigned';
+        else if (currCase.status === 'Assigned') targetStatus = 'In Progress';
+        else if (currCase.status === 'In Progress') targetStatus = 'Resolved';
+        else if (currCase.status === 'Resolved') targetStatus = 'Closed';
+
         onUpdateCase(currCase.id, {
           status: targetStatus,
-          statusType: targetStatus.toLowerCase(),
+          statusType: targetStatus.toLowerCase().replace(/\s+/g, '-'),
           note: reason
         }, 'update');
         return targetStatus;
@@ -142,10 +164,37 @@ export const CaseManagementView = ({
   };
 
   const handleExportReport = () => {
-    showToast?.('Exporting role-scoped Case Management CSV summary...', 'info');
-    setTimeout(() => {
-      showToast?.('Export complete: 4 active demonstration records saved.', 'success');
-    }, 700);
+    showToast?.('Generating role-scoped Case Management CSV summary...', 'info');
+    try {
+      const headers = 'Case_ID,Category,Operational_Area,Priority,Verification,Assigned_Staff,Status,Affected_People,Citizen_Quote\n';
+      const rows = filteredCases
+        .map((c) =>
+          [
+            `"${(c.id || '').replace(/"/g, '""')}"`,
+            `"${(c.category || '').replace(/"/g, '""')}"`,
+            `"${(c.operationalArea || '').replace(/"/g, '""')}"`,
+            `"${(c.priority || '').replace(/"/g, '""')}"`,
+            `"${(c.verification || '').replace(/"/g, '""')}"`,
+            `"${(c.assignedStaff || '').replace(/"/g, '""')}"`,
+            `"${(c.status || '').replace(/"/g, '""')}"`,
+            `"${(c.affectedPeople || '').replace(/"/g, '""')}"`,
+            `"${(c.citizenQuote || '').replace(/"/g, '""')}"`
+          ].join(',')
+        )
+        .join('\n');
+
+      const csvContent = `data:text/csv;charset=utf-8,${headers}${rows}`;
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `humanaid-cases-export-${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast?.(`Export complete: ${filteredCases.length} active records saved to CSV.`, 'success');
+    } catch {
+      showToast?.('Failed to export Case Management CSV.', 'error');
+    }
   };
 
   const handleCreateSubmit = (e) => {
@@ -166,7 +215,7 @@ export const CaseManagementView = ({
       currentSafety: 'Reported safe location',
       accessibility: 'None specified',
       submittedAgo: 'Just now',
-      citizenQuote: newRecordForm.citizenQuote || 'New prototype record submitted via Case Manager workspace.',
+      citizenQuote: newRecordForm.citizenQuote || 'New incident record submitted via Case Manager workspace.',
       notes: []
     };
     onCreateCase(createdItem);
@@ -179,7 +228,13 @@ export const CaseManagementView = ({
       assignedStaff: 'I. Senanayake',
       citizenQuote: ''
     });
-    showToast?.(`New prototype case ${newId} logged successfully!`, 'success');
+    showToast?.(`New case ${newId} logged successfully!`, 'success');
+  };
+
+  const handleScopeChange = (e) => {
+    const nextScope = e.target.value;
+    setAssignmentScope(nextScope);
+    onRefreshScope?.(nextScope);
   };
 
   return (
@@ -187,22 +242,26 @@ export const CaseManagementView = ({
       {/* Top Header Row */}
       <div className="cm-management-head-row">
         <div>
-          <span className="cm-tag-uppercase">CASE MANAGER · CONTROLLED WORKSPACE</span>
+          <span className="cm-tag-uppercase">
+            {isLiveApi ? 'CASE MANAGER · LIVE API WORKSPACE (/API/INCIDENTS)' : 'CASE MANAGER · CONTROLLED WORKSPACE'}
+          </span>
           <h1 className="cm-canvas-h1">Case Management</h1>
           <p className="cm-canvas-sub">
-            Search, filter and review fictional records within this role's authorised scope.
+            {isLiveApi
+              ? "Search, filter and review live HumanitarianCrisisDb incident records within this role's authorised scope."
+              : "Search, filter and review incident records within this role's authorised scope."}
           </p>
         </div>
 
         <div className="cm-mgmt-actions-group">
           <button className="cm-btn-export-outline" onClick={handleExportReport}>
             <Download size={14} />
-            <span>Export demo report</span>
+            <span>Export report</span>
           </button>
 
           <button className="cm-btn-create-record" onClick={() => setShowCreateModal(true)}>
             <Plus size={15} />
-            <span>+ Create prototype record</span>
+            <span>+ Create case record</span>
           </button>
         </div>
       </div>
@@ -221,6 +280,17 @@ export const CaseManagementView = ({
         </div>
 
         <div className="cm-dropdowns-row">
+          <select
+            className="cm-filter-select"
+            value={assignmentScope}
+            onChange={handleScopeChange}
+            aria-label="Assignment scope filter"
+          >
+            <option value="All">All authorised records ({casesList.length})</option>
+            <option value="MyAssigned">My assigned cases ({myAssignedCases.length})</option>
+            <option value="Unassigned">Unassigned cases ({unassignedCases.length})</option>
+          </select>
+
           <select 
             className="cm-filter-select"
             value={statusFilter}
@@ -229,8 +299,11 @@ export const CaseManagementView = ({
             <option value="All">All statuses</option>
             <option value="Open">Open</option>
             <option value="Assigned">Assigned</option>
+            <option value="In Progress">In Progress</option>
             <option value="Pending">Pending</option>
             <option value="Escalated">Escalated</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Closed">Closed</option>
           </select>
 
           <select 
@@ -306,7 +379,9 @@ export const CaseManagementView = ({
 
             <div>
               <h3 className="cm-detail-title">{currentCase.category}</h3>
-              <p className="cm-detail-sub">Selected fictional record · role-scoped</p>
+              <p className="cm-detail-sub">
+                {isLiveApi ? 'Selected database record · role-scoped' : 'Selected record · role-scoped'}
+              </p>
             </div>
 
             <div className="cm-detail-meta-4grid">
@@ -366,7 +441,7 @@ export const CaseManagementView = ({
         )}
       </div>
 
-      {/* Action Confirmation Modal Card (Screenshots 1, 2, 3) */}
+      {/* Action Confirmation Modal Card */}
       {activeActionModal && ACTION_MODAL_CONFIG[activeActionModal] && (
         <div 
           className="cm-modal-backdrop" 
@@ -440,19 +515,19 @@ export const CaseManagementView = ({
                 className="cm-action-modal-btn-confirm"
                 onClick={handleConfirmActionModal}
               >
-                Confirm prototype action
+                Confirm action
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Create Prototype Record Modal */}
+      {/* Create Case Record Modal */}
       {showCreateModal && (
         <div className="cm-modal-backdrop" onClick={() => setShowCreateModal(false)}>
           <div className="cm-modal-card" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Create Prototype Case Record</h3>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Create Case Record</h3>
               <button 
                 onClick={() => setShowCreateModal(false)}
                 style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
@@ -522,7 +597,7 @@ export const CaseManagementView = ({
                   Cancel
                 </button>
                 <button type="submit" className="cm-btn-create-record">
-                  Save Prototype Record
+                  Save Record
                 </button>
               </div>
             </form>
