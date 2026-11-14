@@ -52,6 +52,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHomeService, HomeService>();
         services.AddScoped<ICrisisService, CrisisService>();
         services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<ICoordinatorService, CoordinatorService>();
         services.AddScoped<VolunteerService>();
 
         // Infrastructure Services
