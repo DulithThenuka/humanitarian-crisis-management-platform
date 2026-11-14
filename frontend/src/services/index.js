@@ -7,5 +7,6 @@ export { shelterService } from './shelterService';
 export { resourceService } from './resourceService';
 export { volunteerService } from './volunteerService';
 export { adminService } from './adminService';
+export { coordinatorService } from './coordinatorService';
 export { aiGovernanceService } from './aiGovernanceService';
 

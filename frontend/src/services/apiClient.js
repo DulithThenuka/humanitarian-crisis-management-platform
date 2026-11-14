@@ -22,7 +22,7 @@ apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-      const publicPaths = ['/', '/home', '/landing', '/apogee', '/login', '/signup', '/register'];
+      const publicPaths = ['/', '/home', '/landing', '/login', '/signup', '/register'];
       const currentPath = window.location.pathname;
       if (!publicPaths.includes(currentPath)) {
         localStorage.removeItem('token');
@@ -34,4 +34,5 @@ apiClient.interceptors.response.use(
   }
 );
 
+export { apiClient };
 export default apiClient;

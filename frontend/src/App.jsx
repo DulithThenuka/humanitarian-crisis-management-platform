@@ -23,6 +23,7 @@ function AppLayout() {
     location.pathname.startsWith('/ai-workspaces') ||
     location.pathname.startsWith('/ai-governance') ||
     location.pathname.startsWith('/case-manager') ||
+    location.pathname.startsWith('/incident-manager') ||
     location.pathname.startsWith('/incident') ||
     location.pathname.startsWith('/cases') ||
     location.pathname.startsWith('/map') ||
@@ -30,11 +31,15 @@ function AppLayout() {
     location.pathname.startsWith('/alerts') || 
     location.pathname.startsWith('/safety') || 
     location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/shelter') || 
     location.pathname.startsWith('/shelters') || 
     location.pathname.startsWith('/shelter-admin') || 
     location.pathname.startsWith('/shelter-manager') || 
     location.pathname.startsWith('/shelter-dashboard') || 
     location.pathname.startsWith('/volunteer') || 
+    location.pathname.startsWith('/donor') || 
+    location.pathname.startsWith('/donations') || 
+    location.pathname.startsWith('/partner') || 
     location.pathname.startsWith('/track') || 
     location.pathname.startsWith('/emergency') || 
     location.pathname.startsWith('/assistance') || 

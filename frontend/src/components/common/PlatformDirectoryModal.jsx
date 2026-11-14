@@ -41,432 +41,511 @@ import {
 } from 'lucide-react';
 
 export const PLATFORM_PAGES = [
-  // 1. Citizen & Public Aid
+  // ==========================================
+  // MODULE 1: Citizen / Affected Person
+  // ==========================================
   {
     id: 'citizen-portal',
-    category: 'Citizen & Public Aid',
+    category: 'Citizen / Affected Person',
     name: 'Citizen Crisis Portal',
     path: '/citizen',
     description: 'Central self-service hub for flood-affected families, immediate relief assistance, and verified shelter discovery.',
-    badge: 'Public & Citizen',
+    badge: 'Module 01',
     icon: Users,
     color: '#38bdf8',
     highlight: 'SOS Requests & Status'
   },
   {
+    id: 'citizen-shelters',
+    category: 'Citizen / Affected Person',
+    name: 'Emergency Shelter Finder',
+    path: '/citizen/shelters',
+    description: 'Find verified open flood relief shelters with real-time bed capacity, medical care availability, and relief supplies.',
+    badge: 'Module 01',
+    icon: Building2,
+    color: '#10b981',
+    highlight: 'Live Beds & Amenities'
+  },
+  {
     id: 'citizen-submit',
-    category: 'Citizen & Public Aid',
+    category: 'Citizen / Affected Person',
     name: 'Submit Assistance Request',
     path: '/citizen/submit',
     description: 'Emergency form to submit urgent requests for rescue, food rations, clean drinking water, medical kits, and infant supplies.',
-    badge: 'Citizen',
+    badge: 'Module 01',
     icon: PlusSquare,
     color: '#ef4444',
     highlight: '6 Priority Aid Types'
   },
   {
     id: 'citizen-track',
-    category: 'Citizen & Public Aid',
+    category: 'Citizen / Affected Person',
     name: 'Track Assistance Requests',
     path: '/citizen/track',
     description: 'Real-time GPS dispatch tracking, volunteer verification checkpoints, and ETA countdowns for filed tickets.',
-    badge: 'Citizen',
+    badge: 'Module 01',
     icon: Compass,
     color: '#06b6d4',
     highlight: 'Live ETA & Verification'
   },
   {
-    id: 'citizen-shelters',
-    category: 'Citizen & Public Aid',
-    name: 'Emergency Shelter Finder',
-    path: '/citizen/shelters',
-    description: 'Find verified open flood relief shelters with real-time bed capacity, medical care availability, and relief supplies.',
-    badge: 'Public',
-    icon: Building2,
-    color: '#10b981',
-    highlight: 'Live Beds & Amenities'
-  },
-  {
     id: 'citizen-alerts',
-    category: 'Citizen & Public Aid',
+    category: 'Citizen / Affected Person',
     name: 'Real-Time Hazard Alerts',
     path: '/citizen/alerts',
     description: 'Live hydro-meteorological river flood advisories, Kelani/Kalu ganga basin water levels, and red-zone bulletins.',
-    badge: 'Live Broadcast',
+    badge: 'Module 01',
     icon: AlertTriangle,
     color: '#f59e0b',
     highlight: 'River Level Telemetry'
   },
   {
     id: 'citizen-safety',
-    category: 'Citizen & Public Aid',
+    category: 'Citizen / Affected Person',
     name: 'Flood Safety & Evacuation Guide',
     path: '/citizen/safety',
     description: 'Preparedness instructions, 72-hour survival checklist, evacuation route rules, and flood water health precautions.',
-    badge: 'Preparedness',
+    badge: 'Module 01',
     icon: ShieldCheck,
     color: '#10b981',
     highlight: '72-Hour Emergency Kit'
   },
   {
     id: 'citizen-support',
-    category: 'Citizen & Public Aid',
+    category: 'Citizen / Affected Person',
     name: '24/7 Helplines & Crisis Support',
     path: '/citizen/support',
     description: 'Toll-free direct dial contacts for Disaster Management Centre (117), 1990 Ambulance, and regional police control.',
-    badge: 'Direct Dial',
+    badge: 'Module 01',
     icon: PhoneCall,
     color: '#ec4899',
     highlight: 'DMC: 117 · Ambulance: 1990'
   },
   {
     id: 'citizen-profile',
-    category: 'Citizen & Public Aid',
+    category: 'Citizen / Affected Person',
     name: 'Citizen Household Profile',
     path: '/citizen/profile',
     description: 'Manage vulnerable family members (infants, elderly, chronic illness) and designated evacuation emergency contacts.',
-    badge: 'Profile',
+    badge: 'Module 01',
     icon: User,
     color: '#8b5cf6',
     highlight: 'Vulnerability Registry'
   },
-  {
-    id: 'public-donations',
-    category: 'Citizen & Public Aid',
-    name: 'Public Relief Donations',
-    path: '/donations',
-    description: 'Verified public donations portal for financial aid, dry ration packs, clean water tankers, and essential medical supplies.',
-    badge: 'Public & Donors',
-    icon: Gift,
-    color: '#f43f5e',
-    highlight: 'Direct Humanitarian Impact'
-  },
 
-  // 2. Incident Command & Operations
+  // ==========================================
+  // MODULE 2: Emergency Coordinator
+  // ==========================================
   {
     id: 'coordinator-portal',
-    category: 'Command & Operations',
+    category: 'Emergency Coordinator',
     name: 'Emergency Coordinator Portal',
     path: '/coordinator',
     description: 'Unified command center for Western Province operations, regional situation radar, and multi-agency response workflows.',
-    badge: 'Command',
+    badge: 'Module 02',
     icon: Radio,
     color: '#10b981',
     highlight: 'Western Province Hub'
   },
   {
-    id: 'coordinator-overview',
-    category: 'Command & Operations',
-    name: 'Operations Command Overview',
-    path: '/coordinator/overview',
-    description: 'Situational awareness command map, regional active incidents, critical resource allocations, and live priority feed.',
-    badge: 'Situational HQ',
-    icon: LayoutDashboard,
-    color: '#38bdf8',
-    highlight: 'Sector Incident Radar'
-  },
-  {
-    id: 'coordinator-review',
-    category: 'Command & Operations',
-    name: 'AI Assisted Request Review',
-    path: '/coordinator/review',
-    description: 'Explainable AI scoring inspection, vulnerability factor breakdown, and human-in-the-loop coordinator overrides.',
-    badge: 'Human-in-the-Loop',
-    icon: Brain,
-    color: '#8b5cf6',
-    highlight: 'Explainable AI Triage'
-  },
-  {
     id: 'coordinator-dashboard',
-    category: 'Command & Operations',
+    category: 'Emergency Coordinator',
     name: 'Coordinator Operations Dashboard',
     path: '/coordinator/dashboard',
     description: 'Comprehensive operational cockpit with live citizen ticket feeds, resource gauges, and multi-channel telemetry.',
-    badge: 'Coordinator',
+    badge: 'Module 02',
     icon: LayoutDashboard,
     color: '#3b82f6',
     highlight: 'Complete Telemetry Cockpit'
   },
   {
-    id: 'coordinator-triage',
-    category: 'Command & Operations',
-    name: 'Assistance Request Triage Queue',
-    path: '/coordinator/triage',
-    description: 'High-speed emergency intake sorting, district-level clustering, and rapid status escalation.',
-    badge: 'Triage Queue',
-    icon: ClipboardList,
-    color: '#f59e0b',
-    highlight: 'District Clustering'
+    id: 'coordinator-overview',
+    category: 'Emergency Coordinator',
+    name: 'Operations Command Overview',
+    path: '/coordinator/overview',
+    description: 'Situational awareness command map, regional active incidents, critical resource allocations, and live priority feed.',
+    badge: 'Module 02',
+    icon: LayoutDashboard,
+    color: '#38bdf8',
+    highlight: 'Sector Incident Radar'
   },
   {
+    id: 'coordinator-cases',
+    category: 'Emergency Coordinator',
+    name: 'Assistance Requests Triage & Review',
+    path: '/coordinator/cases',
+    description: 'Real-time case queue with AI-assisted triage scoring, district clustering, and coordinator verification drawers.',
+    badge: 'Module 02',
+    icon: ClipboardList,
+    color: '#f59e0b',
+    highlight: 'AI Assisted Triage'
+  },
+  {
+    id: 'coordinator-review',
+    category: 'Emergency Coordinator',
+    name: 'AI Decision Review & Overrides',
+    path: '/coordinator/review',
+    description: 'Explainable AI scoring inspection, vulnerability factor breakdown, and human-in-the-loop coordinator overrides.',
+    badge: 'Module 02',
+    icon: Brain,
+    color: '#8b5cf6',
+    highlight: 'Human-in-the-Loop Review'
+  },
+  {
+    id: 'coordinator-incidents',
+    category: 'Emergency Coordinator',
+    name: 'Active Crisis Incidents & Declared Events',
+    path: '/coordinator/incidents',
+    description: 'Declare, monitor, and manage active disaster incidents and inundation sectors across Western Province.',
+    badge: 'Module 02',
+    icon: AlertCircle,
+    color: '#f43f5e',
+    highlight: 'Active Incidents Radar'
+  },
+  {
+    id: 'coordinator-alerts',
+    category: 'Emergency Coordinator',
+    name: 'Emergency Broadcast Dispatch',
+    path: '/coordinator/alerts',
+    description: 'Publish critical flood and evacuation alerts directly to response units and affected citizens.',
+    badge: 'Module 02',
+    icon: AlertTriangle,
+    color: '#ef4444',
+    highlight: 'Live Alert Dispatcher'
+  },
+  {
+    id: 'coordinator-history',
+    category: 'Emergency Coordinator',
+    name: 'Cryptographic Decision Audit Ledger',
+    path: '/coordinator/history',
+    description: 'Immutable SHA-256 tamper-evident trail recording every automated triage and coordinator override.',
+    badge: 'Module 02',
+    icon: GitMerge,
+    color: '#6366f1',
+    highlight: 'SHA-256 Audit Trail'
+  },
+  {
+    id: 'coordinator-ai-ops',
+    category: 'Emergency Coordinator',
+    name: 'AI Operations & Model Telemetry',
+    path: '/coordinator/ai-ops',
+    description: 'Autonomous triage confidence metrics, model drift monitoring, automated batch inference, and fallback monitors.',
+    badge: 'Module 02',
+    icon: Cpu,
+    color: '#8b5cf6',
+    highlight: 'Confidence & Drift Tracking'
+  },
+
+  // ==========================================
+  // MODULE 3: Incident / Case Manager
+  // ==========================================
+  {
     id: 'case-manager',
-    category: 'Command & Operations',
+    category: 'Incident / Case Manager',
     name: 'Incident Case Manager Portal',
-    path: '/case-manager',
+    path: '/incident-manager',
     description: 'Deep case investigation portal with multi-agency communication logs, victim notes, and resolution verification.',
-    badge: 'Case Management',
+    badge: 'Module 03',
     icon: FileText,
     color: '#06b6d4',
     highlight: 'Multi-Agency Dossiers'
   },
   {
     id: 'case-manager-cases',
-    category: 'Command & Operations',
+    category: 'Incident / Case Manager',
     name: 'Incident Cases & Investigations',
-    path: '/case-manager/cases',
+    path: '/incident-manager/cases',
     description: 'Manage active emergency incidents, multi-family evacuations, and inter-agency dispatch escalations.',
-    badge: 'Cases',
+    badge: 'Module 03',
     icon: AlertCircle,
     color: '#f43f5e',
     highlight: 'Escalations & Verification'
   },
-
-  // 3. AI Intelligence & Analytics
   {
-    id: 'ai-operations',
-    category: 'AI & Intelligence',
-    name: 'AI Operations & Model Telemetry',
-    path: '/ai-operations',
-    description: 'Autonomous triage confidence metrics, model drift monitoring, automated batch inference, and fallback monitors.',
-    badge: 'AI Operations',
-    icon: Cpu,
+    id: 'case-manager-review',
+    category: 'Incident / Case Manager',
+    name: 'AI-Assisted Investigation Review',
+    path: '/incident-manager/review',
+    description: 'Investigate case telemetry, duplicate detection findings, and vulnerability factors.',
+    badge: 'Module 03',
+    icon: Brain,
     color: '#8b5cf6',
-    highlight: 'Confidence & Drift Tracking'
+    highlight: 'Duplicate Detection'
   },
   {
-    id: 'ai-governance',
-    category: 'AI & Intelligence',
-    name: 'AI Governance & Ethics Settings',
-    path: '/ai-governance',
-    description: 'Human-in-the-loop confidence thresholds, algorithmic fairness audits, and automated override compliance.',
-    badge: 'Governance',
-    icon: ShieldCheck,
-    color: '#10b981',
-    highlight: 'Ethics & Safety Guardrails'
-  },
-  {
-    id: 'map-view',
-    category: 'AI & Intelligence',
-    name: 'Operational GIS Satellite Map',
-    path: '/map',
-    description: 'Geospatial flood basin radar heatmaps, impassable bridge corridors, shelter pins, and GPS convoy tracks.',
-    badge: 'Geospatial GIS',
-    icon: MapPin,
-    color: '#f43f5e',
-    highlight: 'Multi-layer Satellite GIS'
-  },
-  {
-    id: 'reports-analytics',
-    category: 'AI & Intelligence',
-    name: 'Reports & Deep Analytics',
-    path: '/reports',
-    description: 'Aggregated relief volume charts, demand forecasting by district, response latency, and exportable reports.',
-    badge: 'Analytics',
-    icon: FileBarChart,
-    color: '#3b82f6',
-    highlight: 'Predictive Flood Forecasting'
-  },
-  {
-    id: 'audit-center',
-    category: 'AI & Intelligence',
-    name: 'Immutable Audit & Compliance Ledger',
-    path: '/audit',
-    description: 'Cryptographically verified audit trail with SHA-256 hashes recording all automated triage and manual actions.',
-    badge: 'Compliance',
-    icon: GitMerge,
-    color: '#6366f1',
-    highlight: 'SHA-256 Tamper-Proof Trail'
+    id: 'case-manager-communication',
+    category: 'Incident / Case Manager',
+    name: 'Case Communications & Victim Logs',
+    path: '/incident-manager/communication',
+    description: 'Multi-channel victim communication log including direct call-backs, SMS alerts, and responder notes.',
+    badge: 'Module 03',
+    icon: PhoneCall,
+    color: '#38bdf8',
+    highlight: 'Victim Outreach Logs'
   },
 
-  // 4. Shelters & Logistics Management
-  {
-    id: 'shelter-admin',
-    category: 'Shelters & Logistics',
-    name: 'Shelter Manager & Facility Admin',
-    path: '/shelter-admin',
-    description: 'Real-time bed occupancy tracker, vulnerable evacuee placement, food supply alerts, and intake logs.',
-    badge: 'Facilities Admin',
-    icon: Building2,
-    color: '#f87171',
-    highlight: 'Real-time Occupancy Tracker'
-  },
-  {
-    id: 'shelters-directory',
-    category: 'Shelters & Logistics',
-    name: 'Regional Shelter Directory',
-    path: '/shelters/directory',
-    description: 'Administrative catalog of all designated emergency evacuation centers, school gyms, and temples.',
-    badge: 'Shelter Directory',
-    icon: Building,
-    color: '#38bdf8',
-    highlight: 'Verified Capacity Lists'
-  },
-  {
-    id: 'shelters-allocation',
-    category: 'Shelters & Logistics',
-    name: 'Evacuee Placements & Allocations',
-    path: '/shelters/allocation',
-    description: 'Family placement optimization matching available beds, medical special needs, and dietary accommodations.',
-    badge: 'Evacuee Allocation',
-    icon: UserCheck,
-    color: '#10b981',
-    highlight: 'Family Unit Placement'
-  },
+  // ==========================================
+  // MODULE 4: Resource & Logistics Manager
+  // ==========================================
   {
     id: 'logistics-inventory',
-    category: 'Shelters & Logistics',
+    category: 'Resource & Logistics Manager',
     name: 'Logistics Resource Inventory',
     path: '/logistics/inventory',
     description: 'Regional warehouse stockpile counts for dry rations, clean water bowsers, infant formula, and medicine.',
-    badge: 'Warehouse Depots',
+    badge: 'Module 04',
     icon: Package,
     color: '#fbbf24',
     highlight: 'Supply Chain Stockpiles'
   },
   {
     id: 'logistics-dispatch',
-    category: 'Shelters & Logistics',
+    category: 'Resource & Logistics Manager',
     name: 'Relief Convoy Supply Dispatch',
     path: '/logistics/dispatch',
     description: 'Coordinate dispatch manifests, truck convoy assignments, and safe route delivery verifications.',
-    badge: 'Convoy Dispatch',
+    badge: 'Module 04',
     icon: Truck,
     color: '#f59e0b',
     highlight: 'GPS Fleet Manifests'
   },
 
-  // 5. Volunteers & Field Response
+  // ==========================================
+  // MODULE 5: Shelter Management
+  // ==========================================
+  {
+    id: 'shelter-admin',
+    category: 'Shelter Management',
+    name: 'Shelter Manager & Facility Admin',
+    path: '/shelter',
+    description: 'Real-time bed occupancy tracker, vulnerable evacuee placement, food supply alerts, and intake logs.',
+    badge: 'Module 05',
+    icon: Building2,
+    color: '#f87171',
+    highlight: 'Real-time Occupancy Tracker'
+  },
+  {
+    id: 'shelters-directory',
+    category: 'Shelter Management',
+    name: 'Regional Shelter Directory',
+    path: '/shelter/directory',
+    description: 'Administrative catalog of all designated emergency evacuation centers, school gyms, and temples.',
+    badge: 'Module 05',
+    icon: Building,
+    color: '#38bdf8',
+    highlight: 'Verified Capacity Lists'
+  },
+  {
+    id: 'shelters-allocation',
+    category: 'Shelter Management',
+    name: 'Evacuee Placements & Allocations',
+    path: '/shelter/allocations',
+    description: 'Family placement optimization matching available beds, medical special needs, and dietary accommodations.',
+    badge: 'Module 05',
+    icon: UserCheck,
+    color: '#10b981',
+    highlight: 'Family Unit Placement'
+  },
+
+  // ==========================================
+  // MODULE 6: Volunteer Management
+  // ==========================================
   {
     id: 'volunteer-portal',
-    category: 'Volunteers & Field Ops',
+    category: 'Volunteer Management',
     name: 'Volunteer Responder Portal',
     path: '/volunteer',
     description: 'Personal mission board, assigned rescue tickets, shift hours verification, and real-time field check-in.',
-    badge: 'Volunteer HQ',
+    badge: 'Module 06',
     icon: CheckCircle2,
     color: '#c084fc',
     highlight: 'Shift Check-in & Missions'
   },
   {
     id: 'volunteer-opportunities',
-    category: 'Volunteers & Field Ops',
+    category: 'Volunteer Management',
     name: 'Volunteer Mission Opportunities',
     path: '/volunteer/opportunities',
     description: 'Browse urgent field missions: boat rescue crew, medical tent triage, ration packing, and translation.',
-    badge: 'Open Shifts',
+    badge: 'Module 06',
     icon: Sparkles,
     color: '#a855f7',
     highlight: 'Frontline Disaster Roles'
   },
   {
     id: 'volunteers-roster',
-    category: 'Volunteers & Field Ops',
+    category: 'Volunteer Management',
     name: 'Volunteer Roster & Scheduling',
-    path: '/volunteers/roster',
+    path: '/volunteer/roster',
     description: 'Administrative coordination of active on-duty volunteer rosters, badge credentials, and field certifications.',
-    badge: 'Field Roster',
+    badge: 'Module 06',
     icon: Users,
     color: '#3b82f6',
     highlight: 'Credentialed Responders'
   },
   {
     id: 'volunteers-assignments',
-    category: 'Volunteers & Field Ops',
+    category: 'Volunteer Management',
     name: 'Task Assignments Dispatch Board',
     path: '/volunteers/assignments',
     description: 'Interactive dispatch board assigning field tasks to specialized NGO and civil volunteer groups.',
-    badge: 'Dispatch Tasks',
+    badge: 'Module 06',
     icon: ClipboardList,
     color: '#10b981',
     highlight: 'Rescue Task Board'
   },
 
-  // 6. Platform Administration & Security
+  // ==========================================
+  // MODULE 7: Donor & Funding Management
+  // ==========================================
+  {
+    id: 'donor-portal',
+    category: 'Donor & Funding Management',
+    name: 'Humanitarian Aid & Donor Portal',
+    path: '/donor',
+    description: 'Fund emergency rations, clean water tankers, and medical supplies with 100% transparent distribution tracking.',
+    badge: 'Module 07',
+    icon: Gift,
+    color: '#f43f5e',
+    highlight: '100% Transparent Aid'
+  },
+  {
+    id: 'donor-packages',
+    category: 'Donor & Funding Management',
+    name: 'Emergency Relief Packages',
+    path: '/donor/packages',
+    description: 'Sponsor 7-day family food ration packs, water bowser dispatches, and maternal infant nutrition kits.',
+    badge: 'Module 07',
+    icon: Package,
+    color: '#fb7185',
+    highlight: 'High-Impact Relief Packs'
+  },
+  {
+    id: 'donor-tracking',
+    category: 'Donor & Funding Management',
+    name: 'Aid Distribution & Delivery Ledger',
+    path: '/donor/tracking',
+    description: 'Track donated relief materials from central warehouse dispatch to shelter intake with official receipts.',
+    badge: 'Module 07',
+    icon: Truck,
+    color: '#34d399',
+    highlight: 'Verified Delivery Trail'
+  },
+
+  // ==========================================
+  // MODULE 8: Partner Organisation Management
+  // ==========================================
+  {
+    id: 'partner-portal',
+    category: 'Partner Organisation Management',
+    name: 'Inter-Agency Partner Portal',
+    path: '/partner',
+    description: 'Joint humanitarian response platform linking Disaster Management, Red Cross, UN agencies, and accredited NGOs.',
+    badge: 'Module 08',
+    icon: Building2,
+    color: '#38bdf8',
+    highlight: 'Inter-Agency Command'
+  },
+  {
+    id: 'partner-directory',
+    category: 'Partner Organisation Management',
+    name: 'Partner Organisation Directory & MoUs',
+    path: '/partner/directory',
+    description: 'Verified roster of international agencies, civil defence groups, contacts, and active crisis agreements.',
+    badge: 'Module 08',
+    icon: ShieldCheck,
+    color: '#10b981',
+    highlight: 'Verified Humanitarian MoUs'
+  },
+  {
+    id: 'partner-commitments',
+    category: 'Partner Organisation Management',
+    name: 'Partner Resource Commitments',
+    path: '/partner/commitments',
+    description: 'Pledged rescue boat fleets, mobile medical triage tents, and community kitchens by partner agency.',
+    badge: 'Module 08',
+    icon: Package,
+    color: '#c084fc',
+    highlight: 'Pledged Resources'
+  },
+  {
+    id: 'partner-zones',
+    category: 'Partner Organisation Management',
+    name: 'Sector Coordination Matrix',
+    path: '/partner/zones',
+    description: 'Geographic disaster sector assignments to eliminate duplicate aid and guarantee full flood zone coverage.',
+    badge: 'Module 08',
+    icon: MapPin,
+    color: '#f59e0b',
+    highlight: 'Sector Matrix'
+  },
+
+  // ==========================================
+  // MODULE 9: System Administration
+  // ==========================================
   {
     id: 'admin-dashboard',
-    category: 'Platform Administration',
+    category: 'System Administration',
     name: 'Platform Administration & System Health',
     path: '/admin',
     description: 'System health telemetry, real-time database connection metrics, memory usage, and global emergency modes.',
-    badge: 'Platform Admin',
+    badge: 'Module 09',
     icon: Settings,
     color: '#f43f5e',
     highlight: 'Health & System Telemetry'
   },
   {
     id: 'admin-users',
-    category: 'Platform Administration',
+    category: 'System Administration',
     name: 'User Management & Role RBAC',
     path: '/admin/users',
     description: 'Manage operator credentials, district assignments, account lockouts, and cryptographic password resets.',
-    badge: 'Security RBAC',
+    badge: 'Module 09',
     icon: ShieldAlert,
     color: '#e11d48',
     highlight: 'District & Role Controls'
   },
   {
     id: 'auth-login',
-    category: 'Platform Administration',
+    category: 'System Administration',
     name: 'Operator Secure Sign In',
     path: '/login',
     description: 'Secure JWT authenticated portal sign-in with role-based access for coordinators, logistics, and volunteers.',
-    badge: 'Authentication',
+    badge: 'Module 09',
     icon: Lock,
     color: '#94a3b8',
     highlight: 'Role-Based Access'
   },
   {
     id: 'auth-register',
-    category: 'Platform Administration',
+    category: 'System Administration',
     name: 'Platform Account Registration',
     path: '/signup',
     description: 'Register as an emergency responder, humanitarian NGO operator, or community volunteer.',
-    badge: 'Registration',
+    badge: 'Module 09',
     icon: UserPlus,
     color: '#38bdf8',
     highlight: 'Join Crisis Response'
-  },
-
-  // 7. Design Concepts
-  {
-    id: 'bloom-design',
-    category: 'Design Showcase',
-    name: 'Bloom Liquid Glass Showcase',
-    path: '/bloom',
-    description: 'Experimental liquid glass morphism UI showcase with dual-tier backdrop blur and organic motion aesthetics.',
-    badge: 'Experimental UI',
-    icon: Sparkles,
-    color: '#c084fc',
-    highlight: 'Liquid Glass Aesthetics'
-  },
-  {
-    id: 'apogee-hero',
-    category: 'Design Showcase',
-    name: 'Apogee Spatial Hero Section',
-    path: '/apogee',
-    description: 'Spatial dynamic hero section with fluid typography and interactive bar chart telemetry.',
-    badge: 'Spatial Hero',
-    icon: Eye,
-    color: '#38bdf8',
-    highlight: 'Dynamic Spatial Motion'
   }
 ];
 
 const CATEGORIES = [
-  'All Pages',
-  'Citizen & Public Aid',
-  'Command & Operations',
-  'AI & Intelligence',
-  'Shelters & Logistics',
-  'Volunteers & Field Ops',
-  'Platform Administration',
-  'Design Showcase'
+  'All Modules',
+  'Citizen / Affected Person',
+  'Emergency Coordinator',
+  'Incident / Case Manager',
+  'Resource & Logistics Manager',
+  'Shelter Management',
+  'Volunteer Management',
+  'Donor & Funding Management',
+  'Partner Organisation Management',
+  'System Administration'
 ];
 
 export const PlatformDirectoryModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Pages');
+  const [selectedCategory, setSelectedCategory] = useState('All Modules');
   const [copiedPath, setCopiedPath] = useState(null);
 
   // Close on Escape key
@@ -494,7 +573,7 @@ export const PlatformDirectoryModal = ({ isOpen, onClose }) => {
   const filteredPages = useMemo(() => {
     return PLATFORM_PAGES.filter((page) => {
       const matchesCategory =
-        selectedCategory === 'All Pages' || page.category === selectedCategory;
+        selectedCategory === 'All Modules' || page.category === selectedCategory;
 
       if (!matchesCategory) return false;
 
