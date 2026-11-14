@@ -270,6 +270,18 @@ export const AdminDashboardPage = ({ initialTab = 'overview' }) => {
                 <ChevronRight size={14} color="#64748b" />
               </button>
             </li>
+            <li>
+              <button
+                className="adm-nav-btn"
+                onClick={() => navigate('/')}
+              >
+                <div className="adm-nav-btn-content">
+                  <Database size={17} />
+                  <span>Platform Home</span>
+                </div>
+                <ChevronRight size={14} color="#64748b" />
+              </button>
+            </li>
           </ul>
         </div>
 

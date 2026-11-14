@@ -1,0 +1,1 @@
+export { EmergencyCoordinatorPortal } from './EmergencyCoordinatorPortal';

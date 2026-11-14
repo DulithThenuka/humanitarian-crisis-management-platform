@@ -35,13 +35,23 @@ import {
   Headphones,
   User,
   Zap,
-  ChevronDown
+  ChevronDown,
+  LayoutGrid,
+  GitMerge,
+  FileBarChart,
+  Settings,
+  Gift,
+  Lock,
+  ClipboardList,
+  Brain,
+  Building
 } from 'lucide-react';
 
 import westernProvinceMap from '../../assets/western-province-map-clean.png';
 import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
 import { homeService } from '../../services/homeService';
 import Hero, { Animate, RevenueCard, BAR_HEIGHTS } from '../../components/Hero';
+import { PlatformDirectoryModal } from '../../components/common/PlatformDirectoryModal';
 
 export const LandingHomePage = () => {
   const navigate = useNavigate();
@@ -51,6 +61,7 @@ export const LandingHomePage = () => {
 
   // Modals & Interactivity
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showDirectoryModal, setShowDirectoryModal] = useState(false);
   const [showSafetyModal, setShowSafetyModal] = useState(false);
   const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
   const [currentLang, setCurrentLang] = useState('English');
@@ -210,61 +221,184 @@ export const LandingHomePage = () => {
     }
   ];
 
-  // Role Showcase matching platform roles
+  // 12 Comprehensive Role Showcase Workspaces matching platform roles
   const roles = [
     {
+      id: 'citizen',
       title: 'Disaster Affected Citizen',
       desc: 'Submit urgent rescue/ration requests, locate verified open shelters, and track real-time ticket milestones.',
       path: '/citizen',
       badge: 'Public Portal',
       icon: Users,
       color: '#38bdf8',
-      featured: 'Instant SOS intake & live status tracking'
+      featured: 'Instant SOS intake & live status tracking',
+      sublinks: [
+        { label: 'Submit SOS', path: '/citizen/submit' },
+        { label: 'Track Requests', path: '/citizen/track' },
+        { label: 'Find Shelters', path: '/citizen/shelters' },
+        { label: 'Hazard Alerts', path: '/citizen/alerts' },
+      ]
     },
     {
+      id: 'coordinator',
       title: 'Emergency Coordinator',
       desc: 'Live operational overview, automated AI triage review, dynamic priority queues, and incident command.',
       path: '/coordinator',
       badge: 'Command Center',
       icon: Radio,
       color: '#34d399',
-      featured: 'Explainable AI triage rationale & resource dispatch'
+      featured: 'Explainable AI triage rationale & resource dispatch',
+      sublinks: [
+        { label: 'Command Overview', path: '/coordinator/overview' },
+        { label: 'AI Review', path: '/coordinator/review' },
+        { label: 'Operations Cockpit', path: '/coordinator/dashboard' },
+        { label: 'Triage Queue', path: '/coordinator/triage' },
+      ]
     },
     {
-      title: 'Logistics Manager',
+      id: 'case-manager',
+      title: 'Incident & Case Manager',
+      desc: 'Comprehensive victim dossiers, inter-agency case logs, communication notes, and verification outcomes.',
+      path: '/case-manager',
+      badge: 'Case Management',
+      icon: FileText,
+      color: '#06b6d4',
+      featured: 'Multi-agency incident escalation & verification',
+      sublinks: [
+        { label: 'Case Dossiers', path: '/case-manager/cases' },
+        { label: 'AI Assisted Review', path: '/case-manager/review' },
+        { label: 'Case Reports', path: '/case-manager/reports' },
+      ]
+    },
+    {
+      id: 'ai-ops',
+      title: 'AI Operations & Governance',
+      desc: 'Autonomous triage confidence metrics, model drift tracking, human-in-the-loop policies, and ethical thresholds.',
+      path: '/ai-operations',
+      badge: 'AI Intelligence',
+      icon: Cpu,
+      color: '#8b5cf6',
+      featured: 'Real-time model drift telemetry & confidence scoring',
+      sublinks: [
+        { label: 'Model Telemetry', path: '/ai-operations' },
+        { label: 'AI Workspaces', path: '/ai-workspaces' },
+        { label: 'Governance & Ethics', path: '/ai-governance' },
+      ]
+    },
+    {
+      id: 'shelters',
+      title: 'Shelter Facility Manager',
+      desc: 'Live bed occupancy, evacuee intake registration, facility amenities, and capacity management.',
+      path: '/shelter-admin',
+      badge: 'Facilities',
+      icon: Building2,
+      color: '#f87171',
+      featured: 'Live bed counters & vulnerable intake prioritization',
+      sublinks: [
+        { label: 'Bed Occupancy', path: '/shelter-admin' },
+        { label: 'Regional Directory', path: '/shelters/directory' },
+        { label: 'Evacuee Placements', path: '/shelters/allocation' },
+      ]
+    },
+    {
+      id: 'logistics',
+      title: 'Logistics & Supply Chain',
       desc: 'Stockpile depot tracking, relief convoy allocation, medical supplies, and route optimization.',
       path: '/logistics/inventory',
       badge: 'Supply Chain',
       icon: Package,
       color: '#fbbf24',
-      featured: 'Real-time warehouse depots & GPS convoy routing'
+      featured: 'Real-time warehouse depots & GPS convoy routing',
+      sublinks: [
+        { label: 'Warehouse Stockpiles', path: '/logistics/inventory' },
+        { label: 'Convoy Dispatch', path: '/logistics/dispatch' },
+      ]
     },
     {
-      title: 'Shelter Manager',
-      desc: 'Live bed occupancy, evacuee intake registration, facility amenities, and capacity management.',
-      path: '/shelter-manager',
-      badge: 'Facilities',
-      icon: Building2,
-      color: '#f87171',
-      featured: 'Live bed counters & vulnerable intake prioritization'
-    },
-    {
+      id: 'volunteer',
       title: 'Field Volunteer Responder',
       desc: 'Task assignment dispatch, on-ground rescue rosters, search & rescue coordination, and field check-ins.',
-      path: '/volunteers/roster',
+      path: '/volunteer',
       badge: 'Field Ops',
       icon: Compass,
       color: '#c084fc',
-      featured: 'Search & rescue teams & on-duty field rosters'
+      featured: 'Search & rescue teams & on-duty field rosters',
+      sublinks: [
+        { label: 'Volunteer Portal', path: '/volunteer' },
+        { label: 'Mission Shifts', path: '/volunteer/opportunities' },
+        { label: 'Roster Schedule', path: '/volunteers/roster' },
+        { label: 'Task Assignments', path: '/volunteers/assignments' },
+      ]
     },
     {
+      id: 'map',
       title: 'Operational GIS Satellite Map',
       desc: 'Multi-layer geospatial flood mapping, real-time river basin advisories, and safe transit corridors.',
       path: '/map',
       badge: 'Geospatial',
       icon: MapPin,
       color: '#f43f5e',
-      featured: 'Flood basin radar heatmaps & route status'
+      featured: 'Flood basin radar heatmaps & route status',
+      sublinks: [
+        { label: 'Satellite Flood Radar', path: '/map' },
+        { label: 'Impassable Bridges', path: '/map' },
+      ]
+    },
+    {
+      id: 'reports',
+      title: 'Reports & Deep Analytics',
+      desc: 'Aggregated relief volume charts, demand forecasting by district, response latency, and exportable reports.',
+      path: '/reports',
+      badge: 'Analytics',
+      icon: FileBarChart,
+      color: '#3b82f6',
+      featured: 'Predictive crisis telemetry & sector analytics',
+      sublinks: [
+        { label: 'Crisis Reports', path: '/reports' },
+        { label: 'Response Velocity', path: '/analytics' },
+      ]
+    },
+    {
+      id: 'audit',
+      title: 'Immutable Audit & Compliance',
+      desc: 'Cryptographically verified audit trail with SHA-256 hashes recording all automated triage and manual actions.',
+      path: '/audit',
+      badge: 'Governance',
+      icon: GitMerge,
+      color: '#6366f1',
+      featured: 'Cryptographic SHA-256 ledger integrity',
+      sublinks: [
+        { label: 'Audit Ledger', path: '/audit' },
+        { label: 'Tamper Verification', path: '/audit' },
+      ]
+    },
+    {
+      id: 'admin',
+      title: 'Platform Administration & Health',
+      desc: 'System health telemetry, real-time database connection metrics, memory usage, and global emergency modes.',
+      path: '/admin',
+      badge: 'Administration',
+      icon: Settings,
+      color: '#f43f5e',
+      featured: 'System health telemetry & operator RBAC controls',
+      sublinks: [
+        { label: 'System Health', path: '/admin' },
+        { label: 'User RBAC Controls', path: '/admin/users' },
+      ]
+    },
+    {
+      id: 'donations',
+      title: 'Public Relief Donations',
+      desc: 'Verified public donations portal for financial aid, dry ration packs, clean water tankers, and medical supplies.',
+      path: '/donations',
+      badge: 'Donations',
+      icon: Gift,
+      color: '#ec4899',
+      featured: 'Direct emergency contribution channels',
+      sublinks: [
+        { label: 'Online Donation', path: '/donations' },
+        { label: 'Dry Ration Relief', path: '/donations' },
+      ]
     }
   ];
 
@@ -309,10 +443,19 @@ export const LandingHomePage = () => {
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-white/60">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 text-white/60">
+            <button
+              type="button"
+              onClick={() => setShowDirectoryModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-[8px] bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-200 transition-colors text-[11.5px] cursor-pointer"
+            >
+              <LayoutGrid size={12} className="text-sky-300" />
+              <span>Platform Directory (30 Portals)</span>
+            </button>
+            <span className="text-white/20 hidden sm:inline">|</span>
             <a href="tel:117" className="flex items-center gap-1.5 text-rose-300 hover:text-rose-200 transition-colors text-decoration-none font-medium">
               <PhoneCall size={12} />
-              <span>Emergency DMC Hotline: <strong className="text-white">117</strong></span>
+              <span>Emergency DMC: <strong className="text-white">117</strong></span>
             </a>
             <span className="text-white/20">|</span>
             <button 
@@ -414,6 +557,54 @@ export const LandingHomePage = () => {
                   className="text-white/80 hover:text-white underline cursor-pointer bg-transparent border-0 p-0 text-[12px]"
                 >
                   Evacuation Protocols →
+                </button>
+              </div>
+
+              {/* Quick Jump Buttons to Access Key Pages */}
+              <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-white/[0.08]">
+                <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold mr-1">Quick Portals:</span>
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/citizen/submit')} 
+                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-200 transition-colors cursor-pointer"
+                >
+                  Request Aid
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/citizen/shelters')} 
+                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-200 transition-colors cursor-pointer"
+                >
+                  Shelters ({telemetry.metrics.operationalSheltersCount})
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/map')} 
+                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-200 transition-colors cursor-pointer"
+                >
+                  GIS Map
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/coordinator')} 
+                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-200 transition-colors cursor-pointer"
+                >
+                  Coordinator
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/volunteer')} 
+                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-200 transition-colors cursor-pointer"
+                >
+                  Volunteers
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setShowDirectoryModal(true)} 
+                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center gap-1 transition-colors cursor-pointer ml-auto"
+                >
+                  <LayoutGrid size={11} className="text-sky-300" />
+                  <span>All 30 Portals →</span>
                 </button>
               </div>
             </div>
@@ -573,6 +764,12 @@ export const LandingHomePage = () => {
             { label: 'Verified Shelters', href: '/citizen/shelters', badge: `${telemetry.metrics.operationalSheltersCount} Active` },
             { label: 'Satellite Map', href: '/map' },
             { label: 'Coordinator Command', href: '/coordinator/dashboard' },
+            { 
+              label: 'All Portals & Hubs', 
+              href: '#directory', 
+              onClick: () => setShowDirectoryModal(true),
+              badge: '30 Pages' 
+            },
             { label: 'Role Demos', href: '#demos', onClick: () => setShowRoleModal(true) },
           ]}
           loginLabel="Sign In"
@@ -950,7 +1147,7 @@ export const LandingHomePage = () => {
       </section>
 
       {/* =========================================================
-         7. Platform Role Showcase (6 Command Workspaces)
+         7. Platform Role Showcase (12 Command Workspaces)
          ========================================================= */}
       <section className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px] py-16 sm:py-24 border-t border-white/[0.06]">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
@@ -966,28 +1163,37 @@ export const LandingHomePage = () => {
             </p>
           </div>
 
-          <button 
-            type="button"
-            onClick={() => setShowRoleModal(true)}
-            className="h-[46px] px-6 rounded-[12px] border border-white text-white text-[14px] sm:text-[15px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer self-start md:self-auto shrink-0 bg-transparent"
-          >
-            <span>Role Switcher Demo</span>
-            <ArrowRight size={14} />
-          </button>
+          <div className="flex flex-wrap items-center gap-3 self-start md:self-auto shrink-0">
+            <button 
+              type="button"
+              onClick={() => setShowDirectoryModal(true)}
+              className="h-[46px] px-6 rounded-[12px] bg-white text-[#0A0707] hover:bg-white/90 text-[14px] sm:text-[15px] font-[500] transition-colors inline-flex items-center gap-2 cursor-pointer border-0 shadow-md"
+            >
+              <LayoutGrid size={16} />
+              <span>Platform Directory (30)</span>
+            </button>
+            <button 
+              type="button"
+              onClick={() => setShowRoleModal(true)}
+              className="h-[46px] px-6 rounded-[12px] border border-white text-white text-[14px] sm:text-[15px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer bg-transparent"
+            >
+              <span>Role Switcher Demo</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
 
-        {/* 6 Role Cards */}
+        {/* 12 Operational Role Workspaces Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {roles.map((r, i) => {
             const IconComponent = r.icon;
             return (
               <div 
                 key={i} 
-                onClick={() => navigate(r.path)}
-                className="rounded-[24px] bg-slate-900/40 hover:bg-slate-900/70 backdrop-blur-[20px] border border-white/[0.08] hover:border-white/25 p-7 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[260px] shadow-[0_12px_30px_rgba(0,0,0,0.3)]"
+                className="rounded-[24px] bg-slate-900/40 hover:bg-slate-900/70 backdrop-blur-[20px] border border-white/[0.08] hover:border-white/25 p-6 sm:p-7 transition-all duration-300 group flex flex-col justify-between shadow-[0_12px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)]"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center justify-between mb-4">
                     <div 
                       className="w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0"
                       style={{ backgroundColor: `${r.color}15`, border: `1px solid ${r.color}30`, color: r.color }}
@@ -995,26 +1201,53 @@ export const LandingHomePage = () => {
                       <IconComponent size={22} />
                     </div>
                     <span 
-                      className="px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase"
+                      className="px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase font-mono"
                       style={{ backgroundColor: `${r.color}15`, color: r.color, border: `1px solid ${r.color}30` }}
                     >
                       {r.badge}
                     </span>
                   </div>
 
-                  <h3 className="text-white text-[20px] font-[500] group-hover:text-emerald-300 transition-colors">
+                  <h3 
+                    onClick={() => navigate(r.path)}
+                    className="text-white text-[19px] sm:text-[20px] font-[500] group-hover:text-sky-300 transition-colors cursor-pointer"
+                  >
                     {r.title}
                   </h3>
-                  <p className="text-white/60 text-[13.5px] font-[450] mt-2 leading-relaxed">
+                  <p className="text-white/60 text-[13px] font-[450] mt-1.5 leading-relaxed">
                     {r.desc}
                   </p>
+
+                  {/* Sub-links / Quick launch buttons to access each sub-page */}
+                  {r.sublinks && r.sublinks.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-4 pt-3 border-t border-white/[0.06]">
+                      {r.sublinks.map((sub, sIdx) => (
+                        <button
+                          key={sIdx}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(sub.path);
+                          }}
+                          className="px-2.5 py-1 rounded-[8px] bg-white/[0.05] hover:bg-white/[0.14] text-white/75 hover:text-white text-[11px] font-[450] border border-white/[0.08] transition-colors cursor-pointer"
+                        >
+                          {sub.label} →
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <div className="mt-6 pt-5 border-t border-white/[0.08] flex items-center justify-between">
-                  <span className="text-[12px] text-white/50 line-clamp-1">{r.featured}</span>
-                  <span className="text-white/80 group-hover:text-white text-[13px] font-[500] flex items-center gap-1 shrink-0 ml-2">
-                    Launch <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
-                  </span>
+                <div className="mt-5 pt-4 border-t border-white/[0.08] flex items-center justify-between">
+                  <span className="text-[11.5px] text-white/50 line-clamp-1">{r.featured}</span>
+                  <button
+                    type="button"
+                    onClick={() => navigate(r.path)}
+                    className="h-[34px] px-4 rounded-[10px] bg-white/[0.08] hover:bg-white text-white hover:text-slate-900 text-[12.5px] font-[500] flex items-center gap-1.5 transition-all cursor-pointer border border-white/10 shrink-0 ml-2"
+                  >
+                    <span>Launch</span>
+                    <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                  </button>
                 </div>
               </div>
             );
@@ -1088,7 +1321,7 @@ export const LandingHomePage = () => {
          ========================================================= */}
       <footer className="w-full bg-[#080A19] border-t border-white/[0.08] pt-16 pb-12 text-white/70">
         <div className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px]">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/[0.08]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 pb-12 border-b border-white/[0.08]">
             {/* Col 1: Brand */}
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2.5 mb-4">
@@ -1105,38 +1338,77 @@ export const LandingHomePage = () => {
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>Western Province Operations Active · All Regional Hubs Synchronized</span>
               </div>
+
+              <div className="mt-5">
+                <button
+                  type="button"
+                  onClick={() => setShowDirectoryModal(true)}
+                  className="px-4 py-2 rounded-[10px] bg-white/[0.08] hover:bg-white/[0.16] text-white border border-white/15 text-[12.5px] font-[500] inline-flex items-center gap-2 cursor-pointer transition-colors"
+                >
+                  <LayoutGrid size={14} className="text-sky-300" />
+                  <span>Open Platform Directory (30 Portals)</span>
+                </button>
+              </div>
             </div>
 
-            {/* Col 2 */}
+            {/* Col 2: Citizen Services */}
             <div>
-              <h5 className="text-white text-[13px] font-[450] uppercase tracking-wider mb-4">Citizen Services</h5>
-              <ul className="space-y-2.5 text-[13.5px]">
-                <li><Link to="/citizen/submit" className="text-white/60 hover:text-white transition-colors text-decoration-none">Request Assistance</Link></li>
+              <h5 className="text-white text-[13px] font-[500] uppercase tracking-wider mb-4">Citizen Services</h5>
+              <ul className="space-y-2 text-[13px]">
+                <li><Link to="/citizen/submit" className="text-white/60 hover:text-white transition-colors text-decoration-none">Submit Assistance SOS</Link></li>
                 <li><Link to="/citizen/track" className="text-white/60 hover:text-white transition-colors text-decoration-none">Track My Request</Link></li>
                 <li><Link to="/citizen/shelters" className="text-white/60 hover:text-white transition-colors text-decoration-none">Verified Open Shelters</Link></li>
+                <li><Link to="/citizen/alerts" className="text-white/60 hover:text-white transition-colors text-decoration-none">Live Hazard Alerts</Link></li>
+                <li><Link to="/citizen/safety" className="text-white/60 hover:text-white transition-colors text-decoration-none">Safety & Evacuation</Link></li>
+                <li><Link to="/citizen/support" className="text-white/60 hover:text-white transition-colors text-decoration-none">24/7 Helplines</Link></li>
+                <li><Link to="/citizen/profile" className="text-white/60 hover:text-white transition-colors text-decoration-none">Household Profile</Link></li>
+                <li><Link to="/donations" className="text-white/60 hover:text-white transition-colors text-decoration-none">Public Relief Donations</Link></li>
                 <li><Link to="/citizen" className="text-white/60 hover:text-white transition-colors text-decoration-none">Public Citizen Portal</Link></li>
               </ul>
             </div>
 
-            {/* Col 3 */}
+            {/* Col 3: Command & AI */}
             <div>
-              <h5 className="text-white text-[13px] font-[450] uppercase tracking-wider mb-4">Command & Ops</h5>
-              <ul className="space-y-2.5 text-[13.5px]">
-                <li><Link to="/coordinator/dashboard" className="text-white/60 hover:text-white transition-colors text-decoration-none">Coordinator Command</Link></li>
-                <li><Link to="/logistics/inventory" className="text-white/60 hover:text-white transition-colors text-decoration-none">Resource Inventory</Link></li>
-                <li><Link to="/shelters/directory" className="text-white/60 hover:text-white transition-colors text-decoration-none">Shelter Capacity</Link></li>
+              <h5 className="text-white text-[13px] font-[500] uppercase tracking-wider mb-4">Command &amp; AI</h5>
+              <ul className="space-y-2 text-[13px]">
+                <li><Link to="/coordinator" className="text-white/60 hover:text-white transition-colors text-decoration-none">Coordinator Portal</Link></li>
+                <li><Link to="/coordinator/overview" className="text-white/60 hover:text-white transition-colors text-decoration-none">Operations Overview</Link></li>
+                <li><Link to="/coordinator/review" className="text-white/60 hover:text-white transition-colors text-decoration-none">AI Assisted Review</Link></li>
+                <li><Link to="/coordinator/dashboard" className="text-white/60 hover:text-white transition-colors text-decoration-none">Coordinator Cockpit</Link></li>
+                <li><Link to="/coordinator/triage" className="text-white/60 hover:text-white transition-colors text-decoration-none">Request Triage Queue</Link></li>
+                <li><Link to="/case-manager" className="text-white/60 hover:text-white transition-colors text-decoration-none">Incident Case Manager</Link></li>
+                <li><Link to="/ai-operations" className="text-white/60 hover:text-white transition-colors text-decoration-none">AI Operations Center</Link></li>
+                <li><Link to="/ai-governance" className="text-white/60 hover:text-white transition-colors text-decoration-none">AI Ethics &amp; Governance</Link></li>
+              </ul>
+            </div>
+
+            {/* Col 4: Shelters & Logistics */}
+            <div>
+              <h5 className="text-white text-[13px] font-[500] uppercase tracking-wider mb-4">Shelters &amp; Logistics</h5>
+              <ul className="space-y-2 text-[13px]">
+                <li><Link to="/shelter-admin" className="text-white/60 hover:text-white transition-colors text-decoration-none">Shelter Facility Manager</Link></li>
+                <li><Link to="/shelters/directory" className="text-white/60 hover:text-white transition-colors text-decoration-none">Shelter Directory</Link></li>
+                <li><Link to="/shelters/allocation" className="text-white/60 hover:text-white transition-colors text-decoration-none">Evacuee Allocation</Link></li>
+                <li><Link to="/logistics/inventory" className="text-white/60 hover:text-white transition-colors text-decoration-none">Warehouse Stockpiles</Link></li>
+                <li><Link to="/logistics/dispatch" className="text-white/60 hover:text-white transition-colors text-decoration-none">Supply Convoy Dispatch</Link></li>
+                <li><Link to="/volunteer" className="text-white/60 hover:text-white transition-colors text-decoration-none">Volunteer Portal</Link></li>
+                <li><Link to="/volunteer/opportunities" className="text-white/60 hover:text-white transition-colors text-decoration-none">Mission Opportunities</Link></li>
                 <li><Link to="/volunteers/roster" className="text-white/60 hover:text-white transition-colors text-decoration-none">Volunteer Roster</Link></li>
               </ul>
             </div>
 
-            {/* Col 4 */}
+            {/* Col 5: Governance & Access */}
             <div>
-              <h5 className="text-white text-[13px] font-[450] uppercase tracking-wider mb-4">Operations & Access</h5>
-              <ul className="space-y-2.5 text-[13.5px]">
-                <li><Link to="/map" className="text-white/60 hover:text-white transition-colors text-decoration-none">Satellite GIS Radar</Link></li>
-                <li><Link to="/bloom" className="text-white/60 hover:text-white transition-colors text-decoration-none">Crisis Overview Experience</Link></li>
-                <li><button type="button" onClick={() => setShowSafetyModal(true)} className="text-white/60 hover:text-white transition-colors text-decoration-none bg-transparent border-0 p-0 text-[13.5px] cursor-pointer">Safety Protocols</button></li>
-                <li><Link to="/login" className="text-white/60 hover:text-white transition-colors text-decoration-none">Responder Command Sign In</Link></li>
+              <h5 className="text-white text-[13px] font-[500] uppercase tracking-wider mb-4">System &amp; Access</h5>
+              <ul className="space-y-2 text-[13px]">
+                <li><Link to="/map" className="text-white/60 hover:text-white transition-colors text-decoration-none">Satellite GIS Map</Link></li>
+                <li><Link to="/reports" className="text-white/60 hover:text-white transition-colors text-decoration-none">Reports &amp; Analytics</Link></li>
+                <li><Link to="/audit" className="text-white/60 hover:text-white transition-colors text-decoration-none">Immutable Audit Ledger</Link></li>
+                <li><Link to="/admin" className="text-white/60 hover:text-white transition-colors text-decoration-none">Platform Admin &amp; Health</Link></li>
+                <li><Link to="/admin/users" className="text-white/60 hover:text-white transition-colors text-decoration-none">User RBAC Controls</Link></li>
+                <li><Link to="/login" className="text-white/60 hover:text-white transition-colors text-decoration-none">Operator Sign In</Link></li>
+                <li><Link to="/signup" className="text-white/60 hover:text-white transition-colors text-decoration-none">Register Account</Link></li>
+                <li><Link to="/bloom" className="text-white/60 hover:text-white transition-colors text-decoration-none">Bloom Glass Concept</Link></li>
               </ul>
             </div>
           </div>
@@ -1487,6 +1759,31 @@ export const LandingHomePage = () => {
           </div>
         </div>
       )}
+
+      {/* =========================================================
+         14. Master Platform Directory Modal (All 30 Pages)
+         ========================================================= */}
+      <PlatformDirectoryModal
+        isOpen={showDirectoryModal}
+        onClose={() => setShowDirectoryModal(false)}
+      />
+
+      {/* =========================================================
+         15. Persistent Floating Platform Directory Launcher Pill
+         ========================================================= */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <button
+          type="button"
+          onClick={() => setShowDirectoryModal(true)}
+          className="h-[46px] px-4 sm:px-5 rounded-full bg-[#0c1024]/90 hover:bg-[#121836] text-white backdrop-blur-[20px] border border-white/20 shadow-[0_12px_32px_rgba(0,0,0,0.65)] hover:border-white/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5 cursor-pointer font-medium text-[13px] group"
+          title="Open Platform Directory: One-click access to all 30 platform destinations (Esc to close)"
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <LayoutGrid size={16} className="text-sky-300 group-hover:rotate-90 transition-transform duration-300" />
+          <span>Platform Directory</span>
+          <span className="px-1.5 py-0.5 rounded-full bg-white/10 text-[10.5px] font-mono text-white/80">30</span>
+        </button>
+      </div>
     </div>
   );
 };

@@ -62,6 +62,19 @@ export const CoordinatorHeader = ({
         </div>
 
         <div className="ec-header-right-tools">
+          <button
+            type="button"
+            className="ec-operation-selector-btn"
+            onClick={() => navigate('/')}
+            title="Return to Platform Home"
+            style={{ cursor: 'pointer', background: 'rgba(255,255,255,0.06)' }}
+          >
+            <span className="ec-op-label-tiny">Hub</span>
+            <div className="ec-op-current-name">
+              <span>Home →</span>
+            </div>
+          </button>
+
           <div className="ec-operation-selector-btn">
             <span className="ec-op-label-tiny">Active operation</span>
             <div className="ec-op-current-name">

@@ -337,6 +337,11 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
             </p>
           </div>
 
+          <button className="sh-signout-btn" onClick={() => navigate('/')} style={{ marginBottom: '6px' }}>
+            <Home size={15} />
+            <span>Platform Home</span>
+          </button>
+
           <button className="sh-signout-btn" onClick={handleSignOut}>
             <LogOut size={15} />
             <span>Sign out</span>

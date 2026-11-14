@@ -33,7 +33,8 @@ import {
   AlertCircle, 
   Info, 
   Droplets, 
-  Check 
+  Check,
+  LayoutGrid
 } from 'lucide-react';
 
 import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
@@ -43,12 +44,14 @@ import shelter2 from '../../assets/shelter-2.jpg';
 import shelter3 from '../../assets/shelter-3.jpg';
 import robot3D from '../../assets/robot-3d.png';
 import familyPopout from '../../assets/family-popout.png';
+import { PlatformDirectoryModal } from '../../components/common/PlatformDirectoryModal';
 import './CitizenPortalPage.css';
 
 export const CitizenPortalPage = ({ initialTab = 'home' }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const [showDirectoryModal, setShowDirectoryModal] = useState(false);
 
   const getInitialTab = () => {
     const p = (location.pathname || '').toLowerCase().replace(/\/$/, '');
@@ -200,6 +203,28 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
                 </button>
               );
             })}
+
+            {/* Direct Switch to Platform Directory */}
+            <div style={{ padding: '8px 0', borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '8px' }}>
+              <button
+                type="button"
+                className="nav-item"
+                onClick={() => setShowDirectoryModal(true)}
+                style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.08)', marginBottom: '4px' }}
+              >
+                <LayoutGrid size={18} className="nav-icon" />
+                <span>All 30 Portals</span>
+              </button>
+              <button
+                type="button"
+                className="nav-item"
+                onClick={() => navigate('/')}
+                style={{ color: '#e2e8f0' }}
+              >
+                <Home size={18} className="nav-icon" />
+                <span>Platform Home</span>
+              </button>
+            </div>
           </nav>
         </div>
 
@@ -245,9 +270,31 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
          2. Main Dashboard Content
          ========================================================= */}
       <main className="citizen-main">
-        {/* Top Header Controls (Notifications & Help) */}
-        <header className="main-top-bar">
-          <button className="top-notif-btn" aria-label="Notifications">
+        {/* Top Header Controls (Notifications, Platform Navigation & Help) */}
+        <header className="main-top-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px' }}>
+          <button
+            type="button"
+            className="help-support-pill"
+            onClick={() => navigate('/')}
+            style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#f8fafc', border: '1px solid rgba(255, 255, 255, 0.15)', cursor: 'pointer' }}
+            title="Return to Platform Home"
+          >
+            <Home size={14} />
+            <span>Platform Home</span>
+          </button>
+
+          <button
+            type="button"
+            className="help-support-pill"
+            onClick={() => setShowDirectoryModal(true)}
+            style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', cursor: 'pointer' }}
+            title="Open Directory of all 30 Platform Portals"
+          >
+            <LayoutGrid size={14} />
+            <span>All 30 Portals</span>
+          </button>
+
+          <button className="top-notif-btn" aria-label="Notifications" onClick={() => navigate('/citizen/alerts')}>
             <Bell size={19} />
             <span className="notif-badge-count">2</span>
           </button>
@@ -619,6 +666,12 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
           <img src={robot3D} alt="AI Assistant" className="floating-robot-img" />
           <span className="floating-ai-ping"></span>
         </div>
+
+        {/* Master Platform Directory Modal */}
+        <PlatformDirectoryModal
+          isOpen={showDirectoryModal}
+          onClose={() => setShowDirectoryModal(false)}
+        />
       </main>
     </div>
   );

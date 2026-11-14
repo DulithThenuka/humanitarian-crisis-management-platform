@@ -229,6 +229,10 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
             </p>
           </div>
 
+          <button className="cm-btn-signout" onClick={() => navigate('/')} style={{ marginBottom: '6px', color: '#38bdf8' }}>
+            <span>&gt; Platform Home</span>
+          </button>
+
           <button className="cm-btn-signout" onClick={handleSignOut}>
             <span>&gt; Sign out</span>
           </button>
