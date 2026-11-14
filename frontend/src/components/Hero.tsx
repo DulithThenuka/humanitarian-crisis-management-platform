@@ -178,23 +178,23 @@ export function RevenueCard({
 
 // 4.3 Hero — the outer section (default export)
 export default function Hero({
-  brandName = 'RELIEFCORE',
+  brandName = 'HumanAid / RELIEFCORE',
   brandLogo,
   badgeTag,
-  headline = 'Rapid crisis response when every second counts',
-  subheadline = 'Autonomous humanitarian coordination, real-time AI triage, and life-saving resource distribution.',
-  primaryCtaLabel = 'Request Assistance',
+  headline = 'Stronger Communities. Safer Tomorrows.',
+  subheadline = 'AI-powered crisis coordination connecting disaster-affected communities in Sri Lanka with verified shelters, relief resources, and emergency response teams for faster, smarter support.',
+  primaryCtaLabel = 'Request Urgent Aid',
   primaryCtaLink = '/citizen/submit',
   onPrimaryCtaClick,
-  secondaryCtaLabel = 'Track Relief Request',
-  secondaryCtaLink = '/citizen/track',
+  secondaryCtaLabel = 'Find Verified Shelters',
+  secondaryCtaLink = '/citizen/shelters',
   onSecondaryCtaClick,
   extraLeftContent,
-  cardLabel = 'Citizens Supported',
+  cardLabel = 'Disaster Relief Operations',
   cardAmount = '12,430',
   cardDecimals = '+',
   cardDeltaBadge = '+32.4% Aid Flow',
-  cardDeltaCaption = 'vs. previous period (Western Province)',
+  cardDeltaCaption = 'Western Province flood response telemetry',
   navLinks,
   loginLabel = 'Sign In',
   loginLink = '/login',
@@ -210,12 +210,7 @@ export default function Hero({
   onScrollDown,
   scrollDownLabel = 'Explore Live Operations',
 }: HeroProps) {
-  let navigate: ((path: string) => void) | null = null;
-  try {
-    navigate = useNavigate();
-  } catch (e) {
-    navigate = null;
-  }
+  const navigate = useNavigate();
 
   const handlePrimaryClick = (e: React.MouseEvent) => {
     if (onPrimaryCtaClick) {
@@ -392,7 +387,7 @@ export interface NavProps {
 }
 
 export function Nav({
-  brandName = 'RELIEFCORE',
+  brandName = 'HumanAid / RELIEFCORE',
   brandLogo,
   navLinks = [
     { label: 'Citizen Portal', href: '/citizen' },
@@ -413,12 +408,7 @@ export function Nav({
 }: NavProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  let navigate: ((path: string) => void) | null = null;
-  try {
-    navigate = useNavigate();
-  } catch (e) {
-    navigate = null;
-  }
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
@@ -565,14 +555,12 @@ export function Nav({
           >
             <div className="relative w-5 h-5">
               <Menu
-                className={`w-5 h-5 text-white absolute inset-0 transition-all duration-300 ease-out ${
-                  isOpen ? 'opacity-0 rotate-90 scale-75' : 'opacity-100 rotate-0 scale-100'
-                }`}
+                className={`w-5 h-5 text-white absolute inset-0 transition-all duration-300 ease-out ${isOpen ? 'opacity-0 rotate-90 scale-75' : 'opacity-100 rotate-0 scale-100'
+                  }`}
               />
               <X
-                className={`w-5 h-5 text-white absolute inset-0 transition-all duration-300 ease-out ${
-                  isOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75'
-                }`}
+                className={`w-5 h-5 text-white absolute inset-0 transition-all duration-300 ease-out ${isOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75'
+                  }`}
               />
             </div>
           </button>
@@ -581,25 +569,22 @@ export function Nav({
 
       {/* (v) Mobile menu overlay (sibling of <nav>) */}
       <div
-        className={`lg:hidden fixed inset-0 z-40 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-          isOpen ? 'visible' : 'invisible'
-        }`}
+        className={`lg:hidden fixed inset-0 z-40 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'visible' : 'invisible'
+          }`}
       >
         {/* Backdrop (click closes menu) */}
         <div
-          className={`absolute inset-0 bg-[#080A19]/90 backdrop-blur-[24px] transition-opacity duration-500 ${
-            isOpen ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`absolute inset-0 bg-[#080A19]/90 backdrop-blur-[24px] transition-opacity duration-500 ${isOpen ? 'opacity-100' : 'opacity-0'
+            }`}
           onClick={() => setIsOpen(false)}
         />
 
         {/* Panel */}
         <div
-          className={`absolute top-[76px] sm:top-[86px] left-4 right-4 sm:left-6 sm:right-6 bg-[#0B1120]/95 backdrop-blur-[30px] rounded-[20px] border border-white/[0.1] p-6 sm:p-8 shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] origin-top ${
-            isOpen
-              ? 'opacity-100 translate-y-0 scale-100'
-              : 'opacity-0 -translate-y-4 scale-[0.97]'
-          }`}
+          className={`absolute top-[76px] sm:top-[86px] left-4 right-4 sm:left-6 sm:right-6 bg-[#0B1120]/95 backdrop-blur-[30px] rounded-[20px] border border-white/[0.1] p-6 sm:p-8 shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] origin-top ${isOpen
+            ? 'opacity-100 translate-y-0 scale-100'
+            : 'opacity-0 -translate-y-4 scale-[0.97]'
+            }`}
         >
           {/* Panel links */}
           <div className="flex flex-col gap-1">
@@ -611,9 +596,8 @@ export function Nav({
                   setIsOpen(false);
                   handleLinkClick(e, item.href, item.onClick);
                 }}
-                className={`flex items-center justify-between px-4 py-4 rounded-[12px] text-white/90 text-[18px] font-[450] hover:bg-white/[0.06] transition-all duration-300 text-decoration-none ${
-                  isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-3'
-                }`}
+                className={`flex items-center justify-between px-4 py-4 rounded-[12px] text-white/90 text-[18px] font-[450] hover:bg-white/[0.06] transition-all duration-300 text-decoration-none ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-3'
+                  }`}
                 style={{
                   transitionDelay: isOpen ? `${100 + i * 50}ms` : '0ms',
                 }}
@@ -636,9 +620,8 @@ export function Nav({
 
           {/* Panel CTAs */}
           <div
-            className={`flex flex-col gap-3 transition-all duration-300 ${
-              isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-            }`}
+            className={`flex flex-col gap-3 transition-all duration-300 ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+              }`}
             style={{ transitionDelay: isOpen ? '350ms' : '0ms' }}
           >
             {ctaNavLabel && (

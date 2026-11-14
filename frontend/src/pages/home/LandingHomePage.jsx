@@ -50,22 +50,11 @@ import {
 import westernProvinceMap from '../../assets/western-province-map-clean.png';
 import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
 import { homeService } from '../../services/homeService';
-import Hero, { Animate, RevenueCard, BAR_HEIGHTS } from '../../components/Hero';
-import { PlatformDirectoryModal } from '../../components/common/PlatformDirectoryModal';
+import Hero, { Animate, BAR_HEIGHTS } from '../../components/Hero';
 
 export const LandingHomePage = () => {
   const navigate = useNavigate();
 
-  // Apogee Hero Theme Mode State ('crisis' | 'apogee')
-  const [heroMode, setHeroMode] = useState('crisis');
-
-  // Modals & Interactivity
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [showDirectoryModal, setShowDirectoryModal] = useState(false);
-  const [showSafetyModal, setShowSafetyModal] = useState(false);
-  const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
-  const [currentLang, setCurrentLang] = useState('English');
-  const [showLangMenu, setShowLangMenu] = useState(false);
   const [trackingInput, setTrackingInput] = useState('');
 
   // Live Backend Telemetry & Endpoints State
@@ -73,9 +62,6 @@ export const LandingHomePage = () => {
   const [hotlines, setHotlines] = useState([]);
   const [safetyGuides, setSafetyGuides] = useState([]);
   const [sheltersPreview, setSheltersPreview] = useState([]);
-  const [trackingModalData, setTrackingModalData] = useState(null);
-  const [isTrackingLoading, setIsTrackingLoading] = useState(false);
-  const [trackingError, setTrackingError] = useState(null);
 
   const [telemetry, setTelemetry] = useState({
     activeCrisis: {
@@ -221,210 +207,107 @@ export const LandingHomePage = () => {
     }
   ];
 
-  // 12 Comprehensive Role Showcase Workspaces matching platform roles
+  // 9 Official Platform Modules
   const roles = [
     {
       id: 'citizen',
-      title: 'Disaster Affected Citizen',
-      desc: 'Submit urgent rescue/ration requests, locate verified open shelters, and track real-time ticket milestones.',
+      title: 'Citizen / Affected Person',
+      desc: 'Submit urgent SOS assistance requests, find verified open shelters, and track real-time ticket progress.',
       path: '/citizen',
       badge: 'Public Portal',
       icon: Users,
       color: '#38bdf8',
-      featured: 'Instant SOS intake & live status tracking',
-      sublinks: [
-        { label: 'Submit SOS', path: '/citizen/submit' },
-        { label: 'Track Requests', path: '/citizen/track' },
-        { label: 'Find Shelters', path: '/citizen/shelters' },
-        { label: 'Hazard Alerts', path: '/citizen/alerts' },
-      ]
+      featured: 'Instant SOS intake, tracking & open shelter locator'
     },
     {
       id: 'coordinator',
       title: 'Emergency Coordinator',
-      desc: 'Live operational overview, automated AI triage review, dynamic priority queues, and incident command.',
+      desc: 'Live crisis overview, automated AI triage review, dynamic priority queues, and field incident command.',
       path: '/coordinator',
       badge: 'Command Center',
       icon: Radio,
       color: '#34d399',
-      featured: 'Explainable AI triage rationale & resource dispatch',
-      sublinks: [
-        { label: 'Command Overview', path: '/coordinator/overview' },
-        { label: 'AI Review', path: '/coordinator/review' },
-        { label: 'Operations Cockpit', path: '/coordinator/dashboard' },
-        { label: 'Triage Queue', path: '/coordinator/triage' },
-      ]
+      featured: 'Explainable AI triage review & emergency alerts'
     },
     {
-      id: 'case-manager',
-      title: 'Incident & Case Manager',
-      desc: 'Comprehensive victim dossiers, inter-agency case logs, communication notes, and verification outcomes.',
-      path: '/case-manager',
+      id: 'incident-manager',
+      title: 'Incident / Case Manager',
+      desc: 'Comprehensive incident dossiers, verification workflows, communication logs, and inter-agency coordination.',
+      path: '/incident-manager',
       badge: 'Case Management',
       icon: FileText,
       color: '#06b6d4',
-      featured: 'Multi-agency incident escalation & verification',
-      sublinks: [
-        { label: 'Case Dossiers', path: '/case-manager/cases' },
-        { label: 'AI Assisted Review', path: '/case-manager/review' },
-        { label: 'Case Reports', path: '/case-manager/reports' },
-      ]
-    },
-    {
-      id: 'ai-ops',
-      title: 'AI Operations & Governance',
-      desc: 'Autonomous triage confidence metrics, model drift tracking, human-in-the-loop policies, and ethical thresholds.',
-      path: '/ai-operations',
-      badge: 'AI Intelligence',
-      icon: Cpu,
-      color: '#8b5cf6',
-      featured: 'Real-time model drift telemetry & confidence scoring',
-      sublinks: [
-        { label: 'Model Telemetry', path: '/ai-operations' },
-        { label: 'AI Workspaces', path: '/ai-workspaces' },
-        { label: 'Governance & Ethics', path: '/ai-governance' },
-      ]
-    },
-    {
-      id: 'shelters',
-      title: 'Shelter Facility Manager',
-      desc: 'Live bed occupancy, evacuee intake registration, facility amenities, and capacity management.',
-      path: '/shelter-admin',
-      badge: 'Facilities',
-      icon: Building2,
-      color: '#f87171',
-      featured: 'Live bed counters & vulnerable intake prioritization',
-      sublinks: [
-        { label: 'Bed Occupancy', path: '/shelter-admin' },
-        { label: 'Regional Directory', path: '/shelters/directory' },
-        { label: 'Evacuee Placements', path: '/shelters/allocation' },
-      ]
+      featured: 'Multi-agency incident verification & escalation'
     },
     {
       id: 'logistics',
-      title: 'Logistics & Supply Chain',
-      desc: 'Stockpile depot tracking, relief convoy allocation, medical supplies, and route optimization.',
-      path: '/logistics/inventory',
+      title: 'Resource & Logistics Manager',
+      desc: 'Central warehouse stockpiles, relief convoy allocation, medical supply reserves, and dispatch tracking.',
+      path: '/logistics',
       badge: 'Supply Chain',
       icon: Package,
       color: '#fbbf24',
-      featured: 'Real-time warehouse depots & GPS convoy routing',
-      sublinks: [
-        { label: 'Warehouse Stockpiles', path: '/logistics/inventory' },
-        { label: 'Convoy Dispatch', path: '/logistics/dispatch' },
-      ]
+      featured: 'Warehouse depots, ration packs & convoy routing'
+    },
+    {
+      id: 'shelter',
+      title: 'Shelter Management',
+      desc: 'High-ground relief center capacity, real-time bed availability counters, and evacuee intake allocation.',
+      path: '/shelter',
+      badge: 'Facility Ops',
+      icon: Building2,
+      color: '#f87171',
+      featured: 'Live bed occupancy & vulnerable intake allocation'
     },
     {
       id: 'volunteer',
-      title: 'Field Volunteer Responder',
-      desc: 'Task assignment dispatch, on-ground rescue rosters, search & rescue coordination, and field check-ins.',
+      title: 'Volunteer Management',
+      desc: 'Frontline responder rosters, task assignment dispatch, search & rescue coordination, and field check-ins.',
       path: '/volunteer',
-      badge: 'Field Ops',
+      badge: 'Field Responders',
       icon: Compass,
       color: '#c084fc',
-      featured: 'Search & rescue teams & on-duty field rosters',
-      sublinks: [
-        { label: 'Volunteer Portal', path: '/volunteer' },
-        { label: 'Mission Shifts', path: '/volunteer/opportunities' },
-        { label: 'Roster Schedule', path: '/volunteers/roster' },
-        { label: 'Task Assignments', path: '/volunteers/assignments' },
-      ]
+      featured: 'Task dispatch & verified rescue volunteer roster'
     },
     {
-      id: 'map',
-      title: 'Operational GIS Satellite Map',
-      desc: 'Multi-layer geospatial flood mapping, real-time river basin advisories, and safe transit corridors.',
-      path: '/map',
-      badge: 'Geospatial',
-      icon: MapPin,
-      color: '#f43f5e',
-      featured: 'Flood basin radar heatmaps & route status',
-      sublinks: [
-        { label: 'Satellite Flood Radar', path: '/map' },
-        { label: 'Impassable Bridges', path: '/map' },
-      ]
+      id: 'donor',
+      title: 'Donor & Funding Management',
+      desc: 'Emergency relief funding packages, transparency tracking, dry ration contributions, and resource pledges.',
+      path: '/donor',
+      badge: 'Funding & Aid',
+      icon: Gift,
+      color: '#ec4899',
+      featured: 'Relief funding packages & public contributions'
     },
     {
-      id: 'reports',
-      title: 'Reports & Deep Analytics',
-      desc: 'Aggregated relief volume charts, demand forecasting by district, response latency, and exportable reports.',
-      path: '/reports',
-      badge: 'Analytics',
-      icon: FileBarChart,
-      color: '#3b82f6',
-      featured: 'Predictive crisis telemetry & sector analytics',
-      sublinks: [
-        { label: 'Crisis Reports', path: '/reports' },
-        { label: 'Response Velocity', path: '/analytics' },
-      ]
-    },
-    {
-      id: 'audit',
-      title: 'Immutable Audit & Compliance',
-      desc: 'Cryptographically verified audit trail with SHA-256 hashes recording all automated triage and manual actions.',
-      path: '/audit',
-      badge: 'Governance',
-      icon: GitMerge,
-      color: '#6366f1',
-      featured: 'Cryptographic SHA-256 ledger integrity',
-      sublinks: [
-        { label: 'Audit Ledger', path: '/audit' },
-        { label: 'Tamper Verification', path: '/audit' },
-      ]
+      id: 'partner',
+      title: 'Partner Organisation Management',
+      desc: 'NGO, Red Cross, and disaster relief agency partnerships, assigned operational zones, and resource commitments.',
+      path: '/partner',
+      badge: 'Partner Network',
+      icon: Building,
+      color: '#a855f7',
+      featured: 'Agency coordination & active response commitments'
     },
     {
       id: 'admin',
-      title: 'Platform Administration & Health',
-      desc: 'System health telemetry, real-time database connection metrics, memory usage, and global emergency modes.',
+      title: 'System Administration',
+      desc: 'Platform health telemetry, user RBAC permissions, audit trail oversight, and system security controls.',
       path: '/admin',
       badge: 'Administration',
       icon: Settings,
-      color: '#f43f5e',
-      featured: 'System health telemetry & operator RBAC controls',
-      sublinks: [
-        { label: 'System Health', path: '/admin' },
-        { label: 'User RBAC Controls', path: '/admin/users' },
-      ]
-    },
-    {
-      id: 'donations',
-      title: 'Public Relief Donations',
-      desc: 'Verified public donations portal for financial aid, dry ration packs, clean water tankers, and medical supplies.',
-      path: '/donations',
-      badge: 'Donations',
-      icon: Gift,
-      color: '#ec4899',
-      featured: 'Direct emergency contribution channels',
-      sublinks: [
-        { label: 'Online Donation', path: '/donations' },
-        { label: 'Dry Ration Relief', path: '/donations' },
-      ]
+      color: '#6366f1',
+      featured: 'System health telemetry & operator RBAC controls'
     }
   ];
 
-  const handleTrackSubmit = async (e) => {
+  const handleTrackSubmit = (e) => {
     e.preventDefault();
     const query = trackingInput.trim();
-    if (!query) {
-      navigate('/citizen/track');
-      return;
-    }
-
-    setIsTrackingLoading(true);
-    setTrackingError(null);
-    try {
-      const res = await homeService.trackRequest(query);
-      const data = res?.data || res?.Data || res;
-      if (data && (data.publicReference || data.status)) {
-        setTrackingModalData(data);
-      } else {
-        navigate(`/citizen/track?id=${encodeURIComponent(query)}`);
-      }
-    } catch (err) {
-      console.warn('Direct track API fallback, navigating to portal:', err);
+    if (query) {
       navigate(`/citizen/track?id=${encodeURIComponent(query)}`);
-    } finally {
-      setIsTrackingLoading(false);
+    } else {
+      navigate('/citizen/track');
     }
   };
 
@@ -439,33 +322,20 @@ export const LandingHomePage = () => {
             <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
             <AlertTriangle size={13} className="text-rose-400 shrink-0" />
             <span className="text-white/80">
-              <strong className="text-white font-[500]">National Humanitarian Emergency Protocol:</strong> RELIEFCORE Operations Network — Western Province Flood Response, Sri Lanka.
+              <strong className="text-white font-[500]">National Humanitarian Emergency Protocol:</strong> Western Province Flood Response Network, Sri Lanka.
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 text-white/60">
-            <button
-              type="button"
-              onClick={() => setShowDirectoryModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-[8px] bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-200 transition-colors text-[11.5px] cursor-pointer"
-            >
-              <LayoutGrid size={12} className="text-sky-300" />
-              <span>Platform Directory (30 Portals)</span>
-            </button>
-            <span className="text-white/20 hidden sm:inline">|</span>
+          <div className="flex items-center gap-3 text-white/60 text-[12px]">
             <a href="tel:117" className="flex items-center gap-1.5 text-rose-300 hover:text-rose-200 transition-colors text-decoration-none font-medium">
               <PhoneCall size={12} />
               <span>Emergency DMC: <strong className="text-white">117</strong></span>
             </a>
             <span className="text-white/20">|</span>
-            <button 
-              type="button"
-              className="flex items-center gap-1 text-white/80 hover:text-white transition-colors bg-transparent border-0 p-0 text-[12px] cursor-pointer"
-              onClick={() => setShowSafetyModal(true)}
-            >
-              <span>Field Evacuation Protocols</span>
-              <ArrowRight size={12} />
-            </button>
+            <a href="tel:1990" className="flex items-center gap-1.5 text-amber-300 hover:text-amber-200 transition-colors text-decoration-none font-medium">
+              <PhoneCall size={12} />
+              <span>Ambulance: <strong className="text-white">1990</strong></span>
+            </a>
           </div>
         </div>
       </div>
@@ -489,36 +359,29 @@ export const LandingHomePage = () => {
       )}
 
       {/* =========================================================
-         2. Apogee Hero Landing Section (Pixel-Exact & Website Themed)
+         2. HumanAid / RELIEFCORE Crisis Hero Section
          ========================================================= */}
-      {heroMode === 'crisis' ? (
-        <Hero
-          brandName="RELIEFCORE"
-          brandLogo={
-            <div className="flex items-center gap-2.5">
-              <img 
-                src={reliefcoreLogoWhite} 
-                alt="RELIEFCORE Humanitarian Operations" 
-                className="h-[28px] sm:h-[32px] w-auto object-contain"
-              />
-            </div>
-          }
-          liveOpsBadge={
-            <div className="hidden xl:flex items-center gap-1.5 px-3 py-1 rounded-[9px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold tracking-wide">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>LIVE OPERATIONS ACTIVE</span>
-            </div>
-          }
-          badgeTag={
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-[14px] border border-white/15 text-white/90 text-[12px] font-[450]">
-              <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
-              <span className="tracking-wide">WESTERN PROVINCE DISASTER COORDINATION NETWORK</span>
-              <span className="text-white/30">|</span>
-              <span className="text-amber-300 font-semibold">{telemetry.activeCrisis.severity}</span>
-            </div>
-          }
-          headline="Rapid crisis response when every second counts"
-          subheadline="Autonomous emergency triage, real-time high-ground evacuation routing, and life-saving resource convoys deployed across Western Province, Sri Lanka."
+      <Hero
+        brandName="HumanAid / RELIEFCORE"
+        brandLogo={
+          <div className="flex items-center gap-2.5">
+            <img 
+              src={reliefcoreLogoWhite} 
+              alt="HumanAid Humanitarian Operations" 
+              className="h-[28px] sm:h-[32px] w-auto object-contain"
+            />
+          </div>
+        }
+        badgeTag={
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-[14px] border border-white/15 text-white/90 text-[12px] font-[450]">
+            <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
+            <span className="tracking-wide">WESTERN PROVINCE DISASTER COORDINATION NETWORK</span>
+            <span className="text-white/30">|</span>
+            <span className="text-amber-300 font-semibold">{telemetry.activeCrisis.severity}</span>
+          </div>
+        }
+        headline="Stronger Communities. Safer Tomorrows."
+        subheadline="HumanAid connects disaster-affected communities in Sri Lanka with verified shelters, emergency relief resources, and live response convoys for faster, smarter, and transparent support."
           primaryCtaLabel="Request Urgent Aid"
           primaryCtaLink="/citizen/submit"
           secondaryCtaLabel="Find Verified Shelters"
@@ -536,76 +399,20 @@ export const LandingHomePage = () => {
                 />
                 <button 
                   type="submit" 
-                  disabled={isTrackingLoading}
-                  className="h-[38px] px-4 rounded-[10px] bg-[#E9E9E9] hover:bg-white text-[#0A0707] text-[13px] font-[500] shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer border-0 disabled:opacity-60"
+                  className="h-[38px] px-4 rounded-[10px] bg-[#E9E9E9] hover:bg-white text-[#0A0707] text-[13px] font-[500] shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer border-0"
                 >
-                  {isTrackingLoading ? (
-                    <span>Searching...</span>
-                  ) : (
-                    <>
-                      <span>Track Status</span>
-                      <ArrowRight size={13} />
-                    </>
-                  )}
+                  <span>Track Status</span>
+                  <ArrowRight size={13} />
                 </button>
               </form>
               <div className="flex items-center justify-between mt-3 text-[12px] text-white/60 px-1">
                 <span>Emergency DMC: <strong className="text-white">117</strong> · Ambulance: <strong className="text-white">1990</strong></span>
-                <button 
-                  type="button"
-                  onClick={() => setShowSafetyModal(true)} 
-                  className="text-white/80 hover:text-white underline cursor-pointer bg-transparent border-0 p-0 text-[12px]"
+                <Link 
+                  to="/citizen/safety" 
+                  className="text-white/80 hover:text-white underline text-[12px] text-decoration-none"
                 >
-                  Evacuation Protocols →
-                </button>
-              </div>
-
-              {/* Quick Jump Buttons to Access Key Pages */}
-              <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-white/[0.08]">
-                <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold mr-1">Quick Portals:</span>
-                <button 
-                  type="button" 
-                  onClick={() => navigate('/citizen/submit')} 
-                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-200 transition-colors cursor-pointer"
-                >
-                  Request Aid
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => navigate('/citizen/shelters')} 
-                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-200 transition-colors cursor-pointer"
-                >
-                  Shelters ({telemetry.metrics.operationalSheltersCount})
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => navigate('/map')} 
-                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-200 transition-colors cursor-pointer"
-                >
-                  GIS Map
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => navigate('/coordinator')} 
-                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-200 transition-colors cursor-pointer"
-                >
-                  Coordinator
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => navigate('/volunteer')} 
-                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-200 transition-colors cursor-pointer"
-                >
-                  Volunteers
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => setShowDirectoryModal(true)} 
-                  className="text-[11px] px-2.5 py-1 rounded-[7px] bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center gap-1 transition-colors cursor-pointer ml-auto"
-                >
-                  <LayoutGrid size={11} className="text-sky-300" />
-                  <span>All 30 Portals →</span>
-                </button>
+                  Safety Guides →
+                </Link>
               </div>
             </div>
           }
@@ -760,50 +567,23 @@ export const LandingHomePage = () => {
             </Animate>
           }
           navLinks={[
-            { label: 'Citizen Portal', href: '/citizen' },
-            { label: 'Verified Shelters', href: '/citizen/shelters', badge: `${telemetry.metrics.operationalSheltersCount} Active` },
-            { label: 'Satellite Map', href: '/map' },
-            { label: 'Coordinator Command', href: '/coordinator/dashboard' },
-            { 
-              label: 'All Portals & Hubs', 
-              href: '#directory', 
-              onClick: () => setShowDirectoryModal(true),
-              badge: '30 Pages' 
-            },
-            { label: 'Role Demos', href: '#demos', onClick: () => setShowRoleModal(true) },
+            { label: 'Find Assistance', href: '/citizen/submit' },
+            { label: 'Shelters', href: '/citizen/shelters', badge: `${telemetry.metrics.operationalSheltersCount} Open` },
+            { label: 'Track Request', href: '/citizen/track' },
+            { label: 'Operations Portal', href: '/coordinator' },
           ]}
           loginLabel="Sign In"
           loginLink="/login"
-          signupLabel="Sign Up"
-          signupLink="/signup"
-          ctaNavLabel="Request Help"
+          signupLabel=""
+          ctaNavLabel="Request Aid →"
           ctaNavLink="/citizen/submit"
+          liveOpsBadge={null}
           onScrollDown={() => {
             const el = document.getElementById('operations-telemetry-section') || document.getElementById('immediate-assistance-tray');
             if (el) el.scrollIntoView({ behavior: 'smooth' });
           }}
           scrollDownLabel="Explore Live Ground Operations"
         />
-      ) : (
-        <div className="relative">
-          <div className="absolute top-5 right-24 z-50">
-            <button
-              type="button"
-              onClick={() => setHeroMode('crisis')}
-              className="text-[12px] px-3.5 py-1.5 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-[12px] border border-white/20 text-white font-[450] transition-colors cursor-pointer"
-            >
-              ← Back to Crisis Operations
-            </button>
-          </div>
-          <Hero
-            onScrollDown={() => {
-              const el = document.getElementById('operations-telemetry-section') || document.getElementById('immediate-assistance-tray');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }}
-            scrollDownLabel="Explore Website Features"
-          />
-        </div>
-      )}
 
       {/* =========================================================
          3. Horizontal Stats Ribbon (Matching Website Telemetry)
@@ -1162,25 +942,6 @@ export const LandingHomePage = () => {
               Dedicated operational workspaces engineered to deliver zero-latency situational awareness to citizens, coordinators, logistics depots, and frontline rescue teams.
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 self-start md:self-auto shrink-0">
-            <button 
-              type="button"
-              onClick={() => setShowDirectoryModal(true)}
-              className="h-[46px] px-6 rounded-[12px] bg-white text-[#0A0707] hover:bg-white/90 text-[14px] sm:text-[15px] font-[500] transition-colors inline-flex items-center gap-2 cursor-pointer border-0 shadow-md"
-            >
-              <LayoutGrid size={16} />
-              <span>Platform Directory (30)</span>
-            </button>
-            <button 
-              type="button"
-              onClick={() => setShowRoleModal(true)}
-              className="h-[46px] px-6 rounded-[12px] border border-white text-white text-[14px] sm:text-[15px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer bg-transparent"
-            >
-              <span>Role Switcher Demo</span>
-              <ArrowRight size={14} />
-            </button>
-          </div>
         </div>
 
         {/* 12 Operational Role Workspaces Cards */}
@@ -1218,24 +979,6 @@ export const LandingHomePage = () => {
                     {r.desc}
                   </p>
 
-                  {/* Sub-links / Quick launch buttons to access each sub-page */}
-                  {r.sublinks && r.sublinks.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-4 pt-3 border-t border-white/[0.06]">
-                      {r.sublinks.map((sub, sIdx) => (
-                        <button
-                          key={sIdx}
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(sub.path);
-                          }}
-                          className="px-2.5 py-1 rounded-[8px] bg-white/[0.05] hover:bg-white/[0.14] text-white/75 hover:text-white text-[11px] font-[450] border border-white/[0.08] transition-colors cursor-pointer"
-                        >
-                          {sub.label} →
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 <div className="mt-5 pt-4 border-t border-white/[0.08] flex items-center justify-between">
@@ -1245,7 +988,7 @@ export const LandingHomePage = () => {
                     onClick={() => navigate(r.path)}
                     className="h-[34px] px-4 rounded-[10px] bg-white/[0.08] hover:bg-white text-white hover:text-slate-900 text-[12.5px] font-[500] flex items-center gap-1.5 transition-all cursor-pointer border border-white/10 shrink-0 ml-2"
                   >
-                    <span>Launch</span>
+                    <span>Open Portal</span>
                     <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                   </button>
                 </div>
@@ -1273,14 +1016,13 @@ export const LandingHomePage = () => {
               </p>
             </div>
 
-            <button 
-              type="button"
-              onClick={() => setShowSafetyModal(true)}
-              className="h-[46px] px-6 rounded-[12px] border border-white text-white text-[14px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer self-start md:self-auto shrink-0 bg-transparent"
+            <Link 
+              to="/citizen/safety"
+              className="h-[46px] px-6 rounded-[12px] border border-white text-white text-[14px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer self-start md:self-auto shrink-0 bg-transparent text-decoration-none"
             >
               <span>Full Field Safety Protocols</span>
               <ArrowRight size={14} />
-            </button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1338,17 +1080,6 @@ export const LandingHomePage = () => {
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>Western Province Operations Active · All Regional Hubs Synchronized</span>
               </div>
-
-              <div className="mt-5">
-                <button
-                  type="button"
-                  onClick={() => setShowDirectoryModal(true)}
-                  className="px-4 py-2 rounded-[10px] bg-white/[0.08] hover:bg-white/[0.16] text-white border border-white/15 text-[12.5px] font-[500] inline-flex items-center gap-2 cursor-pointer transition-colors"
-                >
-                  <LayoutGrid size={14} className="text-sky-300" />
-                  <span>Open Platform Directory (30 Portals)</span>
-                </button>
-              </div>
             </div>
 
             {/* Col 2: Citizen Services */}
@@ -1362,7 +1093,7 @@ export const LandingHomePage = () => {
                 <li><Link to="/citizen/safety" className="text-white/60 hover:text-white transition-colors text-decoration-none">Safety & Evacuation</Link></li>
                 <li><Link to="/citizen/support" className="text-white/60 hover:text-white transition-colors text-decoration-none">24/7 Helplines</Link></li>
                 <li><Link to="/citizen/profile" className="text-white/60 hover:text-white transition-colors text-decoration-none">Household Profile</Link></li>
-                <li><Link to="/donations" className="text-white/60 hover:text-white transition-colors text-decoration-none">Public Relief Donations</Link></li>
+                <li><Link to="/donor" className="text-white/60 hover:text-white transition-colors text-decoration-none">Donor &amp; Funding Portal</Link></li>
                 <li><Link to="/citizen" className="text-white/60 hover:text-white transition-colors text-decoration-none">Public Citizen Portal</Link></li>
               </ul>
             </div>
@@ -1376,7 +1107,8 @@ export const LandingHomePage = () => {
                 <li><Link to="/coordinator/review" className="text-white/60 hover:text-white transition-colors text-decoration-none">AI Assisted Review</Link></li>
                 <li><Link to="/coordinator/dashboard" className="text-white/60 hover:text-white transition-colors text-decoration-none">Coordinator Cockpit</Link></li>
                 <li><Link to="/coordinator/triage" className="text-white/60 hover:text-white transition-colors text-decoration-none">Request Triage Queue</Link></li>
-                <li><Link to="/case-manager" className="text-white/60 hover:text-white transition-colors text-decoration-none">Incident Case Manager</Link></li>
+                <li><Link to="/incident-manager" className="text-white/60 hover:text-white transition-colors text-decoration-none">Incident Case Manager</Link></li>
+                <li><Link to="/partner" className="text-white/60 hover:text-white transition-colors text-decoration-none">Partner Organisation Portal</Link></li>
                 <li><Link to="/ai-operations" className="text-white/60 hover:text-white transition-colors text-decoration-none">AI Operations Center</Link></li>
                 <li><Link to="/ai-governance" className="text-white/60 hover:text-white transition-colors text-decoration-none">AI Ethics &amp; Governance</Link></li>
               </ul>
@@ -1408,7 +1140,7 @@ export const LandingHomePage = () => {
                 <li><Link to="/admin/users" className="text-white/60 hover:text-white transition-colors text-decoration-none">User RBAC Controls</Link></li>
                 <li><Link to="/login" className="text-white/60 hover:text-white transition-colors text-decoration-none">Operator Sign In</Link></li>
                 <li><Link to="/signup" className="text-white/60 hover:text-white transition-colors text-decoration-none">Register Account</Link></li>
-                <li><Link to="/bloom" className="text-white/60 hover:text-white transition-colors text-decoration-none">Bloom Glass Concept</Link></li>
+                <li><Link to="/citizen/support" className="text-white/60 hover:text-white transition-colors text-decoration-none">Citizen Support Helpdesk</Link></li>
               </ul>
             </div>
           </div>
@@ -1419,371 +1151,6 @@ export const LandingHomePage = () => {
           </div>
         </div>
       </footer>
-
-      {/* =========================================================
-         10. Interactive Role Demo Access Modal
-         ========================================================= */}
-      {showRoleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080A19]/90 backdrop-blur-[24px]" onClick={() => setShowRoleModal(false)}>
-          <div className="w-full max-w-[680px] rounded-[28px] bg-[#0B1120]/95 backdrop-blur-[32px] border border-white/[0.12] p-7 sm:p-9 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-6 pb-5 border-b border-white/[0.08]">
-              <div>
-                <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold tracking-wider uppercase mb-2 inline-block">
-                  RAPID ROLE SWITCHER
-                </span>
-                <h3 className="text-white text-[24px] font-[500]">Select Operational Workspace</h3>
-                <p className="text-white/60 text-[13.5px] font-[450] mt-1">
-                  Click any role to jump directly into that user experience.
-                </p>
-              </div>
-              <button className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer border-0 transition-colors" onClick={() => setShowRoleModal(false)} title="Close">
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1">
-              {roles.map((r, i) => {
-                const IconComp = r.icon;
-                return (
-                  <div 
-                    key={i} 
-                    className="p-4 rounded-[16px] bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.08] hover:border-white/20 transition-all cursor-pointer group flex items-start gap-3"
-                    onClick={() => {
-                      setShowRoleModal(false);
-                      navigate(r.path);
-                    }}
-                  >
-                    <div 
-                      className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${r.color}15`, color: r.color }}
-                    >
-                      <IconComp size={18} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                        <h4 className="text-white text-[14px] font-[500] truncate group-hover:text-emerald-300 transition-colors">{r.title}</h4>
-                      </div>
-                      <p className="text-white/50 text-[12px] font-[450] mt-0.5 line-clamp-1">{r.badge}</p>
-                    </div>
-                    <ChevronRight size={14} className="text-white/30 group-hover:text-white group-hover:translate-x-0.5 transition-all self-center shrink-0" />
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 pt-5 border-t border-white/[0.08] flex items-center justify-between text-[13px] text-white/60">
-              <span>Need a new personal or volunteer account?</span>
-              <button
-                type="button"
-                className="h-[38px] px-5 bg-[#E9E9E9] hover:bg-white text-[#0A0707] font-[500] rounded-[10px] transition-colors cursor-pointer border-0 text-[13px]"
-                onClick={() => {
-                  setShowRoleModal(false);
-                  navigate('/signup');
-                }}
-              >
-                Sign Up Now
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================
-         11. Safety Guidance Modal
-         ========================================================= */}
-      {showSafetyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080A19]/90 backdrop-blur-[24px]" onClick={() => setShowSafetyModal(false)}>
-          <div className="w-full max-w-[680px] rounded-[28px] bg-[#0B1120]/95 backdrop-blur-[32px] border border-white/[0.12] p-7 sm:p-9 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-6 pb-5 border-b border-white/[0.08]">
-              <div>
-                <span className="px-2.5 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[11px] font-semibold tracking-wider uppercase mb-2 inline-block">
-                  OFFICIAL PROTOCOLS
-                </span>
-                <h3 className="text-white text-[24px] font-[500]">Field Safety Guidance & Hotlines</h3>
-                <p className="text-white/60 text-[13.5px] font-[450] mt-1">
-                  Official procedures for Western Province flood basin advisories.
-                </p>
-              </div>
-              <button className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer border-0 transition-colors" onClick={() => setShowSafetyModal(false)} title="Close">
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="space-y-6 max-h-[65vh] overflow-y-auto pr-1">
-              {/* Hotlines */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {(hotlines && hotlines.length > 0 ? hotlines : [
-                  { name: 'DMC Operations', number: '117', service: 'Toll-Free 24/7 Hotline' },
-                  { name: 'Suwa Seriya', number: '1990', service: 'Ambulance Dispatch' },
-                  { name: 'Police Rescue', number: '119', service: 'Emergency Response' }
-                ]).slice(0, 3).map((h, i) => (
-                  <div key={i} className="p-4 rounded-[16px] bg-white/[0.04] border border-white/[0.08]">
-                    <a href={`tel:${h.number.replace(/\s+/g, '')}`} className="text-rose-400 font-mono text-[22px] font-[500] hover:underline text-decoration-none block">
-                      {h.number}
-                    </a>
-                    <div className="text-white text-[13px] font-[500] mt-1 truncate">{h.name}</div>
-                    <div className="text-white/50 text-[11px] truncate">{h.service || 'Emergency Hotline'}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Dynamic Safety Guides from Backend */}
-              {safetyGuides && safetyGuides.length > 0 ? (
-                safetyGuides.map((guide, idx) => (
-                  <div key={idx} className="p-5 rounded-[18px] bg-white/[0.04] border border-white/[0.08]">
-                    <div className="flex items-center gap-2 text-emerald-400 text-[14.5px] font-[500] mb-2">
-                      <CheckCircle2 size={16} />
-                      <span>{guide.title}</span>
-                    </div>
-                    <p className="text-[12.5px] text-white/60 mb-3">{guide.description}</p>
-                    {guide.actionItems && guide.actionItems.length > 0 && (
-                      <ul className="space-y-1.5 text-[13px] text-white/70 leading-relaxed list-disc pl-5 mb-3">
-                        {guide.actionItems.map((item, aIdx) => (
-                          <li key={aIdx}>{item}</li>
-                        ))}
-                      </ul>
-                    )}
-                    {guide.packItems && guide.packItems.length > 0 && (
-                      <div className="pt-2 border-t border-white/[0.06] text-[12px] text-amber-200/80">
-                        <strong className="text-white font-[500]">Emergency Bag Pack:</strong>{' '}
-                        {guide.packItems.join(' · ')}
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                /* Fallback static protocol */
-                <div className="p-5 rounded-[18px] bg-white/[0.04] border border-white/[0.08]">
-                  <div className="flex items-center gap-2 text-emerald-400 text-[14.5px] font-[500] mb-3">
-                    <CheckCircle2 size={16} />
-                    <span>Flash Flood Evacuation Safety Protocol</span>
-                  </div>
-                  <ul className="space-y-2 text-[13px] text-white/70 leading-relaxed">
-                    <li><strong>Avoid Floodwaters:</strong> Never attempt to walk, swim, or drive through moving water. 15 cm of rapid flow can sweep adults away.</li>
-                    <li><strong>Electrical Isolation:</strong> Shut off main circuit breakers before floodwaters enter building entrances. Avoid wet power points.</li>
-                    <li><strong>Secure Critical Documents:</strong> Place identification, deeds, and prescription medicines in sealed waterproof bags on upper floors.</li>
-                    <li><strong>Evacuate Proactively:</strong> If residing along Kelani or Kalu Ganga riverbanks, evacuate early to designated high-ground shelters.</li>
-                  </ul>
-                </div>
-              )}
-
-              <div className="pt-2 flex justify-end">
-                <button 
-                  type="button"
-                  onClick={() => setShowSafetyModal(false)}
-                  className="h-[44px] px-6 bg-[#E9E9E9] hover:bg-white text-[#0A0707] font-[500] text-[14px] rounded-[11px] transition-colors cursor-pointer border-0 shadow-md"
-                >
-                  Understood & Saved
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================
-         12. How It Works Modal
-         ========================================================= */}
-      {showHowItWorksModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080A19]/90 backdrop-blur-[24px]" onClick={() => setShowHowItWorksModal(false)}>
-          <div className="w-full max-w-[680px] rounded-[28px] bg-[#0B1120]/95 backdrop-blur-[32px] border border-white/[0.12] p-7 sm:p-9 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-6 pb-5 border-b border-white/[0.08]">
-              <div>
-                <span className="px-2.5 py-1 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-300 text-[11px] font-semibold tracking-wider uppercase mb-2 inline-block">
-                  PROCESS WORKFLOW
-                </span>
-                <h3 className="text-white text-[24px] font-[450]">How RELIEFCORE Works</h3>
-                <p className="text-white/60 text-[13.5px] font-[450] mt-1">
-                  From citizen SOS intake to on-the-ground rescue and verification.
-                </p>
-              </div>
-              <button className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer border-0 transition-colors" onClick={() => setShowHowItWorksModal(false)} title="Close">
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-start gap-3.5 p-3.5 rounded-[16px] bg-white/[0.04] border border-white/[0.08]">
-                <div className="w-7 h-7 rounded-full bg-sky-500/20 text-sky-300 flex items-center justify-center text-[12px] font-bold shrink-0">1</div>
-                <div>
-                  <h4 className="text-white text-[14.5px] font-[450]">SOS Request Submission</h4>
-                  <p className="text-white/60 text-[13px] mt-0.5">Citizens or relatives submit emergency requests with location coordinates and assistance categories.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3.5 p-3.5 rounded-[16px] bg-white/[0.04] border border-white/[0.08]">
-                <div className="w-7 h-7 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center text-[12px] font-bold shrink-0">2</div>
-                <div>
-                  <h4 className="text-white text-[14.5px] font-[450]">Automated AI NLP Triage</h4>
-                  <p className="text-white/60 text-[13px] mt-0.5">AI extracts hazard cues, identifies vulnerable family members, and generates urgency scores in seconds.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3.5 p-3.5 rounded-[16px] bg-white/[0.04] border border-white/[0.08]">
-                <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-[12px] font-bold shrink-0">3</div>
-                <div>
-                  <h4 className="text-white text-[14.5px] font-[450]">Coordinator Dispatch & Shelter Assignment</h4>
-                  <p className="text-white/60 text-[13px] mt-0.5">Incident commanders confirm assignments and allocate nearest high-ground shelters and relief convoys.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3.5 p-3.5 rounded-[16px] bg-white/[0.04] border border-white/[0.08]">
-                <div className="w-7 h-7 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center text-[12px] font-bold shrink-0">4</div>
-                <div>
-                  <h4 className="text-white text-[14.5px] font-[450]">Field Execution & Live Tracking</h4>
-                  <p className="text-white/60 text-[13px] mt-0.5">Volunteers check in via mobile rosters while citizens track milestone progress in real-time.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-5 border-t border-white/[0.08] flex justify-end">
-              <button 
-                type="button"
-                onClick={() => setShowHowItWorksModal(false)}
-                className="h-[44px] px-6 bg-[#E9E9E9] hover:bg-white text-[#0A0707] font-[450] text-[14px] rounded-[11px] transition-colors cursor-pointer border-0"
-              >
-                Close Workflow
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================
-         13. Instant Live Request Tracking Modal
-         ========================================================= */}
-      {trackingModalData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080A19]/90 backdrop-blur-[24px]" onClick={() => setTrackingModalData(null)}>
-          <div className="w-full max-w-[620px] rounded-[28px] bg-[#0B1120]/95 backdrop-blur-[32px] border border-white/[0.12] p-6 sm:p-8 shadow-[0_24px_50px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between pb-4 border-b border-white/[0.08]">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-[11px] font-semibold">
-                    {trackingModalData.publicReference || 'REQ-LIVE'}
-                  </span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase ${
-                    trackingModalData.urgency === 'Critical' ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300' :
-                    trackingModalData.urgency === 'High' ? 'bg-amber-500/15 border border-amber-500/30 text-amber-300' :
-                    'bg-sky-500/15 border border-sky-500/30 text-sky-300'
-                  }`}>
-                    {trackingModalData.urgency || 'Active'}
-                  </span>
-                </div>
-                <h3 className="text-white text-[22px] font-[500]">
-                  {trackingModalData.category || 'Humanitarian Assistance Request'}
-                </h3>
-                <p className="text-white/60 text-[13px] font-[450] mt-0.5">
-                  {trackingModalData.coarseLocation} · {trackingModalData.peopleCount} individuals in household
-                </p>
-              </div>
-              <button 
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer border-0 transition-colors" 
-                onClick={() => setTrackingModalData(null)}
-                title="Close"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="mt-5 space-y-4">
-              {/* Status Highlight Banner */}
-              <div className="p-4 rounded-[16px] bg-slate-900/60 border border-white/[0.08] flex items-start gap-3">
-                <Activity size={18} className="text-emerald-400 mt-0.5 shrink-0" />
-                <div>
-                  <div className="flex items-center gap-2 text-white text-[13.5px] font-[500]">
-                    <span>Status: <strong className="text-emerald-300">{trackingModalData.status}</strong></span>
-                    <span className="text-white/30">·</span>
-                    <span className="text-white/70">Assigned: {trackingModalData.assignedTeam || 'Rapid Response Unit'}</span>
-                  </div>
-                  <p className="text-white/60 text-[12.5px] mt-1 leading-relaxed">
-                    {trackingModalData.statusNote || 'Your ticket is synchronized with provincial coordinator dispatch.'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Milestone Timeline */}
-              {trackingModalData.timeline && trackingModalData.timeline.length > 0 && (
-                <div className="p-4 rounded-[16px] bg-white/[0.02] border border-white/[0.06]">
-                  <h4 className="text-white/80 text-[12px] font-[500] uppercase tracking-wider mb-3">Response Milestones</h4>
-                  <div className="space-y-3">
-                    {trackingModalData.timeline.map((step, idx) => (
-                      <div key={idx} className="flex items-start gap-3 text-[13px]">
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                          step.isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' :
-                          step.isCurrent ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse' :
-                          'bg-white/5 text-white/30 border border-white/10'
-                        }`}>
-                          {step.isCompleted ? <Check size={11} /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className={`font-[500] ${step.isCompleted ? 'text-white' : step.isCurrent ? 'text-amber-300' : 'text-white/40'}`}>
-                              {step.title}
-                            </span>
-                            {step.timestamp && (
-                              <span className="text-[11px] font-mono text-white/40">
-                                {new Date(step.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[12px] text-white/50 mt-0.5 leading-snug">{step.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-2 flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => setTrackingModalData(null)}
-                  className="h-[42px] px-5 rounded-[11px] border border-white/20 text-white/80 hover:text-white hover:bg-white/5 text-[13.5px] font-[450] transition-colors cursor-pointer bg-transparent"
-                >
-                  Dismiss
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const ref = trackingModalData.publicReference || trackingModalData.id;
-                    setTrackingModalData(null);
-                    navigate(`/citizen/track?id=${encodeURIComponent(ref)}`);
-                  }}
-                  className="h-[42px] px-6 bg-[#E9E9E9] hover:bg-white text-[#0A0707] font-[500] text-[13.5px] rounded-[11px] transition-colors cursor-pointer border-0 shadow-md inline-flex items-center gap-1.5"
-                >
-                  <span>Open in Citizen Portal</span>
-                  <ArrowRight size={13} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================
-         14. Master Platform Directory Modal (All 30 Pages)
-         ========================================================= */}
-      <PlatformDirectoryModal
-        isOpen={showDirectoryModal}
-        onClose={() => setShowDirectoryModal(false)}
-      />
-
-      {/* =========================================================
-         15. Persistent Floating Platform Directory Launcher Pill
-         ========================================================= */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <button
-          type="button"
-          onClick={() => setShowDirectoryModal(true)}
-          className="h-[46px] px-4 sm:px-5 rounded-full bg-[#0c1024]/90 hover:bg-[#121836] text-white backdrop-blur-[20px] border border-white/20 shadow-[0_12px_32px_rgba(0,0,0,0.65)] hover:border-white/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5 cursor-pointer font-medium text-[13px] group"
-          title="Open Platform Directory: One-click access to all 30 platform destinations (Esc to close)"
-        >
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <LayoutGrid size={16} className="text-sky-300 group-hover:rotate-90 transition-transform duration-300" />
-          <span>Platform Directory</span>
-          <span className="px-1.5 py-0.5 rounded-full bg-white/10 text-[10.5px] font-mono text-white/80">30</span>
-        </button>
-      </div>
     </div>
   );
 };
