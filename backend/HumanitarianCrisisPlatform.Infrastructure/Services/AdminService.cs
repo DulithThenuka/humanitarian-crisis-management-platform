@@ -13,6 +13,8 @@ namespace HumanitarianCrisisPlatform.Infrastructure.Services;
 public class AdminService : IAdminService
 {
     private readonly ApplicationDbContext _context;
+    private static PlatformSettingsDto _settings = new();
+    private static readonly DateTime _serverStartTime = DateTime.UtcNow;
 
     public AdminService(ApplicationDbContext context)
     {
@@ -164,6 +166,7 @@ public class AdminService : IAdminService
                 FullName = u.FullName,
                 Email = u.Email,
                 PhoneNumber = u.PhoneNumber,
+                AssignedDistrict = u.AssignedDistrict,
                 Role = u.Role,
                 IsActive = u.IsActive,
                 CreatedAt = u.CreatedAt,
@@ -190,6 +193,7 @@ public class AdminService : IAdminService
             FullName = user.FullName,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
             Role = user.Role,
             IsActive = user.IsActive,
             CreatedAt = user.CreatedAt,
@@ -213,6 +217,7 @@ public class AdminService : IAdminService
             FullName = dto.FullName.Trim(),
             Email = dto.Email.Trim().ToLowerInvariant(),
             PhoneNumber = dto.PhoneNumber?.Trim(),
+            AssignedDistrict = dto.AssignedDistrict?.Trim(),
             Role = dto.Role,
             PasswordHash = PasswordHasher.HashPassword(dto.Password),
             IsActive = true
@@ -227,6 +232,7 @@ public class AdminService : IAdminService
             FullName = user.FullName,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
             Role = user.Role,
             IsActive = user.IsActive,
             CreatedAt = user.CreatedAt
@@ -256,6 +262,7 @@ public class AdminService : IAdminService
         user.FullName = dto.FullName.Trim();
         user.Email = dto.Email.Trim().ToLowerInvariant();
         user.PhoneNumber = dto.PhoneNumber?.Trim();
+        user.AssignedDistrict = dto.AssignedDistrict?.Trim();
         user.Role = dto.Role;
         user.IsActive = dto.IsActive;
 
@@ -267,6 +274,7 @@ public class AdminService : IAdminService
             FullName = user.FullName,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
             Role = user.Role,
             IsActive = user.IsActive,
             CreatedAt = user.CreatedAt,
@@ -406,5 +414,66 @@ public class AdminService : IAdminService
         }
 
         return Result<IReadOnlyList<AdminAuditLogDto>>.Success(audits);
+    }
+
+    public Task<Result<PlatformSettingsDto>> GetPlatformSettingsAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(Result<PlatformSettingsDto>.Success(_settings));
+    }
+
+    public Task<Result<PlatformSettingsDto>> UpdatePlatformSettingsAsync(PlatformSettingsDto dto, CancellationToken cancellationToken = default)
+    {
+        _settings.PlatformName = dto.PlatformName;
+        _settings.EmergencyMode = dto.EmergencyMode;
+        _settings.EmailNotifications = dto.EmailNotifications;
+        _settings.DataSyncInterval = dto.DataSyncInterval;
+        _settings.Language = dto.Language;
+        _settings.MaintenanceMode = dto.MaintenanceMode;
+        _settings.AiTriageConfidenceThreshold = dto.AiTriageConfidenceThreshold;
+        _settings.CriticalShelterCapacityThreshold = dto.CriticalShelterCapacityThreshold;
+        _settings.LastUpdatedAt = DateTime.UtcNow;
+
+        return Task.FromResult(Result<PlatformSettingsDto>.Success(_settings, "Platform settings successfully updated."));
+    }
+
+    public Task<Result<SystemHealthDetailsDto>> GetSystemHealthAsync(CancellationToken cancellationToken = default)
+    {
+        var uptime = (DateTime.UtcNow - _serverStartTime).TotalSeconds;
+        var memoryMb = Math.Round((double)GC.GetTotalMemory(false) / (1024 * 1024), 2);
+
+        var details = new SystemHealthDetailsDto
+        {
+            Status = "Operational",
+            Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
+            ServerTimeUtc = DateTime.UtcNow,
+            UptimeSeconds = Math.Round(uptime, 0),
+            AllocatedMemoryMb = memoryMb,
+            DatabaseEngine = _context.Database.ProviderName ?? "Entity Framework Core Relational",
+            Version = "v1.4.2",
+            ActiveDatabaseConnections = 1
+        };
+
+        return Task.FromResult(Result<SystemHealthDetailsDto>.Success(details));
+    }
+
+    public Task<Result<ProjectTeamDto>> GetProjectTeamAsync(CancellationToken cancellationToken = default)
+    {
+        var team = new ProjectTeamDto
+        {
+            ProjectName = "RELIEFCORE Humanitarian Platform",
+            Institution = "NSBM Green University",
+            Faculty = "Faculty of Computing",
+            Cohort = "BSc (Hons) in Software Engineering - Batch 24.1",
+            Description = "Comprehensive crisis management system designed and developed by NSBM undergraduates featuring automated AI intake triage, verified supply chains, real-time shelter allocation, and immutable audit ledgers.",
+            TeamMembers = new List<TeamMemberDto>
+            {
+                new() { Name = "Dulith Thenuka", Role = "Project Lead & Architecture", Contribution = "Backend .NET Web API, System Architecture, & Database Operations", StudentId = "NSBM-SE-001" },
+                new() { Name = "Eshan Gunasekara", Role = "Full Stack Integration", Contribution = "React Frontend Dashboards & Crisis Triage State Pipeline", StudentId = "NSBM-SE-002" },
+                new() { Name = "K.D. Thathsarani", Role = "Frontend & UX Design", Contribution = "Emergency Portals, Donations, & Platform Administration UI", StudentId = "NSBM-SE-003" },
+                new() { Name = "Ravindu & Design Team (Gurula)", Role = "Design System & Brand Identity", Contribution = "Figma Design System, Wireframes, Visual Assets & Media", StudentId = "NSBM-DES-004" }
+            }
+        };
+
+        return Task.FromResult(Result<ProjectTeamDto>.Success(team));
     }
 }

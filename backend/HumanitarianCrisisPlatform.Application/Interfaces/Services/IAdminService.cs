@@ -16,5 +16,8 @@ public interface IAdminService
     Task<Result<bool>> ResetPasswordAsync(Guid id, string newPassword, CancellationToken cancellationToken = default);
     Task<Result<bool>> DeleteUserAsync(Guid id, Guid currentUserId, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<AdminAuditLogDto>>> GetAuditLogsAsync(int take = 50, CancellationToken cancellationToken = default);
+    Task<Result<PlatformSettingsDto>> GetPlatformSettingsAsync(CancellationToken cancellationToken = default);
+    Task<Result<PlatformSettingsDto>> UpdatePlatformSettingsAsync(PlatformSettingsDto dto, CancellationToken cancellationToken = default);
+    Task<Result<SystemHealthDetailsDto>> GetSystemHealthAsync(CancellationToken cancellationToken = default);
+    Task<Result<ProjectTeamDto>> GetProjectTeamAsync(CancellationToken cancellationToken = default);
 }
-

@@ -27,6 +27,7 @@ public static class DatabaseSeeder
                     Email = "sarah.johnson@reliefcore.org",
                     PasswordHash = defaultPasswordHash,
                     PhoneNumber = "+94 77 123 4567",
+                    AssignedDistrict = "Western Province / Colombo",
                     Role = UserRole.Coordinator,
                     IsActive = true
                 },
@@ -37,6 +38,7 @@ public static class DatabaseSeeder
                     Email = "amara.chen@reliefcore.org",
                     PasswordHash = defaultPasswordHash,
                     PhoneNumber = "+94 77 234 5678",
+                    AssignedDistrict = "Western Province / Gampaha",
                     Role = UserRole.Coordinator,
                     IsActive = true
                 },
@@ -47,6 +49,7 @@ public static class DatabaseSeeder
                     Email = "admin@reliefcore.org",
                     PasswordHash = defaultPasswordHash,
                     PhoneNumber = "+94 77 345 6789",
+                    AssignedDistrict = "National Command Center",
                     Role = UserRole.Admin,
                     IsActive = true
                 },
@@ -57,6 +60,7 @@ public static class DatabaseSeeder
                     Email = "logistics@reliefcore.org",
                     PasswordHash = defaultPasswordHash,
                     PhoneNumber = "+94 77 456 7890",
+                    AssignedDistrict = "Western Province / Kalutara",
                     Role = UserRole.LogisticsManager,
                     IsActive = true
                 },
@@ -67,6 +71,7 @@ public static class DatabaseSeeder
                     Email = "volunteer@reliefcore.org",
                     PasswordHash = defaultPasswordHash,
                     PhoneNumber = "+94 77 567 8901",
+                    AssignedDistrict = "Southern Province / Galle",
                     Role = UserRole.Volunteer,
                     IsActive = true
                 },
@@ -77,6 +82,7 @@ public static class DatabaseSeeder
                     Email = "citizen@reliefcore.org",
                     PasswordHash = defaultPasswordHash,
                     PhoneNumber = "+94 77 678 9012",
+                    AssignedDistrict = "Sabaragamuwa / Ratnapura",
                     Role = UserRole.Citizen,
                     IsActive = true
                 }

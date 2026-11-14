@@ -7,7 +7,7 @@ using HumanitarianCrisisPlatform.Domain.Enums;
 
 namespace HumanitarianCrisisPlatform.API.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Coordinator")]
 [Route("api/[controller]")]
 public class AdminController : BaseApiController
 {
@@ -22,7 +22,6 @@ public class AdminController : BaseApiController
     /// Gets system-wide operational metrics, user demographics, crisis totals, and server health telemetry.
     /// </summary>
     [HttpGet("dashboard-stats")]
-    [Authorize(Roles = "Admin,Coordinator")]
     public async Task<ActionResult<Result<AdminDashboardStatsDto>>> GetDashboardStats(CancellationToken cancellationToken)
     {
         var result = await _adminService.GetDashboardStatsAsync(cancellationToken);
@@ -61,6 +60,7 @@ public class AdminController : BaseApiController
     /// Creates a new user with administrative authority and credentials.
     /// </summary>
     [HttpPost("users")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Result<AdminUserDto>>> CreateUser(
         [FromBody] CreateAdminUserDto dto,
         CancellationToken cancellationToken)
@@ -83,6 +83,7 @@ public class AdminController : BaseApiController
     /// Updates an existing user's profile details.
     /// </summary>
     [HttpPut("users/{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Result<AdminUserDto>>> UpdateUser(
         Guid id,
         [FromBody] UpdateAdminUserDto dto,
@@ -106,6 +107,7 @@ public class AdminController : BaseApiController
     /// Toggles a user's account activation status (lock / unlock).
     /// </summary>
     [HttpPut("users/{id:guid}/status")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Result<bool>>> UpdateUserStatus(
         Guid id,
         [FromBody] UpdateUserStatusDto dto,
@@ -124,6 +126,7 @@ public class AdminController : BaseApiController
     /// Updates a user's platform security role.
     /// </summary>
     [HttpPut("users/{id:guid}/role")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Result<bool>>> UpdateUserRole(
         Guid id,
         [FromBody] UpdateUserRoleDto dto,
@@ -142,6 +145,7 @@ public class AdminController : BaseApiController
     /// Resets a user's password with a secure new hash.
     /// </summary>
     [HttpPost("users/{id:guid}/reset-password")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Result<bool>>> ResetPassword(
         Guid id,
         [FromBody] ResetUserPasswordDto dto,
@@ -165,6 +169,7 @@ public class AdminController : BaseApiController
     /// Deletes a user account from the system.
     /// </summary>
     [HttpDelete("users/{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Result<bool>>> DeleteUser(
         Guid id,
         CancellationToken cancellationToken)
@@ -188,6 +193,55 @@ public class AdminController : BaseApiController
         CancellationToken cancellationToken = default)
     {
         var result = await _adminService.GetAuditLogsAsync(take, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets platform configuration and operational parameters.
+    /// </summary>
+    [HttpGet("settings")]
+    public async Task<ActionResult<Result<PlatformSettingsDto>>> GetSettings(CancellationToken cancellationToken)
+    {
+        var result = await _adminService.GetPlatformSettingsAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Updates platform configuration and operational thresholds.
+    /// </summary>
+    [HttpPut("settings")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<Result<PlatformSettingsDto>>> UpdateSettings(
+        [FromBody] PlatformSettingsDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(Result<PlatformSettingsDto>.Failure("Invalid settings payload."));
+        }
+
+        var result = await _adminService.UpdatePlatformSettingsAsync(dto, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets detailed live system health metrics and server diagnostic telemetry.
+    /// </summary>
+    [HttpGet("system-health")]
+    public async Task<ActionResult<Result<SystemHealthDetailsDto>>> GetSystemHealth(CancellationToken cancellationToken)
+    {
+        var result = await _adminService.GetSystemHealthAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Gets NSBM Green University project engineering team roster and credits.
+    /// </summary>
+    [HttpGet("team")]
+    [AllowAnonymous]
+    public async Task<ActionResult<Result<ProjectTeamDto>>> GetProjectTeam(CancellationToken cancellationToken)
+    {
+        var result = await _adminService.GetProjectTeamAsync(cancellationToken);
         return Ok(result);
     }
 }
