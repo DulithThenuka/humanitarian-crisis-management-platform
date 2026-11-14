@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { CitizenAssistanceRequestForm } from './CitizenAssistanceRequestForm';
-import { TrackRequestsPage } from './TrackRequestsPage';
-import { FindShelterPage } from './FindShelterPage';
-import { EmergencyAlertsPage } from './EmergencyAlertsPage';
-import { SafetyGuidePage } from './SafetyGuidePage';
-import { CitizenSupportPage } from './CitizenSupportPage';
-import { CitizenProfilePage } from './CitizenProfilePage';
+import { CitizenAssistanceRequestForm } from './assistance-requests/CitizenAssistanceRequestForm';
+import { TrackRequestsPage } from './track-requests/TrackRequestsPage';
+import { FindShelterPage } from './shelters/FindShelterPage';
+import { EmergencyAlertsPage } from './emergency-alerts/EmergencyAlertsPage';
+import { SafetyGuidePage } from './safety-guide/SafetyGuidePage';
+import { CitizenSupportPage } from './support-helpline/CitizenSupportPage';
+import { CitizenProfilePage } from './household-profile/CitizenProfilePage';
 import { 
   Home, 
   PlusSquare, 

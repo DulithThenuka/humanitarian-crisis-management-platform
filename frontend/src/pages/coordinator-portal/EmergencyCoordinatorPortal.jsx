@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
+import { coordinatorService } from '../../services';
 
 // Data
 import {
@@ -36,7 +37,7 @@ import { ReportsResponseAnalyticsView } from './reports/ReportsResponseAnalytics
 import { DecisionHistoryView } from './decision-history/DecisionHistoryView';
 import { NotificationsRemindersView } from './notifications/NotificationsRemindersView';
 import { ProfileSettingsView } from './profile-settings/ProfileSettingsView';
-import { AIOperationsContainer } from '../ai-operations/AIOperationsContainer';
+import { AIOperationsContainer } from './ai-decision-support/operations/AIOperationsContainer';
 
 import './EmergencyCoordinatorPortal.css';
 
@@ -91,6 +92,76 @@ export const EmergencyCoordinatorPortal = ({
   const currentCase = cases.find(c => c.id === selectedCaseId) || cases[0];
   const currentIncident = incidents.find(inc => inc.id === selectedIncidentId) || incidents[0];
 
+  // Fetch live backend overview on mount
+  useEffect(() => {
+    let isMounted = true;
+    coordinatorService.getOverview()
+      .then(res => {
+        if (!isMounted || !res?.data) return;
+        const data = res.data;
+        if (data.metrics) {
+          setMetrics(prev => ({
+            ...prev,
+            incomingRequests: data.metrics.incomingRequests ?? prev.incomingRequests,
+            pendingReviews: data.metrics.pendingReviews ?? prev.pendingReviews,
+            criticalPriority: data.metrics.criticalPriority ?? prev.criticalPriority,
+            activeEmergencies: data.metrics.activeEmergencies ?? prev.activeEmergencies,
+            volunteersAssigned: data.metrics.volunteersAssigned ?? prev.volunteersAssigned
+          }));
+        }
+        if (Array.isArray(data.priorityCases) && data.priorityCases.length > 0) {
+          const mapped = data.priorityCases.map(c => ({
+            id: c.ticketReference || c.id,
+            category: c.category || 'Emergency Relief',
+            categoryIcon: c.categoryIcon || 'package',
+            location: c.location || 'Colombo',
+            district: c.district || 'Colombo',
+            timeAgo: c.timeAgo || 'Recent',
+            severity: c.severity || 'High',
+            status: c.status || 'Pending verification',
+            assignedTo: c.assignedTo || 'Assigned to you',
+            requesterName: c.requesterName || 'Displaced Citizen',
+            contactNumber: c.contactNumber || '+94 77 000 0000',
+            contactStatus: c.contactStatus || 'Pending call-back',
+            affectedSummary: c.affectedSummary || 'Household assistance',
+            description: c.description || '',
+            generalLocation: c.generalLocation || 'Zone 03',
+            accessibility: c.accessibility || 'Standard access',
+            emergencyContext: c.emergencyContext || 'Active incident',
+            numberOfPeople: c.numberOfPeople || 1,
+            aiPriorityScore: c.aiPriorityScore || 0.88,
+            aiConfidence: c.aiConfidence || 0.94,
+            aiSuggestion: c.aiSuggestion || 'AI automated triage',
+            attachmentsCount: c.attachmentsCount || 1,
+            attachment: c.attachment || {
+              fileName: 'evidence.jpg',
+              fileSize: '2.4 MB',
+              uploadType: 'Citizen upload',
+              previewUrl: '/assets/req-drawer-flood.jpg'
+            },
+            checklist: Array.isArray(c.checklist) && c.checklist.length > 0 ? c.checklist : [
+              { id: 'c1', label: 'Request category is consistent with description', checked: true, required: false },
+              { id: 'c2', label: 'General location is within active operation boundaries', checked: true, required: false },
+              { id: 'c3', label: 'Citizen contact information has been verified', checked: false, required: true },
+              { id: 'c4', label: 'Supporting photo/evidence has been reviewed', checked: false, required: true }
+            ],
+            notes: Array.isArray(c.notes) ? c.notes : [],
+            history: Array.isArray(c.history) ? c.history : []
+          }));
+          setCases(mapped);
+          if (mapped[0]?.id) setSelectedCaseId(mapped[0].id);
+        }
+        if (Array.isArray(data.recentActivity) && data.recentActivity.length > 0) {
+          setRecentActivity(data.recentActivity);
+        }
+      })
+      .catch(err => {
+        console.warn('Coordinator live API sync skipped (using cached/mock telemetry):', err);
+      });
+
+    return () => { isMounted = false; };
+  }, []);
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => {
@@ -142,6 +213,10 @@ export const EmergencyCoordinatorPortal = ({
 
     setNewNoteText('');
     showToast(`Note logged for request ${currentCase.id}`);
+
+    // Sync note with backend
+    coordinatorService.addCaseNote(currentCase.id, newNoteText.trim())
+      .catch(err => console.warn('Note logged locally (offline/fallback mode):', err));
   };
 
   // Confirm Verification
@@ -183,10 +258,19 @@ export const EmergencyCoordinatorPortal = ({
       pendingReviews: Math.max(0, prev.pendingReviews - 1)
     }));
 
+    const caseIdToVerify = currentCase.id;
+    const reasonToVerify = verifyReason.trim();
+
     setShowVerifyModal(false);
     setVerifyReason('');
     setVerifyConfirmedCheck(false);
-    showToast(`Request ${currentCase.id} verified and scheduled for dispatch!`, 'success');
+    showToast(`Request ${caseIdToVerify} verified and scheduled for dispatch!`, 'success');
+
+    // Sync verification with backend
+    coordinatorService.verifyCase(caseIdToVerify, {
+      reason: reasonToVerify,
+      confirmedCheck: true
+    }).catch(err => console.warn('Verification logged locally (offline/fallback mode):', err));
   };
 
   // Accept AI Recommendation
@@ -202,6 +286,12 @@ export const EmergencyCoordinatorPortal = ({
       type: 'approved'
     };
     setRecentActivity(prev => [newActivity, ...prev]);
+
+    // Sync decision audit with backend
+    coordinatorService.reviewAIDecision(currentCase.id, {
+      action: 'Approve',
+      reason: reason || `Accepted AI recommendation (${finalPriority})`
+    }).catch(err => console.warn('AI review logged locally (offline/fallback mode):', err));
   };
 
   // Create Incident
@@ -235,8 +325,19 @@ export const EmergencyCoordinatorPortal = ({
     setIncidents(prev => [newInc, ...prev]);
     setSelectedIncidentId(newId);
     setShowCreateIncidentModal(false);
+
+    const incidentDataToCreate = {
+      title: newIncidentForm.title.trim(),
+      severity: newIncidentForm.severity,
+      area: newIncidentForm.area || 'Western Province Sector'
+    };
+
     setNewIncidentForm({ title: '', severity: 'High', area: '', stats: '' });
     showToast(`Incident ${newId} logged successfully!`, 'success');
+
+    // Sync incident with backend
+    coordinatorService.createIncident(incidentDataToCreate)
+      .catch(err => console.warn('Incident logged locally (offline/fallback mode):', err));
   };
 
   // Create Alert
@@ -244,9 +345,19 @@ export const EmergencyCoordinatorPortal = ({
     e.preventDefault();
     if (!newAlertForm.title.trim()) return;
 
+    const alertDataToCreate = {
+      title: newAlertForm.title.trim(),
+      severity: newAlertForm.severity,
+      area: newAlertForm.area
+    };
+
     setShowCreateAlertModal(false);
     setNewAlertForm({ title: '', severity: 'Critical', area: 'Kelani East - Zone 03' });
     showToast('Emergency broadcast alert queued for dispatch!', 'success');
+
+    // Sync alert with backend
+    coordinatorService.createAlert(alertDataToCreate)
+      .catch(err => console.warn('Alert queued locally (offline/fallback mode):', err));
   };
 
   if (activeTab === 'ai-ops') {

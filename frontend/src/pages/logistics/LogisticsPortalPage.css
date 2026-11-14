@@ -1,0 +1,114 @@
+.logistics-portal-page {
+  min-height: 100vh;
+  background-color: #0f172a;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.logistics-header {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-bottom: 1px solid #334155;
+  padding: 1.5rem 2rem 0;
+}
+
+.logistics-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.portal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.portal-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 0.35rem 0;
+}
+
+.portal-subtitle {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin: 0;
+  max-width: 650px;
+}
+
+.logistics-header-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.header-stat-pill {
+  background: #1e293b;
+  border: 1px solid #334155;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-bottom: 0.2rem;
+}
+
+.stat-val {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.stat-val-blue { color: #60a5fa; }
+.stat-val-amber { color: #f59e0b; }
+.stat-val-green { color: #10b981; }
+
+.logistics-tab-nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.logistics-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.logistics-tab-btn:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.logistics-tab-btn.active {
+  color: #38bdf8;
+  border-bottom-color: #38bdf8;
+}
+
+.logistics-main-body {
+  flex: 1;
+}

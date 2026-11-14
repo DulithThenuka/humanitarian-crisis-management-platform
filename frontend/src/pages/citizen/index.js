@@ -1,10 +1,13 @@
+// Main Module Entry
 export { CitizenPortalPage } from './CitizenPortalPage';
-export { SubmitRequestPage } from './SubmitRequestPage';
-export { TrackRequestsPage } from './TrackRequestsPage';
-export { FindShelterPage } from './FindShelterPage';
-export { EmergencyAlertsPage } from './EmergencyAlertsPage';
-export { SafetyGuidePage } from './SafetyGuidePage';
-export { CitizenSupportPage } from './CitizenSupportPage';
-export { CitizenProfilePage } from './CitizenProfilePage';
-export { CitizenAssistanceRequestForm } from './CitizenAssistanceRequestForm';
+export { CitizenPortalPage as default } from './CitizenPortalPage';
 
+// Sub-Category Page Modules
+export { FindShelterPage } from './shelters/FindShelterPage';
+export { SubmitRequestPage } from './assistance-requests/SubmitRequestPage';
+export { CitizenAssistanceRequestForm } from './assistance-requests/CitizenAssistanceRequestForm';
+export { TrackRequestsPage } from './track-requests/TrackRequestsPage';
+export { EmergencyAlertsPage } from './emergency-alerts/EmergencyAlertsPage';
+export { SafetyGuidePage } from './safety-guide/SafetyGuidePage';
+export { CitizenSupportPage } from './support-helpline/CitizenSupportPage';
+export { CitizenProfilePage } from './household-profile/CitizenProfilePage';
