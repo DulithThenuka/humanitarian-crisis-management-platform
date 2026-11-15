@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { 
   Shield, 
   ShieldCheck, 
@@ -34,6 +34,9 @@ import './CaseManager.css';
 
 export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
+
   const [activeTab, setActiveTab] = useState(initialTab);
   const [dutyActive, setDutyActive] = useState(true);
   const [activeOperation, setActiveOperation] = useState(CASE_MANAGER_USER.activeOperation);
@@ -42,6 +45,29 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
   // Shared Cases state
   const [casesList, setCasesList] = useState(INITIAL_CASES_LIST);
   const [selectedCaseId, setSelectedCaseId] = useState('HMR-1042');
+
+  // Reactively sync active tab & selected case from route/props
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+    const p = (location.pathname || '').toLowerCase();
+    if (p.includes('/cases') || p.includes('/management')) {
+      setActiveTab('management');
+      if (params.id) setSelectedCaseId(params.id);
+    } else if (p.includes('/review')) {
+      setActiveTab('review');
+      if (params.id) setSelectedCaseId(params.id);
+    } else if (p.includes('/communication')) {
+      setActiveTab('communication');
+    } else if (p.includes('/reports')) {
+      setActiveTab('reports');
+    } else if (p.includes('/profile')) {
+      setActiveTab('profile');
+    } else if (p.includes('/dashboard') || p === '/incident-manager' || p === '/case-manager' || p === '/incident-manager/portal') {
+      setActiveTab('dashboard');
+    }
+  }, [initialTab, location.pathname, params.id]);
   
   // Toast Alert HUD
   const [toast, setToast] = useState(null);

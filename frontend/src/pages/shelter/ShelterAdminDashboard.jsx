@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutGrid,
   Home,
@@ -47,9 +47,31 @@ import './ShelterManager.css';
 
 export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Navigation State
   const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Reactively sync activeTab with URL route and props
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+    const p = (location.pathname || '').toLowerCase();
+    if (p.includes('/directory')) {
+      setActiveTab('directory');
+    } else if (p.includes('/capacity')) {
+      setActiveTab('capacity');
+    } else if (p.includes('/placements') || p.includes('/allocations') || p.includes('/allocation')) {
+      setActiveTab('placements');
+    } else if (p.includes('/resources')) {
+      setActiveTab('resources');
+    } else if (p.includes('/reports')) {
+      setActiveTab('reports');
+    } else if (p.includes('/dashboard') || p === '/shelter' || p === '/shelter-admin' || p === '/shelter-manager' || p === '/shelters') {
+      setActiveTab('dashboard');
+    }
+  }, [initialTab, location.pathname]);
 
   // Core Data States
   const [currentUser, setCurrentUser] = useState(SHELTER_ADMIN_USER);

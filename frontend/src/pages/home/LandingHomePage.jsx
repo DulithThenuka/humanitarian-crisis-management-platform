@@ -217,7 +217,14 @@ export const LandingHomePage = () => {
       badge: 'Public Portal',
       icon: Users,
       color: '#38bdf8',
-      featured: 'Instant SOS intake, tracking & open shelter locator'
+      featured: 'Instant SOS intake, tracking & open shelter locator',
+      sublinks: [
+        { label: 'Submit SOS', path: '/citizen/submit' },
+        { label: 'Track Requests', path: '/citizen/track' },
+        { label: 'Find Shelters', path: '/citizen/shelters' },
+        { label: 'Emergency Alerts', path: '/citizen/alerts' },
+        { label: 'Safety Guides', path: '/citizen/safety' }
+      ]
     },
     {
       id: 'coordinator',
@@ -227,7 +234,15 @@ export const LandingHomePage = () => {
       badge: 'Command Center',
       icon: Radio,
       color: '#34d399',
-      featured: 'Explainable AI triage review & emergency alerts'
+      featured: 'Explainable AI triage review & emergency alerts',
+      sublinks: [
+        { label: 'Command Cockpit', path: '/coordinator/overview' },
+        { label: 'AI Request Review', path: '/coordinator/review' },
+        { label: 'Crisis Incidents', path: '/coordinator/incidents' },
+        { label: 'Resource Dispatch', path: '/coordinator/resources' },
+        { label: 'Shelter & Field Ops', path: '/coordinator/shelters' },
+        { label: 'Response Analytics', path: '/coordinator/reports' }
+      ]
     },
     {
       id: 'incident-manager',
@@ -237,7 +252,14 @@ export const LandingHomePage = () => {
       badge: 'Case Management',
       icon: FileText,
       color: '#06b6d4',
-      featured: 'Multi-agency incident verification & escalation'
+      featured: 'Multi-agency incident verification & escalation',
+      sublinks: [
+        { label: 'Case Dashboard', path: '/incident-manager/dashboard' },
+        { label: 'Active Dossiers', path: '/incident-manager/cases' },
+        { label: 'AI Case Review', path: '/incident-manager/review' },
+        { label: 'Agency Comms', path: '/incident-manager/communication' },
+        { label: 'Case Reports', path: '/incident-manager/reports' }
+      ]
     },
     {
       id: 'logistics',
@@ -247,7 +269,14 @@ export const LandingHomePage = () => {
       badge: 'Supply Chain',
       icon: Package,
       color: '#fbbf24',
-      featured: 'Warehouse depots, ration packs & convoy routing'
+      featured: 'Warehouse depots, ration packs & convoy routing',
+      sublinks: [
+        { label: 'Warehouse Stockpiles', path: '/logistics/inventory' },
+        { label: 'Convoy Dispatch', path: '/logistics/dispatch' },
+        { label: 'Supply Requisitions', path: '/logistics/requests' },
+        { label: 'Depot Facilities', path: '/logistics/depots' },
+        { label: 'Receiving Dock', path: '/logistics/intake' }
+      ]
     },
     {
       id: 'shelter',
@@ -257,7 +286,14 @@ export const LandingHomePage = () => {
       badge: 'Facility Ops',
       icon: Building2,
       color: '#f87171',
-      featured: 'Live bed occupancy & vulnerable intake allocation'
+      featured: 'Live bed occupancy & vulnerable intake allocation',
+      sublinks: [
+        { label: 'Shelter Directory', path: '/shelter/directory' },
+        { label: 'Bed Capacity', path: '/shelter/capacity' },
+        { label: 'Evacuee Placements', path: '/shelter/placements' },
+        { label: 'Relief Requests', path: '/shelter/resources' },
+        { label: 'Occupancy Reports', path: '/shelter/reports' }
+      ]
     },
     {
       id: 'volunteer',
@@ -267,7 +303,13 @@ export const LandingHomePage = () => {
       badge: 'Field Responders',
       icon: Compass,
       color: '#c084fc',
-      featured: 'Task dispatch & verified rescue volunteer roster'
+      featured: 'Task dispatch & verified rescue volunteer roster',
+      sublinks: [
+        { label: 'Mission Shifts', path: '/volunteer/opportunities' },
+        { label: 'Task Assignments', path: '/volunteer/assignments' },
+        { label: 'Field Progress', path: '/volunteer/progress' },
+        { label: 'Responder Schedule', path: '/volunteer/schedule' }
+      ]
     },
     {
       id: 'donor',
@@ -277,7 +319,12 @@ export const LandingHomePage = () => {
       badge: 'Funding & Aid',
       icon: Gift,
       color: '#ec4899',
-      featured: 'Relief funding packages & public contributions'
+      featured: 'Relief funding packages & public contributions',
+      sublinks: [
+        { label: 'Relief Packages', path: '/donor/packages' },
+        { label: 'Tracking Ledger', path: '/donor/tracking' },
+        { label: 'Aid Contribution', path: '/donor/contribute' }
+      ]
     },
     {
       id: 'partner',
@@ -287,7 +334,12 @@ export const LandingHomePage = () => {
       badge: 'Partner Network',
       icon: Building,
       color: '#a855f7',
-      featured: 'Agency coordination & active response commitments'
+      featured: 'Agency coordination & active response commitments',
+      sublinks: [
+        { label: 'Partner Directory', path: '/partner/directory' },
+        { label: 'Resource Pledges', path: '/partner/commitments' },
+        { label: 'Operational Zones', path: '/partner/zones' }
+      ]
     },
     {
       id: 'admin',
@@ -297,7 +349,14 @@ export const LandingHomePage = () => {
       badge: 'Administration',
       icon: Settings,
       color: '#6366f1',
-      featured: 'System health telemetry & operator RBAC controls'
+      featured: 'System health telemetry & operator RBAC controls',
+      sublinks: [
+        { label: 'Command Cockpit', path: '/admin/dashboard' },
+        { label: 'User RBAC Controls', path: '/admin/users' },
+        { label: 'Incident Overseer', path: '/admin/crisis' },
+        { label: 'Supply Inventory', path: '/admin/resources' },
+        { label: 'Audit Ledger', path: '/admin/audit' }
+      ]
     }
   ];
 
@@ -567,17 +626,24 @@ export const LandingHomePage = () => {
             </Animate>
           }
           navLinks={[
-            { label: 'Find Assistance', href: '/citizen/submit' },
-            { label: 'Shelters', href: '/citizen/shelters', badge: `${telemetry.metrics.operationalSheltersCount} Open` },
+            { label: 'Citizen Portal', href: '/citizen' },
+            { label: 'Find Shelters', href: '/citizen/shelters', badge: `${telemetry.metrics.operationalSheltersCount || 16} Open` },
             { label: 'Track Request', href: '/citizen/track' },
-            { label: 'Operations Portal', href: '/coordinator' },
+            { label: 'Satellite Map', href: '/map' },
+            { label: 'Coordinator Command', href: '/coordinator' },
           ]}
           loginLabel="Sign In"
           loginLink="/login"
-          signupLabel=""
-          ctaNavLabel="Request Aid →"
-          ctaNavLink="/citizen/submit"
-          liveOpsBadge={null}
+          signupLabel="Sign Up"
+          signupLink="/signup"
+          ctaNavLabel=""
+          ctaNavLink=""
+          liveOpsBadge={
+            <div className="hidden xl:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[12px] font-medium tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>LIVE RESCUE OPERATIONS ACTIVE</span>
+            </div>
+          }
           onScrollDown={() => {
             const el = document.getElementById('operations-telemetry-section') || document.getElementById('immediate-assistance-tray');
             if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -978,6 +1044,26 @@ export const LandingHomePage = () => {
                   <p className="text-white/60 text-[13px] font-[450] mt-1.5 leading-relaxed">
                     {r.desc}
                   </p>
+
+                  {/* Sub-links / Quick launch buttons to access each sub-page */}
+                  {r.sublinks && r.sublinks.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-4 pt-3 border-t border-white/[0.08]">
+                      {r.sublinks.map((sub, sIdx) => (
+                        <button
+                          key={sIdx}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(sub.path);
+                          }}
+                          className="px-2.5 py-1 rounded-[8px] bg-white/[0.06] hover:bg-white/[0.16] text-white/80 hover:text-white text-[11px] font-[450] border border-white/[0.1] hover:border-white/25 transition-all cursor-pointer flex items-center gap-1 group/btn"
+                        >
+                          <span>{sub.label}</span>
+                          <ArrowRight size={10} className="text-white/40 group-hover/btn:text-white group-hover/btn:translate-x-0.5 transition-all" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                 </div>
 

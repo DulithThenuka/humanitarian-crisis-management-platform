@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { coordinatorService } from '../../services';
 
@@ -45,9 +46,49 @@ export const EmergencyCoordinatorPortal = ({
   initialActiveTab = 'overview',
   initialCaseId = 'HMR-1042'
 }) => {
+  const location = useLocation();
+  const params = useParams();
+
   // Navigation & View States
   const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [selectedCaseId, setSelectedCaseId] = useState(initialCaseId);
+
+  // Sync activeTab & selectedCaseId reactively when URL route or props change
+  useEffect(() => {
+    if (initialActiveTab) {
+      setActiveTab(initialActiveTab);
+    }
+    const path = (location.pathname || '').toLowerCase();
+    if (path.includes('/coordinator/review') || path.includes('/ai-review')) {
+      setActiveTab('review');
+      if (params.id) setSelectedCaseId(params.id);
+    } else if (path.includes('/coordinator/cases') || path.includes('/coordinator/requests')) {
+      setActiveTab('requests');
+      if (params.id) setSelectedCaseId(params.id);
+    } else if (path.includes('/coordinator/incidents') || path.includes('/coordinator/crisis')) {
+      setActiveTab('crisis');
+    } else if (path.includes('/coordinator/resources')) {
+      setActiveTab('resources');
+    } else if (path.includes('/coordinator/shelters')) {
+      setActiveTab('shelters');
+    } else if (path.includes('/coordinator/alerts')) {
+      setActiveTab('alerts');
+    } else if (path.includes('/coordinator/reports')) {
+      setActiveTab('reports');
+    } else if (path.includes('/coordinator/history')) {
+      setActiveTab('history');
+    } else if (path.includes('/coordinator/notifications')) {
+      setActiveTab('notifications');
+    } else if (path.includes('/coordinator/settings')) {
+      setActiveTab('settings');
+    } else if (path.includes('/coordinator/ai-ops') || path.includes('/ai-operations')) {
+      setActiveTab('ai-ops');
+    } else if (path.includes('/coordinator/ai-support')) {
+      setActiveTab('ai-support');
+    } else if (path === '/coordinator' || path === '/coordinator/' || path === '/coordinator/overview' || path === '/coordinator/portal') {
+      setActiveTab('overview');
+    }
+  }, [initialActiveTab, location.pathname, params.id]);
 
   // Core Data States
   const [cases, setCases] = useState(PRIORITY_CASES);

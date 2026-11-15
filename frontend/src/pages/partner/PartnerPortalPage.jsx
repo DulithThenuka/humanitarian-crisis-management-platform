@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Building2,
   Users,
@@ -117,7 +118,25 @@ const PARTNER_ORGANISATIONS = [
 ];
 
 export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Reactively sync activeTab with URL route and props
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+    const p = (location.pathname || '').toLowerCase();
+    if (p.includes('/directory')) {
+      setActiveTab('directory');
+    } else if (p.includes('/commitments')) {
+      setActiveTab('commitments');
+    } else if (p.includes('/zones')) {
+      setActiveTab('zones');
+    } else if (p === '/partner' || p === '/partner/portal' || p === '/partner/dashboard' || p === '/partners') {
+      setActiveTab('overview');
+    }
+  }, [initialTab, location.pathname]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPartner, setSelectedPartner] = useState(PARTNER_ORGANISATIONS[0]);
   const [showCommitmentModal, setShowCommitmentModal] = useState(false);

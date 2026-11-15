@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Heart,
   Gift,
@@ -72,7 +73,23 @@ const DONOR_TRANSACTIONS = [
 ];
 
 export const DonorPortalPage = ({ initialTab = 'overview' }) => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Reactively sync activeTab with URL route and props
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+    const p = (location.pathname || '').toLowerCase();
+    if (p.includes('/packages')) {
+      setActiveTab('packages');
+    } else if (p.includes('/tracking')) {
+      setActiveTab('tracking');
+    } else if (p.includes('/contribute') || p === '/donor' || p === '/donor/portal' || p === '/donor/dashboard' || p === '/donations') {
+      setActiveTab('overview');
+    }
+  }, [initialTab, location.pathname]);
   const [selectedPackage, setSelectedPackage] = useState(RELIEF_PACKAGES[0]);
   const [customAmount, setCustomAmount] = useState('');
   const [donorName, setDonorName] = useState('');
