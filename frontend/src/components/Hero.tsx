@@ -587,7 +587,7 @@ export function Nav({
               <a
                 href={ctaNavLink}
                 onClick={(e) => handleLinkClick(e, ctaNavLink, onCtaNavClick)}
-                className="h-[46px] px-6 bg-[#E9E9E9] rounded-[11px] text-[#0A0707] text-[14px] font-[450] leading-[14px] hover:bg-white transition-colors inline-flex items-center justify-center cursor-pointer text-decoration-none"
+                className="h-[46px] px-6 bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-[550] text-[14px] leading-[14px] rounded-[11px] shadow-[0_4px_16px_rgba(249,115,22,0.4)] border border-orange-400/40 transition-all inline-flex items-center justify-center cursor-pointer text-decoration-none"
               >
                 {ctaNavLabel}
               </a>

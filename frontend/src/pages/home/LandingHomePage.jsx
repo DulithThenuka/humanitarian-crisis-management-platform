@@ -603,10 +603,10 @@ export const LandingHomePage = () => {
                     className="flex flex-col text-left p-2.5 rounded-[12px] bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.08] transition-all cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-semibold text-purple-300 tracking-wider uppercase">Ground Responders</span>
+                      <span className="text-[10px] font-semibold text-teal-300 tracking-wider uppercase">Ground Responders</span>
                       <ArrowRight size={11} className="text-white/40 group-hover:text-white transition-colors" />
                     </div>
-                    <p className="text-[12px] font-medium text-white line-clamp-1 group-hover:text-purple-200 transition-colors">
+                    <p className="text-[12px] font-medium text-white line-clamp-1 group-hover:text-teal-200 transition-colors">
                       {telemetry.metrics.activeGroundTeams} Active Units
                     </p>
                     <span className="text-[10px] text-white/50">{telemetry.metrics.requestsReviewedOnTimePercent}% On-Time Triage</span>
@@ -715,13 +715,13 @@ export const LandingHomePage = () => {
 
             {/* Stat 4 */}
             <div className="rounded-[22px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-6 hover:border-white/20 transition-all flex items-start gap-4">
-              <div className="w-12 h-12 rounded-[14px] bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-[14px] bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
                 <Building2 size={22} />
               </div>
               <div>
                 <div className="flex items-baseline gap-2">
                   <span className="text-[26px] font-[500] text-white tracking-tight">{telemetry.metrics.operationalSheltersCount} Shelters</span>
-                  <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-semibold">Verified</span>
+                  <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-semibold">Verified</span>
                 </div>
                 <h4 className="text-[14px] font-[500] text-white/90 mt-0.5">Evacuation Centers</h4>
                 <p className="text-[12px] text-white/50 mt-1 leading-snug">{telemetry.metrics.shelterOccupancyPercent}% bed capacity currently occupied</p>
@@ -966,7 +966,7 @@ export const LandingHomePage = () => {
             {/* Left Column (5 Cols) */}
             <div className="lg:col-span-5 rounded-[28px] bg-slate-900/50 backdrop-blur-[20px] border border-white/[0.08] p-8 sm:p-10 flex flex-col justify-between">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[11px] font-semibold tracking-wider uppercase mb-5">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-300 text-[11px] font-semibold tracking-wider uppercase mb-5">
                   <MapPin size={12} />
                   <span>SATELLITE SITUATION REPORT</span>
                 </div>
@@ -985,11 +985,11 @@ export const LandingHomePage = () => {
                   </div>
                   <div className="flex items-center justify-between text-[13.5px]">
                     <span className="text-white/80">Gampaha Sector (Attanagalu Oya):</span>
-                    <span className="text-rose-400 font-medium">Critical Overflow Watch</span>
+                    <span className="text-orange-400 font-medium">Critical Overflow Watch</span>
                   </div>
                   <div className="flex items-center justify-between text-[13.5px]">
                     <span className="text-white/80">Kalutara Sector (Kalu Ganga):</span>
-                    <span className="text-emerald-400 font-medium">Safe Corridors Open</span>
+                    <span className="text-cyan-400 font-medium">Safe Corridors Open</span>
                   </div>
                 </div>
               </div>
@@ -1017,9 +1017,9 @@ export const LandingHomePage = () => {
                 />
                 {/* Radar Pulses */}
                 <div className="absolute top-[48%] left-[42%] flex items-center justify-center pointer-events-none">
-                  <span className="absolute w-10 h-10 rounded-full bg-rose-500/30 animate-ping"></span>
-                  <span className="relative w-3.5 h-3.5 rounded-full bg-rose-500 border-2 border-white shadow-[0_0_12px_#f43f5e]"></span>
-                  <span className="absolute left-6 text-[11px] font-semibold text-rose-300 bg-[#080A19]/80 px-2 py-0.5 rounded backdrop-blur border border-rose-500/30 whitespace-nowrap">
+                  <span className="absolute w-10 h-10 rounded-full bg-orange-500/30 animate-ping"></span>
+                  <span className="relative w-3.5 h-3.5 rounded-full bg-orange-500 border-2 border-white shadow-[0_0_12px_#f97316]"></span>
+                  <span className="absolute left-6 text-[11px] font-semibold text-orange-200 bg-[#080A19]/80 px-2 py-0.5 rounded backdrop-blur border border-orange-500/30 whitespace-nowrap">
                     Colombo (Active SOS)
                   </span>
                 </div>
@@ -1031,9 +1031,9 @@ export const LandingHomePage = () => {
                   </span>
                 </div>
                 <div className="absolute top-[72%] left-[54%] flex items-center justify-center pointer-events-none">
-                  <span className="absolute w-8 h-8 rounded-full bg-emerald-500/30 animate-ping"></span>
-                  <span className="relative w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-[0_0_10px_#10b981]"></span>
-                  <span className="absolute left-5 text-[11px] font-semibold text-emerald-300 bg-[#080A19]/80 px-2 py-0.5 rounded backdrop-blur border border-emerald-500/30 whitespace-nowrap">
+                  <span className="absolute w-8 h-8 rounded-full bg-cyan-500/30 animate-ping"></span>
+                  <span className="relative w-3 h-3 rounded-full bg-cyan-500 border-2 border-white shadow-[0_0_10px_#06b6d4]"></span>
+                  <span className="absolute left-5 text-[11px] font-semibold text-cyan-200 bg-[#080A19]/80 px-2 py-0.5 rounded backdrop-blur border border-cyan-500/30 whitespace-nowrap">
                     Kalutara (Shelters Open)
                   </span>
                 </div>
@@ -1049,7 +1049,7 @@ export const LandingHomePage = () => {
       <section className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px] py-16 sm:py-24 border-t border-white/[0.06]" id="command-network-section">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
           <div>
-            <span className="text-purple-400 text-[12px] tracking-[0.2em] font-[500] uppercase mb-2 block">
+            <span className="text-cyan-400 text-[12px] tracking-[0.2em] font-[500] uppercase mb-2 block">
               HUMANITARIAN COMMAND NETWORK
             </span>
             <h2 className="text-white text-[32px] sm:text-[48px] font-normal leading-[1.05] tracking-[-0.02em]">
@@ -1142,7 +1142,7 @@ export const LandingHomePage = () => {
         <div className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px]">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
-              <span className="text-rose-400 text-[12px] tracking-[0.2em] font-[500] uppercase mb-2 block">
+              <span className="text-orange-400 text-[12px] tracking-[0.2em] font-[500] uppercase mb-2 block">
                 24/7 TOLL-FREE EMERGENCY DIRECTORY
               </span>
               <h2 className="text-white text-[32px] sm:text-[44px] font-normal leading-[1.05] tracking-[-0.02em]">
@@ -1231,8 +1231,8 @@ export const LandingHomePage = () => {
             <div>
               <h5 className="text-white text-[13px] font-[500] uppercase tracking-wider mb-4">Citizen Services</h5>
               <ul className="space-y-2 text-[13px]">
-                <li><Link to="/services" className="text-sky-400 hover:text-sky-300 font-medium transition-colors text-decoration-none">Emergency Relief Services</Link></li>
-                <li><Link to="/emergency-directory" className="text-rose-400 hover:text-rose-300 font-medium transition-colors text-decoration-none">24/7 Emergency Directory</Link></li>
+                <li><Link to="/services" className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors text-decoration-none">Emergency Relief Services</Link></li>
+                <li><Link to="/emergency-directory" className="text-orange-400 hover:text-orange-300 font-medium transition-colors text-decoration-none">24/7 Emergency Directory</Link></li>
                 <li><Link to="/citizen/submit" className="text-white/60 hover:text-white transition-colors text-decoration-none">Submit Assistance SOS</Link></li>
                 <li><Link to="/citizen/track" className="text-white/60 hover:text-white transition-colors text-decoration-none">Track My Request</Link></li>
                 <li><Link to="/citizen/shelters" className="text-white/60 hover:text-white transition-colors text-decoration-none">Verified Open Shelters</Link></li>
