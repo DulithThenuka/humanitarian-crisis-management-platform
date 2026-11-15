@@ -309,6 +309,39 @@ export const PLATFORM_PAGES = [
     color: '#f59e0b',
     highlight: 'GPS Fleet Manifests'
   },
+  {
+    id: 'logistics-requests',
+    category: 'Resource & Logistics Manager',
+    name: 'Shelter Supply Requisitions Queue',
+    path: '/logistics/requests',
+    description: 'Review and allocate incoming emergency supply requests from shelters and hospital relief camps.',
+    badge: 'Module 04',
+    icon: ClipboardList,
+    color: '#38bdf8',
+    highlight: 'Shelter Requisition Orders'
+  },
+  {
+    id: 'logistics-depots',
+    category: 'Resource & Logistics Manager',
+    name: 'Depot Facilities & Storage Hubs',
+    path: '/logistics/depots',
+    description: 'Strategic warehouse facility management across Peliyagoda, Colombo Port, Gampaha, and Kalutara.',
+    badge: 'Module 04',
+    icon: Building2,
+    color: '#10b981',
+    highlight: '240k Sq Ft Storage Grid'
+  },
+  {
+    id: 'logistics-intake',
+    category: 'Resource & Logistics Manager',
+    name: 'Receiving Dock & Inward Cargo',
+    path: '/logistics/intake',
+    description: 'Log and verify inward deliveries from UN agencies, Red Cross, and corporate relief food consignments.',
+    badge: 'Module 04',
+    icon: ArrowRight,
+    color: '#a855f7',
+    highlight: 'Waybill & QA Verification'
+  },
 
   // ==========================================
   // MODULE 5: Shelter Management
@@ -504,6 +537,61 @@ export const PLATFORM_PAGES = [
     icon: ShieldAlert,
     color: '#e11d48',
     highlight: 'District & Role Controls'
+  },
+  {
+    id: 'admin-crisis',
+    category: 'System Administration',
+    name: 'Crisis Management & Incidents',
+    path: '/admin/crisis',
+    description: 'Monitor active disaster events, declare emergency incidents, assess affected populations, and deploy response teams.',
+    badge: 'Module 09',
+    icon: ShieldAlert,
+    color: '#dc2626',
+    highlight: 'Emergency Incident Command'
+  },
+  {
+    id: 'admin-donations',
+    category: 'System Administration',
+    name: 'Donations & Grants Oversight',
+    path: '/admin/donations',
+    description: 'Track monetary grants, in-kind relief consignments, sector fund allocations, and cryptographic audit receipts.',
+    badge: 'Module 09',
+    icon: Settings,
+    color: '#0d9488',
+    highlight: 'Disaster Fund Transparency'
+  },
+  {
+    id: 'admin-ai-ops',
+    category: 'System Administration',
+    name: 'AI Operations & Governance',
+    path: '/admin/ai-ops',
+    description: 'Explainable neural triage oversight, demographic fairness audits, and automated dispatch confidence threshold tuning.',
+    badge: 'Module 09',
+    icon: Settings,
+    color: '#9333ea',
+    highlight: 'Ethical Model Telemetry'
+  },
+  {
+    id: 'admin-maps',
+    category: 'System Administration',
+    name: 'Satellite GIS Radar Map',
+    path: '/admin/maps',
+    description: 'High-resolution Western Province satellite cartography with interactive disaster polygons, flood gauges, and shelters.',
+    badge: 'Module 09',
+    icon: MapPin,
+    color: '#0284c7',
+    highlight: 'Sentinel-2 Geospatial HUD'
+  },
+  {
+    id: 'admin-notifications',
+    category: 'System Administration',
+    name: 'System Notifications & Broadcasts',
+    path: '/admin/notifications',
+    description: 'Transmit multi-channel cell broadcasts (SMS, push, radio) and monitor real-time delivery telemetry across districts.',
+    badge: 'Module 09',
+    icon: ShieldAlert,
+    color: '#f43f5e',
+    highlight: 'Public Emergency Broadcast'
   },
   {
     id: 'auth-login',

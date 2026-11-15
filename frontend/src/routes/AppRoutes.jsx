@@ -38,6 +38,7 @@ import { CaseManagerPortal } from '../pages/incident-manager';
 // 4. Resource & Logistics Manager
 // ==========================================
 import {
+  LogisticsPortalPage,
   ResourceInventoryPage,
   AllocationDispatchPage
 } from '../pages/logistics';
@@ -138,6 +139,7 @@ export const AppRoutes = () => {
       <Route path="/coordinator/review" element={<EmergencyCoordinatorPortal initialActiveTab="review" />} />
       <Route path="/coordinator/review/:id" element={<EmergencyCoordinatorPortal initialActiveTab="review" />} />
       <Route path="/coordinator/incidents" element={<EmergencyCoordinatorPortal initialActiveTab="crisis" />} />
+      <Route path="/coordinator/crisis" element={<EmergencyCoordinatorPortal initialActiveTab="crisis" />} />
       <Route path="/coordinator/resources" element={<EmergencyCoordinatorPortal initialActiveTab="resources" />} />
       <Route path="/coordinator/shelters" element={<EmergencyCoordinatorPortal initialActiveTab="shelters" />} />
       <Route path="/coordinator/alerts" element={<EmergencyCoordinatorPortal initialActiveTab="alerts" />} />
@@ -145,8 +147,9 @@ export const AppRoutes = () => {
       <Route path="/coordinator/history" element={<EmergencyCoordinatorPortal initialActiveTab="history" />} />
       <Route path="/coordinator/notifications" element={<EmergencyCoordinatorPortal initialActiveTab="notifications" />} />
       <Route path="/coordinator/settings" element={<EmergencyCoordinatorPortal initialActiveTab="settings" />} />
-      <Route path="/coordinator/triage" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><RequestTriagePage /></ProtectedRoute>} />
-      <Route path="/coordinator/ai-review" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIDecisionReviewPage /></ProtectedRoute>} />
+      <Route path="/coordinator/ai-support" element={<EmergencyCoordinatorPortal initialActiveTab="ai-support" />} />
+      <Route path="/coordinator/triage" element={<RequestTriagePage />} />
+      <Route path="/coordinator/ai-review" element={<AIDecisionReviewPage />} />
       <Route path="/coordinator/ai-ops" element={<AIOperationsContainer initialSubView="overview" />} />
       <Route path="/coordinator/map" element={<DashboardOverviewPage initialTab="map" />} />
       <Route path="/coordinator/audit" element={<AuditCenterPage />} />
@@ -198,11 +201,17 @@ export const AppRoutes = () => {
       {/* ========================================================= */}
       {/* MODULE 4: Resource & Logistics Manager (/logistics/*)     */}
       {/* ========================================================= */}
-      <Route path="/logistics" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'Coordinator', 'Admin']}><ResourceInventoryPage /></ProtectedRoute>} />
-      <Route path="/logistics/dashboard" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'Coordinator', 'Admin']}><ResourceInventoryPage /></ProtectedRoute>} />
-      <Route path="/logistics/inventory" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'Coordinator', 'Admin']}><ResourceInventoryPage /></ProtectedRoute>} />
-      <Route path="/logistics/dispatch" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'Coordinator', 'Admin']}><AllocationDispatchPage /></ProtectedRoute>} />
-      <Route path="/logistics/allocations" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'Coordinator', 'Admin']}><AllocationDispatchPage /></ProtectedRoute>} />
+      <Route path="/logistics" element={<LogisticsPortalPage initialTab="inventory" />} />
+      <Route path="/logistics/dashboard" element={<LogisticsPortalPage initialTab="inventory" />} />
+      <Route path="/logistics/inventory" element={<LogisticsPortalPage initialTab="inventory" />} />
+      <Route path="/logistics/dispatch" element={<LogisticsPortalPage initialTab="dispatch" />} />
+      <Route path="/logistics/allocations" element={<LogisticsPortalPage initialTab="dispatch" />} />
+      <Route path="/logistics/requests" element={<LogisticsPortalPage initialTab="requests" />} />
+      <Route path="/logistics/requisitions" element={<LogisticsPortalPage initialTab="requests" />} />
+      <Route path="/logistics/depots" element={<LogisticsPortalPage initialTab="depots" />} />
+      <Route path="/logistics/warehouses" element={<LogisticsPortalPage initialTab="depots" />} />
+      <Route path="/logistics/intake" element={<LogisticsPortalPage initialTab="intake" />} />
+      <Route path="/logistics/receiving" element={<LogisticsPortalPage initialTab="intake" />} />
 
       {/* ========================================================= */}
       {/* MODULE 5: Shelter Management (/shelter/*)                 */}
@@ -230,8 +239,8 @@ export const AppRoutes = () => {
       <Route path="/shelter-manger" element={<Navigate to="/shelter" replace />} />
       <Route path="/shelters/admin" element={<ShelterAdminDashboard initialTab="dashboard" />} />
       <Route path="/shelter-dashboard" element={<ShelterAdminDashboard initialTab="dashboard" />} />
-      <Route path="/shelters/directory" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin', 'ShelterAdministrator', 'ShelterAdmin']}><ShelterDirectoryPage /></ProtectedRoute>} />
-      <Route path="/shelters/allocation" element={<ProtectedRoute allowedRoles={['Coordinator', 'LogisticsManager', 'Admin', 'ShelterAdministrator', 'ShelterAdmin']}><EvacueeAllocationPage /></ProtectedRoute>} />
+      <Route path="/shelters/directory" element={<ShelterAdminDashboard initialTab="directory" />} />
+      <Route path="/shelters/allocation" element={<ShelterAdminDashboard initialTab="placements" />} />
 
       {/* ========================================================= */}
       {/* MODULE 6: Volunteer Management (/volunteer/*)             */}
@@ -248,7 +257,7 @@ export const AppRoutes = () => {
       <Route path="/volunteer/notifications" element={<VolunteerPortal initialTab="notifications" />} />
       <Route path="/volunteer/profile" element={<VolunteerPortal initialTab="profile" />} />
       <Route path="/volunteer/help" element={<VolunteerPortal initialTab="help" />} />
-      <Route path="/volunteer/roster" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><VolunteerRosterPage /></ProtectedRoute>} />
+      <Route path="/volunteer/roster" element={<VolunteerPortal initialTab="schedule" />} />
 
       {/* Volunteer Backward-Compatible Aliases */}
       <Route path="/volunteer-admin" element={<VolunteerPortal initialTab="overview" />} />
@@ -259,8 +268,8 @@ export const AppRoutes = () => {
       <Route path="/volunteer-management" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteers/manager" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteers/dashboard" element={<VolunteerPortal initialTab="overview" />} />
-      <Route path="/volunteers/roster" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><VolunteerRosterPage /></ProtectedRoute>} />
-      <Route path="/volunteers/assignments" element={<ProtectedRoute allowedRoles={['Coordinator', 'Volunteer', 'Admin']}><TaskAssignmentPage /></ProtectedRoute>} />
+      <Route path="/volunteers/roster" element={<VolunteerPortal initialTab="schedule" />} />
+      <Route path="/volunteers/assignments" element={<VolunteerPortal initialTab="assignments" />} />
 
       {/* ========================================================= */}
       {/* MODULE 7: Donor & Funding Management (/donor/*)           */}
@@ -295,10 +304,22 @@ export const AppRoutes = () => {
       {/* ========================================================= */}
       {/* MODULE 9: System Administration (/admin/*)                 */}
       {/* ========================================================= */}
-      <Route path="/admin" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="overview" /></ProtectedRoute>} />
-      <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="overview" /></ProtectedRoute>} />
-      <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="users" /></ProtectedRoute>} />
-      <Route path="/admin/audit" element={<ProtectedRoute allowedRoles={['Admin']}><AuditCenterPage /></ProtectedRoute>} />
+      <Route path="/admin" element={<AdminDashboardPage initialTab="dashboard" />} />
+      <Route path="/admin/dashboard" element={<AdminDashboardPage initialTab="dashboard" />} />
+      <Route path="/admin/overview" element={<AdminDashboardPage initialTab="dashboard" />} />
+      <Route path="/admin/users" element={<AdminDashboardPage initialTab="settings" />} />
+      <Route path="/admin/crisis" element={<AdminDashboardPage initialTab="crisis" />} />
+      <Route path="/admin/requests" element={<AdminDashboardPage initialTab="requests" />} />
+      <Route path="/admin/resources" element={<AdminDashboardPage initialTab="resources" />} />
+      <Route path="/admin/shelters" element={<AdminDashboardPage initialTab="shelters" />} />
+      <Route path="/admin/volunteers" element={<AdminDashboardPage initialTab="volunteers" />} />
+      <Route path="/admin/donations" element={<AdminDashboardPage initialTab="donations" />} />
+      <Route path="/admin/ai-ops" element={<AdminDashboardPage initialTab="ai-ops" />} />
+      <Route path="/admin/maps" element={<AdminDashboardPage initialTab="maps" />} />
+      <Route path="/admin/notifications" element={<AdminDashboardPage initialTab="notifications" />} />
+      <Route path="/admin/reports" element={<AdminDashboardPage initialTab="reports" />} />
+      <Route path="/admin/audit" element={<AdminDashboardPage initialTab="audit" />} />
+      <Route path="/admin/settings" element={<AdminDashboardPage initialTab="settings" />} />
       <Route path="/administration" element={<Navigate to="/admin" replace />} />
 
       {/* Authentication & Security */}
