@@ -237,7 +237,7 @@ export default function Hero({
 
   return (
     <section className="relative w-full min-h-screen bg-[#080A19] flex flex-col justify-between overflow-hidden">
-      {/* Background Media — authentic Sri Lanka disaster relief operation */}
+      {/* Background Media — authentic Sri Lanka disaster relief operation with Ken Burns motion */}
       {bgVideo ? (
         <video
           className="absolute inset-0 w-full h-full object-cover"
@@ -251,9 +251,28 @@ export default function Hero({
         <img
           src={bgImage || disasterRescueHero}
           alt="Sri Lanka Humanitarian Flood Rescue Operation"
-          className="absolute inset-0 w-full h-full object-cover object-[center_35%] filter brightness-[0.72] contrast-[1.08] transition-transform duration-1000 scale-[1.02]"
+          className="absolute inset-0 w-full h-full object-cover object-[center_35%] filter brightness-[0.70] contrast-[1.1] animate-slow-kenburns scale-[1.02]"
         />
       )}
+
+      {/* Cybernetic Grid Overlay */}
+      <div className="absolute inset-0 cyber-grid-overlay z-0 pointer-events-none opacity-40" />
+
+      {/* Aurora Ambient Glow Orbs */}
+      <div className="absolute top-[16%] right-[8%] w-[580px] h-[580px] rounded-full bg-cyan-500/15 blur-[140px] pointer-events-none animate-aurora-breathe z-0" />
+      <div className="absolute bottom-[20%] left-[5%] w-[500px] h-[500px] rounded-full bg-emerald-500/12 blur-[130px] pointer-events-none animate-aurora-breathe-delayed z-0" />
+
+      {/* Digital Rotating Radar Reticle (Upper Right Background) */}
+      <div className="absolute top-[12%] right-[10%] w-[380px] h-[380px] rounded-full border border-cyan-500/10 pointer-events-none z-0 hidden lg:flex items-center justify-center">
+        <div className="w-[280px] h-[280px] rounded-full border border-cyan-500/15 flex items-center justify-center">
+          <div className="w-[180px] h-[180px] rounded-full border border-cyan-500/20 flex items-center justify-center">
+            <div className="w-2.5 h-2.5 rounded-full bg-cyan-400/40 animate-ping"></div>
+          </div>
+        </div>
+        {/* Rotating 360-degree radar beam */}
+        <div className="absolute inset-0 rounded-full animate-radar-sweep pointer-events-none bg-[conic-gradient(from_0deg,transparent_0_310deg,rgba(56,189,248,0.18)_360deg)]" />
+      </div>
+
       {/* Contrast Overlay for optimal text readability and dark-teal integration */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#080A19]/95 via-[#080A19]/75 to-[#080A19]/45 z-0 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#080A19] via-transparent to-[#080A19]/80 z-0 pointer-events-none" />
@@ -352,7 +371,23 @@ export default function Hero({
 
             {/* Right column: Either custom Crisis Operations HUD or pure RevenueCard */}
             {rightContent ? (
-              rightContent
+              <div className="relative w-full max-w-[440px] mx-auto lg:mx-0">
+                {/* Floating Mission Chip 1 */}
+                <div className="hidden xl:flex absolute -top-4 -left-6 z-20 items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-cyan-500/35 text-cyan-200 text-[11px] shadow-[0_8px_24px_rgba(0,0,0,0.6)] animate-float-slow select-none pointer-events-none">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+                  <span className="font-mono text-cyan-300 font-semibold tracking-wide">SAR OVERPASS:</span>
+                  <span className="text-white/80">Kelani Basin Breach Active</span>
+                </div>
+
+                {rightContent}
+
+                {/* Floating Mission Chip 2 */}
+                <div className="hidden xl:flex absolute -bottom-4 -right-4 z-20 items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/85 backdrop-blur-md border border-emerald-500/40 text-emerald-200 text-[11px] shadow-[0_8px_24px_rgba(0,0,0,0.6)] animate-float-delayed select-none pointer-events-none">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span className="font-semibold text-white">Navy SBS Boat #04:</span>
+                  <span className="text-emerald-100/80">Triage Extraction Online</span>
+                </div>
+              </div>
             ) : (
               <RevenueCard
                 cardLabel={cardLabel}

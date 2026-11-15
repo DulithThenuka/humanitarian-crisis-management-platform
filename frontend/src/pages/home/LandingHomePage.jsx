@@ -473,6 +473,12 @@ export const LandingHomePage = () => {
                   24/7 Hotline Directory →
                 </Link>
               </div>
+              <div className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/60 border border-white/10 backdrop-blur-md text-[11px] text-white/70 w-fit">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Active Mission: <strong className="text-emerald-300 font-medium">Convoy SL-12 En Route to Gampaha</strong></span>
+                <span className="text-white/30">·</span>
+                <span className="text-sky-300 font-mono">GPS Sync</span>
+              </div>
             </div>
           }
           rightContent={

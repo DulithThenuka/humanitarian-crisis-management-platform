@@ -138,3 +138,70 @@ body {
   }
 }
 
+/* =========================================================
+   Cybernetic Crisis HUD Animations & Effects
+   ========================================================= */
+@keyframes slow-kenburns {
+  0% { transform: scale(1.02) translate(0%, 0%); }
+  50% { transform: scale(1.07) translate(-1%, -1%); }
+  100% { transform: scale(1.02) translate(0%, 0%); }
+}
+
+@keyframes radar-sweep-360 {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes aurora-breathe {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+
+@keyframes aurora-breathe-delayed {
+  0%, 100% { opacity: 0.6; transform: scale(1.08); }
+  50% { opacity: 0.95; transform: scale(0.96); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-9px); }
+}
+
+.animate-slow-kenburns {
+  animation: slow-kenburns 30s ease-in-out infinite alternate;
+}
+
+.animate-radar-sweep {
+  animation: radar-sweep-360 12s linear infinite;
+  transform-origin: center center;
+}
+
+.animate-aurora-breathe {
+  animation: aurora-breathe 8s ease-in-out infinite;
+}
+
+.animate-aurora-breathe-delayed {
+  animation: aurora-breathe-delayed 10s ease-in-out infinite 2s;
+}
+
+.animate-float-slow {
+  animation: float-slow 4.5s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 5.5s ease-in-out infinite 1.5s;
+}
+
+/* Digital Grid Pattern */
+.cyber-grid-overlay {
+  background-size: 60px 60px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+}
+
