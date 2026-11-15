@@ -1,0 +1,322 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Xunit;
+using HumanitarianCrisisPlatform.API.Controllers;
+using HumanitarianCrisisPlatform.Application.Common.Models;
+using HumanitarianCrisisPlatform.Application.DTOs.Coordinator;
+using HumanitarianCrisisPlatform.Application.DTOs.Requests;
+using HumanitarianCrisisPlatform.Application.Interfaces.Services;
+using HumanitarianCrisisPlatform.Domain.Entities;
+using HumanitarianCrisisPlatform.Domain.Enums;
+using HumanitarianCrisisPlatform.Tests.IntegrationTests.Infrastructure;
+
+namespace HumanitarianCrisisPlatform.Tests.IntegrationTests.Controllers;
+
+public class CoordinatorControllerTests : IClassFixture<DatabaseFixture>
+{
+    private readonly DatabaseFixture _fixture;
+
+    public CoordinatorControllerTests(DatabaseFixture fixture)
+    {
+        _fixture = fixture;
+    }
+
+    private (CoordinatorController controller, CrisisEventsController crisisController, AlertsController alertsController, HumanitarianCrisisPlatform.Infrastructure.Data.Context.ApplicationDbContext context) CreateControllers()
+    {
+        var context = _fixture.CreateContext();
+        var services = new ServiceCollection();
+        services.AddLogging();
+        HumanitarianCrisisPlatform.API.Extensions.ServiceCollectionExtensions.AddApplicationServices(services, _fixture.Configuration);
+        services.AddScoped(_ => context);
+
+        var provider = services.BuildServiceProvider();
+        var coordinatorService = provider.GetRequiredService<ICoordinatorService>();
+
+        var coordinatorController = new CoordinatorController(coordinatorService);
+        var crisisController = new CrisisEventsController(coordinatorService);
+        var alertsController = new AlertsController(coordinatorService);
+
+        var user = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(new[]
+        {
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "Sarah Johnson"),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Coordinator")
+        }, "TestAuth"));
+
+        var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext { User = user };
+        coordinatorController.ControllerContext = new ControllerContext { HttpContext = httpContext };
+        crisisController.ControllerContext = new ControllerContext { HttpContext = httpContext };
+        alertsController.ControllerContext = new ControllerContext { HttpContext = httpContext };
+
+        return (coordinatorController, crisisController, alertsController, context);
+    }
+
+    [Fact]
+    public async Task GetOverview_ShouldReturnRealMetricsAndPriorities()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        // Seed a sample assistance request
+        var req = new AssistanceRequest
+        {
+            Id = Guid.NewGuid(),
+            Category = "Rescue",
+            Description = "Flooded house with trapped residents",
+            Urgency = PriorityLevel.Critical,
+            Status = RequestStatus.Submitted,
+            Address = "Kelani East Zone 03",
+            NumberOfPeople = 4
+        };
+        await context.AssistanceRequests.AddAsync(req);
+        await context.SaveChangesAsync();
+
+        var result = await controller.GetOverview(default);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var res = Assert.IsAssignableFrom<Result<CoordinatorOverviewDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.NotNull(res.Data);
+        Assert.True(res.Data.Metrics.TotalIncomingRequests >= 1);
+        Assert.True(res.Data.Metrics.PendingReviews >= 1);
+        Assert.True(res.Data.Metrics.CriticalRequests >= 1);
+        Assert.NotEmpty(res.Data.PriorityCases);
+    }
+
+    [Fact]
+    public async Task VerifyRequest_WithValidReason_ShouldSetStatusToVerified()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        var req = new AssistanceRequest
+        {
+            Id = Guid.NewGuid(),
+            Category = "Medical",
+            Description = "Needs insulin injection",
+            Urgency = PriorityLevel.High,
+            Status = RequestStatus.Submitted
+        };
+        await context.AssistanceRequests.AddAsync(req);
+        await context.SaveChangesAsync();
+
+        var dto = new VerifyAssistanceRequestDto
+        {
+            Reason = "Verified by coordinator via Grama Niladhari check",
+            ChecklistConfirmed = true
+        };
+
+        var result = await controller.VerifyRequest(req.Id, dto, default);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var res = Assert.IsAssignableFrom<Result<AssistanceRequestResponseDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.Equal(RequestStatus.Verified, res.Data?.Status);
+
+        // Verify database persistence
+        var updatedReq = await context.AssistanceRequests.FindAsync(req.Id);
+        Assert.NotNull(updatedReq);
+        Assert.Equal(RequestStatus.Verified, updatedReq.Status);
+    }
+
+    [Fact]
+    public async Task VerifyRequest_WithEmptyReason_ShouldReturnBadRequest()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        var req = new AssistanceRequest
+        {
+            Id = Guid.NewGuid(),
+            Category = "Food",
+            Description = "Supplies needed",
+            Status = RequestStatus.Submitted
+        };
+        await context.AssistanceRequests.AddAsync(req);
+        await context.SaveChangesAsync();
+
+        var dto = new VerifyAssistanceRequestDto
+        {
+            Reason = "   " // Empty
+        };
+
+        var result = await controller.VerifyRequest(req.Id, dto, default);
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task EscalateRequest_ShouldUpdateUrgencyToCritical()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        var req = new AssistanceRequest
+        {
+            Id = Guid.NewGuid(),
+            Category = "Rescue",
+            Description = "Water level rising",
+            Urgency = PriorityLevel.Medium,
+            Status = RequestStatus.Submitted
+        };
+        await context.AssistanceRequests.AddAsync(req);
+        await context.SaveChangesAsync();
+
+        var dto = new EscalateAssistanceRequestDto
+        {
+            Reason = "Flash flood surge reported upstream",
+            Urgency = PriorityLevel.Critical
+        };
+
+        var result = await controller.EscalateRequest(req.Id, dto, default);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var res = Assert.IsAssignableFrom<Result<AssistanceRequestResponseDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.Equal(PriorityLevel.Critical, res.Data?.Urgency);
+    }
+
+    [Fact]
+    public async Task CrisisEvents_CreateAndGetAll_ShouldPersistAndRetrieve()
+    {
+        var (_, crisisController, _, context) = CreateControllers();
+
+        var newCrisis = new CreateCrisisEventDto
+        {
+            Title = "2026 Western Province Flood Wave",
+            Description = "Heavy monsoon rains in Kelani catchment area",
+            DisasterType = DisasterType.Flood,
+            Severity = 4,
+            Latitude = 6.95m,
+            Longitude = 79.92m,
+            AffectedAreaRadius = 15m
+        };
+
+        var createResult = await crisisController.Create(newCrisis, default);
+        var createdResult = Assert.IsType<CreatedAtActionResult>(createResult.Result);
+        var res = Assert.IsAssignableFrom<Result<CrisisEventResponseDto>>(createdResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.NotNull(res.Data);
+        Assert.Equal("2026 Western Province Flood Wave", res.Data.Title);
+
+        var listResult = await crisisController.GetAll(activeOnly: true, default);
+        var listOk = Assert.IsType<OkObjectResult>(listResult.Result);
+        var listRes = Assert.IsAssignableFrom<Result<IReadOnlyList<CrisisEventResponseDto>>>(listOk.Value);
+
+        Assert.True(listRes.Succeeded);
+        Assert.Contains(listRes.Data!, c => c.Title == "2026 Western Province Flood Wave");
+    }
+
+    [Fact]
+    public async Task Alerts_CreateAndGetAll_ShouldPersistAndReturnBroadcastAlerts()
+    {
+        var (_, _, alertsController, context) = CreateControllers();
+
+        var alertDto = new CreateAlertDto
+        {
+            Title = "Flood Warning - Wellampitiya Lowland Sector",
+            Category = "Flood warning",
+            Severity = "Critical",
+            Message = "Water levels rising above danger threshold. Evacuate immediately.",
+            Area = "Wellampitiya - Zone 02",
+            SafetyInstructions = "Move to designated high school shelter.\nDo not drive through flood waters."
+        };
+
+        var createResult = await alertsController.Create(alertDto, default);
+        var okResult = Assert.IsType<OkObjectResult>(createResult.Result);
+        var res = Assert.IsAssignableFrom<Result<EmergencyAlertDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.NotNull(res.Data);
+        Assert.Equal("Flood Warning - Wellampitiya Lowland Sector", res.Data.Title);
+        Assert.Equal("Critical", res.Data.Severity);
+
+        var getResult = await alertsController.GetAll(tab: "active", default);
+        var getOk = Assert.IsType<OkObjectResult>(getResult.Result);
+        var getRes = Assert.IsAssignableFrom<Result<IReadOnlyList<EmergencyAlertDto>>>(getOk.Value);
+
+        Assert.True(getRes.Succeeded);
+        Assert.Contains(getRes.Data!, a => a.Title == "Flood Warning - Wellampitiya Lowland Sector");
+    }
+
+    [Fact]
+    public async Task VerifyRequest_WithIncidentCaseNumber_ShouldVerifyAndPersistInDb()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        var incident = new Incident
+        {
+            Id = Guid.NewGuid(),
+            CaseNumber = "HMR-TEST-VERIFY",
+            Title = "Emergency Shelter Test Case",
+            Priority = PriorityLevel.Critical,
+            Status = IncidentStatus.Open,
+            VerificationStatus = "Awaiting review",
+            OperationalArea = "Kelani East - Zone 03",
+            Description = "Test case for coordinator verification"
+        };
+        await context.Incidents.AddAsync(incident);
+        await context.SaveChangesAsync();
+
+        var dto = new VerifyAssistanceRequestDto
+        {
+            Reason = "Confirmed with regional GN officer",
+            ChecklistConfirmed = true
+        };
+
+        var result = await controller.VerifyRequest("HMR-TEST-VERIFY", dto, default);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var res = Assert.IsAssignableFrom<Result<AssistanceRequestResponseDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.Equal(RequestStatus.Verified, res.Data?.Status);
+
+        // Verify database persistence
+        var updatedIncident = await context.Incidents.FindAsync(incident.Id);
+        Assert.NotNull(updatedIncident);
+        Assert.Equal("Verified", updatedIncident.VerificationStatus);
+        Assert.Equal(IncidentStatus.Verified, updatedIncident.Status);
+    }
+
+    [Fact]
+    public async Task EscalateAndAddNote_WithIncidentCaseNumber_ShouldPersistInDb()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        var incident = new Incident
+        {
+            Id = Guid.NewGuid(),
+            CaseNumber = "HMR-TEST-ESC",
+            Title = "Escalation Test Case",
+            Priority = PriorityLevel.Medium,
+            Status = IncidentStatus.Open,
+            VerificationStatus = "Awaiting review",
+            Description = "Test case for coordinator escalation and note"
+        };
+        await context.Incidents.AddAsync(incident);
+        await context.SaveChangesAsync();
+
+        // 1. Escalate
+        var escDto = new EscalateAssistanceRequestDto
+        {
+            Urgency = PriorityLevel.Critical,
+            Reason = "Severe flooding reached 1.5m"
+        };
+        var escResult = await controller.EscalateRequest("HMR-TEST-ESC", escDto, default);
+        var escOk = Assert.IsType<OkObjectResult>(escResult.Result);
+        var escRes = Assert.IsAssignableFrom<Result<AssistanceRequestResponseDto>>(escOk.Value);
+        Assert.True(escRes.Succeeded);
+
+        // 2. Add Note
+        var noteDto = new AddRequestNoteDto
+        {
+            Text = "Contacted rescue boat team #4"
+        };
+        var noteResult = await controller.AddRequestNote("HMR-TEST-ESC", noteDto, default);
+        var noteOk = Assert.IsType<OkObjectResult>(noteResult.Result);
+        var noteRes = Assert.IsAssignableFrom<Result<bool>>(noteOk.Value);
+        Assert.True(noteRes.Succeeded);
+
+        // 3. Verify persistence
+        var updated = await context.Incidents.FindAsync(incident.Id);
+        Assert.NotNull(updated);
+        Assert.Equal(PriorityLevel.Critical, updated.Priority);
+        Assert.Contains("Contacted rescue boat team #4", updated.InternalNotes);
+    }
+}

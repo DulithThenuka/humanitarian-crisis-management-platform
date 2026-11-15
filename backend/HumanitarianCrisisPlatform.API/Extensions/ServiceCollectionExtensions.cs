@@ -55,6 +55,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IIncidentAIReviewService, IncidentAIReviewService>();
         services.AddScoped<IIncidentReportingService, IncidentReportingService>();
         services.AddScoped<IIncidentDuplicateDetectionService, RuleBasedIncidentDuplicateDetectionService>();
+        services.AddScoped<ICoordinatorService, CoordinatorService>();
 
         // Infrastructure Services
         services.AddHttpClient<OpenAIServiceClient>();

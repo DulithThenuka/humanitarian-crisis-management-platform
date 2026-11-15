@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== 'undefined' && window.location.port === '3000'
+    ? '/api'
+    : 'http://localhost:5001/api');
 
 /**
  * Validates that a token string is a well-formed, non-expired JWT (3 dot-separated base64url parts)

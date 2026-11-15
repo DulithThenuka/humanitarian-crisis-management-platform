@@ -14,15 +14,50 @@ export const AIDecisionSupportView = ({
   onInspectDuplicate,
   onAcceptRecommendation,
   aiReviewed,
-  showToast
+  showToast,
+  currentCase
 }) => {
-  const [humanFinalPriority, setHumanFinalPriority] = useState('Critical');
+  const activeCaseId = currentCase?.id || AI_DECISION_SUPPORT_DATA.relatedCaseId;
+  const assessmentId = currentCase?.id ? `AID-${currentCase.id.replace(/\D/g, '') || '2051'}` : AI_DECISION_SUPPORT_DATA.assessmentId;
+  const recommendedPriority = currentCase?.severity || AI_DECISION_SUPPORT_DATA.recommendedPriority;
+  const confidenceScore = currentCase?.aiConfidence ? Math.round(Number(currentCase.aiConfidence) > 1 ? Number(currentCase.aiConfidence) : Number(currentCase.aiConfidence) * 100) : AI_DECISION_SUPPORT_DATA.confidence;
+  const urgencyScore = currentCase?.aipriorityScore ? Math.round(Number(currentCase.aipriorityScore) > 1 ? Number(currentCase.aipriorityScore) : Number(currentCase.aipriorityScore) * 100) : AI_DECISION_SUPPORT_DATA.urgencyScore;
+  const affectedCount = currentCase?.affectedPeople || 6;
+
+  const [humanFinalPriority, setHumanFinalPriority] = useState(recommendedPriority);
   const [humanReviewReason, setHumanReviewReason] = useState('');
   
   // Consequential Action Modal State
   const [aiActionModal, setAiActionModal] = useState(null);
   const [modalReason, setModalReason] = useState('');
   const [modalConfirmedCheck, setModalConfirmedCheck] = useState(false);
+
+  const factors = [
+    {
+      id: 'f1',
+      title: 'Immediate exposure risk',
+      detail: currentCase?.location ? `Hazard proximity in ${currentCase.location}` : 'Rising floodwater and unsafe roadside location',
+      impact: 'High'
+    },
+    {
+      id: 'f2',
+      title: 'People potentially affected',
+      detail: `${affectedCount} household members`,
+      impact: affectedCount >= 5 ? 'High' : 'Medium'
+    },
+    {
+      id: 'f3',
+      title: 'Vulnerability indicators',
+      detail: 'Children and mobility requirement provided',
+      impact: 'High'
+    },
+    {
+      id: 'f4',
+      title: 'Time sensitivity',
+      detail: 'Conditions may worsen before nightfall',
+      impact: 'Medium'
+    }
+  ];
 
   const handleOpenAiModal = (type) => {
     setAiActionModal(type);
@@ -51,18 +86,18 @@ export const AIDecisionSupportView = ({
           <span className="ec-breadcrumb-tiny">HUMAN-REVIEWED RECOMMENDATION</span>
           <h2 className="ec-review-main-title">AI Decision Support &amp; Priority Assessment</h2>
           <p className="ec-review-sub-meta">
-            {AI_DECISION_SUPPORT_DATA.assessmentId} · Related request{' '}
+            {assessmentId} · Related request{' '}
             <strong
               style={{ color: '#0284c7', cursor: 'pointer', textDecoration: 'underline' }}
-              onClick={() => onOpenCaseReview(AI_DECISION_SUPPORT_DATA.relatedCaseId)}
+              onClick={() => onOpenCaseReview(activeCaseId)}
             >
-              {AI_DECISION_SUPPORT_DATA.relatedCaseId}
+              {activeCaseId}
             </strong>{' '}
             · AI outputs are recommendations, not confirmed facts.
           </p>
         </div>
         <span className={aiReviewed ? 'ec-badge-verified' : 'ec-badge-pending'}>
-          ● {aiReviewed ? 'Human Review Recorded' : AI_DECISION_SUPPORT_DATA.status}
+          ● {aiReviewed ? 'Human Review Recorded' : (currentCase?.status === 'Verified' ? 'Verified' : AI_DECISION_SUPPORT_DATA.status)}
         </span>
       </div>
 
@@ -86,17 +121,17 @@ export const AIDecisionSupportView = ({
                 <span className="ec-meta-label-tiny">Recommended priority</span>
               </div>
               <div style={{ fontSize: '26px', fontWeight: 800, color: '#dc2626', marginBottom: '4px' }}>
-                {AI_DECISION_SUPPORT_DATA.recommendedPriority}
+                {recommendedPriority}
               </div>
               <div style={{ fontSize: '12px', color: '#64748b' }}>
-                Urgency score {AI_DECISION_SUPPORT_DATA.urgencyScore} / 100
+                Urgency score {urgencyScore} / 100
               </div>
             </div>
 
             {/* Circular Confidence Gauge */}
             <div className="ec-confidence-gauge-circle">
               <span style={{ fontSize: '20px', fontWeight: 800 }}>
-                {AI_DECISION_SUPPORT_DATA.confidence}
+                {confidenceScore}
               </span>
               <span style={{ fontSize: '9px', fontWeight: 700, color: '#64748b' }}>% confidence</span>
             </div>
@@ -112,7 +147,7 @@ export const AIDecisionSupportView = ({
               Factors influencing the recommendation
             </h3>
             <div>
-              {AI_DECISION_SUPPORT_DATA.factors.map(fac => (
+              {factors.map(fac => (
                 <div key={fac.id} className="ec-factor-item-row">
                   <div className="ec-factor-left">
                     <CheckCircle2 size={16} color="#0284c7" />

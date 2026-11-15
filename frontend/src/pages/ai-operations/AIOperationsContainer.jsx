@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Shield, 
-  ShieldCheck, 
-  Sparkles, 
-  CheckSquare, 
-  FileText, 
-  Layers, 
-  GitCommit, 
-  Search, 
-  Bell, 
-  ChevronDown, 
+import { useAuth } from '../../context/AuthContext';
+import {
+  Shield,
+  ShieldCheck,
+  Sparkles,
+  CheckSquare,
+  FileText,
+  Layers,
+  GitCommit,
+  Search,
+  Bell,
+  ChevronDown,
   ChevronLeft,
   CheckCircle2,
   X
@@ -25,11 +26,16 @@ import { AIGovernanceSettings } from './AIGovernanceSettings';
 
 import './AIOperationsCommon.css';
 
-export const AIOperationsContainer = ({ 
-  initialSubView = 'overview', 
-  onBack = null 
+export const AIOperationsContainer = ({
+  initialSubView = 'overview',
+  onBack = null
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const fullName = user?.fullName || user?.name || 'Jane Coordinator';
+  const initials = user?.initials || (fullName ? fullName.split(' ').filter(Boolean).map(p => p[0]).join('').slice(0, 2).toUpperCase() : 'JC');
+  const role = user?.role === 'Coordinator' ? 'Emergency Coordinator' : (user?.role || 'Emergency Coordinator');
+
   const [activeSubView, setActiveSubView] = useState(initialSubView);
   const [selectedCaseId, setSelectedCaseId] = useState('AID-2051');
   const [selectedWorkspace, setSelectedWorkspace] = useState('classification');
@@ -97,14 +103,14 @@ export const AIOperationsContainer = ({
           {/* Authorised Reviewer User Card */}
           <div className="ai-reviewer-card">
             <div className="ai-reviewer-meta-left">
-              <div className="ai-reviewer-avatar">MF</div>
+              <div className="ai-reviewer-avatar">{initials}</div>
               <div>
                 <span className="ai-reviewer-tag">AUTHORISED REVIEWER</span>
-                <div className="ai-reviewer-role">Emergency Coordinator</div>
-                <div className="ai-reviewer-name">Maya Fernando</div>
+                <div className="ai-reviewer-role">{role}</div>
+                <div className="ai-reviewer-name">{fullName}</div>
               </div>
             </div>
-            <div 
+            <div
               className={`ai-duty-toggle-switch ${dutyActive ? 'active' : 'inactive'}`}
               onClick={() => {
                 setDutyActive(!dutyActive);
@@ -201,9 +207,9 @@ export const AIOperationsContainer = ({
 
           <div className="top-nav-center-search">
             <Search size={15} className="top-search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search decisions, requests, AI services..." 
+            <input
+              type="text"
+              placeholder="Search decisions, requests, AI services..."
               value={topSearch}
               onChange={(e) => setTopSearch(e.target.value)}
               className="top-search-input"
@@ -220,7 +226,7 @@ export const AIOperationsContainer = ({
               </div>
             </div>
 
-            <button 
+            <button
               className="top-nav-bell-btn"
               onClick={() => showToast('12 unreviewed high-priority AI recommendations awaiting action', 'info')}
               title="Notifications"
@@ -230,10 +236,10 @@ export const AIOperationsContainer = ({
             </button>
 
             <div className="top-nav-user-badge">
-              <div className="user-avatar-circle">MF</div>
+              <div className="user-avatar-circle">{initials}</div>
               <div className="user-badge-text">
-                <strong className="user-name">Maya Fernando</strong>
-                <span className="user-role">Emergency Coordinator</span>
+                <strong className="user-name">{fullName}</strong>
+                <span className="user-role">{role}</span>
               </div>
             </div>
           </div>
@@ -251,7 +257,7 @@ export const AIOperationsContainer = ({
         {/* 3. Subview Body */}
         <main className="ai-portal-page-body">
           {activeSubView === 'overview' && (
-            <AIOperationsOverview 
+            <AIOperationsOverview
               onNavigateQueue={() => setActiveSubView('queue')}
               onNavigateReview={(id = 'AID-2051') => {
                 setSelectedCaseId(id);
@@ -267,7 +273,7 @@ export const AIOperationsContainer = ({
           )}
 
           {activeSubView === 'queue' && (
-            <DecisionSupportQueue 
+            <DecisionSupportQueue
               onOpenReview={(id = 'AID-2051') => {
                 setSelectedCaseId(id);
                 setActiveSubView('review');
@@ -278,7 +284,7 @@ export const AIOperationsContainer = ({
           )}
 
           {activeSubView === 'review' && (
-            <AIDecisionReview 
+            <AIDecisionReview
               caseId={selectedCaseId}
               onBackToQueue={() => setActiveSubView('queue')}
               showToast={showToast}
@@ -286,7 +292,7 @@ export const AIOperationsContainer = ({
           )}
 
           {activeSubView === 'workspace' && (
-            <AIServiceWorkspace 
+            <AIServiceWorkspace
               initialService={selectedWorkspace}
               onBackOverview={() => setActiveSubView('overview')}
               onViewCase={(id = 'AID-2051') => {
@@ -298,7 +304,7 @@ export const AIOperationsContainer = ({
           )}
 
           {activeSubView === 'trace' && (
-            <DecisionTraceAudit 
+            <DecisionTraceAudit
               caseId={selectedCaseId}
               onBackToQueue={() => setActiveSubView('queue')}
               showToast={showToast}
@@ -306,7 +312,7 @@ export const AIOperationsContainer = ({
           )}
 
           {activeSubView === 'governance' && (
-            <AIGovernanceSettings 
+            <AIGovernanceSettings
               onNavigateWorkspace={(wsId) => {
                 setSelectedWorkspace(wsId);
                 setActiveSubView('workspace');

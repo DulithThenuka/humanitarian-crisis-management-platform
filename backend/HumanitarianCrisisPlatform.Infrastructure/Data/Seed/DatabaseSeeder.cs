@@ -10,13 +10,9 @@ public static class DatabaseSeeder
 {
     public static async Task SeedAsync(ApplicationDbContext context)
     {
-        // Apply EF Core migrations for relational providers (SQL Server LocalDB);
+        // Relational providers (SQL Server LocalDB): do not automatically apply EF Core migrations
         // keep EnsureCreatedAsync() for InMemory test providers.
-        if (context.Database.IsRelational())
-        {
-            await context.Database.MigrateAsync();
-        }
-        else
+        if (!context.Database.IsRelational())
         {
             await context.Database.EnsureCreatedAsync();
         }

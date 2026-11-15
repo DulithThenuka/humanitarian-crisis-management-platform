@@ -30,12 +30,6 @@ public class AuthController : BaseApiController
             return BadRequest(Result<AuthResponseDto>.Failure("Email and password are required."));
         }
 
-        // Ensure database has default seeded accounts if empty
-        if (!await _context.Users.AnyAsync())
-        {
-            await DatabaseSeeder.SeedAsync(_context);
-        }
-
         var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
 

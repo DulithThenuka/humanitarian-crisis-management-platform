@@ -45,6 +45,8 @@ public class IncidentRepository : Repository<Incident>, IIncidentRepository
         return await _dbSet
             .Include(i => i.StatusHistories)
             .Include(i => i.AIReviews)
+            .Include(i => i.Communications)
+            .Include(i => i.AuditLogs)
             .OrderByDescending(i => i.CreatedAt)
             .AsNoTracking()
             .ToListAsync(cancellationToken);

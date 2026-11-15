@@ -11,11 +11,20 @@ import {
   Mail,
   Lock
 } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 import { PROFILE_SETTINGS_DATA } from '../data/coordinatorPortalData';
 import './ProfileSettingsView.css';
 
 export const ProfileSettingsView = ({ showToast }) => {
-  const [profile, setProfile] = useState(PROFILE_SETTINGS_DATA);
+  const { user } = useAuth();
+  const [profile, setProfile] = useState(() => ({
+    ...PROFILE_SETTINGS_DATA,
+    fullName: user?.fullName || user?.name || PROFILE_SETTINGS_DATA.fullName,
+    email: user?.email || PROFILE_SETTINGS_DATA.email,
+    role: user?.role === 'Coordinator' ? 'Emergency Coordinator' : (user?.role || PROFILE_SETTINGS_DATA.role)
+  }));
+
+  const initials = user?.initials || (profile.fullName ? profile.fullName.split(' ').filter(Boolean).map(p => p[0]).join('').slice(0, 2).toUpperCase() : 'JC');
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -49,7 +58,7 @@ export const ProfileSettingsView = ({ showToast }) => {
           {/* User Banner */}
           <div className="ec-profile-user-banner">
             <div className="ec-profile-avatar-circle">
-              MF
+              {initials}
             </div>
             <div className="ec-profile-user-meta">
               <h3 className="ec-profile-name">{profile.fullName}</h3>

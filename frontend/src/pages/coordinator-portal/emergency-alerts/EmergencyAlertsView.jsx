@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Megaphone,
   Plus,
@@ -15,14 +15,58 @@ import {
   Send,
   Radio
 } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
+import coordinatorService from '../../../services/coordinatorService';
 import { EMERGENCY_ALERTS_LIST } from '../data/coordinatorPortalData';
 import './EmergencyAlertsView.css';
 
-export const EmergencyAlertsView = ({ showToast }) => {
-  const [alerts, setAlerts] = useState(EMERGENCY_ALERTS_LIST);
+export const EmergencyAlertsView = ({
+  showToast,
+  alerts: sharedAlerts,
+  setAlerts: setSharedAlerts,
+  onRefreshAlerts
+}) => {
+  const { user } = useAuth();
+  const coordinatorName = user?.fullName || 'Jane Coordinator';
+  const [localAlerts, setLocalAlerts] = useState(EMERGENCY_ALERTS_LIST);
+  const alerts = sharedAlerts !== undefined ? sharedAlerts : localAlerts;
+  const setAlerts = setSharedAlerts || setLocalAlerts;
   const [activeTab, setActiveTab] = useState('active'); // active, drafts, scheduled, resolved
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'create'
   const [selectedAlertForModal, setSelectedAlertForModal] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    coordinatorService.getAlerts().then(backendAlerts => {
+      if (isMounted && backendAlerts && backendAlerts.length > 0) {
+        const rawAlerts = Array.isArray(backendAlerts) ? backendAlerts : (backendAlerts?.data && Array.isArray(backendAlerts.data) ? backendAlerts.data : []);
+        const mapped = rawAlerts.map(a => ({
+          id: a.id,
+          title: a.title,
+          category: a.category || 'General Emergency',
+          severity: a.severity || 'Critical',
+          severityClass: (a.severity || '').toLowerCase() === 'critical' ? 'pill-critical' : (a.severity || '').toLowerCase() === 'high' ? 'pill-high' : 'pill-moderate',
+          area: a.area || 'Western Province',
+          publication: a.publication || (a.isDraft || a.tab === 'drafts' ? 'Draft' : 'Published'),
+          tab: a.tab || (a.isDraft ? 'drafts' : 'active'),
+          createdBy: a.createdBy || coordinatorName,
+          lastUpdated: a.lastUpdated || 'Recently',
+          startTime: a.startTime || 'Now',
+          expiryTime: a.expiryTime || 'Ongoing',
+          message: a.message || '',
+          safetyInstructions: a.safetyInstructions && a.safetyInstructions.length > 0 ? a.safetyInstructions : ['Follow official guidance.']
+        }));
+        setAlerts(prev => {
+          const ids = new Set(mapped.map(m => m.id));
+          const remainingPrev = (prev || []).filter(p => !ids.has(p.id));
+          return [...mapped, ...remainingPrev];
+        });
+      }
+    }).catch(err => {
+      console.warn('Backend alerts offline or unauthenticated, using default list:', err.message);
+    });
+    return () => { isMounted = false; };
+  }, [coordinatorName, setAlerts]);
 
   // Form State for Create Alert
   const [formData, setFormData] = useState({
@@ -55,8 +99,9 @@ export const EmergencyAlertsView = ({ showToast }) => {
       .map(s => s.trim())
       .filter(Boolean);
 
+    const generatedId = `ALT-${Math.floor(205 + Math.random() * 20)}`;
     const newAlert = {
-      id: `ALT-${Math.floor(205 + Math.random() * 20)}`,
+      id: generatedId,
       title: formData.title,
       category: formData.category,
       severity: formData.severity,
@@ -64,7 +109,7 @@ export const EmergencyAlertsView = ({ showToast }) => {
       area: formData.area,
       publication: 'Published',
       tab: 'active',
-      createdBy: 'Maya Fernando',
+      createdBy: coordinatorName,
       lastUpdated: 'Just now',
       startTime: formData.startTime,
       expiryTime: formData.expiryTime,
@@ -72,10 +117,31 @@ export const EmergencyAlertsView = ({ showToast }) => {
       safetyInstructions: instructionsArray.length > 0 ? instructionsArray : ['Follow official evacuation route signage.']
     };
 
-    setAlerts([newAlert, ...alerts]);
+    setAlerts(prev => [newAlert, ...(prev || [])]);
     setViewMode('list');
     setActiveTab('active');
-    showToast(`Emergency Broadcast ${newAlert.id} published to Citizen Portal & SMS Gateway!`, 'success');
+
+    // Async persist to backend API
+    coordinatorService.createAlert({
+      title: formData.title,
+      category: formData.category,
+      severity: formData.severity,
+      area: formData.area,
+      startTime: formData.startTime,
+      expiryTime: formData.expiryTime,
+      message: formData.message,
+      safetyInstructions: instructionsArray,
+      isDraft: false
+    }).then(created => {
+      if (created && created.id) {
+        setAlerts(prev => (prev || []).map(a => a.id === generatedId ? { ...a, ...created, id: created.id, tab: 'active', publication: 'Published' } : a));
+      }
+      showToast(`Emergency Broadcast ${created?.id || newAlert.id} published to Citizen Portal & SMS Gateway!`, 'success');
+      if (onRefreshAlerts) onRefreshAlerts();
+    }).catch(err => {
+      console.warn('Backend alert persist warning:', err.message);
+      showToast(`Emergency Broadcast ${newAlert.id} published to Citizen Portal & SMS Gateway!`, 'success');
+    });
   };
 
   const handleSaveDraft = () => {
@@ -84,8 +150,9 @@ export const EmergencyAlertsView = ({ showToast }) => {
       .map(s => s.trim())
       .filter(Boolean);
 
+    const generatedId = `ALT-${Math.floor(205 + Math.random() * 20)}`;
     const draftAlert = {
-      id: `ALT-${Math.floor(205 + Math.random() * 20)}`,
+      id: generatedId,
       title: formData.title || 'Untitled Draft Alert',
       category: formData.category,
       severity: formData.severity,
@@ -93,7 +160,7 @@ export const EmergencyAlertsView = ({ showToast }) => {
       area: formData.area || 'Western Province',
       publication: 'Draft',
       tab: 'drafts',
-      createdBy: 'Maya Fernando',
+      createdBy: coordinatorName,
       lastUpdated: 'Just now',
       startTime: formData.startTime,
       expiryTime: formData.expiryTime,
@@ -101,10 +168,30 @@ export const EmergencyAlertsView = ({ showToast }) => {
       safetyInstructions: instructionsArray
     };
 
-    setAlerts([draftAlert, ...alerts]);
+    setAlerts(prev => [draftAlert, ...(prev || [])]);
     setViewMode('list');
     setActiveTab('drafts');
     showToast('Alert saved to coordinator drafts queue.', 'info');
+
+    // Async persist to backend API with isDraft = true
+    coordinatorService.createAlert({
+      title: formData.title || 'Untitled Draft Alert',
+      category: formData.category,
+      severity: formData.severity,
+      area: formData.area || 'Western Province',
+      startTime: formData.startTime,
+      expiryTime: formData.expiryTime,
+      message: formData.message,
+      safetyInstructions: instructionsArray,
+      isDraft: true
+    }).then(created => {
+      if (created && created.id) {
+        setAlerts(prev => (prev || []).map(a => a.id === generatedId ? { ...a, ...created, id: created.id, tab: 'drafts', publication: 'Draft' } : a));
+      }
+      if (onRefreshAlerts) onRefreshAlerts();
+    }).catch(err => {
+      console.warn('Backend draft alert persist warning:', err.message);
+    });
   };
 
   const parsedInstructions = formData.safetyInstructions
