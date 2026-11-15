@@ -149,7 +149,7 @@ export const LandingHomePage = () => {
     return () => { isMounted = false; };
   }, []);
 
-  // 6 Primary Assistance Categories Matching CitizenPortal & Backend Database
+  // 6 Primary Assistance Categories Matching Dedicated Services Hub
   const quickCategories = [
     {
       id: 'food',
@@ -158,7 +158,7 @@ export const LandingHomePage = () => {
       desc: 'Pre-packed family ration hampers, baby nutrition & clean meal packs.',
       icon: UtensilsCrossed,
       color: '#38bdf8',
-      link: '/citizen/submit?category=Food'
+      link: '/services?category=food'
     },
     {
       id: 'medical',
@@ -167,7 +167,7 @@ export const LandingHomePage = () => {
       desc: 'Emergency trauma first aid, chronic medicine kits & mobile clinics.',
       icon: Plus,
       color: '#34d399',
-      link: '/citizen/submit?category=Medical'
+      link: '/services?category=medical'
     },
     {
       id: 'shelter',
@@ -176,7 +176,7 @@ export const LandingHomePage = () => {
       desc: 'High-ground relief centers with real-time bed capacity & meals.',
       icon: Building2,
       color: '#fbbf24',
-      link: '/citizen/shelters'
+      link: '/services?category=shelter'
     },
     {
       id: 'transport',
@@ -185,7 +185,7 @@ export const LandingHomePage = () => {
       desc: 'Amphibious rescue boats, stranded resident extraction & SOS airlift.',
       icon: Bus,
       color: '#f87171',
-      link: '/citizen/submit?category=Transport'
+      link: '/services?category=rescue'
     },
     {
       id: 'water',
@@ -194,7 +194,7 @@ export const LandingHomePage = () => {
       desc: 'Purified water bowsers, portable filtration & sanitary hydration packs.',
       icon: Droplets,
       color: '#60a5fa',
-      link: '/citizen/submit?category=Drinking%20Water'
+      link: '/services?category=water'
     },
     {
       id: 'access',
@@ -203,7 +203,7 @@ export const LandingHomePage = () => {
       desc: 'Priority assistance for infants, expectant mothers, elderly & disabled citizens.',
       icon: Accessibility,
       color: '#c084fc',
-      link: '/citizen/submit?category=Accessibility'
+      link: '/services?category=access'
     }
   ];
 
@@ -465,12 +465,12 @@ export const LandingHomePage = () => {
                 </button>
               </form>
               <div className="flex items-center justify-between mt-3 text-[12px] text-white/60 px-1">
-                <span>Emergency DMC: <strong className="text-white">117</strong> · Ambulance: <strong className="text-white">1990</strong></span>
+                <span>Emergency DMC: <a href="tel:117" className="text-white hover:underline">117</a> · Ambulance: <a href="tel:1990" className="text-white hover:underline">1990</a></span>
                 <Link 
-                  to="/citizen/safety" 
+                  to="/emergency-directory" 
                   className="text-white/80 hover:text-white underline text-[12px] text-decoration-none"
                 >
-                  Safety Guides →
+                  24/7 Hotline Directory →
                 </Link>
               </div>
             </div>
@@ -626,11 +626,12 @@ export const LandingHomePage = () => {
             </Animate>
           }
           navLinks={[
-            { label: 'Citizen Portal', href: '/citizen' },
+            { label: 'Relief Services', href: '/services' },
+            { label: 'Satellite Radar', href: '/map' },
+            { label: 'Architecture', href: '/capabilities' },
+            { label: 'Emergency Hotlines', href: '/emergency-directory' },
             { label: 'Find Shelters', href: '/citizen/shelters', badge: `${telemetry.metrics.operationalSheltersCount || 16} Open` },
-            { label: 'Track Request', href: '/citizen/track' },
-            { label: 'Satellite Map', href: '/map' },
-            { label: 'Coordinator Command', href: '/coordinator' },
+            { label: 'Citizen Portal', href: '/citizen' },
           ]}
           loginLabel="Sign In"
           loginLink="/login"
@@ -741,13 +742,21 @@ export const LandingHomePage = () => {
             </p>
           </div>
 
-          <Link 
-            to="/citizen"
-            className="h-[46px] px-6 rounded-[12px] border border-white text-white text-[14px] sm:text-[15px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer text-decoration-none self-start md:self-auto shrink-0"
-          >
-            <span>Explore Citizen Portal</span>
-            <ArrowRight size={14} />
-          </Link>
+          <div className="flex flex-wrap items-center gap-3 self-start md:self-auto shrink-0">
+            <Link 
+              to="/services"
+              className="h-[46px] px-6 rounded-[12px] bg-sky-500 hover:bg-sky-400 text-slate-950 text-[14px] sm:text-[15px] font-[500] transition-colors inline-flex items-center gap-2 cursor-pointer text-decoration-none shadow-lg shadow-sky-500/20"
+            >
+              <span>Explore All Relief Services</span>
+              <ArrowRight size={14} />
+            </Link>
+            <Link 
+              to="/citizen"
+              className="h-[46px] px-5 rounded-[12px] border border-white/20 text-white text-[14px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer text-decoration-none"
+            >
+              <span>Citizen Portal</span>
+            </Link>
+          </div>
         </div>
 
         {/* 6 Category Glass Cards */}
@@ -803,16 +812,25 @@ export const LandingHomePage = () => {
          ========================================================= */}
       <section className="w-full bg-[#080A19] border-t border-white/[0.06] py-16 sm:py-24">
         <div className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px]">
-          <div className="max-w-[760px] mb-14">
-            <span className="text-sky-400 text-[12px] tracking-[0.2em] font-[500] uppercase mb-2 block">
-              INTELLIGENT CRISIS INFRASTRUCTURE
-            </span>
-            <h2 className="text-white text-[32px] sm:text-[48px] font-normal leading-[1.05] tracking-[-0.02em]">
-              Engineered for Rapid Humanitarian Action
-            </h2>
-            <p className="text-white/70 text-[16px] sm:text-[18px] font-[450] mt-3 leading-relaxed">
-              RELIEFCORE connects vulnerable citizens, volunteer search-and-rescue teams, and provincial command centers through automated machine triage, verifiable supply chains, and transparent shelter networks.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+            <div className="max-w-[760px]">
+              <span className="text-sky-400 text-[12px] tracking-[0.2em] font-[500] uppercase mb-2 block">
+                INTELLIGENT CRISIS INFRASTRUCTURE
+              </span>
+              <h2 className="text-white text-[32px] sm:text-[48px] font-normal leading-[1.05] tracking-[-0.02em]">
+                Engineered for Rapid Humanitarian Action
+              </h2>
+              <p className="text-white/70 text-[16px] sm:text-[18px] font-[450] mt-3 leading-relaxed">
+                RELIEFCORE connects vulnerable citizens, volunteer search-and-rescue teams, and provincial command centers through automated machine triage, verifiable supply chains, and transparent shelter networks.
+              </p>
+            </div>
+            <Link
+              to="/capabilities"
+              className="h-[46px] px-6 rounded-[12px] bg-slate-800/80 hover:bg-slate-700/80 border border-white/20 text-white text-[14px] sm:text-[15px] font-[450] transition-colors inline-flex items-center gap-2 cursor-pointer text-decoration-none self-start md:self-auto shrink-0 shadow-lg"
+            >
+              <span>Explore Full Architecture</span>
+              <ArrowRight size={14} />
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -829,20 +847,29 @@ export const LandingHomePage = () => {
                   Machine learning algorithms process unstructured citizen emergency descriptions, automatically extract trapped member counts, identify medical hazards, and calculate dynamic urgency scores (1-5).
                 </p>
               </div>
-              <ul className="space-y-2.5 pt-6 border-t border-white/[0.08] text-[13px] text-white/80">
-                <li className="flex items-center gap-2">
-                  <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span>Trapped count, water level & medical urgency extraction</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span>Dynamic priority queues prevent response SLA breach</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span>Explainable AI rationale presented for human sign-off</span>
-                </li>
-              </ul>
+              <div>
+                <ul className="space-y-2.5 pt-6 border-t border-white/[0.08] text-[13px] text-white/80">
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span>Trapped count, water level & medical urgency extraction</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span>Dynamic priority queues prevent response SLA breach</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span>Explainable AI rationale presented for human sign-off</span>
+                  </li>
+                </ul>
+                <Link
+                  to="/capabilities"
+                  className="mt-5 pt-3 border-t border-white/[0.08] text-[13px] text-sky-400 hover:text-sky-300 font-medium inline-flex items-center gap-1.5 text-decoration-none group"
+                >
+                  <span>Test Live AI Triage Simulator</span>
+                  <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </div>
             </div>
 
             {/* Capability 2 */}
@@ -858,20 +885,29 @@ export const LandingHomePage = () => {
                   Real-time inventory ledger tracking across regional warehouses, automated supply convoy routing, medical kits, and life-boat allocations to priority hazard zones.
                 </p>
               </div>
-              <ul className="space-y-2.5 pt-6 border-t border-white/[0.08] text-[13px] text-white/80">
-                <li className="flex items-center gap-2">
-                  <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span>Multi-depot inventory visibility & stock threshold alerts</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span>GPS vehicle tracking & safe high-ground route optimization</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span>Strict multi-agency allocation audit logs</span>
-                </li>
-              </ul>
+              <div>
+                <ul className="space-y-2.5 pt-6 border-t border-white/[0.08] text-[13px] text-white/80">
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span>Multi-depot inventory visibility & stock threshold alerts</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span>GPS vehicle tracking & safe high-ground route optimization</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span>Strict multi-agency allocation audit logs</span>
+                  </li>
+                </ul>
+                <Link
+                  to="/capabilities"
+                  className="mt-5 pt-3 border-t border-white/[0.08] text-[13px] text-emerald-400 hover:text-emerald-300 font-medium inline-flex items-center gap-1.5 text-decoration-none group"
+                >
+                  <span>Inspect Supply Architecture Specs</span>
+                  <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </div>
             </div>
 
             {/* Capability 3 */}
@@ -887,20 +923,29 @@ export const LandingHomePage = () => {
                   Dynamic bed counter sync for evacuation centers across Western Province, direct evacuee family intake, vulnerable demographic tracking, and medical facility proximity.
                 </p>
               </div>
-              <ul className="space-y-2.5 pt-6 border-t border-white/[0.08] text-[13px] text-white/80">
-                <li className="flex items-center gap-2">
-                  <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span>Live bed availability verified by on-site managers</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span>Special needs placement (elderly, infants & pregnant women)</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span>Automated evacuee overflow redirection to secondary hubs</span>
-                </li>
-              </ul>
+              <div>
+                <ul className="space-y-2.5 pt-6 border-t border-white/[0.08] text-[13px] text-white/80">
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span>Live bed availability verified by on-site managers</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span>Special needs placement (elderly, infants & pregnant women)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span>Automated evacuee overflow redirection to secondary hubs</span>
+                  </li>
+                </ul>
+                <Link
+                  to="/capabilities"
+                  className="mt-5 pt-3 border-t border-white/[0.08] text-[13px] text-amber-400 hover:text-amber-300 font-medium inline-flex items-center gap-1.5 text-decoration-none group"
+                >
+                  <span>View Shelter Capacity Specs</span>
+                  <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -995,7 +1040,7 @@ export const LandingHomePage = () => {
       {/* =========================================================
          7. Platform Role Showcase (12 Command Workspaces)
          ========================================================= */}
-      <section className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px] py-16 sm:py-24 border-t border-white/[0.06]">
+      <section className="w-full max-w-[1800px] mx-auto px-5 sm:px-8 md:px-[82px] py-16 sm:py-24 border-t border-white/[0.06]" id="command-network-section">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
           <div>
             <span className="text-purple-400 text-[12px] tracking-[0.2em] font-[500] uppercase mb-2 block">
@@ -1102,13 +1147,21 @@ export const LandingHomePage = () => {
               </p>
             </div>
 
-            <Link 
-              to="/citizen/safety"
-              className="h-[46px] px-6 rounded-[12px] border border-white text-white text-[14px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer self-start md:self-auto shrink-0 bg-transparent text-decoration-none"
-            >
-              <span>Full Field Safety Protocols</span>
-              <ArrowRight size={14} />
-            </Link>
+            <div className="flex flex-wrap items-center gap-3 self-start md:self-auto shrink-0">
+              <Link 
+                to="/emergency-directory"
+                className="h-[46px] px-6 rounded-[12px] bg-rose-500 hover:bg-rose-600 text-white text-[14px] font-[500] transition-colors inline-flex items-center gap-2 cursor-pointer shadow-lg shadow-rose-500/20 text-decoration-none"
+              >
+                <span>National Hotlines & Protocols</span>
+                <ArrowRight size={14} />
+              </Link>
+              <Link 
+                to="/citizen/safety"
+                className="h-[46px] px-5 rounded-[12px] border border-white/20 text-white text-[14px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer text-decoration-none"
+              >
+                <span>Citizen Guides</span>
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1172,14 +1225,14 @@ export const LandingHomePage = () => {
             <div>
               <h5 className="text-white text-[13px] font-[500] uppercase tracking-wider mb-4">Citizen Services</h5>
               <ul className="space-y-2 text-[13px]">
+                <li><Link to="/services" className="text-sky-400 hover:text-sky-300 font-medium transition-colors text-decoration-none">Emergency Relief Services</Link></li>
+                <li><Link to="/emergency-directory" className="text-rose-400 hover:text-rose-300 font-medium transition-colors text-decoration-none">24/7 Emergency Directory</Link></li>
                 <li><Link to="/citizen/submit" className="text-white/60 hover:text-white transition-colors text-decoration-none">Submit Assistance SOS</Link></li>
                 <li><Link to="/citizen/track" className="text-white/60 hover:text-white transition-colors text-decoration-none">Track My Request</Link></li>
                 <li><Link to="/citizen/shelters" className="text-white/60 hover:text-white transition-colors text-decoration-none">Verified Open Shelters</Link></li>
                 <li><Link to="/citizen/alerts" className="text-white/60 hover:text-white transition-colors text-decoration-none">Live Hazard Alerts</Link></li>
                 <li><Link to="/citizen/safety" className="text-white/60 hover:text-white transition-colors text-decoration-none">Safety & Evacuation</Link></li>
                 <li><Link to="/citizen/support" className="text-white/60 hover:text-white transition-colors text-decoration-none">24/7 Helplines</Link></li>
-                <li><Link to="/citizen/profile" className="text-white/60 hover:text-white transition-colors text-decoration-none">Household Profile</Link></li>
-                <li><Link to="/donor" className="text-white/60 hover:text-white transition-colors text-decoration-none">Donor &amp; Funding Portal</Link></li>
                 <li><Link to="/citizen" className="text-white/60 hover:text-white transition-colors text-decoration-none">Public Citizen Portal</Link></li>
               </ul>
             </div>
@@ -1188,15 +1241,14 @@ export const LandingHomePage = () => {
             <div>
               <h5 className="text-white text-[13px] font-[500] uppercase tracking-wider mb-4">Command &amp; AI</h5>
               <ul className="space-y-2 text-[13px]">
+                <li><Link to="/capabilities" className="text-sky-400 hover:text-sky-300 font-medium transition-colors text-decoration-none">Crisis Architecture</Link></li>
                 <li><Link to="/coordinator" className="text-white/60 hover:text-white transition-colors text-decoration-none">Coordinator Portal</Link></li>
                 <li><Link to="/coordinator/overview" className="text-white/60 hover:text-white transition-colors text-decoration-none">Operations Overview</Link></li>
                 <li><Link to="/coordinator/review" className="text-white/60 hover:text-white transition-colors text-decoration-none">AI Assisted Review</Link></li>
                 <li><Link to="/coordinator/dashboard" className="text-white/60 hover:text-white transition-colors text-decoration-none">Coordinator Cockpit</Link></li>
-                <li><Link to="/coordinator/triage" className="text-white/60 hover:text-white transition-colors text-decoration-none">Request Triage Queue</Link></li>
                 <li><Link to="/incident-manager" className="text-white/60 hover:text-white transition-colors text-decoration-none">Incident Case Manager</Link></li>
                 <li><Link to="/partner" className="text-white/60 hover:text-white transition-colors text-decoration-none">Partner Organisation Portal</Link></li>
                 <li><Link to="/ai-operations" className="text-white/60 hover:text-white transition-colors text-decoration-none">AI Operations Center</Link></li>
-                <li><Link to="/ai-governance" className="text-white/60 hover:text-white transition-colors text-decoration-none">AI Ethics &amp; Governance</Link></li>
               </ul>
             </div>
 
@@ -1219,7 +1271,7 @@ export const LandingHomePage = () => {
             <div>
               <h5 className="text-white text-[13px] font-[500] uppercase tracking-wider mb-4">System &amp; Access</h5>
               <ul className="space-y-2 text-[13px]">
-                <li><Link to="/map" className="text-white/60 hover:text-white transition-colors text-decoration-none">Satellite GIS Map</Link></li>
+                <li><Link to="/map" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors text-decoration-none">Satellite GIS Radar Map</Link></li>
                 <li><Link to="/reports" className="text-white/60 hover:text-white transition-colors text-decoration-none">Reports &amp; Analytics</Link></li>
                 <li><Link to="/audit" className="text-white/60 hover:text-white transition-colors text-decoration-none">Immutable Audit Ledger</Link></li>
                 <li><Link to="/admin" className="text-white/60 hover:text-white transition-colors text-decoration-none">Platform Admin &amp; Health</Link></li>

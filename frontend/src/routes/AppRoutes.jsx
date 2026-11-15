@@ -80,7 +80,14 @@ import { PartnerPortalPage } from '../pages/partner';
 import { AdminDashboardPage, AuditCenterPage } from '../pages/admin';
 
 // Public & Security Pages
-import { LandingHomePage, BloomLandingPage } from '../pages/home';
+import {
+  LandingHomePage,
+  BloomLandingPage,
+  PublicCrisisMapPage,
+  EmergencyServicesPage,
+  CoreCapabilitiesPage,
+  EmergencyDirectoryPage
+} from '../pages/home';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { RegisterPage } from '../pages/auth/RegisterPage';
 import { UnauthorizedPage } from '../pages/auth/UnauthorizedPage';
@@ -89,12 +96,21 @@ import Hero from '../components/Hero';
 export const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Home & Showcase */}
+      {/* Public Home & Dedicated Showcase Sections */}
       <Route path="/" element={<LandingHomePage />} />
       <Route path="/home" element={<LandingHomePage />} />
       <Route path="/landing" element={<LandingHomePage />} />
       <Route path="/apogee" element={<Navigate to="/" replace />} />
       <Route path="/bloom" element={<BloomLandingPage />} />
+      <Route path="/map" element={<PublicCrisisMapPage />} />
+      <Route path="/satellite-map" element={<PublicCrisisMapPage />} />
+      <Route path="/services" element={<EmergencyServicesPage />} />
+      <Route path="/relief-services" element={<EmergencyServicesPage />} />
+      <Route path="/assistance-services" element={<EmergencyServicesPage />} />
+      <Route path="/capabilities" element={<CoreCapabilitiesPage />} />
+      <Route path="/operations-architecture" element={<CoreCapabilitiesPage />} />
+      <Route path="/emergency-directory" element={<EmergencyDirectoryPage />} />
+      <Route path="/safety-protocols" element={<EmergencyDirectoryPage />} />
 
       {/* ========================================================= */}
       {/* MODULE 1: Citizen / Affected Person (/citizen/*)          */}
@@ -162,7 +178,6 @@ export const AppRoutes = () => {
       <Route path="/coordinator/requests/:id" element={<DashboardOverviewPage />} />
       <Route path="/requests/:id" element={<DashboardOverviewPage />} />
       <Route path="/request-detail" element={<DashboardOverviewPage />} />
-      <Route path="/map" element={<DashboardOverviewPage />} />
       <Route path="/analytics" element={<DashboardOverviewPage />} />
       <Route path="/reports" element={<DashboardOverviewPage initialTab="reports" />} />
       <Route path="/notifications" element={<DashboardOverviewPage initialTab="notifications" />} />
