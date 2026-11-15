@@ -34,7 +34,9 @@ import {
   Info, 
   Droplets, 
   Check,
-  LayoutGrid
+  LayoutGrid,
+  Bot,
+  Sparkles
 } from 'lucide-react';
 
 import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
@@ -42,8 +44,6 @@ import citizenMapPreview from '../../assets/citizen-map-preview.jpg';
 import shelter1 from '../../assets/shelter-1.jpg';
 import shelter2 from '../../assets/shelter-2.jpg';
 import shelter3 from '../../assets/shelter-3.jpg';
-import robot3D from '../../assets/robot-3d.png';
-import familyPopout from '../../assets/family-popout.png';
 import { PlatformDirectoryModal } from '../../components/common/PlatformDirectoryModal';
 import './CitizenPortalPage.css';
 
@@ -351,15 +351,6 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
               />
             </div>
           </div>
-
-          {/* 3D Pop-Out Cutout of Mother and Child */}
-          <div className="hero-popout-wrapper">
-            <img
-              src={familyPopout}
-              alt="Disaster response family"
-              className="hero-popout-img"
-            />
-          </div>
         </section>
 
         {/* Body 2-Column Grid */}
@@ -643,7 +634,7 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
         <section className="ai-assistant-banner">
           <div className="ai-banner-left">
             <div className="ai-robot-badge">
-              <img src={robot3D} alt="AI Support Assistant" className="ai-robot-3d-img" />
+              <Bot size={22} className="ai-robot-vector-icon" />
             </div>
             <div>
               <h3 className="ai-banner-title">AI Support Assistant</h3>
@@ -661,9 +652,9 @@ export const CitizenPortalPage = ({ initialTab = 'home' }) => {
           </>
         )}
 
-        {/* Floating 3D AI Assistant Widget */}
+        {/* Floating AI Assistant Widget */}
         <div className="floating-ai-widget" onClick={() => navigate('/citizen/support')} title="Talk with AI Support Assistant">
-          <img src={robot3D} alt="AI Assistant" className="floating-robot-img" />
+          <Bot size={26} className="floating-robot-icon" />
           <span className="floating-ai-ping"></span>
         </div>
 

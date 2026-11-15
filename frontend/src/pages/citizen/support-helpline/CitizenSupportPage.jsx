@@ -29,7 +29,6 @@ import {
   UserCheck
 } from 'lucide-react';
 import { useAlert } from '@/context/AlertContext';
-import robot3D from '@/assets/robot-3d.png';
 import './CitizenSupportPage.css';
 
 // ---------------------------------------------------------------------------
@@ -585,7 +584,16 @@ export const CitizenSupportPage = ({ onBack }) => {
         </div>
 
         <div className="support-hero-side-illustration">
-          <img src={robot3D} alt="ReliefBot 3D AI Assistant" className="support-robot-img" />
+          <div className="support-ai-vector-badge">
+            <div className="support-ai-icon-circle">
+              <Bot size={48} className="support-ai-bot-icon" />
+              <span className="support-ai-radar-pulse"></span>
+            </div>
+            <div className="support-ai-badge-label">
+              <Sparkles size={13} className="text-amber-300" />
+              <span>ReliefCore AI 24/7 Desk</span>
+            </div>
+          </div>
         </div>
       </div>
 
