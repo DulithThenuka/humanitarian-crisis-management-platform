@@ -328,7 +328,7 @@ export default function Hero({
                     <a
                       href={primaryCtaLink}
                       onClick={handlePrimaryClick}
-                      className="h-[46px] sm:h-[51px] px-5 sm:px-[27px] bg-[#E9E9E9] rounded-[12px] text-[#0A0707] text-[14px] sm:text-[15.5px] font-[450] leading-[15.5px] transition-opacity hover:opacity-90 inline-flex items-center justify-center cursor-pointer text-decoration-none"
+                      className="h-[46px] sm:h-[51px] px-6 sm:px-[28px] bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-[550] text-[14px] sm:text-[15.5px] rounded-[12px] shadow-[0_4px_24px_rgba(249,115,22,0.45)] border border-orange-400/40 transition-all hover:scale-[1.02] active:scale-[0.98] inline-flex items-center justify-center cursor-pointer text-decoration-none"
                     >
                       {primaryCtaLabel}
                     </a>
@@ -336,7 +336,7 @@ export default function Hero({
                     <button
                       type="button"
                       onClick={handlePrimaryClick}
-                      className="h-[46px] sm:h-[51px] px-5 sm:px-[27px] bg-[#E9E9E9] rounded-[12px] text-[#0A0707] text-[14px] sm:text-[15.5px] font-[450] leading-[15.5px] transition-opacity hover:opacity-90 inline-flex items-center justify-center cursor-pointer"
+                      className="h-[46px] sm:h-[51px] px-6 sm:px-[28px] bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-[550] text-[14px] sm:text-[15.5px] rounded-[12px] shadow-[0_4px_24px_rgba(249,115,22,0.45)] border border-orange-400/40 transition-all hover:scale-[1.02] active:scale-[0.98] inline-flex items-center justify-center cursor-pointer"
                     >
                       {primaryCtaLabel}
                     </button>
@@ -346,7 +346,7 @@ export default function Hero({
                     <a
                       href={secondaryCtaLink}
                       onClick={handleSecondaryClick}
-                      className="h-[46px] sm:h-[51px] px-5 sm:px-[27px] rounded-[12px] border border-white text-white text-[14px] sm:text-[15.5px] font-[450] leading-[15.5px] transition-opacity hover:opacity-80 inline-flex items-center justify-center cursor-pointer text-decoration-none"
+                      className="h-[46px] sm:h-[51px] px-5 sm:px-[27px] rounded-[12px] border border-cyan-400/35 bg-cyan-950/20 text-cyan-200 hover:text-white hover:bg-cyan-900/30 hover:border-cyan-400/60 text-[14px] sm:text-[15.5px] font-[450] transition-all inline-flex items-center justify-center cursor-pointer text-decoration-none backdrop-blur-md"
                     >
                       {secondaryCtaLabel}
                     </a>
@@ -354,7 +354,7 @@ export default function Hero({
                     <button
                       type="button"
                       onClick={handleSecondaryClick}
-                      className="h-[46px] sm:h-[51px] px-5 sm:px-[27px] rounded-[12px] border border-white text-white text-[14px] sm:text-[15.5px] font-[450] leading-[15.5px] transition-opacity hover:opacity-80 inline-flex items-center justify-center cursor-pointer"
+                      className="h-[46px] sm:h-[51px] px-5 sm:px-[27px] rounded-[12px] border border-cyan-400/35 bg-cyan-950/20 text-cyan-200 hover:text-white hover:bg-cyan-900/30 hover:border-cyan-400/60 text-[14px] sm:text-[15.5px] font-[450] transition-all inline-flex items-center justify-center cursor-pointer backdrop-blur-md"
                     >
                       {secondaryCtaLabel}
                     </button>

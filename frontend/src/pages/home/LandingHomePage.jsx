@@ -378,20 +378,20 @@ export const LandingHomePage = () => {
       <div className="w-full bg-[#080A19]/90 border-b border-white/[0.08] backdrop-blur-[16px] py-2.5 px-5 sm:px-8 md:px-[82px] text-[12px] text-white/70 relative z-50">
         <div className="w-full max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
-            <AlertTriangle size={13} className="text-rose-400 shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+            <AlertTriangle size={13} className="text-orange-400 shrink-0" />
             <span className="text-white/80">
               <strong className="text-white font-[500]">National Humanitarian Emergency Protocol:</strong> Western Province Flood Response Network, Sri Lanka.
             </span>
           </div>
 
           <div className="flex items-center gap-3 text-white/60 text-[12px]">
-            <a href="tel:117" className="flex items-center gap-1.5 text-rose-300 hover:text-rose-200 transition-colors text-decoration-none font-medium">
+            <a href="tel:117" className="flex items-center gap-1.5 text-orange-300 hover:text-orange-200 transition-colors text-decoration-none font-medium">
               <PhoneCall size={12} />
               <span>Emergency DMC: <strong className="text-white">117</strong></span>
             </a>
             <span className="text-white/20">|</span>
-            <a href="tel:1990" className="flex items-center gap-1.5 text-amber-300 hover:text-amber-200 transition-colors text-decoration-none font-medium">
+            <a href="tel:1990" className="flex items-center gap-1.5 text-cyan-300 hover:text-cyan-200 transition-colors text-decoration-none font-medium">
               <PhoneCall size={12} />
               <span>Ambulance: <strong className="text-white">1990</strong></span>
             </a>
@@ -401,16 +401,16 @@ export const LandingHomePage = () => {
 
       {/* Real-time Crisis Broadcast Advisory Banner */}
       {alerts && alerts.length > 0 && (
-        <div className="bg-amber-500/15 border-b border-amber-500/30 px-5 sm:px-8 md:px-[82px] py-2.5 backdrop-blur-md">
-          <div className="w-full max-w-[1800px] mx-auto flex items-center justify-between text-[12.5px] text-amber-200">
+        <div className="bg-orange-500/15 border-b border-orange-500/30 px-5 sm:px-8 md:px-[82px] py-2.5 backdrop-blur-md">
+          <div className="w-full max-w-[1800px] mx-auto flex items-center justify-between text-[12.5px] text-orange-200">
             <div className="flex items-center gap-2.5 overflow-hidden text-ellipsis whitespace-nowrap">
-              <span className="px-2 py-0.5 rounded bg-amber-500/30 text-amber-100 font-semibold text-[10px] tracking-wider uppercase">
+              <span className="px-2 py-0.5 rounded bg-orange-500/30 text-orange-100 font-semibold text-[10px] tracking-wider uppercase">
                 {alerts[0].level || 'CRITICAL FLOOD ADVISORY'}
               </span>
               <strong className="text-white">{alerts[0].title}:</strong>
-              <span className="text-amber-200/90">{alerts[0].message}</span>
+              <span className="text-orange-200/90">{alerts[0].message}</span>
             </div>
-            <span className="hidden md:inline-block text-[11px] text-amber-300/70 shrink-0 ml-4 font-mono">
+            <span className="hidden md:inline-block text-[11px] text-orange-300/70 shrink-0 ml-4 font-mono">
               Sector: {alerts[0].region}
             </span>
           </div>
@@ -432,11 +432,11 @@ export const LandingHomePage = () => {
           </div>
         }
         badgeTag={
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-[14px] border border-white/15 text-white/90 text-[12px] font-[450]">
-            <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
-            <span className="tracking-wide">WESTERN PROVINCE DISASTER COORDINATION NETWORK</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/70 backdrop-blur-[14px] border border-cyan-500/30 text-white/90 text-[12px] font-[450]">
+            <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+            <span className="tracking-wide text-cyan-200">WESTERN PROVINCE DISASTER COORDINATION NETWORK</span>
             <span className="text-white/30">|</span>
-            <span className="text-amber-300 font-semibold">{telemetry.activeCrisis.severity}</span>
+            <span className="text-orange-400 font-semibold">{telemetry.activeCrisis.severity}</span>
           </div>
         }
         headline="Stronger Communities. Safer Tomorrows."
@@ -447,7 +447,7 @@ export const LandingHomePage = () => {
           secondaryCtaLink="/citizen/shelters"
           extraLeftContent={
             <div className="mt-5 max-w-[440px]">
-              <form className="flex items-center gap-2 p-1.5 rounded-[14px] bg-slate-900/60 backdrop-blur-[20px] border border-white/[0.15] shadow-[0_8px_32px_rgba(0,0,0,0.4)] focus-within:border-white/40 focus-within:ring-1 focus-within:ring-white/20 transition-all" onSubmit={handleTrackSubmit}>
+              <form className="flex items-center gap-2 p-1.5 rounded-[14px] bg-slate-900/70 backdrop-blur-[20px] border border-white/[0.15] shadow-[0_8px_32px_rgba(0,0,0,0.4)] focus-within:border-cyan-400/50 focus-within:ring-1 focus-within:ring-cyan-400/20 transition-all" onSubmit={handleTrackSubmit}>
                 <Search size={16} className="text-white/50 ml-3 shrink-0" />
                 <input 
                   type="text" 
@@ -458,7 +458,7 @@ export const LandingHomePage = () => {
                 />
                 <button 
                   type="submit" 
-                  className="h-[38px] px-4 rounded-[10px] bg-[#E9E9E9] hover:bg-white text-[#0A0707] text-[13px] font-[500] shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer border-0"
+                  className="h-[38px] px-4 rounded-[10px] bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-[13px] font-[550] shadow-[0_2px_12px_rgba(249,115,22,0.35)] border border-orange-400/30 shrink-0 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>Track Status</span>
                   <ArrowRight size={13} />
@@ -751,14 +751,14 @@ export const LandingHomePage = () => {
           <div className="flex flex-wrap items-center gap-3 self-start md:self-auto shrink-0">
             <Link 
               to="/services"
-              className="h-[46px] px-6 rounded-[12px] bg-sky-500 hover:bg-sky-400 text-slate-950 text-[14px] sm:text-[15px] font-[500] transition-colors inline-flex items-center gap-2 cursor-pointer text-decoration-none shadow-lg shadow-sky-500/20"
+              className="h-[46px] px-6 rounded-[12px] bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-[550] text-[14px] sm:text-[15px] transition-all inline-flex items-center gap-2 cursor-pointer text-decoration-none shadow-[0_4px_20px_rgba(249,115,22,0.4)] border border-orange-400/40"
             >
               <span>Explore All Relief Services</span>
               <ArrowRight size={14} />
             </Link>
             <Link 
               to="/citizen"
-              className="h-[46px] px-5 rounded-[12px] border border-white/20 text-white text-[14px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer text-decoration-none"
+              className="h-[46px] px-5 rounded-[12px] border border-cyan-500/35 bg-cyan-950/20 text-cyan-200 hover:text-white hover:border-cyan-400/60 transition-colors inline-flex items-center gap-2 cursor-pointer text-decoration-none backdrop-blur-md"
             >
               <span>Citizen Portal</span>
             </Link>
@@ -998,12 +998,12 @@ export const LandingHomePage = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/map')}
-                  className="h-[48px] sm:h-[51px] px-6 sm:px-[27px] bg-[#E9E9E9] hover:bg-white text-[#0A0707] text-[14px] sm:text-[15.5px] font-[500] rounded-[12px] transition-colors inline-flex items-center gap-2 cursor-pointer border-0 shadow-lg"
+                  className="h-[48px] sm:h-[51px] px-6 sm:px-[27px] bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-[14px] sm:text-[15.5px] font-[550] rounded-[12px] shadow-[0_4px_20px_rgba(249,115,22,0.4)] border border-orange-400/40 transition-all inline-flex items-center gap-2 cursor-pointer"
                 >
                   <span>Inspect GIS Map</span>
                   <ArrowRight size={14} />
                 </button>
-                <span className="text-[11px] font-mono text-white/50">6.9271° N, 79.8612° E</span>
+                <span className="text-[11px] font-mono text-cyan-300/70">6.9271° N, 79.8612° E</span>
               </div>
             </div>
 
@@ -1156,14 +1156,14 @@ export const LandingHomePage = () => {
             <div className="flex flex-wrap items-center gap-3 self-start md:self-auto shrink-0">
               <Link 
                 to="/emergency-directory"
-                className="h-[46px] px-6 rounded-[12px] bg-rose-500 hover:bg-rose-600 text-white text-[14px] font-[500] transition-colors inline-flex items-center gap-2 cursor-pointer shadow-lg shadow-rose-500/20 text-decoration-none"
+                className="h-[46px] px-6 rounded-[12px] bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-[550] text-[14px] transition-all inline-flex items-center gap-2 cursor-pointer shadow-[0_4px_20px_rgba(249,115,22,0.4)] border border-orange-400/40 text-decoration-none"
               >
                 <span>National Hotlines & Protocols</span>
                 <ArrowRight size={14} />
               </Link>
               <Link 
                 to="/citizen/safety"
-                className="h-[46px] px-5 rounded-[12px] border border-white/20 text-white text-[14px] font-[450] hover:bg-white/10 transition-colors inline-flex items-center gap-2 cursor-pointer text-decoration-none"
+                className="h-[46px] px-5 rounded-[12px] border border-cyan-500/35 bg-cyan-950/20 text-cyan-200 hover:text-white hover:border-cyan-400/60 transition-colors inline-flex items-center gap-2 cursor-pointer text-decoration-none backdrop-blur-md"
               >
                 <span>Citizen Guides</span>
               </Link>
@@ -1177,9 +1177,9 @@ export const LandingHomePage = () => {
               { name: 'Police Emergency Service', number: '119', service: 'Ground rescue & emergency security operations' }
             ]).slice(0, 3).map((item, idx) => {
               const styles = [
-                { bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-400', hover: 'hover:text-rose-300', icon: PhoneCall },
-                { bg: 'bg-sky-500/10', border: 'border-sky-500/20', text: 'text-sky-400', hover: 'hover:text-sky-300', icon: HeartPulse },
-                { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', hover: 'hover:text-emerald-300', icon: ShieldAlert },
+                { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400', hover: 'hover:text-orange-300', icon: PhoneCall },
+                { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400', hover: 'hover:text-cyan-300', icon: HeartPulse },
+                { bg: 'bg-teal-500/10', border: 'border-teal-500/30', text: 'text-teal-400', hover: 'hover:text-teal-300', icon: ShieldAlert },
               ];
               const cur = styles[idx % styles.length];
               const IconComp = cur.icon;
