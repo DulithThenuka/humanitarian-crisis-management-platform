@@ -9,4 +9,7 @@ export { LogisticsPortalPage as default } from './LogisticsPortalPage';
 // Sub-Category Page Modules
 export { ResourceInventoryPage } from './inventory/ResourceInventoryPage';
 export { AllocationDispatchPage } from './dispatch/AllocationDispatchPage';
+export { SupplyRequisitionsView } from './requests/SupplyRequisitionsView';
+export { DepotFacilitiesView } from './depots/DepotFacilitiesView';
+export { ReceivingDockView } from './intake/ReceivingDockView';
 export * from './data/logisticsPortalData';
