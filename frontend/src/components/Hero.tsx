@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
+import disasterRescueHero from '../assets/disaster-rescue-hero.jpg';
 
 export interface HeroProps {
   brandName?: string;
   brandLogo?: React.ReactNode;
+  bgImage?: string;
+  bgVideo?: string;
   badgeTag?: React.ReactNode;
   headline?: React.ReactNode;
   subheadline?: React.ReactNode;
@@ -180,6 +183,8 @@ export function RevenueCard({
 export default function Hero({
   brandName = 'HumanAid / RELIEFCORE',
   brandLogo,
+  bgImage,
+  bgVideo,
   badgeTag,
   headline = 'Stronger Communities. Safer Tomorrows.',
   subheadline = 'AI-powered crisis coordination connecting disaster-affected communities in Sri Lanka with verified shelters, relief resources, and emergency response teams for faster, smarter support.',
@@ -232,17 +237,26 @@ export default function Hero({
 
   return (
     <section className="relative w-full min-h-screen bg-[#080A19] flex flex-col justify-between overflow-hidden">
-      {/* Background video — first child, absolutely positioned, covering */}
-      <video
-        className="absolute inset-0 w-full h-full object-cover"
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260813_092641_de52eb87-daf2-41db-92cb-7a56eae012a5.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-      />
-      {/* Contrast Overlay for optimal text readability */}
-      <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none" />
+      {/* Background Media — authentic Sri Lanka disaster relief operation */}
+      {bgVideo ? (
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          src={bgVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      ) : (
+        <img
+          src={bgImage || disasterRescueHero}
+          alt="Sri Lanka Humanitarian Flood Rescue Operation"
+          className="absolute inset-0 w-full h-full object-cover object-[center_35%] filter brightness-[0.72] contrast-[1.08] transition-transform duration-1000 scale-[1.02]"
+        />
+      )}
+      {/* Contrast Overlay for optimal text readability and dark-teal integration */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#080A19]/95 via-[#080A19]/75 to-[#080A19]/45 z-0 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#080A19] via-transparent to-[#080A19]/80 z-0 pointer-events-none" />
 
       {/* Content wrapper */}
       <div className="relative z-10 w-full flex-1 flex flex-col justify-between">
