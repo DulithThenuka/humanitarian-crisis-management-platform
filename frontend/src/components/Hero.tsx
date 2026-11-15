@@ -251,16 +251,17 @@ export default function Hero({
         <img
           src={bgImage || disasterRescueHero}
           alt="Sri Lanka Humanitarian Flood Rescue Operation"
-          className="absolute inset-0 w-full h-full object-cover object-[center_35%] filter brightness-[0.70] contrast-[1.1] animate-slow-kenburns scale-[1.02]"
+          className="absolute inset-0 w-full h-full object-cover object-[center_32%] filter brightness-[0.92] contrast-[1.06] saturate-[1.12] animate-slow-kenburns scale-[1.02]"
         />
       )}
 
       {/* Cybernetic Grid Overlay */}
-      <div className="absolute inset-0 cyber-grid-overlay z-0 pointer-events-none opacity-40" />
+      <div className="absolute inset-0 cyber-grid-overlay z-0 pointer-events-none opacity-30" />
 
       {/* Aurora Ambient Glow Orbs */}
       <div className="absolute top-[16%] right-[8%] w-[580px] h-[580px] rounded-full bg-cyan-500/15 blur-[140px] pointer-events-none animate-aurora-breathe z-0" />
       <div className="absolute bottom-[20%] left-[5%] w-[500px] h-[500px] rounded-full bg-emerald-500/12 blur-[130px] pointer-events-none animate-aurora-breathe-delayed z-0" />
+      <div className="absolute top-[28%] left-[35%] w-[420px] h-[320px] rounded-full bg-amber-500/12 blur-[110px] pointer-events-none z-0" />
 
       {/* Digital Rotating Radar Reticle (Upper Right Background) */}
       <div className="absolute top-[12%] right-[10%] w-[380px] h-[380px] rounded-full border border-cyan-500/10 pointer-events-none z-0 hidden lg:flex items-center justify-center">
@@ -273,9 +274,9 @@ export default function Hero({
         <div className="absolute inset-0 rounded-full animate-radar-sweep pointer-events-none bg-[conic-gradient(from_0deg,transparent_0_310deg,rgba(56,189,248,0.18)_360deg)]" />
       </div>
 
-      {/* Contrast Overlay for optimal text readability and dark-teal integration */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#080A19]/95 via-[#080A19]/75 to-[#080A19]/45 z-0 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#080A19] via-transparent to-[#080A19]/80 z-0 pointer-events-none" />
+      {/* Precision Contrast Vignette: Dark solid on left for 100% text legibility, transparent on center/right to show responders clearly */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#080A19] via-[#080A19]/80 via-45% to-transparent z-0 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#080A19] via-transparent via-55% to-[#080A19]/70 z-0 pointer-events-none" />
 
       {/* Content wrapper */}
       <div className="relative z-10 w-full flex-1 flex flex-col justify-between">
