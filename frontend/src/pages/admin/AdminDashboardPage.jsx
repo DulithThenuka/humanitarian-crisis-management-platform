@@ -706,6 +706,24 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
       }
     } catch {
       // Keep rich fallback
+    }
+
+    try {
+      const donationsRes = await adminService.getDonations();
+      if (donationsRes?.succeeded && donationsRes.data && donationsRes.data.length > 0) {
+        setDonations(donationsRes.data);
+      }
+    } catch {
+      // Keep rich fallback
+    }
+
+    try {
+      const broadcastsRes = await adminService.getBroadcasts();
+      if (broadcastsRes?.succeeded && broadcastsRes.data && broadcastsRes.data.length > 0) {
+        setBroadcasts(broadcastsRes.data);
+      }
+    } catch {
+      // Keep rich fallback
     } finally {
       setLoading(false);
     }
