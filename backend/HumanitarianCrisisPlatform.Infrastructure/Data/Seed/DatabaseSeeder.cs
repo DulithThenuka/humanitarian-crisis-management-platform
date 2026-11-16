@@ -346,5 +346,286 @@ public static class DatabaseSeeder
                 await context.SaveChangesAsync();
             }
         }
+
+        // 7. Seed Corporate & Humanitarian Relief Donations
+        if (!await context.Donations.AnyAsync())
+        {
+            var donations = new List<Donation>
+            {
+                new()
+                {
+                    Id = Guid.Parse("d1111111-0000-0000-0000-000000000101"),
+                    DonorName = "Dilmah Tea Relief Trust",
+                    DonorEmail = "csr@dilmahtea.com",
+                    DonorPhone = "+94 11 482 2000",
+                    DonationType = 0, // Monetary
+                    Amount = 5000000m,
+                    Currency = "LKR",
+                    Sector = "Food & Clean Water",
+                    TargetDistrict = "Colombo (Kelani Basin)",
+                    Status = 1, // Verified & Cleared
+                    ReceivedAt = DateTime.UtcNow.AddHours(-18),
+                    VerifiedBy = "DMC Treasury Audit",
+                    TaxExemptId = "TE-2026-8841",
+                    AuditHash = "sha256-8f7a43e8bb219901"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d2222222-0000-0000-0000-000000000102"),
+                    DonorName = "UN OCHA Emergency Rapid Fund",
+                    DonorEmail = "rapid-response@un.ocha.org",
+                    DonationType = 0, // Monetary
+                    Amount = 8500000m,
+                    Currency = "LKR",
+                    Sector = "Medical Field Hospitals",
+                    TargetDistrict = "Western & Sabaragamuwa",
+                    Status = 1, // Verified & Cleared
+                    ReceivedAt = DateTime.UtcNow.AddHours(-36),
+                    VerifiedBy = "UN Comptroller Office",
+                    TaxExemptId = "UN-NGO-2026-002",
+                    AuditHash = "sha256-12c49981e4b3017a"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d3333333-0000-0000-0000-000000000103"),
+                    DonorName = "John Keells Foundation",
+                    DonorEmail = "community@keells.com",
+                    DonationType = 1, // InKind
+                    Amount = 3750000m,
+                    Currency = "LKR",
+                    ItemDescription = "Emergency Dry Ration Packs & Infant Hygiene Kits",
+                    ItemQuantity = 2500,
+                    Sector = "Dry Rations & Baby Care",
+                    TargetDistrict = "Gampaha Evacuee Shelters",
+                    Status = 2, // AllocatedToDepot
+                    ReceivedAt = DateTime.UtcNow.AddHours(-40),
+                    VerifiedBy = "Logistics Intake Dock",
+                    TaxExemptId = "TE-2026-8812",
+                    AuditHash = "sha256-99ea4871bb04bc33"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d4444444-0000-0000-0000-000000000104"),
+                    DonorName = "Commercial Bank CSR Division",
+                    DonorEmail = "csr@combank.net",
+                    DonationType = 0,
+                    Amount = 3200000m,
+                    Currency = "LKR",
+                    Sector = "Water Bowsers & Fuel Reserves",
+                    TargetDistrict = "Colombo & Kalutara",
+                    Status = 1,
+                    ReceivedAt = DateTime.UtcNow.AddHours(-52),
+                    VerifiedBy = "DMC Treasury Audit",
+                    TaxExemptId = "TE-2026-8790",
+                    AuditHash = "sha256-33d1bb89aa04ff20"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d5555555-0000-0000-0000-000000000105"),
+                    DonorName = "Sri Lanka Red Cross Society",
+                    DonorEmail = "disaster@redcross.lk",
+                    DonationType = 1,
+                    Amount = 2400000m,
+                    Currency = "LKR",
+                    ItemDescription = "Surgical Trauma & Emergency First Aid Kits",
+                    ItemQuantity = 1200,
+                    Sector = "Emergency Medical Care",
+                    TargetDistrict = "Colombo Base Stations",
+                    Status = 2,
+                    ReceivedAt = DateTime.UtcNow.AddHours(-60),
+                    VerifiedBy = "Medical Corps Logistics",
+                    TaxExemptId = "RC-MED-2026",
+                    AuditHash = "sha256-44aa9911e2477190"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d6666666-0000-0000-0000-000000000106"),
+                    DonorName = "Rotary Club Colombo West",
+                    DonorEmail = "president@rotarycolombo.lk",
+                    DonationType = 0,
+                    Amount = 1800000m,
+                    Currency = "LKR",
+                    Sector = "Shelter Bedding & Tarpaulins",
+                    TargetDistrict = "Western Province Shelters",
+                    Status = 1,
+                    ReceivedAt = DateTime.UtcNow.AddHours(-72),
+                    VerifiedBy = "DMC Treasury Audit",
+                    TaxExemptId = "TE-2026-8744",
+                    AuditHash = "sha256-aa428801990141bb"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d7777777-0000-0000-0000-000000000107"),
+                    DonorName = "Aitken Spence Logistics Aid",
+                    DonorEmail = "logistics.aid@aitkenspence.lk",
+                    DonationType = 2, // LogisticsAsset
+                    Amount = 4800000m,
+                    Currency = "LKR",
+                    ItemDescription = "6 4x4 Off-Road Transport Trucks for Flood Rescue Convoys",
+                    ItemQuantity = 6,
+                    Sector = "Flood Rescue Convoys",
+                    TargetDistrict = "Western Province Command",
+                    Status = 3, // ActiveDeployment
+                    ReceivedAt = DateTime.UtcNow.AddHours(-80),
+                    VerifiedBy = "Fleet Master Verification",
+                    TaxExemptId = "TE-2026-8711",
+                    AuditHash = "sha256-55bc9944bb2201ea"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d8888888-0000-0000-0000-000000000108"),
+                    DonorName = "Australia-Sri Lanka Disaster Solidarity",
+                    DonorEmail = "aus.aid@dfat.gov.au",
+                    DonationType = 0,
+                    Amount = 2600000m,
+                    Currency = "LKR",
+                    Sector = "Mobile Water Purification Units",
+                    TargetDistrict = "Kalutara & Galle",
+                    Status = 0, // PendingAudit
+                    ReceivedAt = DateTime.UtcNow.AddHours(-96),
+                    VerifiedBy = "Central Bank Escrow Unit",
+                    TaxExemptId = "PENDING-CB",
+                    AuditHash = "sha256-77ee1134aa9940cb"
+                }
+            };
+
+            await context.Donations.AddRangeAsync(donations);
+            await context.SaveChangesAsync();
+        }
+
+        // 8. Seed Emergency Broadcasts & Alert Warnings
+        if (!await context.EmergencyBroadcasts.AnyAsync())
+        {
+            var broadcasts = new List<EmergencyBroadcast>
+            {
+                new()
+                {
+                    Id = Guid.Parse("b1111111-0000-0000-0000-000000000091"),
+                    Title = "Emergency Flash Flood Warning: Kelani River Basin",
+                    Severity = "Emergency",
+                    Channels = "SMS Broadcast, Push Notification, Field Radio",
+                    TargetRegion = "Colombo & Gampaha Lowlands",
+                    TargetAudience = "All Citizens in Zone A & B (45,200 recipients)",
+                    Message = "CRITICAL ALERT: Kelani River has exceeded major flood level (1.84m). Immediate evacuation advised for low-lying areas of Wellampitiya, Kolonnawa, Kelaniya. Proceed to designated high-ground shelters.",
+                    SentBy = "DMC Emergency Command / Sarah Johnson",
+                    DeliveryRate = "99.2%",
+                    Status = "Active Live",
+                    IsActive = true,
+                    SentAt = DateTime.UtcNow.AddMinutes(-45)
+                },
+                new()
+                {
+                    Id = Guid.Parse("b2222222-0000-0000-0000-000000000092"),
+                    Title = "Severe Road Inundation: A1 Colombo-Kandy Road at Peliyagoda",
+                    Severity = "Warning",
+                    Channels = "Push Notification, Citizen Portal",
+                    TargetRegion = "Peliyagoda & Kelaniya Corridors",
+                    TargetAudience = "Commuters & Logistics Convoys (28,400 recipients)",
+                    Message = "ROAD CLOSURE: A1 Highway submerged between Peliyagoda junction and 4th Mile Post. Light vehicles cannot pass. Use Southern Expressway or Minuwangoda diversion route.",
+                    SentBy = "Traffic Police Disaster Liaison",
+                    DeliveryRate = "98.7%",
+                    Status = "Active Live",
+                    IsActive = true,
+                    SentAt = DateTime.UtcNow.AddHours(-2)
+                },
+                new()
+                {
+                    Id = Guid.Parse("b3333333-0000-0000-0000-000000000093"),
+                    Title = "New High-Ground Relief Shelter Opened: Colombo Central School",
+                    Severity = "Advisory",
+                    Channels = "SMS Broadcast, Push Notification",
+                    TargetRegion = "Colombo District - Zone A",
+                    TargetAudience = "Registered Evacuees (18,500 recipients)",
+                    Message = "SHELTER NOTIFICATION: Colombo Central School (Capacity 500) is now open with clean water, hot meals, and a Sri Lanka Red Cross medical aid post.",
+                    SentBy = "Shelter Administration Lead",
+                    DeliveryRate = "99.4%",
+                    Status = "Active Live",
+                    IsActive = true,
+                    SentAt = DateTime.UtcNow.AddHours(-4)
+                },
+                new()
+                {
+                    Id = Guid.Parse("b4444444-0000-0000-0000-000000000094"),
+                    Title = "Precautionary Boil Water Directive: Kalutara District",
+                    Severity = "Warning",
+                    Channels = "SMS Broadcast, Field Radio",
+                    TargetRegion = "Kalutara South & Beruwala",
+                    TargetAudience = "Residents in Coastal Inundation Areas (32,100 recipients)",
+                    Message = "HEALTH DIRECTIVE: Groundwater wells contaminated due to sea surge. All tap and well water must be boiled vigorously for at least 3 minutes before drinking or food preparation.",
+                    SentBy = "Ministry of Health Disaster Response",
+                    DeliveryRate = "97.8%",
+                    Status = "Active Live",
+                    IsActive = true,
+                    SentAt = DateTime.UtcNow.AddHours(-8)
+                },
+                new()
+                {
+                    Id = Guid.Parse("b5555555-0000-0000-0000-000000000089"),
+                    Title = "Dam Spillway Gate #3 Release Notice: Laxapana Hydro Complex",
+                    Severity = "Emergency",
+                    Channels = "SMS Broadcast, Emergency Sirens",
+                    TargetRegion = "Kelani Downstream Riparian Communities",
+                    TargetAudience = "Riparian Riverfront Dwellings (24,000 recipients)",
+                    Message = "DAM GATE NOTICE: 3 spillway gates opened due to torrential catchment rainfall. Expect river crest surge between 06:00 and 10:00. Maintain 100m clearance from riverbanks.",
+                    SentBy = "Ceylon Electricity Board Hydro Security",
+                    DeliveryRate = "99.8%",
+                    Status = "Archived",
+                    IsActive = false,
+                    SentAt = DateTime.UtcNow.AddHours(-24)
+                }
+            };
+
+            await context.EmergencyBroadcasts.AddRangeAsync(broadcasts);
+            await context.SaveChangesAsync();
+        }
+
+        // 9. Seed Official Situation Reports (SITREPs)
+        if (!await context.SituationReports.AnyAsync())
+        {
+            var reports = new List<SituationReport>
+            {
+                new()
+                {
+                    Id = Guid.Parse("c1111111-0000-0000-0000-000000000014"),
+                    ReportCode = "SITREP-2026-WP-014",
+                    Title = "Kelani River Basin Flash Flooding - Situation Report #14",
+                    IncidentName = "Western Province Monsoon Inundation",
+                    DisasterType = "Flood",
+                    District = "Colombo",
+                    GeneratedBy = "Operations Administrator",
+                    CasualtiesReported = 0,
+                    PeopleDisplaced = 3200,
+                    SheltersActive = 16,
+                    TeamsDeployed = 42,
+                    RoadPassabilityStatus = "Major arterial roads restricted; boat corridors active",
+                    ExecutiveSummary = "Water level at Nagalagam Street gauge recorded 1.84m (Major Flood). Tri-forces and volunteer search-and-rescue teams have evacuated 3,200 individuals across Wellampitiya and Kolonnawa.",
+                    PriorityNeeds = "Potable water bowsers, infant care packs, emergency inflatable dinghies.",
+                    Status = "Official Approved",
+                    ReportedAt = DateTime.UtcNow.AddHours(-2)
+                },
+                new()
+                {
+                    Id = Guid.Parse("c2222222-0000-0000-0000-000000000015"),
+                    ReportCode = "SITREP-2026-WP-015",
+                    Title = "Gampaha Mudslide & Attanagalu Oya Inundation Report",
+                    IncidentName = "Gampaha Rail Corridor Landslide",
+                    DisasterType = "Landslide",
+                    District = "Gampaha",
+                    GeneratedBy = "Kasun Perera (District Lead)",
+                    CasualtiesReported = 0,
+                    PeopleDisplaced = 1450,
+                    SheltersActive = 7,
+                    TeamsDeployed = 18,
+                    RoadPassabilityStatus = "A1 highway blocked at Miriswatta; clearance ongoing",
+                    ExecutiveSummary = "Heavy mud deposits cleared from mainline railway tracks. 1,450 residents accommodated in verified secondary shelters with 100% ration coverage.",
+                    PriorityNeeds = "Heavy earthmoving excavators, fuel reserves for drainage sumps.",
+                    Status = "Official Approved",
+                    ReportedAt = DateTime.UtcNow.AddHours(-5)
+                }
+            };
+
+            await context.SituationReports.AddRangeAsync(reports);
+            await context.SaveChangesAsync();
+        }
     }
 }
