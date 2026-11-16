@@ -512,3 +512,5 @@ export const AIDecisionSupportView = ({
     </div>
   );
 };
+
+export default AIDecisionSupportView;
