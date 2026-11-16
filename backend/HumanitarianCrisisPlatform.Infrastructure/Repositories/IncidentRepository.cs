@@ -22,6 +22,7 @@ public class IncidentRepository : Repository<Incident>, IIncidentRepository
         if (includeDetails)
         {
             query = query
+                .AsSplitQuery()
                 .Include(i => i.Assignments)
                 .Include(i => i.StatusHistories)
                 .Include(i => i.Escalations)
@@ -43,6 +44,7 @@ public class IncidentRepository : Repository<Incident>, IIncidentRepository
     public async Task<IReadOnlyList<Incident>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default)
     {
         return await _dbSet
+            .AsSplitQuery()
             .Include(i => i.StatusHistories)
             .Include(i => i.AIReviews)
             .Include(i => i.Communications)

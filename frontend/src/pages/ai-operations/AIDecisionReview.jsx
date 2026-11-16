@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
   Home, 
@@ -13,6 +13,7 @@ import {
   Info,
   Check
 } from 'lucide-react';
+import { aiGovernanceService } from '../../services/aiGovernanceService';
 
 export const AIDecisionReview = ({ 
   caseId = 'AID-2051', 
@@ -20,25 +21,78 @@ export const AIDecisionReview = ({
   showToast 
 }) => {
   const [selectedDecision, setSelectedDecision] = useState('approve'); // 'approve' | 'modify' | 'reject' | 'defer'
+  const [modifiedPriority, setModifiedPriority] = useState('High');
   const [reviewerNotes, setReviewerNotes] = useState('');
   const [confirmedCheck, setConfirmedCheck] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFullRequestModal, setShowFullRequestModal] = useState(false);
+  const [caseData, setCaseData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleRecordDecision = () => {
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCase = async () => {
+      try {
+        const res = await aiGovernanceService.getCase(caseId);
+        if (isMounted && res?.data?.data) {
+          setCaseData(res.data.data);
+          if (res.data.data.humanDecision) {
+            const decLower = res.data.data.humanDecision.toLowerCase();
+            if (decLower.includes('modify') || decLower.includes('override')) setSelectedDecision('modify');
+            else if (decLower.includes('reject')) setSelectedDecision('reject');
+            else if (decLower.includes('defer')) setSelectedDecision('defer');
+            else setSelectedDecision('approve');
+          }
+          if (res.data.data.decisionReason) {
+            setReviewerNotes(res.data.data.decisionReason);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load case detail:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchCase();
+    return () => { isMounted = false; };
+  }, [caseId]);
+
+  const handleRecordDecision = async () => {
     if (!confirmedCheck) {
       showToast?.('Please check the confirmation box before recording the decision', 'warning');
       return;
     }
 
+    if (!reviewerNotes.trim()) {
+      showToast?.('Please provide reviewer rationale notes to support your decision.', 'warning');
+      return;
+    }
+
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const targetCaseId = caseData?.relatedRecord || caseId;
+      const res = await aiGovernanceService.recordDecision({
+        caseId: targetCaseId,
+        decision: selectedDecision,
+        reason: reviewerNotes,
+        overriddenPriority: selectedDecision === 'modify' ? modifiedPriority : null
+      });
+
+      if (res?.data?.succeeded) {
+        showToast?.(`Audited decision (${selectedDecision.toUpperCase()}) recorded in SQL database for ${targetCaseId}.`, 'success');
+        setTimeout(() => {
+          onBackToQueue?.();
+        }, 700);
+      } else {
+        showToast?.(res?.data?.message || 'Failed to record decision.', 'error');
+      }
+    } catch (err) {
+      const errMsg = err?.response?.data?.message || err?.message || 'Failed to record decision.';
+      showToast?.(errMsg, 'error');
+    } finally {
       setIsSubmitting(false);
-      showToast?.(`Decision for ${caseId} (${selectedDecision.toUpperCase()}) recorded in immutable audit trail`, 'success');
-      setTimeout(() => {
-        onBackToQueue?.();
-      }, 700);
-    }, 600);
+    }
   };
 
   const decisionOptions = [
@@ -73,7 +127,7 @@ export const AIDecisionReview = ({
           <span>Back to decision queue</span>
         </button>
 
-        <span className="ai-review-case-id-tag">Decision AID-2051</span>
+        <span className="ai-review-case-id-tag">Decision {caseData?.decisionId || caseId}</span>
       </div>
 
       {/* Main Title Row */}
@@ -82,11 +136,11 @@ export const AIDecisionReview = ({
           <span className="ai-category-badge-tiny">AI DECISION REVIEW</span>
           <h1 className="ai-review-heading">Urgency &amp; Priority Recommendation</h1>
           <div className="ai-review-sub-meta">
-            <span>Related request <strong>HMR-1042</strong></span>
+            <span>Related request <strong>{caseData?.relatedRecord || 'HMR-1042'}</strong></span>
             <span className="dot-sep">·</span>
-            <span>Generated 18 Feb 2026, 09:42</span>
+            <span>Category: <strong>{caseData?.category || 'Emergency Shelter'}</strong></span>
             <span className="dot-sep">·</span>
-            <span className="pill-pending-approval">● Pending Human Approval</span>
+            <span className="pill-pending-approval">● {caseData?.reviewStatus || 'Pending Human Approval'}</span>
           </div>
         </div>
       </div>
@@ -117,36 +171,36 @@ export const AIDecisionReview = ({
                   <Home size={18} className="text-red" />
                 </div>
                 <div className="request-titles">
-                  <h4 className="req-main-name">Emergency shelter for displaced household</h4>
-                  <span className="req-sub-geo">HMR-1042 · Kelani East, Zone 03</span>
+                  <h4 className="req-main-name">{caseData?.title || 'Emergency shelter for displaced household'}</h4>
+                  <span className="req-sub-geo">{caseData?.relatedRecord || 'HMR-1042'} · {caseData?.address || caseData?.operationalArea || 'Kelani East, Zone 03'}</span>
                 </div>
-                <span className="pill-reported-urgent">● Reported urgent</span>
+                <span className="pill-reported-urgent">● Priority: {caseData?.currentPriority || 'Critical'}</span>
               </div>
 
               {/* 4 Metadata Points Grid */}
               <div className="request-meta-4grid">
                 <div className="meta-point">
                   <span className="meta-lbl">PEOPLE AFFECTED</span>
-                  <strong className="meta-val">6 people</strong>
+                  <strong className="meta-val">{caseData?.affectedCount ?? 6} people</strong>
                 </div>
                 <div className="meta-point">
                   <span className="meta-lbl">CURRENT SAFETY</span>
-                  <strong className="meta-val">Temporary roadside location</strong>
+                  <strong className="meta-val">{caseData?.currentSafety || 'Temporary roadside location'}</strong>
                 </div>
                 <div className="meta-point">
                   <span className="meta-lbl">ACCESSIBILITY</span>
-                  <strong className="meta-val">Older adult with limited mobility</strong>
+                  <strong className="meta-val">{caseData?.accessibilityNeeds || 'Older adult with limited mobility'}</strong>
                 </div>
                 <div className="meta-point">
-                  <span className="meta-lbl">SUBMITTED</span>
-                  <strong className="meta-val">8 minutes ago</strong>
+                  <span className="meta-lbl">CALLER CONTACT</span>
+                  <strong className="meta-val">{caseData?.contactPhone || '+94 77 123 4567'}</strong>
                 </div>
               </div>
 
               {/* Citizen Quote Box */}
               <div className="citizen-statement-quote">
                 <p>
-                  "Flood water entered our home overnight. We have two children and my mother cannot walk far. We need a safe place before the water rises again."
+                  "{caseData?.description || 'Flood water entered our home overnight. We have two children and my mother cannot walk far. We need a safe place before the water rises again.'}"
                 </p>
               </div>
             </div>
@@ -160,13 +214,19 @@ export const AIDecisionReview = ({
                   <Sparkles size={18} />
                 </div>
                 <div>
-                  <span className="ai-rec-tag">AI recommendation</span>
-                  <h3 className="ai-rec-bold-title">Assign Critical priority for immediate human coordination</h3>
+                  <span className="ai-rec-tag">AI recommendation ({caseData?.providerLabel || 'Deterministic Rule Support'})</span>
+                  <h3 className="ai-rec-bold-title">{caseData?.reasoning || `Assign ${caseData?.recommendedPriority || 'Critical'} priority for immediate human coordination`}</h3>
                 </div>
               </div>
 
               <div className="ai-confidence-score-box">
-                <span className="score-num">0.89</span>
+                <span className="score-num">
+                  {caseData?.confidenceScore != null && !isNaN(caseData.confidenceScore)
+                    ? Number(caseData.confidenceScore).toFixed(2)
+                    : (typeof caseData?.confidence === 'number' && !isNaN(caseData.confidence)
+                        ? (caseData.confidence / 100).toFixed(2)
+                        : 'N/A')}
+                </span>
                 <span className="score-lbl">confidence</span>
               </div>
             </div>
@@ -302,12 +362,29 @@ export const AIDecisionReview = ({
               ))}
             </div>
 
+            {selectedDecision === 'modify' && (
+              <div className="reviewer-notes-group" style={{ marginTop: '12px' }}>
+                <label className="notes-label">ASSIGN ADJUSTED PRIORITY</label>
+                <select
+                  value={modifiedPriority}
+                  onChange={(e) => setModifiedPriority(e.target.value)}
+                  className="queue-filter-select"
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                >
+                  <option value="Critical">Critical</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            )}
+
             {/* Reviewer Notes Textarea */}
             <div className="reviewer-notes-group">
-              <label className="notes-label">REVIEWER NOTES (OPTIONAL)</label>
+              <label className="notes-label">REVIEWER NOTES / JUSTIFICATION (REQUIRED)</label>
               <textarea
                 rows={3}
-                placeholder="Add context supporting your decision..."
+                placeholder="Explain justification for your decision..."
                 value={reviewerNotes}
                 onChange={(e) => setReviewerNotes(e.target.value)}
                 className="reviewer-notes-textarea"
