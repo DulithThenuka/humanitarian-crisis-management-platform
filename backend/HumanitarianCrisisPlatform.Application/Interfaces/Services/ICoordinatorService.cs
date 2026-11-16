@@ -23,4 +23,7 @@ public interface ICoordinatorService
     Task<Result<EmergencyAlertDto>> CreateEmergencyAlertAsync(CreateAlertDto dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
     Task<Result<ResourceCoordinationDashboardDto>> GetResourceCoordinationAsync(CancellationToken cancellationToken = default);
     Task<Result<CoordinatorAllocationRequestDto>> SubmitAllocationRequestAsync(SubmitResourceAllocationRequestDto dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
+    Task<Result<ShelterVolunteerDashboardDto>> GetShelterVolunteerCoordinationAsync(CancellationToken cancellationToken = default);
+    Task<Result<CoordinatorShelterPlacementRequestDto>> SubmitShelterPlacementRequestAsync(SubmitShelterPlacementRequestDto dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
+    Task<Result<CoordinatorVolunteerAssignmentRequestDto>> SubmitVolunteerAssignmentRequestAsync(SubmitVolunteerAssignmentRequestDto dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
 }

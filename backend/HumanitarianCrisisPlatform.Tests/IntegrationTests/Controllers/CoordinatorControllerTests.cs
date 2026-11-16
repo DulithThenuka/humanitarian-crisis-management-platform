@@ -412,4 +412,136 @@ public class CoordinatorControllerTests : IClassFixture<DatabaseFixture>
         Assert.Equal(0, savedAlloc.DispatchStatus); // Submitted
         Assert.Contains("Kelani East Zone 03", savedAlloc.Notes);
     }
+
+    [Fact]
+    public async Task GetShelterVolunteerCoordination_ShouldReturnRealSheltersVolunteersAndMetrics()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        // Seed a Shelter
+        var shelter = new Shelter
+        {
+            Id = Guid.NewGuid(),
+            Name = "Kelani Central Community Hall",
+            Address = "Kelani East Road, Zone 03",
+            Latitude = 6.9532m,
+            Longitude = 79.9124m,
+            TotalCapacity = 150,
+            CurrentOccupancy = 40,
+            Facilities = "[\"Water Supply\",\"First Aid\",\"Electricity\"]",
+            IsActive = true
+        };
+        await context.Shelters.AddAsync(shelter);
+
+        // Seed an active Incident
+        var incident = new Incident
+        {
+            Id = Guid.NewGuid(),
+            CaseNumber = "HMR-SH-01",
+            Title = "Evacuation required for flood victims",
+            Description = "Families displaced by river overflow",
+            Category = IncidentCategory.EmergencyShelter,
+            Priority = PriorityLevel.Critical,
+            Status = IncidentStatus.Open,
+            OperationalArea = "Kelani East",
+            AffectedPeople = 6
+        };
+        await context.Incidents.AddAsync(incident);
+        await context.SaveChangesAsync();
+
+        var result = await controller.GetShelterVolunteerCoordination(default);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var res = Assert.IsAssignableFrom<Result<ShelterVolunteerDashboardDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.NotNull(res.Data);
+        Assert.NotNull(res.Data.Metrics);
+        Assert.True(res.Data.Metrics.AvailableShelterCapacity >= 110);
+        Assert.NotEmpty(res.Data.Shelters);
+        Assert.NotEmpty(res.Data.ShelterRecommendations);
+    }
+
+    [Fact]
+    public async Task SubmitShelterPlacementRequest_ValidDto_ShouldPersistPlacementRequest()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        var shelter = new Shelter
+        {
+            Id = Guid.NewGuid(),
+            Name = "Wattala Relief Center",
+            Address = "Wattala South Road",
+            Latitude = 6.9800m,
+            Longitude = 79.8900m,
+            TotalCapacity = 100,
+            CurrentOccupancy = 20,
+            IsActive = true
+        };
+        await context.Shelters.AddAsync(shelter);
+        await context.SaveChangesAsync();
+
+        var dto = new SubmitShelterPlacementRequestDto
+        {
+            ShelterId = shelter.Id,
+            RelatedIncident = "HMR-1042",
+            NumberOfPersons = 6,
+            SpecialRequirements = "Wheelchair accessible ground floor required",
+            AccessibilityNeeds = "Older adult with limited mobility",
+            Priority = "Critical",
+            CoordinatorNotes = "Family evacuated from inundated home"
+        };
+
+        var result = await controller.SubmitShelterPlacementRequest(dto, default);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var res = Assert.IsAssignableFrom<Result<CoordinatorShelterPlacementRequestDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.NotNull(res.Data);
+        Assert.Equal("Submitted", res.Data.Status);
+        Assert.Equal(6, res.Data.NumberOfPersons);
+
+        // Verify persistence in ShelterAllocations
+        var savedAlloc = await context.ShelterAllocations.FindAsync(res.Data.Id);
+        Assert.NotNull(savedAlloc);
+        Assert.Equal(6, savedAlloc.NumberOfPersons);
+        Assert.Contains("Status: Submitted", savedAlloc.Notes);
+        Assert.Contains("HMR-1042", savedAlloc.Notes);
+        // Verify shelter occupancy was NOT directly updated by coordinator
+        var refreshedShelter = await context.Shelters.FindAsync(shelter.Id);
+        Assert.NotNull(refreshedShelter);
+        Assert.Equal(20, refreshedShelter.CurrentOccupancy);
+    }
+
+    [Fact]
+    public async Task SubmitVolunteerAssignmentRequest_ValidDto_ShouldPersistAssignmentRequest()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        var dto = new SubmitVolunteerAssignmentRequestDto
+        {
+            RelatedIncident = "HMR-1042",
+            RequiredVolunteerCount = 4,
+            RequiredSkills = "First Aid, Water Rescue",
+            Location = "Kelani East Zone 03",
+            Priority = "Critical",
+            TaskDescription = "Assist boat evacuation and primary trauma triage",
+            AdditionalInstructions = "Wear standard high-visibility life jackets and boots"
+        };
+
+        var result = await controller.SubmitVolunteerAssignmentRequest(dto, default);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var res = Assert.IsAssignableFrom<Result<CoordinatorVolunteerAssignmentRequestDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.NotNull(res.Data);
+        Assert.Equal("Submitted", res.Data.Status);
+        Assert.Equal(4, res.Data.RequiredVolunteerCount);
+
+        // Verify persistence in VolunteerAssignments
+        var savedAssignment = await context.VolunteerAssignments.FindAsync(res.Data.Id);
+        Assert.NotNull(savedAssignment);
+        Assert.Equal(0, savedAssignment.AssignmentStatus); // Submitted
+        Assert.Contains("Needed: 4", savedAssignment.Notes);
+        Assert.Contains("HMR-1042", savedAssignment.Notes);
+    }
 }

@@ -32,4 +32,14 @@ public class ShelterRepository : Repository<Shelter>, IShelterRepository
     {
         await _context.ShelterAllocations.AddAsync(allocation, cancellationToken);
     }
+
+    public async Task<IReadOnlyList<ShelterAllocation>> GetAllAllocationsWithDetailsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.ShelterAllocations
+            .Include(a => a.Shelter)
+            .Include(a => a.AssistanceRequest)
+            .OrderByDescending(a => a.CreatedAt)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
 }

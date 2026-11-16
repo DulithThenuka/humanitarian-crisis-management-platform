@@ -134,4 +134,31 @@ public class CoordinatorController : BaseApiController
         if (!result.Succeeded) return BadRequest(result);
         return Ok(result);
     }
+
+    [HttpGet("shelter-volunteer")]
+    public async Task<ActionResult<Result<ShelterVolunteerDashboardDto>>> GetShelterVolunteerCoordination(CancellationToken cancellationToken)
+    {
+        var result = await _coordinatorService.GetShelterVolunteerCoordinationAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("shelter-requests")]
+    public async Task<ActionResult<Result<CoordinatorShelterPlacementRequestDto>>> SubmitShelterPlacementRequest(
+        [FromBody] SubmitShelterPlacementRequestDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _coordinatorService.SubmitShelterPlacementRequestAsync(dto, CurrentUserId, CurrentUserName, cancellationToken);
+        if (!result.Succeeded) return BadRequest(result);
+        return Ok(result);
+    }
+
+    [HttpPost("volunteer-requests")]
+    public async Task<ActionResult<Result<CoordinatorVolunteerAssignmentRequestDto>>> SubmitVolunteerAssignmentRequest(
+        [FromBody] SubmitVolunteerAssignmentRequestDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _coordinatorService.SubmitVolunteerAssignmentRequestAsync(dto, CurrentUserId, CurrentUserName, cancellationToken);
+        if (!result.Succeeded) return BadRequest(result);
+        return Ok(result);
+    }
 }

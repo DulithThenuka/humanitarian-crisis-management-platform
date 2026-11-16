@@ -879,7 +879,10 @@ export const EmergencyCoordinatorPortal = ({
 
         {activeTab === 'shelters' && (
           <ShelterVolunteerCoordinationView
+            cases={cases}
+            coordinatorUser={coordinatorUser}
             showToast={showToast}
+            onNavigateTab={setActiveTab}
           />
         )}
 

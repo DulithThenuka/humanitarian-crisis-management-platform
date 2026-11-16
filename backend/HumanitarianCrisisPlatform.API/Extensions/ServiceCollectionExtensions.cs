@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAssistanceRequestRepository, AssistanceRequestRepository>();
         services.AddScoped<IShelterRepository, ShelterRepository>();
         services.AddScoped<IResourceRepository, ResourceRepository>();
+        services.AddScoped<IVolunteerRepository, VolunteerRepository>();
         services.AddScoped<IAIDecisionAuditRepository, AIDecisionAuditRepository>();
         services.AddScoped<IIncidentRepository, IncidentRepository>();
 

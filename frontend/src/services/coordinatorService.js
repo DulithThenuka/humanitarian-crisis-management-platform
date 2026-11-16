@@ -64,6 +64,18 @@ export const coordinatorService = {
   submitResourceAllocationRequest: async (data) => {
     const res = await apiClient.post('/coordinator/resources/allocation-requests', data);
     return unwrap(res);
+  },
+  getShelterVolunteerCoordination: async () => {
+    const res = await apiClient.get('/coordinator/shelter-volunteer');
+    return unwrap(res);
+  },
+  submitShelterPlacementRequest: async (data) => {
+    const res = await apiClient.post('/coordinator/shelter-requests', data);
+    return unwrap(res);
+  },
+  submitVolunteerAssignmentRequest: async (data) => {
+    const res = await apiClient.post('/coordinator/volunteer-requests', data);
+    return unwrap(res);
   }
 };
 

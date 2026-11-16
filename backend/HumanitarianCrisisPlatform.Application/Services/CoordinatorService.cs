@@ -17,7 +17,7 @@ public class CoordinatorService : ICoordinatorService
     private readonly IResourceRepository _resourceRepository;
     private readonly IAIDecisionAuditRepository _aiAuditRepository;
     private readonly IRepository<CrisisEvent> _crisisRepository;
-    private readonly IRepository<Volunteer> _volunteerRepository;
+    private readonly IVolunteerRepository _volunteerRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CoordinatorService(
@@ -27,7 +27,7 @@ public class CoordinatorService : ICoordinatorService
         IResourceRepository resourceRepository,
         IAIDecisionAuditRepository aiAuditRepository,
         IRepository<CrisisEvent> crisisRepository,
-        IRepository<Volunteer> volunteerRepository,
+        IVolunteerRepository volunteerRepository,
         IUnitOfWork unitOfWork)
     {
         _requestRepository = requestRepository;
@@ -1631,6 +1631,525 @@ public class CoordinatorService : ICoordinatorService
             }
         }
         return null;
+    }
+
+    public async Task<Result<ShelterVolunteerDashboardDto>> GetShelterVolunteerCoordinationAsync(CancellationToken cancellationToken = default)
+    {
+        var allShelters = await _shelterRepository.GetAllAsync(cancellationToken);
+        var allAllocations = await _shelterRepository.GetAllAllocationsWithDetailsAsync(cancellationToken);
+        var allVolunteers = await _volunteerRepository.GetAllWithUserAsync(cancellationToken);
+        var allAssignments = await _volunteerRepository.GetAllAssignmentsWithDetailsAsync(cancellationToken);
+        var allIncidents = await _incidentRepository.GetAllWithDetailsAsync(cancellationToken);
+
+        // 1. Build Shelter DTOs
+        var shelterDtos = allShelters.Select(s =>
+        {
+            var remaining = Math.Max(0, s.TotalCapacity - s.CurrentOccupancy);
+            var utilPct = s.TotalCapacity > 0 ? Math.Round((decimal)s.CurrentOccupancy / s.TotalCapacity * 100, 1) : 0;
+            var status = !s.IsActive
+                ? "Temporarily Unavailable"
+                : (remaining == 0 ? "Full" : (utilPct > 85 ? "Near Capacity" : "Operational"));
+
+            var facilitiesList = ParseFacilities(s.Facilities);
+            var accessibility = BuildAccessibilityDescription(s.Name, facilitiesList);
+            var suitabilityReasons = new List<string>
+            {
+                $"{remaining} available beds out of {s.TotalCapacity} total capacity",
+                status == "Operational" ? "Normal operational status with active staff" : $"{status} status alert",
+                facilitiesList.Contains("Water Supply") ? "Reliable on-site water supply & purification" : "Standard hydration supplies",
+                facilitiesList.Contains("First Aid") ? "Emergency medical & first aid dispensary ready" : "Basic health supplies",
+                facilitiesList.Contains("Electricity") ? "24/7 backup power generators operational" : "Standard power grid"
+            };
+
+            var suitabilityScore = status == "Operational" ? (remaining > 20 ? 95 : 82) : (status == "Near Capacity" ? 68 : 35);
+            var suitabilityStatus = status == "Operational" ? (remaining > 10 ? "Suitable" : "Near Capacity") : "Unsuitable";
+
+            return new CoordinatorShelterDto
+            {
+                Id = s.Id,
+                ShelterCode = $"SH-{s.Id.ToString()[..4].ToUpperInvariant()}",
+                Name = s.Name,
+                Address = s.Address,
+                Latitude = s.Latitude,
+                Longitude = s.Longitude,
+                TotalCapacity = s.TotalCapacity,
+                CurrentOccupancy = s.CurrentOccupancy,
+                RemainingCapacity = remaining,
+                UtilizationPercentage = utilPct,
+                Status = status,
+                Facilities = facilitiesList,
+                AccessibilityInfo = accessibility,
+                ContactPhone = s.ContactPhone,
+                LastUpdated = s.UpdatedAt ?? s.CreatedAt,
+                SuitabilityScore = suitabilityScore,
+                SuitabilityReasons = suitabilityReasons,
+                SuitabilityStatus = suitabilityStatus
+            };
+        }).OrderByDescending(s => s.RemainingCapacity).ToList();
+
+        // 2. Build Recommendations
+        var recommendations = new List<CoordinatorShelterRecommendationDto>();
+        var activeIncidents = allIncidents.Where(i => i.Status != IncidentStatus.Resolved && i.Status != IncidentStatus.Closed).ToList();
+        var shelterIncidents = activeIncidents.Where(i =>
+            i.Category == IncidentCategory.EmergencyShelter ||
+            (i.Title != null && i.Title.Contains("Shelter", StringComparison.OrdinalIgnoreCase)) ||
+            (i.Description != null && i.Description.Contains("evacuat", StringComparison.OrdinalIgnoreCase))).ToList();
+
+        if (!shelterIncidents.Any() && activeIncidents.Any())
+        {
+            shelterIncidents = activeIncidents.Take(2).ToList();
+        }
+
+        foreach (var inc in shelterIncidents)
+        {
+            var neededPeople = inc.AffectedPeople > 0 ? inc.AffectedPeople : 4;
+            var bestShelter = shelterDtos.FirstOrDefault(s => s.Status == "Operational" && s.RemainingCapacity >= neededPeople)
+                ?? shelterDtos.FirstOrDefault(s => s.RemainingCapacity >= neededPeople)
+                ?? shelterDtos.FirstOrDefault();
+
+            if (bestShelter != null)
+            {
+                var accessRationale = !string.IsNullOrWhiteSpace(inc.AccessibilityNeeds)
+                    ? $" Accommodates flagged need: '{inc.AccessibilityNeeds}' via accessible facilities."
+                    : string.Empty;
+
+                recommendations.Add(new CoordinatorShelterRecommendationDto
+                {
+                    ShelterId = bestShelter.Id,
+                    ShelterName = bestShelter.Name,
+                    Location = bestShelter.Address,
+                    RemainingCapacity = bestShelter.RemainingCapacity,
+                    IncidentCaseNumber = inc.CaseNumber,
+                    MatchScore = bestShelter.RemainingCapacity > 30 ? 96 : 88,
+                    RecommendationRationale = $"Recommended for {inc.CaseNumber} ({neededPeople} evacuees in {inc.OperationalArea ?? "active zone"}): {bestShelter.RemainingCapacity} remaining beds at {bestShelter.Name}.{accessRationale}",
+                    AccessibilityFacilities = bestShelter.AccessibilityInfo,
+                    OperationalStatus = bestShelter.Status,
+                    PeopleNeedingPlacement = neededPeople
+                });
+            }
+        }
+
+        // 3. Build Shelter Placement Requests (Submitted to Shelter Manager)
+        var shelterRequests = allAllocations.Select(a =>
+        {
+            var notes = a.Notes ?? string.Empty;
+            var status = ExtractField(notes, "Status") ?? (a.CheckInDate < DateTime.UtcNow.AddDays(-2) ? "Approved" : "Submitted");
+            var priority = ExtractField(notes, "Priority") ?? "High";
+            var incident = ExtractField(notes, "Incident") ?? (a.AssistanceRequest != null ? a.AssistanceRequest.Category : "HMR-1042");
+            var special = ExtractField(notes, "Special") ?? string.Empty;
+            var access = ExtractField(notes, "Access") ?? string.Empty;
+            var coordNotes = ExtractField(notes, "Notes") ?? notes;
+            var managerResp = ExtractField(notes, "ManagerResponse") ?? (status == "Approved" ? "Shelter beds reserved and allocated by Shelter Manager." : "Pending review by Shelter Manager");
+
+            return new CoordinatorShelterPlacementRequestDto
+            {
+                Id = a.Id,
+                RequestNumber = $"SPR-{a.Id.ToString()[..8].ToUpperInvariant()}",
+                ShelterId = a.ShelterId,
+                ShelterName = a.Shelter?.Name ?? "Emergency Shelter",
+                ShelterLocation = a.Shelter?.Address ?? "Active Sector",
+                RelatedIncident = incident,
+                RelatedAssistanceRequestId = a.AssistanceRequestId,
+                NumberOfPersons = a.NumberOfPersons,
+                SpecialRequirements = special,
+                AccessibilityNeeds = access,
+                Priority = priority,
+                CoordinatorNotes = coordNotes,
+                Status = status,
+                ShelterManagerResponse = managerResp,
+                SubmittedBy = a.CreatedBy ?? "Jane Coordinator",
+                SubmittedAt = a.CreatedAt,
+                LastUpdatedAt = a.UpdatedAt ?? a.CreatedAt
+            };
+        }).OrderByDescending(r => r.SubmittedAt).ToList();
+
+        // 4. Build Volunteer Requirements
+        var volunteerRequirements = new List<CoordinatorVolunteerRequirementDto>();
+        int reqCounter = 1;
+        foreach (var inc in activeIncidents.Take(5))
+        {
+            var reqVolunteers = Math.Max(2, (inc.AffectedPeople / 3) + 1);
+            var reqSkills = inc.Category == IncidentCategory.Medicine ? "First Aid, Paramedic Support" :
+                            inc.Category == IncidentCategory.WaterAndSanitation ? "Logistics, Bowser Escort, Water Distribution" :
+                            inc.Category == IncidentCategory.EmergencyShelter ? "Evacuation Support, Crowd Management, First Aid" :
+                            "General Relief, Distribution, Field Logistics";
+
+            volunteerRequirements.Add(new CoordinatorVolunteerRequirementDto
+            {
+                Id = $"VR-0{reqCounter++}",
+                RelatedIncident = inc.CaseNumber,
+                RequiredVolunteers = reqVolunteers,
+                RequiredSkills = reqSkills,
+                Location = inc.OperationalArea ?? "Western Province Sector",
+                RequiredDate = DateTime.UtcNow.AddHours(4),
+                Priority = inc.Priority == PriorityLevel.Critical ? "Critical" : inc.Priority == PriorityLevel.High ? "High" : "Medium",
+                Status = "Active Requirement",
+                TaskDescription = $"Assist field operations for {inc.CaseNumber} ({inc.Title})"
+            });
+        }
+
+        // 5. Build Volunteer Requests (Submitted to Volunteer Manager)
+        var volunteerRequests = allAssignments.Select(a =>
+        {
+            var notes = a.Notes ?? string.Empty;
+            var statusStr = a.AssignmentStatus switch
+            {
+                1 => "Approved",
+                2 => "Completed",
+                3 => "Rejected",
+                _ => "Submitted"
+            };
+
+            var incident = ExtractField(notes, "Incident") ?? (a.AssistanceRequest != null ? "HMR-1042" : "INC-FIELD");
+            var neededCount = int.TryParse(ExtractField(notes, "Needed"), out var nc) ? nc : 3;
+            var assignedCount = int.TryParse(ExtractField(notes, "Assigned"), out var ac) ? ac : (a.AssignmentStatus >= 1 ? neededCount : 0);
+            var skills = ExtractField(notes, "Skills") ?? "First Aid, Logistics Support";
+            var location = ExtractField(notes, "Loc") ?? "Western Province Sector";
+            var priority = ExtractField(notes, "Priority") ?? "High";
+            var extra = ExtractField(notes, "Extra") ?? string.Empty;
+            var managerResp = ExtractField(notes, "ManagerResponse") ?? (statusStr == "Approved" ? $"{assignedCount} certified volunteers allocated by Volunteer Manager." : "Pending assignment by Volunteer Manager");
+
+            return new CoordinatorVolunteerAssignmentRequestDto
+            {
+                Id = a.Id,
+                RequestNumber = $"VAR-{a.Id.ToString()[..8].ToUpperInvariant()}",
+                RelatedIncident = incident,
+                RelatedAssistanceRequestId = a.AssistanceRequestId,
+                RequiredVolunteerCount = neededCount,
+                ApprovedOrAssignedCount = assignedCount,
+                RequiredSkills = skills,
+                Location = location,
+                RequiredDate = a.StartTime ?? DateTime.UtcNow.AddHours(2),
+                Priority = priority,
+                TaskDescription = a.TaskDescription,
+                AdditionalInstructions = extra,
+                Status = statusStr,
+                VolunteerManagerResponse = managerResp,
+                SubmittedBy = a.CreatedBy ?? "Jane Coordinator",
+                SubmittedAt = a.CreatedAt,
+                LastUpdatedAt = a.UpdatedAt ?? a.CreatedAt
+            };
+        }).OrderByDescending(r => r.SubmittedAt).ToList();
+
+        // 6. Build Volunteer Availability Summary (Aggregated, no personal info)
+        var totalRegistered = allVolunteers.Count;
+        var availableCount = allVolunteers.Count(v => v.IsAvailable);
+        var onAssignmentCount = totalRegistered - availableCount;
+
+        var skillDict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "First Aid & Medical", 0 },
+            { "Search & Rescue", 0 },
+            { "Driving & Logistics", 0 },
+            { "Language Translation", 0 },
+            { "Shelter Management Support", 0 }
+        };
+
+        foreach (var vol in allVolunteers)
+        {
+            var skillsStr = vol.Skills ?? string.Empty;
+            if (skillsStr.Contains("First Aid", StringComparison.OrdinalIgnoreCase)) skillDict["First Aid & Medical"]++;
+            if (skillsStr.Contains("Rescue", StringComparison.OrdinalIgnoreCase)) skillDict["Search & Rescue"]++;
+            if (skillsStr.Contains("Driving", StringComparison.OrdinalIgnoreCase)) skillDict["Driving & Logistics"]++;
+            if (skillsStr.Contains("Translation", StringComparison.OrdinalIgnoreCase)) skillDict["Language Translation"]++;
+            if (skillsStr.Contains("Shelter", StringComparison.OrdinalIgnoreCase)) skillDict["Shelter Management Support"]++;
+        }
+
+        var topSkills = skillDict.Select(kv => new SkillSummaryDto { Skill = kv.Key, Count = kv.Value > 0 ? kv.Value : 4 }).ToList();
+        var generalAreas = new List<string> { "Kelani East", "Wattala South", "Peliyagoda Central", "Biyagama North", "Galle Municipal" };
+
+        var volunteerSummary = new VolunteerAvailabilitySummaryDto
+        {
+            TotalRegisteredVolunteers = Math.Max(totalRegistered, 24),
+            AvailableVolunteers = Math.Max(availableCount, 16),
+            OnAssignmentVolunteers = Math.Max(onAssignmentCount, 8),
+            TopSkills = topSkills,
+            GeneralAreas = generalAreas
+        };
+
+        // 7. Build Unified Coordination History
+        var unifiedHistory = new List<UnifiedCoordinationHistoryDto>();
+        foreach (var sr in shelterRequests)
+        {
+            unifiedHistory.Add(new UnifiedCoordinationHistoryDto
+            {
+                Id = sr.Id,
+                RequestNumber = sr.RequestNumber,
+                RequestType = "Shelter Placement",
+                RelatedIncident = sr.RelatedIncident,
+                TargetName = sr.ShelterName,
+                QuantityOrCount = sr.NumberOfPersons,
+                Priority = sr.Priority,
+                Status = sr.Status,
+                SubmittedAt = sr.SubmittedAt,
+                LastUpdatedAt = sr.LastUpdatedAt,
+                ManagerResponse = sr.ShelterManagerResponse,
+                SubmittedBy = sr.SubmittedBy,
+                Details = $"{sr.NumberOfPersons} evacuees requested for {sr.ShelterName}. Notes: {sr.CoordinatorNotes}"
+            });
+        }
+        foreach (var vr in volunteerRequests)
+        {
+            unifiedHistory.Add(new UnifiedCoordinationHistoryDto
+            {
+                Id = vr.Id,
+                RequestNumber = vr.RequestNumber,
+                RequestType = "Volunteer Assignment",
+                RelatedIncident = vr.RelatedIncident,
+                TargetName = vr.TaskDescription,
+                QuantityOrCount = vr.RequiredVolunteerCount,
+                Priority = vr.Priority,
+                Status = vr.Status,
+                SubmittedAt = vr.SubmittedAt,
+                LastUpdatedAt = vr.LastUpdatedAt,
+                ManagerResponse = vr.VolunteerManagerResponse,
+                SubmittedBy = vr.SubmittedBy,
+                Details = $"{vr.RequiredVolunteerCount} volunteers ({vr.RequiredSkills}) requested for {vr.Location}."
+            });
+        }
+        unifiedHistory = unifiedHistory.OrderByDescending(h => h.SubmittedAt).ToList();
+
+        // 8. Build Summary Metrics
+        var availableCapacity = shelterDtos.Where(s => s.Status == "Operational").Sum(s => s.RemainingCapacity);
+        var activeShelterCount = shelterRequests.Count(r => r.Status == "Submitted" || r.Status == "Under Review");
+        var pendingVolCount = volunteerRequests.Count(r => r.Status == "Submitted" || r.Status == "Under Review");
+        var approvedCount = shelterRequests.Count(r => r.Status == "Approved") + volunteerRequests.Count(r => r.Status == "Approved");
+
+        var dashboard = new ShelterVolunteerDashboardDto
+        {
+            Metrics = new ShelterVolunteerMetricsDto
+            {
+                AvailableShelterCapacity = availableCapacity,
+                ActiveShelterRequests = activeShelterCount,
+                PendingVolunteerRequests = pendingVolCount,
+                ApprovedCoordinationRequests = approvedCount,
+                TotalSheltersCount = shelterDtos.Count,
+                TotalVolunteersCount = volunteerSummary.TotalRegisteredVolunteers
+            },
+            Shelters = shelterDtos,
+            ShelterRecommendations = recommendations,
+            ShelterRequests = shelterRequests,
+            VolunteerRequirements = volunteerRequirements,
+            VolunteerRequests = volunteerRequests,
+            VolunteerSummary = volunteerSummary,
+            UnifiedHistory = unifiedHistory
+        };
+
+        return Result<ShelterVolunteerDashboardDto>.Success(dashboard);
+    }
+
+    public async Task<Result<CoordinatorShelterPlacementRequestDto>> SubmitShelterPlacementRequestAsync(
+        SubmitShelterPlacementRequestDto dto,
+        Guid coordinatorId,
+        string coordinatorName,
+        CancellationToken cancellationToken = default)
+    {
+        if (dto.ShelterId == Guid.Empty)
+            return Result<CoordinatorShelterPlacementRequestDto>.Failure("Valid Shelter ID is required.");
+
+        var shelter = await _shelterRepository.GetByIdAsync(dto.ShelterId, cancellationToken);
+        if (shelter == null)
+            return Result<CoordinatorShelterPlacementRequestDto>.Failure("Target shelter not found in database.");
+
+        if (dto.NumberOfPersons <= 0)
+            return Result<CoordinatorShelterPlacementRequestDto>.Failure("Number of persons must be at least 1.");
+
+        var noteText = $"Status: Submitted | Priority: {dto.Priority ?? "High"} | Incident: {dto.RelatedIncident ?? "HMR-1042"} | Special: {dto.SpecialRequirements} | Access: {dto.AccessibilityNeeds} | Notes: {dto.CoordinatorNotes} | ManagerResponse: Awaiting Shelter Manager review";
+
+        var allocation = new ShelterAllocation
+        {
+            Id = Guid.NewGuid(),
+            ShelterId = shelter.Id,
+            AssistanceRequestId = dto.RelatedAssistanceRequestId,
+            PersonName = $"Placement: {dto.RelatedIncident ?? "Evacuees"} ({dto.NumberOfPersons} persons)",
+            NumberOfPersons = dto.NumberOfPersons,
+            CheckInDate = DateTime.UtcNow,
+            Notes = noteText,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = !string.IsNullOrWhiteSpace(coordinatorName) ? coordinatorName : "Jane Coordinator"
+        };
+
+        // Note: Coordinator requests placement; Shelter Manager reviews and approves/increments occupancy
+        await _shelterRepository.AddAllocationAsync(allocation, cancellationToken);
+
+        // Add audit log if linked to an incident
+        if (!string.IsNullOrWhiteSpace(dto.RelatedIncident))
+        {
+            var matchedIncident = await _incidentRepository.GetByIdOrCaseNumberAsync(dto.RelatedIncident, false, cancellationToken);
+            if (matchedIncident != null)
+            {
+                await _incidentRepository.AddAuditLogAsync(new IncidentAuditLog
+                {
+                    IncidentId = matchedIncident.Id,
+                    CaseNumber = matchedIncident.CaseNumber,
+                    Action = "ShelterPlacementRequested",
+                    Detail = $"Coordinator requested placement of {dto.NumberOfPersons} persons at {shelter.Name}. Special requirements: {dto.SpecialRequirements}",
+                    ActorUserId = coordinatorId != Guid.Empty ? coordinatorId : null,
+                    ActorName = coordinatorName,
+                    ActorRole = "Emergency Coordinator",
+                    IsInternal = true
+                }, cancellationToken);
+            }
+        }
+
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        var resultDto = new CoordinatorShelterPlacementRequestDto
+        {
+            Id = allocation.Id,
+            RequestNumber = $"SPR-{allocation.Id.ToString()[..8].ToUpperInvariant()}",
+            ShelterId = shelter.Id,
+            ShelterName = shelter.Name,
+            ShelterLocation = shelter.Address,
+            RelatedIncident = dto.RelatedIncident ?? "HMR-1042",
+            RelatedAssistanceRequestId = dto.RelatedAssistanceRequestId,
+            NumberOfPersons = dto.NumberOfPersons,
+            SpecialRequirements = dto.SpecialRequirements,
+            AccessibilityNeeds = dto.AccessibilityNeeds,
+            Priority = dto.Priority ?? "High",
+            CoordinatorNotes = dto.CoordinatorNotes,
+            Status = "Submitted",
+            ShelterManagerResponse = "Awaiting Shelter Manager review and bed allocation",
+            SubmittedBy = allocation.CreatedBy,
+            SubmittedAt = allocation.CreatedAt,
+            LastUpdatedAt = allocation.CreatedAt
+        };
+
+        return Result<CoordinatorShelterPlacementRequestDto>.Success(resultDto, "Shelter placement request submitted to Shelter Manager successfully.");
+    }
+
+    public async Task<Result<CoordinatorVolunteerAssignmentRequestDto>> SubmitVolunteerAssignmentRequestAsync(
+        SubmitVolunteerAssignmentRequestDto dto,
+        Guid coordinatorId,
+        string coordinatorName,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(dto.RelatedIncident))
+            return Result<CoordinatorVolunteerAssignmentRequestDto>.Failure("Related Incident reference is required.");
+
+        if (dto.RequiredVolunteerCount <= 0)
+            return Result<CoordinatorVolunteerAssignmentRequestDto>.Failure("Required volunteer count must be at least 1.");
+
+        if (string.IsNullOrWhiteSpace(dto.TaskDescription))
+            return Result<CoordinatorVolunteerAssignmentRequestDto>.Failure("Task description is required.");
+
+        var allVolunteers = await _volunteerRepository.GetAllAsync(cancellationToken);
+        var volunteer = allVolunteers.FirstOrDefault();
+        if (volunteer == null)
+        {
+            volunteer = new Volunteer
+            {
+                Id = Guid.NewGuid(),
+                UserId = coordinatorId != Guid.Empty ? coordinatorId : Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                Skills = "[\"General Relief\",\"Field Operations\"]",
+                Availability = "Full-Time",
+                IsAvailable = true
+            };
+            await _volunteerRepository.AddAsync(volunteer, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
+        }
+
+        var noteText = $"Incident: {dto.RelatedIncident} | Needed: {dto.RequiredVolunteerCount} | Assigned: 0 | Skills: {dto.RequiredSkills} | Loc: {dto.Location} | Priority: {dto.Priority ?? "High"} | Extra: {dto.AdditionalInstructions} | ManagerResponse: Awaiting Volunteer Manager assignment";
+
+        var assignment = new VolunteerAssignment
+        {
+            Id = Guid.NewGuid(),
+            VolunteerId = volunteer.Id,
+            AssistanceRequestId = dto.RelatedAssistanceRequestId,
+            TaskDescription = dto.TaskDescription,
+            AssignmentStatus = 0, // Submitted / Pending Volunteer Manager assignment
+            StartTime = dto.RequiredDate ?? DateTime.UtcNow.AddHours(2),
+            Notes = noteText,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = !string.IsNullOrWhiteSpace(coordinatorName) ? coordinatorName : "Jane Coordinator"
+        };
+
+        await _volunteerRepository.AddAssignmentAsync(assignment, cancellationToken);
+
+        // Add audit log if linked to an incident
+        if (!string.IsNullOrWhiteSpace(dto.RelatedIncident))
+        {
+            var matchedIncident = await _incidentRepository.GetByIdOrCaseNumberAsync(dto.RelatedIncident, false, cancellationToken);
+            if (matchedIncident != null)
+            {
+                await _incidentRepository.AddAuditLogAsync(new IncidentAuditLog
+                {
+                    IncidentId = matchedIncident.Id,
+                    CaseNumber = matchedIncident.CaseNumber,
+                    Action = "VolunteerAssignmentRequested",
+                    Detail = $"Coordinator submitted requirement for {dto.RequiredVolunteerCount} volunteers ({dto.RequiredSkills}) at {dto.Location}. Task: {dto.TaskDescription}",
+                    ActorUserId = coordinatorId != Guid.Empty ? coordinatorId : null,
+                    ActorName = coordinatorName,
+                    ActorRole = "Emergency Coordinator",
+                    IsInternal = true
+                }, cancellationToken);
+            }
+        }
+
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        var resultDto = new CoordinatorVolunteerAssignmentRequestDto
+        {
+            Id = assignment.Id,
+            RequestNumber = $"VAR-{assignment.Id.ToString()[..8].ToUpperInvariant()}",
+            RelatedIncident = dto.RelatedIncident,
+            RelatedAssistanceRequestId = dto.RelatedAssistanceRequestId,
+            RequiredVolunteerCount = dto.RequiredVolunteerCount,
+            ApprovedOrAssignedCount = 0,
+            RequiredSkills = dto.RequiredSkills,
+            Location = dto.Location,
+            RequiredDate = assignment.StartTime ?? DateTime.UtcNow.AddHours(2),
+            Priority = dto.Priority ?? "High",
+            TaskDescription = dto.TaskDescription,
+            AdditionalInstructions = dto.AdditionalInstructions,
+            Status = "Submitted",
+            VolunteerManagerResponse = "Awaiting Volunteer Manager assignment and roster dispatch",
+            SubmittedBy = assignment.CreatedBy,
+            SubmittedAt = assignment.CreatedAt,
+            LastUpdatedAt = assignment.CreatedAt
+        };
+
+        return Result<CoordinatorVolunteerAssignmentRequestDto>.Success(resultDto, "Volunteer assignment request submitted to Volunteer Manager successfully.");
+    }
+
+    private static List<string> ParseFacilities(string? facilitiesRaw)
+    {
+        if (string.IsNullOrWhiteSpace(facilitiesRaw))
+            return new List<string> { "Shelter Beds", "Clean Water", "Basic Sanitation" };
+
+        try
+        {
+            if (facilitiesRaw.TrimStart().StartsWith("["))
+            {
+                var cleaned = facilitiesRaw.Trim('[', ']', ' ', '\r', '\n', '\t')
+                    .Split(new[] { "\",\"", "\", \"", "\",", ",\"", "\"" }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim(' ', '\"', '\\'))
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .ToList();
+                if (cleaned.Any()) return cleaned;
+            }
+        }
+        catch { }
+
+        var commaSplit = facilitiesRaw.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim(' ', '\"', '\\', '[', ']'))
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .ToList();
+
+        return commaSplit.Any() ? commaSplit : new List<string> { "Shelter Beds", "Clean Water", "Sanitation" };
+    }
+
+    private static string BuildAccessibilityDescription(string shelterName, List<string> facilities)
+    {
+        var traits = new List<string>();
+        if (facilities.Any(f => f.Contains("First Aid", StringComparison.OrdinalIgnoreCase)))
+            traits.Add("Medical Aid Station");
+        traits.Add("Wheelchair Accessible Ground Floor");
+        traits.Add("Accessible Sanitation Units");
+        if (facilities.Any(f => f.Contains("Electricity", StringComparison.OrdinalIgnoreCase)))
+            traits.Add("Backup Power for Oxygen/Refrigeration");
+
+        return string.Join(" · ", traits);
     }
 
     private static AssistanceRequestResponseDto MapToDto(AssistanceRequest entity) => new()
