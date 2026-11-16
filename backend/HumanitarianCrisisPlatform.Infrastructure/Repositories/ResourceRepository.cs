@@ -19,4 +19,14 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
     {
         await _context.ResourceAllocations.AddAsync(allocation, cancellationToken);
     }
+
+    public async Task<IReadOnlyList<ResourceAllocation>> GetAllAllocationsWithDetailsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.ResourceAllocations
+            .Include(a => a.Resource)
+            .Include(a => a.AssistanceRequest)
+            .Include(a => a.Shelter)
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
 }

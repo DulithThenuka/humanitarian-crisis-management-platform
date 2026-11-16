@@ -117,4 +117,21 @@ public class CoordinatorController : BaseApiController
     {
         return RequestAdditionalInformation(id.ToString(), dto, cancellationToken);
     }
+
+    [HttpGet("resources")]
+    public async Task<ActionResult<Result<ResourceCoordinationDashboardDto>>> GetResourceCoordination(CancellationToken cancellationToken)
+    {
+        var result = await _coordinatorService.GetResourceCoordinationAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("resources/allocation-requests")]
+    public async Task<ActionResult<Result<CoordinatorAllocationRequestDto>>> SubmitAllocationRequest(
+        [FromBody] SubmitResourceAllocationRequestDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _coordinatorService.SubmitAllocationRequestAsync(dto, CurrentUserId, CurrentUserName, cancellationToken);
+        if (!result.Succeeded) return BadRequest(result);
+        return Ok(result);
+    }
 }

@@ -56,6 +56,14 @@ export const coordinatorService = {
   createAlert: async (data) => {
     const res = await apiClient.post('/alerts', data);
     return unwrap(res);
+  },
+  getResourceCoordination: async () => {
+    const res = await apiClient.get('/coordinator/resources');
+    return unwrap(res);
+  },
+  submitResourceAllocationRequest: async (data) => {
+    const res = await apiClient.post('/coordinator/resources/allocation-requests', data);
+    return unwrap(res);
   }
 };
 

@@ -319,4 +319,97 @@ public class CoordinatorControllerTests : IClassFixture<DatabaseFixture>
         Assert.Equal(PriorityLevel.Critical, updated.Priority);
         Assert.Contains("Contacted rescue boat team #4", updated.InternalNotes);
     }
+
+    [Fact]
+    public async Task GetResourceCoordination_ShouldReturnRealRequirementsShortagesAndAllocations()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        // Seed a resource
+        var resource = new Resource
+        {
+            Id = Guid.NewGuid(),
+            Name = "Clean Water Tanker (5000L)",
+            Category = "Water",
+            TotalQuantity = 100,
+            AllocatedQuantity = 20,
+            Unit = "Liters",
+            MinimumThreshold = 10,
+            WarehouseLocation = "Central Depot Colombo"
+        };
+        await context.Resources.AddAsync(resource);
+
+        // Seed an active incident needing water
+        var incident = new Incident
+        {
+            Id = Guid.NewGuid(),
+            CaseNumber = "HMR-RES-01",
+            Title = "Flood displacement in Kelani",
+            Description = "Clean water urgently required",
+            Category = IncidentCategory.WaterAndSanitation,
+            Priority = PriorityLevel.Critical,
+            Status = IncidentStatus.Open,
+            OperationalArea = "Kelani East",
+            AffectedPeople = 10
+        };
+        await context.Incidents.AddAsync(incident);
+        await context.SaveChangesAsync();
+
+        var result = await controller.GetResourceCoordination(default);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var res = Assert.IsAssignableFrom<Result<ResourceCoordinationDashboardDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.NotNull(res.Data);
+        Assert.NotNull(res.Data.Metrics);
+        Assert.NotEmpty(res.Data.Requirements);
+        Assert.NotNull(res.Data.Recommendations);
+    }
+
+    [Fact]
+    public async Task SubmitAllocationRequest_ValidDto_ShouldPersistAllocationRequest()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        var resItem = new Resource
+        {
+            Id = Guid.NewGuid(),
+            Name = "Clean Water Tanker (5000L)",
+            Category = "Water",
+            TotalQuantity = 100,
+            AllocatedQuantity = 0,
+            Unit = "Liters",
+            MinimumThreshold = 10,
+            WarehouseLocation = "Central Depot Colombo"
+        };
+        await context.Resources.AddAsync(resItem);
+        await context.SaveChangesAsync();
+
+        var dto = new SubmitResourceAllocationRequestDto
+        {
+            Category = "Water",
+            ResourceName = "Clean Water Tanker (5000L)",
+            RequestedQuantity = 50,
+            Destination = "Kelani East Zone 03",
+            Urgency = "Critical",
+            RelatedRecord = "HMR-RES-01",
+            Justification = "Immediate need for 10 displaced families at evacuation site"
+        };
+
+        var result = await controller.SubmitAllocationRequest(dto, default);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var res = Assert.IsAssignableFrom<Result<CoordinatorAllocationRequestDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.NotNull(res.Data);
+        Assert.Equal("Submitted", res.Data.Status);
+        Assert.Equal(50, res.Data.RequestedQuantity);
+
+        // Verify persistence in ResourceAllocations
+        var savedAlloc = await context.ResourceAllocations.FindAsync(res.Data.Id);
+        Assert.NotNull(savedAlloc);
+        Assert.Equal(50, savedAlloc.Quantity);
+        Assert.Equal(0, savedAlloc.DispatchStatus); // Submitted
+        Assert.Contains("Kelani East Zone 03", savedAlloc.Notes);
+    }
 }

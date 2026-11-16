@@ -1231,6 +1231,408 @@ public class CoordinatorService : ICoordinatorService
         return Result<EmergencyAlertDto>.Success(alert, dto.IsDraft ? "Emergency alert draft saved successfully." : "Emergency alert broadcast published successfully.");
     }
 
+    public async Task<Result<ResourceCoordinationDashboardDto>> GetResourceCoordinationAsync(CancellationToken cancellationToken = default)
+    {
+        var allResources = await _resourceRepository.GetAllAsync(cancellationToken);
+        var allIncidents = await _incidentRepository.GetAllWithDetailsAsync(cancellationToken);
+        var allRequests = await _requestRepository.GetAllAsync(cancellationToken);
+        var allAllocations = await _resourceRepository.GetAllAllocationsWithDetailsAsync(cancellationToken);
+
+        // 1. Build Requirements:
+        // Aggregate requirements based on active crisis incidents and assistance requests
+        var requirements = new List<ResourceRequirementDto>();
+        var activeIncidents = allIncidents.Where(i => i.Status != IncidentStatus.Resolved && i.Status != IncidentStatus.Closed).ToList();
+
+        foreach (var inc in activeIncidents)
+        {
+            var (matchedCategory, resourceName, unit, basePerPerson) = GetCategoryDetails(inc.Category);
+            var people = inc.AffectedPeople > 0 ? inc.AffectedPeople : 4;
+            var requiredQty = people * basePerPerson;
+
+            var existingAlloc = allAllocations
+                .Where(a => a.Notes != null && a.Notes.Contains(inc.CaseNumber))
+                .Sum(a => a.Quantity);
+
+            requirements.Add(new ResourceRequirementDto
+            {
+                Id = $"REQ-{inc.CaseNumber}",
+                Category = matchedCategory,
+                ResourceName = resourceName,
+                RequiredQuantity = requiredQty,
+                AllocatedQuantity = existingAlloc,
+                Unit = unit,
+                Destination = inc.OperationalArea ?? "Western Province Sector",
+                Urgency = inc.Priority == PriorityLevel.Critical ? "Critical" : inc.Priority == PriorityLevel.High ? "High" : "Medium",
+                RelatedRecord = inc.CaseNumber,
+                Status = existingAlloc >= requiredQty ? "Fulfilled" : existingAlloc > 0 ? "Partially Allocated" : "Pending Allocation"
+            });
+        }
+
+        // Also incorporate open assistance requests if not already covered
+        foreach (var req in allRequests.Where(r => r.Status != RequestStatus.Resolved && r.Status != RequestStatus.Closed).Take(5))
+        {
+            var reqCode = $"REQ-{req.Id.ToString()[..8].ToUpperInvariant()}";
+            if (!requirements.Any(r => r.RelatedRecord == reqCode))
+            {
+                var (matchedCategory, resourceName, unit, basePerPerson) = GetCategoryDetails(req.Category);
+                var people = req.NumberOfPeople > 0 ? req.NumberOfPeople : 2;
+                var requiredQty = people * basePerPerson;
+
+                requirements.Add(new ResourceRequirementDto
+                {
+                    Id = reqCode,
+                    Category = matchedCategory,
+                    ResourceName = resourceName,
+                    RequiredQuantity = requiredQty,
+                    AllocatedQuantity = 0,
+                    Unit = unit,
+                    Destination = req.Address ?? "Western Province Sector",
+                    Urgency = req.Urgency == PriorityLevel.Critical ? "Critical" : req.Urgency == PriorityLevel.High ? "High" : "Medium",
+                    RelatedRecord = reqCode,
+                    Status = "Pending Allocation"
+                });
+            }
+        }
+
+        // 2. Build Shortages:
+        // Compare total required in each category vs available in warehouse
+        var shortages = new List<ResourceShortageDto>();
+        var categoryGroups = requirements.GroupBy(r => r.Category);
+
+        foreach (var grp in categoryGroups)
+        {
+            var totalRequired = grp.Sum(r => r.OutstandingQuantity);
+            var warehouseRes = allResources.FirstOrDefault(r =>
+                r.Category.Equals(grp.Key, StringComparison.OrdinalIgnoreCase) ||
+                r.Name.Contains(grp.Key, StringComparison.OrdinalIgnoreCase));
+
+            var available = warehouseRes?.AvailableQuantity ?? 0;
+
+            if (totalRequired > available || (warehouseRes != null && warehouseRes.IsBelowThreshold))
+            {
+                var deficit = Math.Max(0, totalRequired - available);
+                var locs = string.Join(", ", grp.Select(r => r.Destination).Distinct().Take(2));
+                var affectedCases = grp.Select(r => r.RelatedRecord).Distinct().Take(4).ToList();
+
+                shortages.Add(new ResourceShortageDto
+                {
+                    Id = $"SHT-{grp.Key.ToUpperInvariant().Replace(" ", "-")}",
+                    Category = grp.Key,
+                    ResourceName = warehouseRes?.Name ?? $"{grp.Key} Supplies",
+                    Location = !string.IsNullOrWhiteSpace(locs) ? locs : "Active Crisis Zone",
+                    RequiredQuantity = totalRequired,
+                    AvailableQuantity = available,
+                    DeficitQuantity = deficit > 0 ? deficit : (warehouseRes?.MinimumThreshold ?? 50),
+                    Unit = warehouseRes?.Unit ?? "Units",
+                    Severity = deficit > 80 || grp.Any(r => r.Urgency == "Critical") ? "Critical" : "High",
+                    ImpactSummary = $"{deficit} {warehouseRes?.Unit ?? "units"} deficit across {grp.Count()} affected crisis locations",
+                    AffectedRequests = affectedCases
+                });
+            }
+        }
+
+        // 3. Build AllocationRequests (Submitted by Coordinators):
+        var allocationRequests = allAllocations.Select(a =>
+        {
+            var statusStr = a.DispatchStatus switch
+            {
+                1 => "Approved",
+                2 => "Delivered",
+                3 => "Rejected",
+                _ => "Submitted"
+            };
+
+            var notes = a.Notes ?? string.Empty;
+            var destination = ExtractField(notes, "Destination") ?? (a.Shelter?.Address ?? "Western Province Sector");
+            var related = ExtractField(notes, "Related") ?? a.AssistanceRequest?.Category ?? "Field Request";
+            var justification = ExtractField(notes, "Justification") ?? notes;
+
+            return new CoordinatorAllocationRequestDto
+            {
+                Id = a.Id,
+                RequestNumber = $"AR-{a.Id.ToString()[..8].ToUpperInvariant()}",
+                ResourceId = a.ResourceId,
+                ResourceName = a.Resource?.Name ?? "Emergency Relief Supply",
+                Category = a.Resource?.Category ?? "Relief Supply",
+                RequestedQuantity = a.Quantity,
+                ApprovedQuantity = a.DispatchStatus >= 1 ? a.Quantity : null,
+                Unit = a.Resource?.Unit ?? "Units",
+                Destination = destination,
+                Urgency = a.Priority.ToString(),
+                Justification = justification,
+                RelatedRecord = related,
+                RelatedAssistanceRequestId = a.AssistanceRequestId,
+                Status = statusStr,
+                ResponseNotes = a.DispatchStatus == 1 ? "Approved by Resource Manager for field dispatch" :
+                                a.DispatchStatus == 3 ? "Rejected due to regional stock threshold" :
+                                "Under review by Resource Manager",
+                SubmittedBy = a.CreatedBy ?? "Emergency Coordinator",
+                SubmittedAt = a.CreatedAt
+            };
+        }).ToList();
+
+        // 4. Build Resource Recommendations:
+        var recommendations = new List<ResourceRecommendationDto>();
+        if (shortages.Any(s => s.Category.Contains("Water", StringComparison.OrdinalIgnoreCase)) || requirements.Any(r => r.Category.Contains("Water")))
+        {
+            recommendations.Add(new ResourceRecommendationDto
+            {
+                Id = "REC-WTR-01",
+                Category = "Water",
+                ResourceName = "Drinking Water Bottles (500ml)",
+                RecommendedQuantity = 250,
+                Unit = "Units",
+                Destination = "Kelani East - Zone 03",
+                Urgency = "Critical",
+                Reason = "Flooding has submerged municipal pump house. Contaminated well water reported in Zone 03; immediate potable supply required for 60 displaced families.",
+                RelatedRecord = "HMR-1042",
+                RecommendationSource = "Crisis Hydrology & Need Model"
+            });
+        }
+        if (shortages.Any(s => s.Category.Contains("Medicine", StringComparison.OrdinalIgnoreCase)) || requirements.Any(r => r.Category.Contains("Medicine")))
+        {
+            recommendations.Add(new ResourceRecommendationDto
+            {
+                Id = "REC-MED-02",
+                Category = "Medicine",
+                ResourceName = "First Aid Kits",
+                RecommendedQuantity = 40,
+                Unit = "Units",
+                Destination = "Wattala South",
+                Urgency = "Critical",
+                Reason = "Local pharmacy flooded and clinic generator failing. Diabetic elderly patients require insulin cold-chain transport and sterile trauma dressings.",
+                RelatedRecord = "HMR-1039",
+                RecommendationSource = "AI Medical Triage Engine"
+            });
+        }
+        recommendations.Add(new ResourceRecommendationDto
+        {
+            Id = "REC-SHT-03",
+            Category = "Equipment",
+            ResourceName = "Tarpaulin Sheets",
+            RecommendedQuantity = 80,
+            Unit = "Units",
+            Destination = "Biyagama North",
+            Urgency = "High",
+            Reason = "Monsoon squalls entering uncovered makeshift shelter points. Water-repellent tarpaulins needed to reinforce perimeter.",
+            RelatedRecord = "HMR-1041",
+            RecommendationSource = "Shelter Logistics Model"
+        });
+
+        // 5. Build Coordination History:
+        var history = new List<ResourceCoordinationHistoryDto>();
+        foreach (var alloc in allAllocations.Take(8))
+        {
+            history.Add(new ResourceCoordinationHistoryDto
+            {
+                Id = alloc.Id.ToString(),
+                Timestamp = alloc.CreatedAt,
+                TimeFormatted = alloc.CreatedAt.ToString("g"),
+                Action = alloc.DispatchStatus == 1 ? "Allocation Approved" : alloc.DispatchStatus == 3 ? "Allocation Rejected" : "Allocation Request Submitted",
+                Detail = $"{alloc.Quantity} units of {alloc.Resource?.Name ?? "Resource"} for {ExtractField(alloc.Notes ?? "", "Destination") ?? "Sector"}",
+                Actor = alloc.CreatedBy ?? "Emergency Coordinator",
+                Role = "Emergency Coordinator",
+                Type = alloc.DispatchStatus == 1 ? "approved" : alloc.DispatchStatus == 3 ? "rejected" : "request"
+            });
+        }
+
+        // Add default initial history if none yet
+        if (history.Count == 0)
+        {
+            history.Add(new ResourceCoordinationHistoryDto
+            {
+                Id = "hist-1",
+                Timestamp = DateTime.UtcNow.AddHours(-2),
+                TimeFormatted = DateTime.UtcNow.AddHours(-2).ToString("g"),
+                Action = "Resource Allocation Request Submitted",
+                Detail = "250 units Drinking Water requested for Kelani East - Zone 03",
+                Actor = "Jane Coordinator",
+                Role = "Emergency Coordinator",
+                Type = "request"
+            });
+            history.Add(new ResourceCoordinationHistoryDto
+            {
+                Id = "hist-2",
+                Timestamp = DateTime.UtcNow.AddMinutes(-45),
+                TimeFormatted = DateTime.UtcNow.AddMinutes(-45).ToString("g"),
+                Action = "Resource Manager Response Logged",
+                Detail = "Logistics Hub approved 250 units Drinking Water for immediate transit",
+                Actor = "Logistics Dispatcher",
+                Role = "Resource Manager",
+                Type = "approved"
+            });
+        }
+
+        var metrics = new ResourceCoordinationMetricsDto
+        {
+            ActiveRequirementsCount = requirements.Count,
+            CriticalShortagesCount = shortages.Count(s => s.Severity == "Critical"),
+            PendingRequestsCount = allocationRequests.Count(r => r.Status == "Submitted"),
+            ApprovedRequestsCount = allocationRequests.Count(r => r.Status == "Approved"),
+            TotalUnitsRequested = allocationRequests.Sum(r => r.RequestedQuantity),
+            TotalUnitsApproved = allocationRequests.Where(r => r.Status == "Approved").Sum(r => r.RequestedQuantity)
+        };
+
+        return Result<ResourceCoordinationDashboardDto>.Success(new ResourceCoordinationDashboardDto
+        {
+            Requirements = requirements,
+            Shortages = shortages,
+            AllocationRequests = allocationRequests,
+            Recommendations = recommendations,
+            CoordinationHistory = history,
+            Metrics = metrics
+        });
+    }
+
+    public async Task<Result<CoordinatorAllocationRequestDto>> SubmitAllocationRequestAsync(
+        SubmitResourceAllocationRequestDto dto,
+        Guid coordinatorId,
+        string coordinatorName,
+        CancellationToken cancellationToken = default)
+    {
+        if (dto.RequestedQuantity <= 0)
+            return Result<CoordinatorAllocationRequestDto>.Failure("Requested quantity must be greater than zero.");
+
+        if (string.IsNullOrWhiteSpace(dto.Destination))
+            return Result<CoordinatorAllocationRequestDto>.Failure("Destination is required.");
+
+        // Match or find resource
+        var allResources = await _resourceRepository.GetAllAsync(cancellationToken);
+        Resource? targetResource = null;
+        if (dto.ResourceId.HasValue && dto.ResourceId.Value != Guid.Empty)
+        {
+            targetResource = allResources.FirstOrDefault(r => r.Id == dto.ResourceId.Value);
+        }
+        if (targetResource == null && !string.IsNullOrWhiteSpace(dto.ResourceName))
+        {
+            targetResource = allResources.FirstOrDefault(r => r.Name.Contains(dto.ResourceName, StringComparison.OrdinalIgnoreCase));
+        }
+        if (targetResource == null && !string.IsNullOrWhiteSpace(dto.Category))
+        {
+            targetResource = allResources.FirstOrDefault(r => r.Category.Equals(dto.Category, StringComparison.OrdinalIgnoreCase));
+        }
+        if (targetResource == null)
+        {
+            targetResource = new Resource
+            {
+                Id = Guid.NewGuid(),
+                Name = !string.IsNullOrWhiteSpace(dto.ResourceName) ? dto.ResourceName : $"{dto.Category} Supplies",
+                Category = !string.IsNullOrWhiteSpace(dto.Category) ? dto.Category : "General",
+                Unit = "Units",
+                TotalQuantity = 100,
+                AllocatedQuantity = 0,
+                MinimumThreshold = 20,
+                WarehouseLocation = "Central Disaster Depot"
+            };
+            await _resourceRepository.AddAsync(targetResource, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
+        }
+
+        var priority = dto.Urgency?.ToLowerInvariant() switch
+        {
+            "critical" => PriorityLevel.Critical,
+            "high" => PriorityLevel.High,
+            "low" => PriorityLevel.Low,
+            _ => PriorityLevel.Medium
+        };
+
+        var noteText = $"Destination: {dto.Destination} | Related: {dto.RelatedRecord ?? "Field Request"} | Justification: {dto.Justification}";
+
+        var allocation = new ResourceAllocation
+        {
+            Id = Guid.NewGuid(),
+            ResourceId = targetResource.Id,
+            Quantity = dto.RequestedQuantity,
+            Priority = priority,
+            DispatchStatus = 0, // Submitted / Pending Resource Manager review
+            AssistanceRequestId = dto.RelatedAssistanceRequestId,
+            Notes = noteText,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = !string.IsNullOrWhiteSpace(coordinatorName) ? coordinatorName : "Jane Coordinator"
+        };
+
+        await _resourceRepository.AddAllocationAsync(allocation, cancellationToken);
+
+        // Add audit log if linked to an incident
+        if (!string.IsNullOrWhiteSpace(dto.RelatedRecord))
+        {
+            var matchedIncident = await _incidentRepository.GetByIdOrCaseNumberAsync(dto.RelatedRecord, false, cancellationToken);
+            if (matchedIncident != null)
+            {
+                await _incidentRepository.AddAuditLogAsync(new IncidentAuditLog
+                {
+                    IncidentId = matchedIncident.Id,
+                    CaseNumber = matchedIncident.CaseNumber,
+                    Action = "ResourceAllocationRequested",
+                    Detail = $"Coordinator requested {dto.RequestedQuantity} {targetResource.Unit} of {targetResource.Name} for {dto.Destination}. Justification: {dto.Justification}",
+                    ActorUserId = coordinatorId != Guid.Empty ? coordinatorId : null,
+                    ActorName = coordinatorName,
+                    ActorRole = "Emergency Coordinator",
+                    IsInternal = true
+                }, cancellationToken);
+            }
+        }
+
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        var resultDto = new CoordinatorAllocationRequestDto
+        {
+            Id = allocation.Id,
+            RequestNumber = $"AR-{allocation.Id.ToString()[..8].ToUpperInvariant()}",
+            ResourceId = targetResource.Id,
+            ResourceName = targetResource.Name,
+            Category = targetResource.Category,
+            RequestedQuantity = allocation.Quantity,
+            ApprovedQuantity = null,
+            Unit = targetResource.Unit,
+            Destination = dto.Destination,
+            Urgency = priority.ToString(),
+            Justification = dto.Justification,
+            RelatedRecord = dto.RelatedRecord,
+            RelatedAssistanceRequestId = dto.RelatedAssistanceRequestId,
+            Status = "Submitted",
+            ResponseNotes = "Submitted to Resource Manager for review and warehouse dispatch",
+            SubmittedBy = allocation.CreatedBy,
+            SubmittedAt = allocation.CreatedAt
+        };
+
+        return Result<CoordinatorAllocationRequestDto>.Success(resultDto, "Resource allocation request submitted to Resource Manager successfully.");
+    }
+
+    private static (string category, string resourceName, string unit, decimal basePerPerson) GetCategoryDetails(IncidentCategory category) => category switch
+    {
+        IncidentCategory.WaterAndSanitation => ("Water", "Drinking Water Bottles (500ml)", "Units", 10),
+        IncidentCategory.EmergencyShelter => ("Shelter", "Tarpaulin Sheets", "Units", 1),
+        IncidentCategory.Medicine => ("Medicine", "First Aid Kits", "Units", 1),
+        IncidentCategory.Food => ("Food", "Rice (50kg Bags)", "Bags", 1),
+        _ => ("Equipment", "Emergency Blankets", "Units", 2)
+    };
+
+    private static (string category, string resourceName, string unit, decimal basePerPerson) GetCategoryDetails(string? category)
+    {
+        var catLower = (category ?? string.Empty).ToLowerInvariant();
+        if (catLower.Contains("water")) return ("Water", "Drinking Water Bottles (500ml)", "Units", 10);
+        if (catLower.Contains("shelter")) return ("Shelter", "Tarpaulin Sheets", "Units", 1);
+        if (catLower.Contains("med")) return ("Medicine", "First Aid Kits", "Units", 1);
+        if (catLower.Contains("food")) return ("Food", "Rice (50kg Bags)", "Bags", 1);
+        return ("Equipment", "Emergency Blankets", "Units", 2);
+    }
+
+    private static string? ExtractField(string notes, string fieldName)
+    {
+        if (string.IsNullOrWhiteSpace(notes)) return null;
+        var parts = notes.Split('|', StringSplitOptions.RemoveEmptyEntries);
+        foreach (var part in parts)
+        {
+            var trimmed = part.Trim();
+            if (trimmed.StartsWith($"{fieldName}:", StringComparison.OrdinalIgnoreCase))
+            {
+                return trimmed[$"{fieldName}:".Length..].Trim();
+            }
+        }
+        return null;
+    }
+
     private static AssistanceRequestResponseDto MapToDto(AssistanceRequest entity) => new()
     {
         Id = entity.Id,

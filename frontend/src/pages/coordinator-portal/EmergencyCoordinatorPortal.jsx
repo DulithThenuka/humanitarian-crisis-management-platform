@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 
 // API Services
 import coordinatorService from '../../services/coordinatorService';
+import incidentService from '../../services/incidentService';
 
 // Data
 import {
@@ -73,6 +74,7 @@ export const EmergencyCoordinatorPortal = ({
   const [alerts, setAlerts] = useState(EMERGENCY_ALERTS_LIST);
 
   // Controls & HUD
+  const [autoNextEnabled, setAutoNextEnabled] = useState(false);
   const [dutyActive, setDutyActive] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
@@ -324,6 +326,35 @@ export const EmergencyCoordinatorPortal = ({
     }
   };
 
+  // Auto-Next Advance Handler
+  const advanceToNextActionableCase = useCallback((currentReqId, updatedList) => {
+    const list = updatedList || cases;
+    const priorityWeight = { Critical: 1, High: 2, Medium: 3, Low: 4 };
+
+    const actionable = list.filter(c => {
+      if (c.id === currentReqId) return false;
+      const isVerified = c.status === 'Verified' || c.verificationStatus === 'Verified';
+      const isNeedInfo = c.status === 'Need information' ||
+                         c.verificationStatus === 'More Information Required' ||
+                         c.verificationStatus === 'Information Requested';
+      const isRejected = c.status === 'Rejected';
+      return !isVerified && !isNeedInfo && !isRejected;
+    });
+
+    if (actionable.length > 0) {
+      actionable.sort((a, b) => {
+        const pA = priorityWeight[a.severity] || 3;
+        const pB = priorityWeight[b.severity] || 3;
+        return pA - pB;
+      });
+      const nextCase = actionable[0];
+      setSelectedCaseId(nextCase.id);
+      showToast(`Auto-Next: Advanced to ${nextCase.id} (${nextCase.severity || 'Pending'})`, 'info');
+    } else {
+      showToast('Auto-Next: All pending requests in review queue have been addressed!', 'success');
+    }
+  }, [cases, showToast]);
+
   // Confirm Verification
   const handleConfirmVerification = async () => {
     if (!verifyReason.trim() || !verifyConfirmedCheck) return;
@@ -331,18 +362,18 @@ export const EmergencyCoordinatorPortal = ({
     const reqId = currentCase.id;
     const reason = verifyReason.trim();
 
-    setCases(prevCases =>
-      prevCases.map(item => {
-        if (item.id === reqId) {
-          return {
-            ...item,
-            status: 'Verified',
-            checklist: (item.checklist || []).map(chk => ({ ...chk, checked: true }))
-          };
-        }
-        return item;
-      })
-    );
+    const updatedCases = cases.map(item => {
+      if (item.id === reqId) {
+        return {
+          ...item,
+          status: 'Verified',
+          verificationStatus: 'Verified',
+          checklist: (item.checklist || []).map(chk => ({ ...chk, checked: true }))
+        };
+      }
+      return item;
+    });
+    setCases(updatedCases);
 
     setRequestsList(prevList =>
       prevList.map(req =>
@@ -376,6 +407,9 @@ export const EmergencyCoordinatorPortal = ({
         checklistConfirmed: true
       });
       showToast(`Request ${reqId} verified and scheduled for dispatch!`, 'success');
+      if (autoNextEnabled) {
+        advanceToNextActionableCase(reqId, updatedCases);
+      }
     } catch (err) {
       console.warn('Backend verification sync warning (client state updated):', err.message);
       showToast(`Request ${reqId} verified locally!`, 'success');
@@ -389,17 +423,19 @@ export const EmergencyCoordinatorPortal = ({
         urgency: 3,
         reason: reason || 'Escalated to Critical by Emergency Coordinator'
       });
-      setCases(prevCases =>
-        prevCases.map(item =>
-          item.id === reqId ? { ...item, severity: 'Critical' } : item
-        )
+      const updatedCases = cases.map(item =>
+        item.id === reqId ? { ...item, severity: 'Critical' } : item
       );
+      setCases(updatedCases);
       setRequestsList(prevList =>
         prevList.map(req =>
           req.id === reqId ? { ...req, aiPriority: 'Critical' } : req
         )
       );
       showToast(`Operational priority for ${reqId} escalated to Critical Emergency Command`, 'warning');
+      if (autoNextEnabled) {
+        advanceToNextActionableCase(reqId, updatedCases);
+      }
     } catch (err) {
       console.warn('Backend escalation error:', err.message);
       showToast(`Operational priority for ${reqId} escalated to Critical`, 'warning');
@@ -434,20 +470,19 @@ export const EmergencyCoordinatorPortal = ({
       };
 
       // 1. Update cases state
-      setCases(prevCases =>
-        prevCases.map(item =>
-          item.id === reqId
-            ? {
-                ...item,
-                status: 'Need information',
-                verificationStatus: 'More Information Required',
-                verification: 'Need information',
-                history: [...(item.history || []), newHistoryItem],
-                communications: [newCommunication, ...(item.communications || [])]
-              }
-            : item
-        )
+      const updatedCases = cases.map(item =>
+        item.id === reqId
+          ? {
+              ...item,
+              status: 'Need information',
+              verificationStatus: 'More Information Required',
+              verification: 'Need information',
+              history: [...(item.history || []), newHistoryItem],
+              communications: [newCommunication, ...(item.communications || [])]
+            }
+          : item
       );
+      setCases(updatedCases);
 
       // 2. Update requestsList state
       setRequestsList(prevList =>
@@ -481,6 +516,9 @@ export const EmergencyCoordinatorPortal = ({
       setRecentActivity(prev => [newActivity, ...prev]);
 
       showToast(`Additional information requested for ${reqId}. Status updated.`, 'success');
+      if (autoNextEnabled) {
+        advanceToNextActionableCase(reqId, updatedCases);
+      }
 
       // 5. Reload from backend to confirm database sync
       await loadPortalData();
@@ -495,44 +533,120 @@ export const EmergencyCoordinatorPortal = ({
     const rejectText = `[REJECTED] ${reason || 'Operational rationale logged'}`;
     try {
       await coordinatorService.addNote(reqId, { text: rejectText });
-      setCases(prevCases =>
-        prevCases.map(item =>
-          item.id === reqId ? { ...item, status: 'Rejected' } : item
-        )
+      const updatedCases = cases.map(item =>
+        item.id === reqId ? { ...item, status: 'Rejected' } : item
       );
+      setCases(updatedCases);
       setRequestsList(prevList =>
         prevList.map(req =>
           req.id === reqId ? { ...req, status: 'Rejected', statusClass: 'status-rejected' } : req
         )
       );
       showToast(`Request ${reqId} rejected with logged operational rationale`, 'error');
+      if (autoNextEnabled) {
+        advanceToNextActionableCase(reqId, updatedCases);
+      }
     } catch (err) {
       console.warn('Backend rejection error:', err.message);
       showToast(`Request ${reqId} rejected`, 'error');
     }
   };
 
-  // Accept AI Recommendation
-  const handleAcceptAIRecommendation = async (finalPriority, reason) => {
-    setAiReviewed(true);
-    showToast(`Accepted AI recommendation (${finalPriority}) for ${AI_DECISION_SUPPORT_DATA.assessmentId}`, 'success');
+  // Record Human Decision on AI Assessment (Accept, Adjust, Reject)
+  const handleRecordAIDecision = async (caseId, decisionType, finalPriority, reason) => {
+    const decLabel = decisionType === 'accept' ? 'Approved' : decisionType === 'adjust' ? 'Overridden' : 'Rejected';
+    const targetCase = cases.find(c => c.id === caseId) || currentCase;
+    const appliedPriority = decisionType === 'accept' ? (targetCase?.severity || 'High') : finalPriority;
 
+    // 1. Attempt backend incident AI review endpoint
+    try {
+      await incidentService.recordAIReviewDecision(caseId, {
+        decision: decLabel,
+        reason: reason,
+        overriddenPriority: decisionType === 'adjust' ? appliedPriority : null
+      });
+    } catch (err) {
+      console.warn('Incident AI review endpoint note:', err.message);
+    }
+
+    // 2. Add audit note via coordinator service
+    try {
+      await coordinatorService.addNote(caseId, {
+        text: `[AI REVIEW ${decLabel.toUpperCase()}] Priority: ${appliedPriority}. Reviewer: ${coordinatorUser.fullName}. Rationale: ${reason}`
+      });
+    } catch (err) {
+      console.warn('Coordinator note sync fallback:', err.message);
+    }
+
+    // 3. If adjusted to Critical or escalate, call escalateRequest
+    if (decisionType === 'adjust' && appliedPriority === 'Critical') {
+      try {
+        await coordinatorService.escalateRequest(caseId, {
+          urgency: 3,
+          reason: `Priority adjusted to Critical via AI Decision Review: ${reason}`
+        });
+      } catch (err) {
+        console.warn('Coordinator escalate fallback:', err.message);
+      }
+    }
+
+    // 4. Update local state
+    setCases(prevCases =>
+      prevCases.map(item =>
+        item.id === caseId
+          ? {
+              ...item,
+              severity: appliedPriority,
+              status: decisionType === 'reject' ? item.status : 'Verified',
+              verificationStatus: decisionType === 'reject' ? item.verificationStatus : 'Verified',
+              aiReviewed: true,
+              history: [
+                ...(item.history || []),
+                {
+                  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  event: `AI Recommendation ${decLabel}: priority set to ${appliedPriority}`,
+                  actor: `Emergency Coordinator (${coordinatorUser.fullName})`
+                }
+              ]
+            }
+          : item
+      )
+    );
+
+    setRequestsList(prevList =>
+      prevList.map(req =>
+        req.id === caseId
+          ? {
+              ...req,
+              aiPriority: appliedPriority,
+              verification: decisionType === 'reject' ? req.verification : 'Verified',
+              status: decisionType === 'reject' ? req.status : 'Verified',
+              statusClass: decisionType === 'reject' ? req.statusClass : 'status-verified'
+            }
+          : req
+      )
+    );
+
+    // 5. Update activity feed
     const newActivity = {
       id: `ACT-${Date.now()}`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      title: 'AI priority accepted',
-      detail: `AID-2051 for ${AI_DECISION_SUPPORT_DATA.relatedCaseId}`,
-      type: 'approved'
+      title: `AI Review: ${decLabel}`,
+      detail: `${caseId} priority set to ${appliedPriority}`,
+      type: decisionType === 'reject' ? 'general' : 'approved'
     };
     setRecentActivity(prev => [newActivity, ...prev]);
 
-    try {
-      await coordinatorService.addNote(AI_DECISION_SUPPORT_DATA.relatedCaseId, {
-        text: `[AI RECOMMENDATION ACCEPTED] Priority set to ${finalPriority}. Assessment: ${AI_DECISION_SUPPORT_DATA.assessmentId}. Rationale: ${reason || 'Accepted by Emergency Coordinator'}`
-      });
-    } catch (err) {
-      console.warn('AI recommendation note sync warning:', err.message);
-    }
+    setAiReviewed(true);
+    showToast(`Human decision (${decLabel}: ${appliedPriority}) recorded for ${caseId}`, 'success');
+
+    // 6. Reload from backend to confirm database sync
+    await loadPortalData();
+  };
+
+  // Backwards-compatible alias for existing handlers
+  const handleAcceptAIRecommendation = async (finalPriority, reason) => {
+    await handleRecordAIDecision(currentCase.id, 'accept', finalPriority, reason);
   };
 
   // Create Incident
@@ -701,12 +815,17 @@ export const EmergencyCoordinatorPortal = ({
 
         {activeTab === 'ai-support' && (
           <AIDecisionSupportView
+            cases={cases}
+            selectedCaseId={selectedCaseId}
+            onSelectCase={setSelectedCaseId}
+            currentCase={currentCase}
             onOpenCaseReview={handleOpenCaseReview}
             onInspectDuplicate={() => setShowDuplicateModal(true)}
             onAcceptRecommendation={handleAcceptAIRecommendation}
+            onRecordAIDecision={handleRecordAIDecision}
             aiReviewed={aiReviewed}
             showToast={showToast}
-            currentCase={currentCase}
+            coordinatorUser={coordinatorUser}
           />
         )}
 
@@ -724,7 +843,13 @@ export const EmergencyCoordinatorPortal = ({
 
         {activeTab === 'review' && (
           <RequestReviewView
+            cases={cases}
+            selectedCaseId={selectedCaseId}
+            onSelectCase={setSelectedCaseId}
             currentCase={currentCase}
+            metrics={metrics}
+            autoNextEnabled={autoNextEnabled}
+            setAutoNextEnabled={setAutoNextEnabled}
             onBackToRequests={() => setActiveTab('requests')}
             onToggleChecklist={handleToggleChecklist}
             newNoteText={newNoteText}
@@ -745,7 +870,10 @@ export const EmergencyCoordinatorPortal = ({
 
         {activeTab === 'resources' && (
           <ResourceCoordinationView
+            cases={cases}
+            coordinatorUser={coordinatorUser}
             showToast={showToast}
+            onNavigateTab={setActiveTab}
           />
         )}
 
@@ -822,6 +950,7 @@ export const EmergencyCoordinatorPortal = ({
       <DuplicateInspectModal
         isOpen={showDuplicateModal}
         onClose={() => setShowDuplicateModal(false)}
+        currentCase={currentCase}
         onMarkDistinct={() => {
           setShowDuplicateModal(false);
           showToast('Marked as verified distinct case (non-duplicate)');
