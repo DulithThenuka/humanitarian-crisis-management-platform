@@ -2459,6 +2459,404 @@ public class CoordinatorService : ICoordinatorService
         return string.Join(" · ", traits);
     }
 
+    public async Task<Result<CoordinatorAnalyticsDto>> GetAnalyticsAsync(
+        string? period = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        DateTime rangeStart;
+        DateTime rangeEnd = endDate ?? now;
+        string periodKey = string.IsNullOrWhiteSpace(period) ? "30d" : period.ToLowerInvariant();
+
+        if (startDate.HasValue && endDate.HasValue)
+        {
+            rangeStart = startDate.Value;
+            rangeEnd = endDate.Value;
+            periodKey = "custom";
+        }
+        else
+        {
+            switch (periodKey)
+            {
+                case "24h":
+                case "1d":
+                    rangeStart = now.AddHours(-24);
+                    break;
+                case "7d":
+                    rangeStart = now.AddDays(-7);
+                    break;
+                case "14d":
+                    rangeStart = now.AddDays(-14);
+                    break;
+                case "90d":
+                    rangeStart = now.AddDays(-90);
+                    break;
+                case "month":
+                    rangeStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+                    break;
+                case "year":
+                    rangeStart = new DateTime(now.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    break;
+                case "30d":
+                default:
+                    rangeStart = now.AddDays(-30);
+                    periodKey = "30d";
+                    break;
+            }
+        }
+
+        // Fetch operational data
+        var allIncidents = await _incidentRepository.GetAllWithDetailsAsync(cancellationToken);
+        var allRequests = await _requestRepository.GetAllAsync(cancellationToken);
+        var allAllocations = await _resourceRepository.GetAllAllocationsWithDetailsAsync(cancellationToken);
+        var allShelters = await _shelterRepository.GetAllAsync(cancellationToken);
+        var allShelterAllocations = await _shelterRepository.GetAllAllocationsWithDetailsAsync(cancellationToken);
+        var allVolunteers = await _volunteerRepository.GetAllAsync(cancellationToken);
+        var allVolunteerAssignments = await _volunteerRepository.GetAllAssignmentsWithDetailsAsync(cancellationToken);
+
+        // Filter period incidents and requests strictly for the requested range
+        var periodIncidents = allIncidents.Where(i => i.CreatedAt >= rangeStart && i.CreatedAt <= rangeEnd).ToList();
+        var periodRequests = allRequests.Where(r => r.CreatedAt >= rangeStart && r.CreatedAt <= rangeEnd).ToList();
+
+        // 1. KPI Metrics
+        int incomingCount = periodIncidents.Count + periodRequests.Count;
+
+        var periodDuration = rangeEnd - rangeStart;
+        var priorStart = rangeStart - periodDuration;
+        var priorCount = allIncidents.Count(i => i.CreatedAt >= priorStart && i.CreatedAt < rangeStart) +
+                         allRequests.Count(r => r.CreatedAt >= priorStart && r.CreatedAt < rangeStart);
+
+        string incomingTrend;
+        if (priorCount > 0)
+        {
+            var diffPct = Math.Round(((double)(incomingCount - priorCount) / priorCount) * 100);
+            incomingTrend = diffPct >= 0 ? $"+{diffPct}% vs prev period" : $"{diffPct}% vs prev period";
+        }
+        else if (incomingCount > 0)
+        {
+            incomingTrend = $"{incomingCount} total records";
+        }
+        else
+        {
+            incomingTrend = "No records in range";
+        }
+
+        // Average initial review time
+        var reviewDiffMinutes = new List<double>();
+        foreach (var inc in periodIncidents)
+        {
+            if (inc.VerifiedAt.HasValue && inc.VerifiedAt.Value >= inc.CreatedAt)
+            {
+                var diff = (inc.VerifiedAt.Value - inc.CreatedAt).TotalMinutes;
+                if (diff >= 0 && diff < 100000) reviewDiffMinutes.Add(diff);
+            }
+            else if (inc.StatusHistories != null && inc.StatusHistories.Any())
+            {
+                var firstChange = inc.StatusHistories.OrderBy(h => h.ChangedAt).FirstOrDefault();
+                if (firstChange != null && firstChange.ChangedAt >= inc.CreatedAt)
+                {
+                    var diff = (firstChange.ChangedAt - inc.CreatedAt).TotalMinutes;
+                    if (diff >= 0 && diff < 100000) reviewDiffMinutes.Add(diff);
+                }
+            }
+        }
+
+        string avgInitialReviewTime = "N/A";
+        double? avgReviewMins = null;
+        if (reviewDiffMinutes.Count > 0)
+        {
+            avgReviewMins = reviewDiffMinutes.Average();
+            if (avgReviewMins < 60)
+                avgInitialReviewTime = $"{Math.Round(avgReviewMins.Value)} mins";
+            else if (avgReviewMins < 1440)
+                avgInitialReviewTime = $"{(avgReviewMins.Value / 60.0):F1} hrs";
+            else
+                avgInitialReviewTime = $"{(avgReviewMins.Value / 1440.0):F1} days";
+        }
+
+        // Average resolution time
+        var resolutionDiffHours = new List<double>();
+        foreach (var inc in periodIncidents)
+        {
+            if (inc.ResolvedAt.HasValue && inc.ResolvedAt.Value >= inc.CreatedAt)
+            {
+                var diff = (inc.ResolvedAt.Value - inc.CreatedAt).TotalHours;
+                if (diff >= 0) resolutionDiffHours.Add(diff);
+            }
+            else if (inc.ClosedAt.HasValue && inc.ClosedAt.Value >= inc.CreatedAt)
+            {
+                var diff = (inc.ClosedAt.Value - inc.CreatedAt).TotalHours;
+                if (diff >= 0) resolutionDiffHours.Add(diff);
+            }
+        }
+        foreach (var req in periodRequests)
+        {
+            if (req.ResolvedAt.HasValue && req.ResolvedAt.Value >= req.CreatedAt)
+            {
+                var diff = (req.ResolvedAt.Value - req.CreatedAt).TotalHours;
+                if (diff >= 0) resolutionDiffHours.Add(diff);
+            }
+        }
+
+        string avgResolutionTime = "N/A";
+        double? avgResHours = null;
+        if (resolutionDiffHours.Count > 0)
+        {
+            avgResHours = resolutionDiffHours.Average();
+            if (avgResHours < 1)
+                avgResolutionTime = $"{Math.Round(avgResHours.Value * 60)} mins";
+            else if (avgResHours < 48)
+                avgResolutionTime = $"{avgResHours.Value:F1} hrs";
+            else
+                avgResolutionTime = $"{(avgResHours.Value / 24.0):F1} days";
+        }
+
+        // Open vs Resolved
+        bool IsResolvedIncident(Incident i) => i.Status == IncidentStatus.Resolved || i.Status == IncidentStatus.Closed || i.ResolvedAt.HasValue;
+        bool IsResolvedRequest(AssistanceRequest r) => r.Status == RequestStatus.Resolved || r.Status == RequestStatus.Closed || r.ResolvedAt.HasValue;
+
+        var resolvedCount = periodIncidents.Count(IsResolvedIncident) + periodRequests.Count(IsResolvedRequest);
+        var openCount = incomingCount - resolvedCount;
+        var openVsResolvedRatio = $"{openCount} open / {resolvedCount} resolved";
+        var totalReqs = openCount + resolvedCount;
+        var resRatePct = totalReqs > 0 ? Math.Round((double)resolvedCount / totalReqs * 100, 1) : 0;
+
+        // Resource Fulfillment
+        // Approved resources are NOT counted as delivered unless DispatchStatus == 2 or DeliveredAt != null
+        var deliveredQty = allAllocations.Where(a => a.DispatchStatus == 2 || a.DeliveredAt != null).Sum(a => a.Quantity);
+        var totalAllocatedQty = allAllocations.Sum(a => a.Quantity);
+        var fulfillmentPct = totalAllocatedQty > 0 ? Math.Round((double)deliveredQty / (double)totalAllocatedQty * 100, 1) : 0;
+        var resourceFulfillmentRatio = totalAllocatedQty > 0 ? $"{fulfillmentPct}%" : "0%";
+
+        var metricsDto = new AnalyticsKpiMetricsDto
+        {
+            IncomingRequestsCount = incomingCount,
+            IncomingRequestsTrend = incomingTrend,
+            AvgInitialReviewTime = avgInitialReviewTime,
+            AvgInitialReviewMinutes = avgReviewMins,
+            AvgInitialReviewTarget = "Target: < 30m",
+            AvgResolutionTime = avgResolutionTime,
+            AvgResolutionHours = avgResHours,
+            AvgResolutionTrend = resolutionDiffHours.Count > 0 ? $"{resolutionDiffHours.Count} resolved" : "0 resolved",
+            OpenVsResolvedRatio = openVsResolvedRatio,
+            OpenRequestsCount = openCount,
+            ResolvedRequestsCount = resolvedCount,
+            ResolutionRatePct = resRatePct,
+            ResourceFulfillmentRatio = resourceFulfillmentRatio,
+            DeliveredQuantity = deliveredQty,
+            TotalAllocatedQuantity = totalAllocatedQty,
+            ResourceFulfillmentPct = fulfillmentPct
+        };
+
+        // 2. Incoming Requests Trend over time
+        var trendPoints = new List<TrendDataPointDto>();
+        int bucketCount = periodKey switch
+        {
+            "24h" or "1d" => 6,
+            "7d" => 7,
+            "14d" => 7,
+            "90d" => 6,
+            "year" => 12,
+            _ => 6
+        };
+
+        var bucketSpanTicks = (rangeEnd - rangeStart).Ticks / bucketCount;
+        int maxCount = 0;
+
+        for (int b = 0; b < bucketCount; b++)
+        {
+            var bStart = rangeStart.AddTicks(bucketSpanTicks * b);
+            var bEnd = (b == bucketCount - 1) ? rangeEnd : rangeStart.AddTicks(bucketSpanTicks * (b + 1));
+
+            var countInBucket = allIncidents.Count(i => i.CreatedAt >= bStart && i.CreatedAt < bEnd) +
+                               allRequests.Count(r => r.CreatedAt >= bStart && r.CreatedAt < bEnd);
+
+            if (countInBucket > maxCount) maxCount = countInBucket;
+
+            string timeLabel = periodKey switch
+            {
+                "24h" or "1d" => bStart.ToString("HH:mm"),
+                "7d" or "14d" or "30d" => bStart.ToString("MMM dd"),
+                "90d" or "year" => bStart.ToString("MMM yyyy"),
+                _ => bStart.ToString("MMM dd")
+            };
+
+            trendPoints.Add(new TrendDataPointDto
+            {
+                Time = timeLabel,
+                Count = countInBucket,
+                IsPeak = false
+            });
+        }
+
+        if (maxCount > 0)
+        {
+            var peakItem = trendPoints.FirstOrDefault(t => t.Count == maxCount);
+            if (peakItem != null) peakItem.IsPeak = true;
+        }
+
+        // 3. Priority Distribution (Donut Chart)
+        var criticalCount = periodIncidents.Count(i => i.Priority == PriorityLevel.Critical) +
+                            periodRequests.Count(r => r.Urgency == PriorityLevel.Critical);
+        var highCount = periodIncidents.Count(i => i.Priority == PriorityLevel.High) +
+                        periodRequests.Count(r => r.Urgency == PriorityLevel.High);
+        var mediumCount = periodIncidents.Count(i => i.Priority == PriorityLevel.Medium) +
+                          periodRequests.Count(r => r.Urgency == PriorityLevel.Medium);
+        var lowCount = periodIncidents.Count(i => i.Priority == PriorityLevel.Low) +
+                       periodRequests.Count(r => r.Urgency == PriorityLevel.Low);
+        var totalPriorityCount = criticalCount + highCount + mediumCount + lowCount;
+
+        var priorityDistribution = new PriorityDistributionDto
+        {
+            Total = totalPriorityCount,
+            Slices = new List<PrioritySliceDto>
+            {
+                new() { Name = "Critical", Count = criticalCount, Pct = totalPriorityCount > 0 ? Math.Round((double)criticalCount / totalPriorityCount * 100) : 0, Color = "#ef4444" },
+                new() { Name = "High", Count = highCount, Pct = totalPriorityCount > 0 ? Math.Round((double)highCount / totalPriorityCount * 100) : 0, Color = "#f59e0b" },
+                new() { Name = "Moderate", Count = mediumCount, Pct = totalPriorityCount > 0 ? Math.Round((double)mediumCount / totalPriorityCount * 100) : 0, Color = "#0284c7" },
+                new() { Name = "Low", Count = lowCount, Pct = totalPriorityCount > 0 ? Math.Round((double)lowCount / totalPriorityCount * 100) : 0, Color = "#10b981" }
+            }
+        };
+
+        // 4. Request Status Distribution
+        var statusCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var inc in periodIncidents)
+        {
+            var st = !string.IsNullOrWhiteSpace(inc.VerificationStatus) ? inc.VerificationStatus : inc.Status.ToString();
+            statusCounts[st] = statusCounts.GetValueOrDefault(st, 0) + 1;
+        }
+        foreach (var req in periodRequests)
+        {
+            var st = req.Status.ToString();
+            statusCounts[st] = statusCounts.GetValueOrDefault(st, 0) + 1;
+        }
+        var statusGroups = statusCounts
+            .Select(kv => new CategoryDistributionDto
+            {
+                Category = kv.Key,
+                Count = kv.Value,
+                Pct = incomingCount > 0 ? Math.Round((double)kv.Value / incomingCount * 100) : 0
+            })
+            .OrderByDescending(s => s.Count)
+            .ToList();
+
+        // 5. Requests by Category
+        var catCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var inc in periodIncidents)
+        {
+            var cat = !string.IsNullOrWhiteSpace(inc.CategoryDisplay) ? inc.CategoryDisplay : inc.Category.ToString();
+            catCounts[cat] = catCounts.GetValueOrDefault(cat, 0) + 1;
+        }
+        foreach (var req in periodRequests)
+        {
+            var cat = !string.IsNullOrWhiteSpace(req.Category) ? req.Category : "General";
+            if (cat.Equals("Medical", StringComparison.OrdinalIgnoreCase)) cat = "Medicine";
+            catCounts[cat] = catCounts.GetValueOrDefault(cat, 0) + 1;
+        }
+
+        var categoryGroups = catCounts
+            .Select(kv => new CategoryDistributionDto
+            {
+                Category = kv.Key,
+                Count = kv.Value,
+                Pct = incomingCount > 0 ? Math.Round((double)kv.Value / incomingCount * 100) : 0
+            })
+            .OrderByDescending(c => c.Count)
+            .ToList();
+
+        // 6. Operational Progress
+        var verifiedCount = periodIncidents.Count(i => i.VerificationStatus == "Verified") +
+                            periodRequests.Count(r => r.Status == RequestStatus.Verified);
+        var triageRate = incomingCount > 0 ? Math.Round((double)verifiedCount / incomingCount * 100) : 0;
+
+        var totalCap = allShelters.Sum(s => s.TotalCapacity);
+        var currOcc = allShelters.Sum(s => s.CurrentOccupancy);
+        var shelterUtil = totalCap > 0 ? Math.Round((double)currOcc / totalCap * 100) : 0;
+
+        var criticalResolved = periodIncidents.Count(i => i.Priority == PriorityLevel.Critical && IsResolvedIncident(i)) +
+                               periodRequests.Count(r => r.Urgency == PriorityLevel.Critical && IsResolvedRequest(r));
+        var critRate = criticalCount > 0 ? Math.Round((double)criticalResolved / criticalCount * 100) : 0;
+
+        var operationalProgress = new List<OperationalProgressItemDto>
+        {
+            new() { Label = "Request review & triage rate", Value = $"{triageRate}%", Type = triageRate >= 70 ? "On target" : "In review", TypeClass = triageRate >= 70 ? "pill-ontarget" : "pill-ontarget" },
+            new() { Label = "Shelter capacity utilization", Value = $"{shelterUtil}%", Type = shelterUtil > 80 ? "High capacity" : "Available", TypeClass = shelterUtil > 80 ? "pill-ontarget" : "pill-neutral" },
+            new() { Label = "Resource delivery fulfillment", Value = $"{fulfillmentPct}%", Type = deliveredQty > 0 ? "Active dispatch" : "Pending delivery", TypeClass = deliveredQty > 0 ? "pill-ontarget" : "pill-ontarget" },
+            new() { Label = "Critical case response readiness", Value = $"{critRate}%", Type = critRate >= 50 ? "Managed" : "Active triage", TypeClass = critRate >= 50 ? "pill-ontarget" : "pill-ontarget" }
+        };
+
+        // 7. Resource Coordination Summary
+        var resourceCoordination = new ResourceAnalyticsSummaryDto
+        {
+            TotalAllocations = allAllocations.Count,
+            FulfilledCount = allAllocations.Count(a => a.DispatchStatus == 2 || a.DeliveredAt != null),
+            DispatchedCount = allAllocations.Count(a => a.DispatchStatus == 1),
+            PendingCount = allAllocations.Count(a => a.DispatchStatus == 0),
+            DeliveredQuantity = deliveredQty,
+            TotalQuantity = totalAllocatedQty,
+            FulfillmentRatePct = fulfillmentPct
+        };
+
+        // 8. Shelter Placement Requests Summary
+        var shelterCoordination = new ShelterAnalyticsSummaryDto
+        {
+            TotalPlacementRequests = allShelterAllocations.Count,
+            ApprovedCount = allShelterAllocations.Count(a => a.Notes != null && a.Notes.Contains("Approved", StringComparison.OrdinalIgnoreCase)),
+            PendingCount = allShelterAllocations.Count(a => a.Notes == null || a.Notes.Contains("Submitted", StringComparison.OrdinalIgnoreCase)),
+            TotalEvacueesRequested = allShelterAllocations.Sum(a => a.NumberOfPersons),
+            TotalCapacityAvailable = totalCap - currOcc,
+            UtilizationRatePct = shelterUtil
+        };
+
+        // 9. Volunteer Assignment Requests Summary
+        var volunteerCoordination = new VolunteerAnalyticsSummaryDto
+        {
+            TotalAssignmentRequests = allVolunteerAssignments.Count,
+            AssignedCount = allVolunteerAssignments.Count(v => v.AssignmentStatus != 0),
+            PendingCount = allVolunteerAssignments.Count(v => v.AssignmentStatus == 0),
+            VolunteersRequested = allVolunteerAssignments.Sum(v =>
+            {
+                if (v.Notes != null && v.Notes.Contains("Needed:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(v.Notes, @"Needed:\s*(\d+)");
+                    if (match.Success && int.TryParse(match.Groups[1].Value, out var n)) return n;
+                }
+                return 1;
+            }),
+            VolunteersAssigned = allVolunteerAssignments.Sum(v =>
+            {
+                if (v.Notes != null && v.Notes.Contains("Assigned:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(v.Notes, @"Assigned:\s*(\d+)");
+                    if (match.Success && int.TryParse(match.Groups[1].Value, out var n)) return n;
+                }
+                return v.AssignmentStatus != 0 ? 1 : 0;
+            }),
+            AvailableVolunteersCount = allVolunteers.Count(v => v.IsAvailable)
+        };
+
+        var analyticsDto = new CoordinatorAnalyticsDto
+        {
+            GeneratedAt = DateTime.UtcNow,
+            Period = periodKey,
+            StartDate = rangeStart,
+            EndDate = rangeEnd,
+            Metrics = metricsDto,
+            RequestsOverTime = trendPoints,
+            PriorityDistribution = priorityDistribution,
+            StatusDistribution = statusGroups,
+            RequestsByCategory = categoryGroups,
+            OperationalProgress = operationalProgress,
+            ResourceCoordination = resourceCoordination,
+            ShelterCoordination = shelterCoordination,
+            VolunteerCoordination = volunteerCoordination
+        };
+
+        return Result<CoordinatorAnalyticsDto>.Success(analyticsDto);
+    }
+
     private static AssistanceRequestResponseDto MapToDto(AssistanceRequest entity) => new()
     {
         Id = entity.Id,

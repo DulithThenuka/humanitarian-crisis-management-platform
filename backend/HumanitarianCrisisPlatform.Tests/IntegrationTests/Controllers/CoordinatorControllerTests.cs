@@ -626,4 +626,63 @@ public class CoordinatorControllerTests : IClassFixture<DatabaseFixture>
         Assert.Contains("Needed: 4", savedAssignment.Notes);
         Assert.Contains("HMR-1042", savedAssignment.Notes);
     }
+
+    [Fact]
+    public async Task GetAnalytics_ShouldReturnRealCalculatedMetrics()
+    {
+        var (controller, _, _, context) = CreateControllers();
+
+        var req = new AssistanceRequest
+        {
+            Id = Guid.NewGuid(),
+            Category = "Rescue",
+            Description = "Trapped residents needing boat rescue",
+            Urgency = PriorityLevel.Critical,
+            Status = RequestStatus.Verified,
+            CreatedAt = DateTime.UtcNow.AddDays(-2),
+            ResolvedAt = null,
+            Address = "Test River Road 10",
+            NumberOfPeople = 12
+        };
+        await context.AssistanceRequests.AddAsync(req);
+
+        var resObj = new Resource
+        {
+            Id = Guid.NewGuid(),
+            Name = "Clean Water Tanker",
+            Category = "Water",
+            Unit = "Liters",
+            TotalQuantity = 500
+        };
+        await context.Resources.AddAsync(resObj);
+
+        var resourceAlloc = new ResourceAllocation
+        {
+            Id = Guid.NewGuid(),
+            ResourceId = resObj.Id,
+            AssistanceRequestId = req.Id,
+            Quantity = 100,
+            DispatchStatus = 2, // Delivered
+            DeliveredAt = DateTime.UtcNow.AddDays(-1)
+        };
+        await context.ResourceAllocations.AddAsync(resourceAlloc);
+        await context.SaveChangesAsync();
+
+        var result = await controller.GetAnalytics("30d", null, null, default);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var res = Assert.IsAssignableFrom<Result<CoordinatorAnalyticsDto>>(okResult.Value);
+
+        Assert.True(res.Succeeded);
+        Assert.NotNull(res.Data);
+        Assert.NotNull(res.Data.Metrics);
+        Assert.True(res.Data.Metrics.IncomingRequestsCount >= 1);
+        Assert.NotNull(res.Data.Metrics.AvgInitialReviewTime);
+        Assert.NotNull(res.Data.Metrics.OpenVsResolvedRatio);
+        Assert.NotNull(res.Data.Metrics.ResourceFulfillmentRatio);
+        Assert.NotNull(res.Data.PriorityDistribution);
+        Assert.NotEmpty(res.Data.PriorityDistribution.Slices);
+        Assert.NotEmpty(res.Data.RequestsOverTime);
+        Assert.NotNull(res.Data.ResourceCoordination);
+        Assert.True(res.Data.ResourceCoordination.DeliveredQuantity >= 100);
+    }
 }

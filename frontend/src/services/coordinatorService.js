@@ -92,6 +92,10 @@ export const coordinatorService = {
   submitVolunteerAssignmentRequest: async (data) => {
     const res = await apiClient.post('/coordinator/volunteer-requests', data);
     return unwrap(res);
+  },
+  getAnalytics: async (params = {}) => {
+    const res = await apiClient.get('/coordinator/analytics', { params });
+    return unwrap(res);
   }
 };
 

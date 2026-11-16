@@ -152,6 +152,17 @@ public class CoordinatorController : BaseApiController
         return Ok(result);
     }
 
+    [HttpGet("analytics")]
+    public async Task<ActionResult<Result<CoordinatorAnalyticsDto>>> GetAnalytics(
+        [FromQuery] string? period = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _coordinatorService.GetAnalyticsAsync(period, startDate, endDate, cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPost("volunteer-requests")]
     public async Task<ActionResult<Result<CoordinatorVolunteerAssignmentRequestDto>>> SubmitVolunteerAssignmentRequest(
         [FromBody] SubmitVolunteerAssignmentRequestDto dto,

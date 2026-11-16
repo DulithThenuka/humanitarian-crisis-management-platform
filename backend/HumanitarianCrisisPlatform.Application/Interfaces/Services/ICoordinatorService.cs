@@ -30,4 +30,5 @@ public interface ICoordinatorService
     Task<Result<ShelterVolunteerDashboardDto>> GetShelterVolunteerCoordinationAsync(CancellationToken cancellationToken = default);
     Task<Result<CoordinatorShelterPlacementRequestDto>> SubmitShelterPlacementRequestAsync(SubmitShelterPlacementRequestDto dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
     Task<Result<CoordinatorVolunteerAssignmentRequestDto>> SubmitVolunteerAssignmentRequestAsync(SubmitVolunteerAssignmentRequestDto dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
+    Task<Result<CoordinatorAnalyticsDto>> GetAnalyticsAsync(string? period = null, DateTime? startDate = null, DateTime? endDate = null, CancellationToken cancellationToken = default);
 }
