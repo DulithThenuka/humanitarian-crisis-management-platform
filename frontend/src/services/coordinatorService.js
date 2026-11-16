@@ -53,8 +53,24 @@ export const coordinatorService = {
     const res = await apiClient.get('/alerts', { params });
     return unwrap(res);
   },
+  getAlertById: async (id) => {
+    const res = await apiClient.get(`/alerts/${id}`);
+    return unwrap(res);
+  },
   createAlert: async (data) => {
     const res = await apiClient.post('/alerts', data);
+    return unwrap(res);
+  },
+  updateAlert: async (id, data) => {
+    const res = await apiClient.put(`/alerts/${id}`, data);
+    return unwrap(res);
+  },
+  resolveAlert: async (id, data = null) => {
+    const res = await apiClient.post(`/alerts/${id}/resolve`, data || {});
+    return unwrap(res);
+  },
+  publishAlert: async (id) => {
+    const res = await apiClient.post(`/alerts/${id}/publish`);
     return unwrap(res);
   },
   getResourceCoordination: async () => {

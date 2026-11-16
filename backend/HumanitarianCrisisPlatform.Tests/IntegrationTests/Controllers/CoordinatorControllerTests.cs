@@ -236,6 +236,88 @@ public class CoordinatorControllerTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
+    public async Task Alerts_StatusManagement_AllFourTabsAndTransitions()
+    {
+        var (_, _, alertsController, context) = CreateControllers();
+
+        // 1. Create Draft alert
+        var draftDto = new CreateAlertDto
+        {
+            Title = "Upcoming Heavy Rainfall Advisory",
+            Category = "Storm warning",
+            Severity = "Moderate",
+            Message = "Monsoon depression expected to bring heavy rain in 48 hours.",
+            Area = "Galle District",
+            IsDraft = true,
+            PublicationStatus = "Draft"
+        };
+        var createDraft = await alertsController.Create(draftDto, default);
+        var draftRes = Assert.IsAssignableFrom<Result<EmergencyAlertDto>>(Assert.IsType<OkObjectResult>(createDraft.Result).Value);
+        Assert.True(draftRes.Succeeded);
+        Assert.Equal("drafts", draftRes.Data!.Tab);
+        Assert.Equal("Draft", draftRes.Data.Publication);
+
+        // 2. Create Scheduled alert
+        var schedDto = new CreateAlertDto
+        {
+            Title = "Scheduled Reservoir Water Release Notice",
+            Category = "Flood warning",
+            Severity = "High",
+            Message = "Reservoir spill gates will open at midnight tonight.",
+            Area = "Kelani Basin",
+            ScheduledDate = DateTime.UtcNow.AddHours(6).ToString("o"),
+            PublicationStatus = "Scheduled"
+        };
+        var createSched = await alertsController.Create(schedDto, default);
+        var schedRes = Assert.IsAssignableFrom<Result<EmergencyAlertDto>>(Assert.IsType<OkObjectResult>(createSched.Result).Value);
+        Assert.True(schedRes.Succeeded);
+        Assert.Equal("scheduled", schedRes.Data!.Tab);
+        Assert.Equal("Scheduled", schedRes.Data.Publication);
+
+        // 3. Verify tabs filter correctly
+        var draftsTab = await alertsController.GetAll(tab: "drafts", default);
+        var draftsData = Assert.IsAssignableFrom<Result<IReadOnlyList<EmergencyAlertDto>>>(Assert.IsType<OkObjectResult>(draftsTab.Result).Value).Data!;
+        Assert.Contains(draftsData, a => a.Id == draftRes.Data.Id);
+
+        var schedTab = await alertsController.GetAll(tab: "scheduled", default);
+        var schedData = Assert.IsAssignableFrom<Result<IReadOnlyList<EmergencyAlertDto>>>(Assert.IsType<OkObjectResult>(schedTab.Result).Value).Data!;
+        Assert.Contains(schedData, a => a.Id == schedRes.Data.Id);
+
+        // 4. Update Alert
+        var updateDto = new UpdateAlertDto
+        {
+            Title = "Updated Reservoir Water Release Notice (URGENT)",
+            Category = "Flood warning",
+            Severity = "Critical",
+            Message = "Spill gates opening sooner than anticipated due to heavy catchment inflow.",
+            Area = "Kelani Basin & Lowlands",
+            ScheduledDate = schedRes.Data.ScheduledDate,
+            PublicationStatus = "Scheduled"
+        };
+        var updateRes = await alertsController.Update(schedRes.Data.Id, updateDto, default);
+        var updatedData = Assert.IsAssignableFrom<Result<EmergencyAlertDto>>(Assert.IsType<OkObjectResult>(updateRes.Result).Value).Data!;
+        Assert.Equal("Updated Reservoir Water Release Notice (URGENT)", updatedData.Title);
+        Assert.Equal("Critical", updatedData.Severity);
+
+        // 5. Publish the draft alert
+        var publishRes = await alertsController.Publish(draftRes.Data.Id, default);
+        var publishedData = Assert.IsAssignableFrom<Result<EmergencyAlertDto>>(Assert.IsType<OkObjectResult>(publishRes.Result).Value).Data!;
+        Assert.Equal("active", publishedData.Tab);
+        Assert.Equal("Published", publishedData.Publication);
+
+        // 6. Resolve the published alert
+        var resolveDto = new ResolveAlertDto
+        {
+            ResolutionNotes = "Monsoon depression has dissipated without localized flooding."
+        };
+        var resolveRes = await alertsController.Resolve(draftRes.Data.Id, resolveDto, default);
+        var resolvedData = Assert.IsAssignableFrom<Result<EmergencyAlertDto>>(Assert.IsType<OkObjectResult>(resolveRes.Result).Value).Data!;
+        Assert.Equal("resolved", resolvedData.Tab);
+        Assert.Equal("Resolved", resolvedData.Publication);
+        Assert.Contains("dissipated", resolvedData.ResolutionNotes);
+    }
+
+    [Fact]
     public async Task VerifyRequest_WithIncidentCaseNumber_ShouldVerifyAndPersistInDb()
     {
         var (controller, _, _, context) = CreateControllers();

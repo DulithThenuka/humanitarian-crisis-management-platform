@@ -1,3 +1,4 @@
+using System.Text;
 using HumanitarianCrisisPlatform.Application.Common.Models;
 using HumanitarianCrisisPlatform.Application.DTOs.Coordinator;
 using HumanitarianCrisisPlatform.Application.DTOs.Requests;
@@ -1040,84 +1041,8 @@ public class CoordinatorService : ICoordinatorService
 
         var alerts = events
             .OrderByDescending(c => c.StartDate)
-            .Select(c =>
-            {
-                var isCritical = c.Severity >= 4;
-                var isHigh = c.Severity == 3;
-                var severityLabel = isCritical ? "Critical" : isHigh ? "High" : "Moderate";
-                var severityClass = isCritical ? "pill-critical" : isHigh ? "pill-high" : "pill-moderate";
-
-                var desc = c.Description ?? string.Empty;
-                var area = "Western Province";
-                var category = $"{c.DisasterType} warning";
-                var message = desc;
-                var instructions = new List<string>();
-
-                var lines = desc.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                var messageLines = new List<string>();
-                bool inInstructions = false;
-
-                foreach (var line in lines)
-                {
-                    if (line.StartsWith("Area:", StringComparison.OrdinalIgnoreCase))
-                    {
-                        area = line.Substring(5).Trim();
-                    }
-                    else if (line.StartsWith("Category:", StringComparison.OrdinalIgnoreCase))
-                    {
-                        category = line.Substring(9).Trim();
-                    }
-                    else if (line.StartsWith("Safety Instructions:", StringComparison.OrdinalIgnoreCase))
-                    {
-                        inInstructions = true;
-                    }
-                    else if (inInstructions)
-                    {
-                        instructions.Add(line.TrimStart('-', '*', ' '));
-                    }
-                    else
-                    {
-                        messageLines.Add(line);
-                    }
-                }
-
-                if (messageLines.Count > 0)
-                {
-                    message = string.Join("\n", messageLines);
-                }
-
-                if (instructions.Count == 0)
-                {
-                    instructions = new List<string>
-                    {
-                        "Follow official evacuation route signage.",
-                        "Move vital medicines, dry rations and identity documents to high ground.",
-                        "Do not attempt to walk or drive through flowing water."
-                    };
-                }
-
-                var isDraft = !c.IsActive && c.EndDate == null;
-                var isResolved = !c.IsActive && c.EndDate != null;
-
-                return new EmergencyAlertDto
-                {
-                    Id = $"ALT-{c.Id.ToString()[..6].ToUpperInvariant()}",
-                    SourceCrisisEventId = c.Id,
-                    Title = c.Title,
-                    Category = category,
-                    Severity = severityLabel,
-                    SeverityClass = severityClass,
-                    Area = !string.IsNullOrWhiteSpace(area) ? area : (c.Latitude.HasValue ? $"Sector Lat {c.Latitude:F2}, Lon {c.Longitude:F2}" : "Western Province"),
-                    Publication = isDraft ? "Draft" : (isResolved ? "Resolved" : "Published"),
-                    Tab = isDraft ? "drafts" : (isResolved ? "resolved" : "active"),
-                    CreatedBy = c.CreatedBy ?? "Emergency Coordinator",
-                    LastUpdated = c.UpdatedAt?.ToString("g") ?? c.CreatedAt.ToString("g"),
-                    StartTime = c.StartDate.ToString("g"),
-                    ExpiryTime = c.EndDate?.ToString("g") ?? "Until further notice",
-                    Message = message,
-                    SafetyInstructions = instructions
-                };
-            }).ToList();
+            .Select(c => MapToEmergencyAlertDto(c))
+            .ToList();
 
         if (!string.IsNullOrWhiteSpace(tab) && !tab.Equals("all", StringComparison.OrdinalIgnoreCase))
         {
@@ -1125,6 +1050,19 @@ public class CoordinatorService : ICoordinatorService
         }
 
         return Result<IReadOnlyList<EmergencyAlertDto>>.Success(alerts);
+    }
+
+    public async Task<Result<EmergencyAlertDto>> GetEmergencyAlertByIdAsync(
+        string id,
+        CancellationToken cancellationToken = default)
+    {
+        var ev = await FindAlertEventAsync(id, cancellationToken);
+        if (ev == null)
+        {
+            return Result<EmergencyAlertDto>.Failure($"Emergency alert with ID '{id}' was not found.");
+        }
+
+        return Result<EmergencyAlertDto>.Success(MapToEmergencyAlertDto(ev));
     }
 
     public async Task<Result<EmergencyAlertDto>> CreateEmergencyAlertAsync(
@@ -1139,67 +1077,71 @@ public class CoordinatorService : ICoordinatorService
         }
 
         var severityInt = dto.Severity.Equals("Critical", StringComparison.OrdinalIgnoreCase) ? 5 :
-                          dto.Severity.Equals("High", StringComparison.OrdinalIgnoreCase) ? 3 : 2;
+                          dto.Severity.Equals("High", StringComparison.OrdinalIgnoreCase) ? 3 :
+                          dto.Severity.Equals("Moderate", StringComparison.OrdinalIgnoreCase) ? 2 : 1;
 
-        List<string> safetyList = new();
-        if (dto.SafetyInstructions != null)
+        var safetyList = ParseSafetyInstructions(dto.SafetyInstructions);
+
+        // Determine target status
+        var targetStatus = "Published";
+        if (dto.PublicationStatus?.Equals("Scheduled", StringComparison.OrdinalIgnoreCase) == true ||
+            (!string.IsNullOrWhiteSpace(dto.ScheduledDate) && !dto.IsDraft))
         {
-            if (dto.SafetyInstructions is System.Text.Json.JsonElement jsonElem)
+            targetStatus = "Scheduled";
+        }
+        else if (dto.IsDraft || dto.PublicationStatus?.Equals("Draft", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            targetStatus = "Draft";
+        }
+        else if (dto.PublicationStatus?.Equals("Resolved", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            targetStatus = "Resolved";
+        }
+
+        var disasterType = DisasterType.Flood;
+        if (dto.Category.Contains("Cyclone", StringComparison.OrdinalIgnoreCase) || dto.Category.Contains("Storm", StringComparison.OrdinalIgnoreCase))
+            disasterType = DisasterType.Storm;
+        else if (dto.Category.Contains("Landslide", StringComparison.OrdinalIgnoreCase))
+            disasterType = DisasterType.Landslide;
+        else if (dto.Category.Contains("Tsunami", StringComparison.OrdinalIgnoreCase))
+            disasterType = DisasterType.Tsunami;
+
+        var sb = new StringBuilder();
+        if (!string.IsNullOrWhiteSpace(dto.Area)) sb.AppendLine($"Area: {dto.Area.Trim()}");
+        if (!string.IsNullOrWhiteSpace(dto.Category)) sb.AppendLine($"Category: {dto.Category.Trim()}");
+        if (!string.IsNullOrWhiteSpace(dto.RelatedIncident)) sb.AppendLine($"Related Incident: {dto.RelatedIncident.Trim()}");
+        sb.AppendLine($"Publication: {targetStatus}");
+        if (!string.IsNullOrWhiteSpace(dto.ScheduledDate)) sb.AppendLine($"Scheduled: {dto.ScheduledDate.Trim()}");
+        if (safetyList.Count > 0)
+        {
+            sb.AppendLine("Safety Instructions:");
+            foreach (var s in safetyList) sb.AppendLine($"- {s}");
+        }
+        sb.AppendLine();
+        sb.AppendLine(dto.Message.Trim());
+
+        var startDate = DateTime.UtcNow;
+        if (targetStatus == "Scheduled")
+        {
+            if (!string.IsNullOrWhiteSpace(dto.ScheduledDate) && DateTime.TryParse(dto.ScheduledDate, out var schedDate))
             {
-                if (jsonElem.ValueKind == System.Text.Json.JsonValueKind.Array)
-                {
-                    foreach (var item in jsonElem.EnumerateArray())
-                    {
-                        var s = item.GetString();
-                        if (!string.IsNullOrWhiteSpace(s)) safetyList.Add(s.Trim());
-                    }
-                }
-                else if (jsonElem.ValueKind == System.Text.Json.JsonValueKind.String)
-                {
-                    var s = jsonElem.GetString();
-                    if (!string.IsNullOrWhiteSpace(s))
-                    {
-                        safetyList.AddRange(s.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
-                    }
-                }
-            }
-            else if (dto.SafetyInstructions is IEnumerable<string> stringEnumerable)
-            {
-                safetyList.AddRange(stringEnumerable.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()));
+                startDate = schedDate;
             }
             else
             {
-                var s = dto.SafetyInstructions.ToString();
-                if (!string.IsNullOrWhiteSpace(s))
-                {
-                    safetyList.AddRange(s.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
-                }
+                startDate = DateTime.UtcNow.AddHours(4);
             }
-        }
-
-        var fullDescription = dto.Message.Trim();
-        if (!string.IsNullOrWhiteSpace(dto.Area))
-        {
-            fullDescription = $"Area: {dto.Area.Trim()}\n{fullDescription}";
-        }
-        if (!string.IsNullOrWhiteSpace(dto.Category))
-        {
-            fullDescription = $"Category: {dto.Category.Trim()}\n{fullDescription}";
-        }
-        if (safetyList.Count > 0)
-        {
-            fullDescription += $"\n\nSafety Instructions:\n{string.Join("\n", safetyList)}";
         }
 
         var crisisEvent = new CrisisEvent
         {
             Title = dto.Title.Trim(),
-            Description = fullDescription,
-            DisasterType = DisasterType.Flood,
+            Description = sb.ToString(),
+            DisasterType = disasterType,
             Severity = severityInt,
-            IsActive = !dto.IsDraft,
-            StartDate = DateTime.UtcNow,
-            EndDate = dto.IsDraft ? null : (DateTime?)null,
+            IsActive = targetStatus == "Published",
+            StartDate = startDate,
+            EndDate = targetStatus == "Resolved" ? DateTime.UtcNow : null,
             CreatedBy = coordinatorName,
             CreatedAt = DateTime.UtcNow
         };
@@ -1207,28 +1149,393 @@ public class CoordinatorService : ICoordinatorService
         var created = await _crisisRepository.AddAsync(crisisEvent, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
 
-        var alert = new EmergencyAlertDto
+        var successMessage = targetStatus switch
         {
-            Id = $"ALT-{created.Id.ToString()[..6].ToUpperInvariant()}",
-            SourceCrisisEventId = created.Id,
-            Title = created.Title,
-            Category = dto.Category,
-            Severity = dto.Severity,
-            SeverityClass = dto.Severity.Equals("Critical", StringComparison.OrdinalIgnoreCase) ? "pill-critical" : "pill-high",
-            Area = dto.Area,
-            Publication = dto.IsDraft ? "Draft" : "Published",
-            Tab = dto.IsDraft ? "drafts" : "active",
-            CreatedBy = coordinatorName,
-            LastUpdated = "Just now",
-            StartTime = dto.StartTime ?? DateTime.UtcNow.ToString("g"),
-            ExpiryTime = dto.ExpiryTime ?? "Until further notice",
-            Message = dto.Message,
-            SafetyInstructions = safetyList.Count > 0
-                ? safetyList
-                : new List<string> { "Follow instructions from authorized relief personnel." }
+            "Draft" => "Emergency alert draft saved successfully.",
+            "Scheduled" => "Emergency alert scheduled for broadcast successfully.",
+            _ => "Emergency alert broadcast published successfully."
         };
 
-        return Result<EmergencyAlertDto>.Success(alert, dto.IsDraft ? "Emergency alert draft saved successfully." : "Emergency alert broadcast published successfully.");
+        return Result<EmergencyAlertDto>.Success(MapToEmergencyAlertDto(created), successMessage);
+    }
+
+    public async Task<Result<EmergencyAlertDto>> UpdateEmergencyAlertAsync(
+        string id,
+        UpdateAlertDto dto,
+        Guid coordinatorId,
+        string coordinatorName,
+        CancellationToken cancellationToken = default)
+    {
+        var ev = await FindAlertEventAsync(id, cancellationToken);
+        if (ev == null)
+        {
+            return Result<EmergencyAlertDto>.Failure($"Emergency alert with ID '{id}' was not found.");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Title) || string.IsNullOrWhiteSpace(dto.Message))
+        {
+            return Result<EmergencyAlertDto>.Failure("Alert title and message are required.");
+        }
+
+        var severityInt = dto.Severity.Equals("Critical", StringComparison.OrdinalIgnoreCase) ? 5 :
+                          dto.Severity.Equals("High", StringComparison.OrdinalIgnoreCase) ? 3 :
+                          dto.Severity.Equals("Moderate", StringComparison.OrdinalIgnoreCase) ? 2 : 1;
+
+        ev.Title = dto.Title.Trim();
+        ev.Severity = severityInt;
+
+        if (dto.Category.Contains("Cyclone", StringComparison.OrdinalIgnoreCase) || dto.Category.Contains("Storm", StringComparison.OrdinalIgnoreCase))
+            ev.DisasterType = DisasterType.Storm;
+        else if (dto.Category.Contains("Landslide", StringComparison.OrdinalIgnoreCase))
+            ev.DisasterType = DisasterType.Landslide;
+        else if (dto.Category.Contains("Tsunami", StringComparison.OrdinalIgnoreCase))
+            ev.DisasterType = DisasterType.Tsunami;
+        else
+            ev.DisasterType = DisasterType.Flood;
+
+        var targetStatus = dto.PublicationStatus;
+        if (string.IsNullOrWhiteSpace(targetStatus))
+        {
+            targetStatus = ev.IsActive ? "Published" : (ev.EndDate != null ? "Resolved" : "Draft");
+        }
+
+        if (targetStatus.Equals("Published", StringComparison.OrdinalIgnoreCase))
+        {
+            ev.IsActive = true;
+            ev.StartDate = DateTime.UtcNow;
+            ev.EndDate = null;
+        }
+        else if (targetStatus.Equals("Draft", StringComparison.OrdinalIgnoreCase))
+        {
+            ev.IsActive = false;
+            ev.EndDate = null;
+        }
+        else if (targetStatus.Equals("Scheduled", StringComparison.OrdinalIgnoreCase))
+        {
+            ev.IsActive = false;
+            if (!string.IsNullOrWhiteSpace(dto.ScheduledDate) && DateTime.TryParse(dto.ScheduledDate, out var schedDate))
+            {
+                ev.StartDate = schedDate;
+            }
+            else if (ev.StartDate <= DateTime.UtcNow)
+            {
+                ev.StartDate = DateTime.UtcNow.AddHours(4);
+            }
+            ev.EndDate = null;
+        }
+        else if (targetStatus.Equals("Resolved", StringComparison.OrdinalIgnoreCase))
+        {
+            ev.IsActive = false;
+            ev.EndDate = DateTime.UtcNow;
+        }
+
+        var safetyList = ParseSafetyInstructions(dto.SafetyInstructions);
+
+        var sb = new StringBuilder();
+        if (!string.IsNullOrWhiteSpace(dto.Area)) sb.AppendLine($"Area: {dto.Area.Trim()}");
+        if (!string.IsNullOrWhiteSpace(dto.Category)) sb.AppendLine($"Category: {dto.Category.Trim()}");
+        if (!string.IsNullOrWhiteSpace(dto.RelatedIncident)) sb.AppendLine($"Related Incident: {dto.RelatedIncident.Trim()}");
+        sb.AppendLine($"Publication: {targetStatus}");
+        if (!string.IsNullOrWhiteSpace(dto.ScheduledDate)) sb.AppendLine($"Scheduled: {dto.ScheduledDate.Trim()}");
+        if (!string.IsNullOrWhiteSpace(dto.ResolutionNotes)) sb.AppendLine($"Resolution: {dto.ResolutionNotes.Trim()}");
+        if (safetyList.Count > 0)
+        {
+            sb.AppendLine("Safety Instructions:");
+            foreach (var s in safetyList) sb.AppendLine($"- {s}");
+        }
+        sb.AppendLine();
+        sb.AppendLine(dto.Message.Trim());
+
+        ev.Description = sb.ToString();
+        ev.UpdatedAt = DateTime.UtcNow;
+        ev.LastModifiedBy = coordinatorName;
+
+        await _crisisRepository.UpdateAsync(ev, cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        return Result<EmergencyAlertDto>.Success(MapToEmergencyAlertDto(ev), "Emergency alert updated successfully.");
+    }
+
+    public async Task<Result<EmergencyAlertDto>> ResolveEmergencyAlertAsync(
+        string id,
+        ResolveAlertDto? dto,
+        Guid coordinatorId,
+        string coordinatorName,
+        CancellationToken cancellationToken = default)
+    {
+        var ev = await FindAlertEventAsync(id, cancellationToken);
+        if (ev == null)
+        {
+            return Result<EmergencyAlertDto>.Failure($"Emergency alert with ID '{id}' was not found.");
+        }
+
+        ev.IsActive = false;
+        ev.EndDate = DateTime.UtcNow;
+        ev.UpdatedAt = DateTime.UtcNow;
+        ev.LastModifiedBy = coordinatorName;
+
+        var resolution = !string.IsNullOrWhiteSpace(dto?.ResolutionNotes)
+            ? dto.ResolutionNotes.Trim()
+            : $"Resolved by {coordinatorName} at {DateTime.UtcNow:g}";
+
+        var desc = ev.Description ?? string.Empty;
+        if (desc.Contains("Publication:", StringComparison.OrdinalIgnoreCase))
+        {
+            var lines = desc.Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].StartsWith("Publication:", StringComparison.OrdinalIgnoreCase))
+                {
+                    lines[i] = "Publication: Resolved";
+                }
+            }
+            desc = string.Join("\n", lines);
+        }
+        else
+        {
+            desc = $"Publication: Resolved\n{desc}";
+        }
+        desc += $"\nResolution: {resolution}";
+
+        ev.Description = desc;
+
+        await _crisisRepository.UpdateAsync(ev, cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        return Result<EmergencyAlertDto>.Success(MapToEmergencyAlertDto(ev), "Emergency alert marked as resolved.");
+    }
+
+    public async Task<Result<EmergencyAlertDto>> PublishEmergencyAlertAsync(
+        string id,
+        Guid coordinatorId,
+        string coordinatorName,
+        CancellationToken cancellationToken = default)
+    {
+        var ev = await FindAlertEventAsync(id, cancellationToken);
+        if (ev == null)
+        {
+            return Result<EmergencyAlertDto>.Failure($"Emergency alert with ID '{id}' was not found.");
+        }
+
+        ev.IsActive = true;
+        ev.StartDate = DateTime.UtcNow;
+        ev.EndDate = null;
+        ev.UpdatedAt = DateTime.UtcNow;
+        ev.LastModifiedBy = coordinatorName;
+
+        var desc = ev.Description ?? string.Empty;
+        if (desc.Contains("Publication:", StringComparison.OrdinalIgnoreCase))
+        {
+            var lines = desc.Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].StartsWith("Publication:", StringComparison.OrdinalIgnoreCase))
+                {
+                    lines[i] = "Publication: Published";
+                }
+            }
+            desc = string.Join("\n", lines);
+        }
+        else
+        {
+            desc = $"Publication: Published\n{desc}";
+        }
+
+        ev.Description = desc;
+
+        await _crisisRepository.UpdateAsync(ev, cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        return Result<EmergencyAlertDto>.Success(MapToEmergencyAlertDto(ev), "Emergency alert published broadcast successfully.");
+    }
+
+    private async Task<CrisisEvent?> FindAlertEventAsync(string id, CancellationToken cancellationToken)
+    {
+        if (Guid.TryParse(id, out var guid))
+        {
+            var found = await _crisisRepository.GetByIdAsync(guid, cancellationToken);
+            if (found != null) return found;
+        }
+
+        var cleanId = id.Trim();
+        if (cleanId.StartsWith("ALT-", StringComparison.OrdinalIgnoreCase))
+        {
+            cleanId = cleanId.Substring(4);
+        }
+
+        var allEvents = await _crisisRepository.GetAllAsync(cancellationToken);
+        var matched = allEvents.FirstOrDefault(e =>
+            e.Id.ToString().StartsWith(cleanId, StringComparison.OrdinalIgnoreCase) ||
+            $"ALT-{e.Id.ToString()[..Math.Min(6, e.Id.ToString().Length)]}".Equals(id, StringComparison.OrdinalIgnoreCase) ||
+            e.Id.ToString().Equals(id, StringComparison.OrdinalIgnoreCase));
+
+        if (matched != null)
+        {
+            return await _crisisRepository.GetByIdAsync(matched.Id, cancellationToken);
+        }
+
+        return null;
+    }
+
+    private static EmergencyAlertDto MapToEmergencyAlertDto(CrisisEvent c)
+    {
+        var isCritical = c.Severity >= 4;
+        var isHigh = c.Severity == 3;
+        var severityLabel = isCritical ? "Critical" : isHigh ? "High" : "Moderate";
+        var severityClass = isCritical ? "pill-critical" : isHigh ? "pill-high" : "pill-moderate";
+
+        var desc = c.Description ?? string.Empty;
+        var area = "Western Province";
+        var category = $"{c.DisasterType} warning";
+        string? relatedIncident = null;
+        string? pubStatusMeta = null;
+        string? resolutionNotes = null;
+        string? scheduledDate = null;
+        var instructions = new List<string>();
+
+        var lines = desc.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var messageLines = new List<string>();
+        bool inInstructions = false;
+
+        foreach (var line in lines)
+        {
+            if (line.StartsWith("Area:", StringComparison.OrdinalIgnoreCase))
+            {
+                area = line.Substring(5).Trim();
+            }
+            else if (line.StartsWith("Category:", StringComparison.OrdinalIgnoreCase))
+            {
+                category = line.Substring(9).Trim();
+            }
+            else if (line.StartsWith("Related Incident:", StringComparison.OrdinalIgnoreCase))
+            {
+                relatedIncident = line.Substring(17).Trim();
+            }
+            else if (line.StartsWith("Publication:", StringComparison.OrdinalIgnoreCase))
+            {
+                pubStatusMeta = line.Substring(12).Trim();
+            }
+            else if (line.StartsWith("Scheduled:", StringComparison.OrdinalIgnoreCase))
+            {
+                scheduledDate = line.Substring(10).Trim();
+            }
+            else if (line.StartsWith("Resolution:", StringComparison.OrdinalIgnoreCase))
+            {
+                resolutionNotes = line.Substring(11).Trim();
+            }
+            else if (line.StartsWith("Safety Instructions:", StringComparison.OrdinalIgnoreCase))
+            {
+                inInstructions = true;
+            }
+            else if (inInstructions)
+            {
+                instructions.Add(line.TrimStart('-', '*', ' '));
+            }
+            else
+            {
+                messageLines.Add(line);
+            }
+        }
+
+        var message = messageLines.Count > 0 ? string.Join("\n", messageLines) : desc;
+
+        if (instructions.Count == 0)
+        {
+            instructions = new List<string>
+            {
+                "Follow official evacuation route signage.",
+                "Move vital medicines, dry rations and identity documents to high ground.",
+                "Do not attempt to walk or drive through flowing water."
+            };
+        }
+
+        string publication;
+        string tab;
+
+        if (pubStatusMeta?.Equals("Resolved", StringComparison.OrdinalIgnoreCase) == true || (!c.IsActive && c.EndDate != null))
+        {
+            publication = "Resolved";
+            tab = "resolved";
+        }
+        else if (pubStatusMeta?.Equals("Scheduled", StringComparison.OrdinalIgnoreCase) == true || (!c.IsActive && c.StartDate > DateTime.UtcNow) || (c.StartDate > DateTime.UtcNow && c.EndDate == null))
+        {
+            publication = "Scheduled";
+            tab = "scheduled";
+        }
+        else if (pubStatusMeta?.Equals("Draft", StringComparison.OrdinalIgnoreCase) == true || (!c.IsActive && c.EndDate == null))
+        {
+            publication = "Draft";
+            tab = "drafts";
+        }
+        else
+        {
+            publication = "Published";
+            tab = "active";
+        }
+
+        return new EmergencyAlertDto
+        {
+            Id = $"ALT-{c.Id.ToString()[..6].ToUpperInvariant()}",
+            SourceCrisisEventId = c.Id,
+            Title = c.Title,
+            Category = category,
+            Severity = severityLabel,
+            SeverityClass = severityClass,
+            Area = !string.IsNullOrWhiteSpace(area) ? area : (c.Latitude.HasValue ? $"Sector Lat {c.Latitude:F2}, Lon {c.Longitude:F2}" : "Western Province"),
+            RelatedIncident = relatedIncident,
+            Publication = publication,
+            Tab = tab,
+            CreatedBy = c.CreatedBy ?? "Emergency Coordinator",
+            CreatedDate = c.CreatedAt.ToString("g"),
+            LastUpdated = c.UpdatedAt?.ToString("g") ?? c.CreatedAt.ToString("g"),
+            StartTime = c.StartDate.ToString("g"),
+            ExpiryTime = c.EndDate?.ToString("g") ?? "Until further notice",
+            ScheduledDate = scheduledDate ?? (tab == "scheduled" ? c.StartDate.ToString("g") : null),
+            ResolutionNotes = resolutionNotes,
+            ResolvedAt = c.EndDate?.ToString("g"),
+            ResolvedBy = c.LastModifiedBy ?? c.CreatedBy,
+            Message = message,
+            SafetyInstructions = instructions
+        };
+    }
+
+    private static List<string> ParseSafetyInstructions(object? safetyInstructions)
+    {
+        List<string> safetyList = new();
+        if (safetyInstructions == null) return safetyList;
+
+        if (safetyInstructions is System.Text.Json.JsonElement jsonElem)
+        {
+            if (jsonElem.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                foreach (var item in jsonElem.EnumerateArray())
+                {
+                    var s = item.GetString();
+                    if (!string.IsNullOrWhiteSpace(s)) safetyList.Add(s.Trim());
+                }
+            }
+            else if (jsonElem.ValueKind == System.Text.Json.JsonValueKind.String)
+            {
+                var s = jsonElem.GetString();
+                if (!string.IsNullOrWhiteSpace(s))
+                {
+                    safetyList.AddRange(s.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+                }
+            }
+        }
+        else if (safetyInstructions is IEnumerable<string> stringEnumerable)
+        {
+            safetyList.AddRange(stringEnumerable.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()));
+        }
+        else
+        {
+            var s = safetyInstructions.ToString();
+            if (!string.IsNullOrWhiteSpace(s))
+            {
+                safetyList.AddRange(s.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+            }
+        }
+        return safetyList;
     }
 
     public async Task<Result<ResourceCoordinationDashboardDto>> GetResourceCoordinationAsync(CancellationToken cancellationToken = default)

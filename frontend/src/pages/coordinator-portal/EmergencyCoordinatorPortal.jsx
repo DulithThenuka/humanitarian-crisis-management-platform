@@ -71,7 +71,7 @@ export const EmergencyCoordinatorPortal = ({
   const [metrics, setMetrics] = useState(INITIAL_METRICS);
   const [isLive, setIsLive] = useState(false);
   const [apiError, setApiError] = useState(null);
-  const [alerts, setAlerts] = useState(EMERGENCY_ALERTS_LIST);
+  const [alerts, setAlerts] = useState([]);
 
   // Controls & HUD
   const [autoNextEnabled, setAutoNextEnabled] = useState(false);
@@ -101,8 +101,13 @@ export const EmergencyCoordinatorPortal = ({
   });
   const [newAlertForm, setNewAlertForm] = useState({
     title: '',
+    category: 'Flood warning',
     severity: 'Critical',
-    area: 'Kelani East - Zone 03'
+    area: 'Kelani East - Zone 03',
+    relatedIncident: '',
+    message: '',
+    safetyInstructions: 'Move vital medicines, dry rations and identity documents to high ground.\nDo not attempt to walk or drive through flowing water.\nFollow instructions from authorized relief personnel.',
+    scheduledDate: ''
   });
 
   // Selected Objects
@@ -235,25 +240,28 @@ export const EmergencyCoordinatorPortal = ({
       if (rawAlerts && rawAlerts.length > 0) {
         const mappedAlerts = rawAlerts.map(a => ({
           id: a.id,
+          sourceCrisisEventId: a.sourceCrisisEventId,
           title: a.title,
           category: a.category || 'Flood warning',
           severity: a.severity || 'Critical',
           severityClass: (a.severity || '').toLowerCase() === 'critical' ? 'pill-critical' : (a.severity || '').toLowerCase() === 'high' ? 'pill-high' : 'pill-moderate',
           area: a.area || 'Western Province',
+          relatedIncident: a.relatedIncident || '',
           publication: a.publication || 'Published',
           tab: a.tab || 'active',
           createdBy: a.createdBy || coordinatorUser.fullName,
+          createdDate: a.createdDate || a.lastUpdated || 'Recently',
           lastUpdated: a.lastUpdated || 'Recently',
           startTime: a.startTime || 'Now',
-          expiryTime: a.expiryTime || 'Ongoing',
+          expiryTime: a.expiryTime || 'Until further notice',
+          scheduledDate: a.scheduledDate || null,
+          resolutionNotes: a.resolutionNotes || null,
+          resolvedAt: a.resolvedAt || null,
+          resolvedBy: a.resolvedBy || null,
           message: a.message || '',
-          safetyInstructions: a.safetyInstructions && a.safetyInstructions.length > 0 ? a.safetyInstructions : ['Follow official guidance.']
+          safetyInstructions: a.safetyInstructions && a.safetyInstructions.length > 0 ? a.safetyInstructions : ['Follow official evacuation route signage.']
         }));
-        setAlerts(prev => {
-          const ids = new Set(mappedAlerts.map(m => m.id));
-          const remainingPrev = prev.filter(p => !ids.has(p.id));
-          return [...mappedAlerts, ...remainingPrev];
-        });
+        setAlerts(mappedAlerts);
       }
     } catch (err) {
       console.warn('Emergency alerts API offline:', err.message || err);
@@ -703,60 +711,62 @@ export const EmergencyCoordinatorPortal = ({
     }
   };
 
-  // Create Alert
-  const handleCreateAlert = async (e) => {
-    e.preventDefault();
-    if (!newAlertForm.title.trim()) return;
+  // Create Alert (from Modal or Overview)
+  const handleCreateAlert = async (formData) => {
+    const data = formData && formData.title ? formData : newAlertForm;
+    if (!data || !data.title?.trim()) {
+      showToast('Please enter an alert title', 'error');
+      return;
+    }
 
-    const alertCopy = { ...newAlertForm };
+    const action = data.publicationAction || 'publish';
+    const isDraft = action === 'draft';
+    const isScheduled = action === 'schedule';
+    const publicationStatus = isDraft ? 'Draft' : isScheduled ? 'Scheduled' : 'Published';
+
+    const instructionsArray = typeof data.safetyInstructions === 'string'
+      ? data.safetyInstructions.split('\n').map(s => s.trim()).filter(Boolean)
+      : (Array.isArray(data.safetyInstructions) ? data.safetyInstructions : ['Follow official guidance.']);
+
     setShowCreateAlertModal(false);
-    setNewAlertForm({ title: '', severity: 'Critical', area: 'Kelani East - Zone 03' });
-
-    const instructionsArray = [
-      'Follow instructions from verified response teams.',
-      'Avoid flooded roadways.'
-    ];
-
-    const tempId = `ALT-${Math.floor(205 + Math.random() * 20)}`;
-    const optimisticAlert = {
-      id: tempId,
-      title: alertCopy.title.trim(),
+    setNewAlertForm({
+      title: '',
       category: 'Flood warning',
-      severity: alertCopy.severity,
-      severityClass: alertCopy.severity === 'Critical' ? 'pill-critical' : 'pill-high',
-      area: alertCopy.area || 'Kelani East - Zone 03',
-      publication: 'Published',
-      tab: 'active',
-      createdBy: coordinatorUser.fullName,
-      lastUpdated: 'Just now',
-      startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      expiryTime: 'Until further notice',
-      message: `Emergency Alert: ${alertCopy.title.trim()} for ${alertCopy.area || 'Kelani East - Zone 03'}`,
-      safetyInstructions: instructionsArray
-    };
-
-    setAlerts(prev => [optimisticAlert, ...prev]);
+      severity: 'Critical',
+      area: 'Kelani East - Zone 03',
+      relatedIncident: '',
+      message: '',
+      safetyInstructions: 'Move vital medicines, dry rations and identity documents to high ground.\nDo not attempt to walk or drive through flowing water.\nFollow instructions from authorized relief personnel.',
+      scheduledDate: ''
+    });
 
     try {
-      const created = await coordinatorService.createAlert({
-        title: alertCopy.title.trim(),
-        severity: alertCopy.severity,
-        area: alertCopy.area || 'Kelani East - Zone 03',
-        message: `Emergency Alert: ${alertCopy.title.trim()} for ${alertCopy.area || 'Kelani East - Zone 03'}`,
-        category: 'Flood warning',
+      const payload = {
+        title: data.title.trim(),
+        category: data.category || 'Flood warning',
+        severity: data.severity || 'Critical',
+        area: data.area || 'Western Province',
+        relatedIncident: data.relatedIncident || '',
+        message: data.message || `Emergency broadcast alert: ${data.title.trim()}`,
         safetyInstructions: instructionsArray,
-        isDraft: false
-      });
+        isDraft,
+        publicationStatus,
+        scheduledDate: isScheduled ? data.scheduledDate : null
+      };
 
-      if (created && created.id) {
-        setAlerts(prev => prev.map(a => a.id === tempId ? { ...a, ...created, id: created.id } : a));
-        showToast(`Emergency alert ${created.id} broadcast published successfully!`, 'success');
-      } else {
-        showToast('Emergency alert broadcast published successfully!', 'success');
-      }
+      const created = await coordinatorService.createAlert(payload);
+      await loadPortalData();
+
+      const successMsg = isDraft
+        ? `Alert ${created?.id || ''} saved to drafts queue.`
+        : isScheduled
+        ? `Alert ${created?.id || ''} scheduled for future broadcast.`
+        : `Emergency Alert ${created?.id || ''} broadcast published successfully!`;
+      showToast(successMsg, 'success');
     } catch (err) {
-      console.warn('Backend alert persist error:', err.message || err);
-      showToast('Emergency alert broadcast queued locally.', 'info');
+      console.error('Backend alert persist error:', err);
+      const msg = err.response?.data?.message || err.message || 'Failed to save emergency alert.';
+      showToast(msg, 'error');
     }
   };
 
@@ -892,6 +902,7 @@ export const EmergencyCoordinatorPortal = ({
             alerts={alerts}
             setAlerts={setAlerts}
             onRefreshAlerts={loadPortalData}
+            cases={cases}
           />
         )}
 
@@ -974,6 +985,7 @@ export const EmergencyCoordinatorPortal = ({
         newAlertForm={newAlertForm}
         setNewAlertForm={setNewAlertForm}
         onSubmit={handleCreateAlert}
+        cases={cases}
       />
 
       <AttachmentPreviewModal

@@ -25,6 +25,16 @@ public class AlertsController : BaseApiController
         return Ok(result);
     }
 
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Result<EmergencyAlertDto>>> GetById(
+        string id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _coordinatorService.GetEmergencyAlertByIdAsync(id, cancellationToken);
+        if (!result.Succeeded) return NotFound(result);
+        return Ok(result);
+    }
+
     [HttpPost]
     [Authorize(Roles = "Coordinator,Admin")]
     public async Task<ActionResult<Result<EmergencyAlertDto>>> Create(
@@ -32,6 +42,41 @@ public class AlertsController : BaseApiController
         CancellationToken cancellationToken = default)
     {
         var result = await _coordinatorService.CreateEmergencyAlertAsync(dto, CurrentUserId, CurrentUserName, cancellationToken);
+        if (!result.Succeeded) return BadRequest(result);
+        return Ok(result);
+    }
+
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Coordinator,Admin")]
+    public async Task<ActionResult<Result<EmergencyAlertDto>>> Update(
+        string id,
+        [FromBody] UpdateAlertDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _coordinatorService.UpdateEmergencyAlertAsync(id, dto, CurrentUserId, CurrentUserName, cancellationToken);
+        if (!result.Succeeded) return BadRequest(result);
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/resolve")]
+    [Authorize(Roles = "Coordinator,Admin")]
+    public async Task<ActionResult<Result<EmergencyAlertDto>>> Resolve(
+        string id,
+        [FromBody] ResolveAlertDto? dto = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _coordinatorService.ResolveEmergencyAlertAsync(id, dto, CurrentUserId, CurrentUserName, cancellationToken);
+        if (!result.Succeeded) return BadRequest(result);
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/publish")]
+    [Authorize(Roles = "Coordinator,Admin")]
+    public async Task<ActionResult<Result<EmergencyAlertDto>>> Publish(
+        string id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _coordinatorService.PublishEmergencyAlertAsync(id, CurrentUserId, CurrentUserName, cancellationToken);
         if (!result.Succeeded) return BadRequest(result);
         return Ok(result);
     }

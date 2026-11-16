@@ -20,7 +20,11 @@ public interface ICoordinatorService
     Task<Result<CrisisEventResponseDto>> GetCrisisEventByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Result<CrisisEventResponseDto>> CreateCrisisEventAsync(CreateCrisisEventDto dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<EmergencyAlertDto>>> GetEmergencyAlertsAsync(string? tab = null, CancellationToken cancellationToken = default);
+    Task<Result<EmergencyAlertDto>> GetEmergencyAlertByIdAsync(string id, CancellationToken cancellationToken = default);
     Task<Result<EmergencyAlertDto>> CreateEmergencyAlertAsync(CreateAlertDto dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
+    Task<Result<EmergencyAlertDto>> UpdateEmergencyAlertAsync(string id, UpdateAlertDto dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
+    Task<Result<EmergencyAlertDto>> ResolveEmergencyAlertAsync(string id, ResolveAlertDto? dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
+    Task<Result<EmergencyAlertDto>> PublishEmergencyAlertAsync(string id, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
     Task<Result<ResourceCoordinationDashboardDto>> GetResourceCoordinationAsync(CancellationToken cancellationToken = default);
     Task<Result<CoordinatorAllocationRequestDto>> SubmitAllocationRequestAsync(SubmitResourceAllocationRequestDto dto, Guid coordinatorId, string coordinatorName, CancellationToken cancellationToken = default);
     Task<Result<ShelterVolunteerDashboardDto>> GetShelterVolunteerCoordinationAsync(CancellationToken cancellationToken = default);
