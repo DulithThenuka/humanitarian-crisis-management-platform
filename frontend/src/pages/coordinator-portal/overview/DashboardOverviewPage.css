@@ -14,7 +14,7 @@
 .coord-sidebar {
   width: 226px;
   min-width: 226px;
-  background-color: #082128;
+  background-color: #0b1318;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -72,7 +72,7 @@
 }
 
 .coord-nav-item.active {
-  background-color: #0e6f76;
+  background-color: #0284c7;
   color: #ffffff;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(14, 111, 118, 0.35);
@@ -1278,7 +1278,7 @@
   bottom: 24px;
   left: 55%;
   transform: translateX(-50%);
-  background-color: #082128;
+  background-color: #0b1318;
   border: 1px solid #164b58;
   border-radius: 8px;
   padding: 10px 18px;
@@ -1966,7 +1966,7 @@
 }
 
 .crypto-ledger-box {
-  background-color: #082128;
+  background-color: #0b1318;
   border: 1px solid #164b58;
   border-radius: 6px;
   padding: 10px 12px;
