@@ -12,7 +12,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  if (token) {
+  if (token && token !== 'reliefcore-session-token') {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

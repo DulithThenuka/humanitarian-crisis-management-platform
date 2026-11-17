@@ -28,30 +28,62 @@ export const LoginPage = () => {
   const { showAlert } = useAlert();
   const navigate = useNavigate();
 
+  const getRoleDashboardRoute = (role) => {
+    const normalized = String(role || '').toLowerCase();
+    switch (normalized) {
+      case 'admin':
+      case '4':
+        return '/admin';
+      case 'coordinator':
+      case '1':
+        return '/coordinator';
+      case 'logisticsmanager':
+      case '2':
+        return '/logistics';
+      case 'sheltermanager':
+      case 'shelteradministrator':
+      case 'shelteradmin':
+      case '5':
+        return '/shelter';
+      case 'volunteer':
+      case '3':
+        return '/volunteer';
+      case 'incidentmanager':
+      case '8':
+        return '/incident-manager';
+      case 'donor':
+      case '6':
+        return '/donor';
+      case 'partner':
+      case '7':
+        return '/partner';
+      case 'citizen':
+      case '0':
+      default:
+        return '/citizen';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const response = await authService.login(formData);
-      if (response?.succeeded) {
+      if (response?.succeeded && response?.data?.token) {
         login(response.data);
-        showAlert("Login successful", "success");
-        navigate('/coordinator');
+        showAlert(response.message || "Login successful", "success");
+        const targetRoute = getRoleDashboardRoute(response.data.role);
+        navigate(targetRoute, { replace: true });
       } else {
-        showAlert(response?.errors?.[0] || "Invalid credentials", "error");
+        const errorMsg = response?.errors?.[0] || response?.message || "Invalid email or password";
+        showAlert(errorMsg, "error");
       }
     } catch (err) {
-      // Frontend-only / offline demo mode fallback
-      const demoUser = {
-        id: 'usr-001',
-        fullName: formData.email ? (formData.email.split('@')[0].charAt(0).toUpperCase() + formData.email.split('@')[0].slice(1)) : 'Amara Chen',
-        role: 'Coordinator',
-        email: formData.email || 'amara.chen@reliefcore.org',
-        token: 'reliefcore-session-token'
-      };
-      login(demoUser);
-      showAlert("Logged in successfully (Demo Mode)", "success");
-      navigate('/coordinator');
+      const errorMsg =
+        err?.errors?.[0] ||
+        err?.message ||
+        (typeof err === 'string' ? err : "Invalid email or password. Please try again.");
+      showAlert(errorMsg, "error");
     } finally {
       setLoading(false);
     }

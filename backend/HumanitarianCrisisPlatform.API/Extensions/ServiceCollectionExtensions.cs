@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
         var useInMemory = config.GetValue<bool>("UseInMemoryDatabase", false);
         var connectionString = config.GetConnectionString("DefaultConnection");
 
-        if (useInMemory || string.IsNullOrWhiteSpace(connectionString) || connectionString.Contains("localdb", StringComparison.OrdinalIgnoreCase))
+        if (useInMemory)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseInMemoryDatabase("HumanitarianCrisisDb"));
@@ -66,3 +66,4 @@ public static class ServiceCollectionExtensions
         return services;
     }
 }
+

@@ -319,22 +319,22 @@ export const AppRoutes = () => {
       {/* ========================================================= */}
       {/* MODULE 9: System Administration (/admin/*)                 */}
       {/* ========================================================= */}
-      <Route path="/admin" element={<AdminDashboardPage initialTab="dashboard" />} />
-      <Route path="/admin/dashboard" element={<AdminDashboardPage initialTab="dashboard" />} />
-      <Route path="/admin/overview" element={<AdminDashboardPage initialTab="dashboard" />} />
-      <Route path="/admin/users" element={<AdminDashboardPage initialTab="settings" />} />
-      <Route path="/admin/crisis" element={<AdminDashboardPage initialTab="crisis" />} />
-      <Route path="/admin/requests" element={<AdminDashboardPage initialTab="requests" />} />
-      <Route path="/admin/resources" element={<AdminDashboardPage initialTab="resources" />} />
-      <Route path="/admin/shelters" element={<AdminDashboardPage initialTab="shelters" />} />
-      <Route path="/admin/volunteers" element={<AdminDashboardPage initialTab="volunteers" />} />
-      <Route path="/admin/donations" element={<AdminDashboardPage initialTab="donations" />} />
-      <Route path="/admin/ai-ops" element={<AdminDashboardPage initialTab="ai-ops" />} />
-      <Route path="/admin/maps" element={<AdminDashboardPage initialTab="maps" />} />
-      <Route path="/admin/notifications" element={<AdminDashboardPage initialTab="notifications" />} />
-      <Route path="/admin/reports" element={<AdminDashboardPage initialTab="reports" />} />
-      <Route path="/admin/audit" element={<AdminDashboardPage initialTab="audit" />} />
-      <Route path="/admin/settings" element={<AdminDashboardPage initialTab="settings" />} />
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="dashboard" /></ProtectedRoute>} />
+      <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="dashboard" /></ProtectedRoute>} />
+      <Route path="/admin/overview" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="dashboard" /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="settings" /></ProtectedRoute>} />
+      <Route path="/admin/crisis" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="crisis" /></ProtectedRoute>} />
+      <Route path="/admin/requests" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="requests" /></ProtectedRoute>} />
+      <Route path="/admin/resources" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="resources" /></ProtectedRoute>} />
+      <Route path="/admin/shelters" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="shelters" /></ProtectedRoute>} />
+      <Route path="/admin/volunteers" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="volunteers" /></ProtectedRoute>} />
+      <Route path="/admin/donations" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="donations" /></ProtectedRoute>} />
+      <Route path="/admin/ai-ops" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="ai-ops" /></ProtectedRoute>} />
+      <Route path="/admin/maps" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="maps" /></ProtectedRoute>} />
+      <Route path="/admin/notifications" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="notifications" /></ProtectedRoute>} />
+      <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="reports" /></ProtectedRoute>} />
+      <Route path="/admin/audit" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="audit" /></ProtectedRoute>} />
+      <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="settings" /></ProtectedRoute>} />
       <Route path="/administration" element={<Navigate to="/admin" replace />} />
 
       {/* Authentication & Security */}

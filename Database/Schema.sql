@@ -12,6 +12,7 @@ CREATE TABLE Users (
     Email               NVARCHAR(256)       NOT NULL UNIQUE,
     PasswordHash        NVARCHAR(500)       NOT NULL,
     PhoneNumber         NVARCHAR(20)        NULL,
+    AssignedDistrict    NVARCHAR(100)       NULL,
     Role                INT                 NOT NULL DEFAULT 0,  -- 0=Citizen, 1=Coordinator, 2=LogisticsManager, 3=Volunteer, 4=Admin
     IsActive            BIT                 NOT NULL DEFAULT 1,
     CreatedAt           DATETIME2           NOT NULL DEFAULT GETUTCDATE(),

@@ -345,7 +345,7 @@ export const LandingHomePage = () => {
       id: 'admin',
       title: 'System Administration',
       desc: 'Platform health telemetry, user RBAC permissions, audit trail oversight, and system security controls.',
-      path: '/admin',
+      path: '/login',
       badge: 'Administration',
       icon: Settings,
       color: '#6366f1',

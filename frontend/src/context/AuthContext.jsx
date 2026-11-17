@@ -1,53 +1,70 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+
+import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
 
-const defaultCoordinator = {
-  id: 'usr-001',
-  fullName: 'Amara Chen',
-  role: 'Coordinator',
-  email: 'amara.chen@reliefcore.org',
-  token: 'reliefcore-session-token'
-};
-
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('user');
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        return defaultCoordinator;
-      }
-    }
-    return defaultCoordinator;
-  });
-  const [token, setToken] = useState(() => localStorage.getItem('token') || 'reliefcore-session-token');
-  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
 
-  useEffect(() => {
-    if (!localStorage.getItem('user')) {
-      localStorage.setItem('user', JSON.stringify(defaultCoordinator));
-      localStorage.setItem('token', 'reliefcore-session-token');
+    if (!storedToken || !storedUser || storedToken === 'reliefcore-session-token') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return null;
     }
-  }, []);
+    return storedToken;
+  });
+
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('token');
+
+    if (!storedUser || !storedToken || storedToken === 'reliefcore-session-token') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return null;
+    }
+
+    try {
+      return JSON.parse(storedUser);
+    } catch {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return null;
+    }
+  });
+
+  const [loading] = useState(false);
 
   const login = (data) => {
-    setToken(data.token);
+    if (!data || !data.token) return;
     setUser(data);
-    localStorage.setItem('token', data.token);
+    setToken(data.token);
     localStorage.setItem('user', JSON.stringify(data));
+    localStorage.setItem('token', data.token);
   };
 
   const logout = () => {
-    setToken(null);
     setUser(null);
-    localStorage.removeItem('token');
+    setToken(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
+  const isAuthenticated = Boolean(user && token && token !== 'reliefcore-session-token');
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading, isAuthenticated: !!token }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        login,
+        logout,
+        loading,
+        isAuthenticated
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
