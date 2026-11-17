@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
 
 export const Sidebar = () => {
   const { user } = useAuth();
@@ -37,6 +37,7 @@ export const Sidebar = () => {
     { label: 'Volunteer Coordinator', to: '/volunteer-coordinator', roles: ['Coordinator', 'Admin'] },
     { label: 'Volunteer Roster', to: '/volunteer/roster', roles: ['Coordinator', 'Admin'] },
     { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
+
     // 7. Donor & Funding Management
     { label: 'Donor & Funding Portal', to: '/donor', roles: ['Coordinator', 'Admin', 'LogisticsManager', 'Volunteer', 'Citizen'] },
 
@@ -54,42 +55,49 @@ export const Sidebar = () => {
   return (
     <aside style={{
       width: '260px',
-      borderRight: '1px solid #334155',
-      backgroundColor: '#0f172a',
-      padding: '20px 16px',
+      borderRight: '1px solid rgba(255, 255, 255, 0.08)',
+      backgroundColor: '#14291e',
+      padding: '20px 14px',
       display: 'flex',
       flexDirection: 'column',
-      gap: '6px'
+      gap: '4px',
+      fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
     }}>
-      <div style={{ padding: '4px 8px 18px 8px', borderBottom: '1px solid rgba(51, 65, 85, 0.6)', marginBottom: '10px' }}>
-        <img
-          src={reliefcoreLogoWhite}
-          alt="RELIEFCORE"
-          style={{ height: '34px', width: 'auto', maxWidth: '100%', objectFit: 'contain' }}
-        />
+      <div style={{ padding: '4px 8px 16px 8px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Shield size={20} color="#dbe4c6" />
+          <div>
+            <div style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff', lineHeight: 1.1 }}>HumanAid</div>
+            <div style={{ fontSize: '10px', color: '#9fa89e' }}>Response coordination</div>
+          </div>
+        </div>
       </div>
-      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', padding: '0 12px 10px 12px' }}>
+      <div style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', color: '#738075', padding: '0 12px 6px 12px', letterSpacing: '0.06em' }}>
         Navigation
       </div>
-      {allowedLinks.map(link => (
-        <NavLink
-          key={link.to}
-          to={link.to}
-          style={({ isActive }) => ({
-            display: 'block',
-            padding: '10px 14px',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontSize: '13.5px',
-            fontWeight: isActive ? 700 : 500,
-            color: isActive ? '#38bdf8' : '#94a3b8',
-            backgroundColor: isActive ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
-            transition: 'all 0.15s ease'
-          })}
-        >
-          {link.label}
-        </NavLink>
-      ))}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflowY: 'auto' }}>
+        {allowedLinks.map(link => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            style={({ isActive }) => ({
+              display: 'block',
+              padding: '9px 12px',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontWeight: isActive ? 700 : 500,
+              color: isActive ? '#162e20' : '#bcc5b9',
+              backgroundColor: isActive ? '#dbe4c6' : 'transparent',
+              transition: 'all 0.15s ease'
+            })}
+          >
+            {link.label}
+          </NavLink>
+        ))}
+      </div>
     </aside>
   );
 };
+
+export default Sidebar;
