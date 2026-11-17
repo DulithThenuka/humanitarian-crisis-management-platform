@@ -49,7 +49,8 @@ function AppLayout() {
     location.pathname === '/login' || 
     location.pathname === '/register' ||
     location.pathname === '/signup' ||
-    location.pathname === '/sign-up';
+    location.pathname === '/sign-up' ||
+    location.pathname.startsWith('/partner');
 
   if (isDedicatedLayout) {
     return (

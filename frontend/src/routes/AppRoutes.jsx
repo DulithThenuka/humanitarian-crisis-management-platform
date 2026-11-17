@@ -94,6 +94,9 @@ import { RegisterPage } from '../pages/auth/RegisterPage';
 import { UnauthorizedPage } from '../pages/auth/UnauthorizedPage';
 import Hero from '../components/Hero';
 
+// Partner Organisation Officer Pages
+import { PartnerOrganisationOfficerPage } from '../pages/partner-organisation-officer/PartnerOrganisationOfficerPage';
+
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -322,6 +325,10 @@ export const AppRoutes = () => {
       <Route path="/partner/directory" element={<PartnerPortalPage initialTab="directory" />} />
       <Route path="/partner/commitments" element={<PartnerPortalPage initialTab="commitments" />} />
       <Route path="/partner/zones" element={<PartnerPortalPage initialTab="zones" />} />
+
+      {/* Partner Officer Routes */}
+      <Route path="/partner-organisation-officer" element={<ProtectedRoute allowedRoles={['PartnerOfficer', 'PartnerOrganisationOfficer', 'Coordinator', 'Admin', 'LogisticsManager']}><PartnerOrganisationOfficerPage /></ProtectedRoute>} />
+      <Route path="/partner-officer" element={<Navigate to="/partner-organisation-officer" replace />} />
 
       {/* Partner Backward-Compatible Aliases */}
       <Route path="/partners" element={<Navigate to="/partner" replace />} />

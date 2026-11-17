@@ -9,4 +9,5 @@ export { volunteerService } from './volunteerService';
 export { adminService } from './adminService';
 export { coordinatorService } from './coordinatorService';
 export { aiGovernanceService } from './aiGovernanceService';
+export { partnerService } from './partnerService';
 

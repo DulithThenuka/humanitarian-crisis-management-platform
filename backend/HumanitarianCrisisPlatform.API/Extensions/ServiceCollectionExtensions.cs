@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IShelterRepository, ShelterRepository>();
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<IAIDecisionAuditRepository, AIDecisionAuditRepository>();
+        services.AddScoped<IPartnerRepository, PartnerRepository>();
 
         // Domain & Application Services
         services.AddScoped<IAssistanceRequestService, AssistanceRequestService>();
@@ -53,6 +54,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICrisisService, CrisisService>();
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<ICoordinatorService, CoordinatorService>();
+        services.AddScoped<IPartnerService, PartnerService>();
         services.AddScoped<VolunteerService>();
 
         // Infrastructure Services

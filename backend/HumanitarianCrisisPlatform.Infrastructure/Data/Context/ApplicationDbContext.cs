@@ -22,6 +22,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Donation> Donations => Set<Donation>();
     public DbSet<EmergencyBroadcast> EmergencyBroadcasts => Set<EmergencyBroadcast>();
     public DbSet<SituationReport> SituationReports => Set<SituationReport>();
+    public DbSet<PartnerOrganisation> PartnerOrganisations => Set<PartnerOrganisation>();
+    public DbSet<PartnerCommitment> PartnerCommitments => Set<PartnerCommitment>();
+    public DbSet<SectorZone> SectorZones => Set<SectorZone>();
+    public DbSet<PartnerZoneAssignment> PartnerZoneAssignments => Set<PartnerZoneAssignment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
