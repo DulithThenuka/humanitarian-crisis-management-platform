@@ -96,26 +96,54 @@ public static class DatabaseSeeder
                     AssignedDistrict = "Western Province Command",
                     Role = UserRole.CaseManager,
                     IsActive = true
+                },
+                new User
+                {
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888888"),
+                    FullName = "Tharushi De Alwis",
+                    Email = "shelter.admin@reliefcore.org",
+                    PasswordHash = defaultPasswordHash,
+                    PhoneNumber = "+94 77 123 4567",
+                    AssignedDistrict = "Western Province / Colombo Shelters",
+                    Role = UserRole.ShelterManager,
+                    IsActive = true
                 }
             };
 
             await context.Users.AddRangeAsync(users);
             await context.SaveChangesAsync();
         }
-        else if (!await context.Users.AnyAsync(u => u.Role == UserRole.CaseManager))
+        else
         {
             var defaultPasswordHash = PasswordHasher.HashPassword("Password123!");
-            context.Users.Add(new User
+            if (!await context.Users.AnyAsync(u => u.Role == UserRole.CaseManager))
             {
-                Id = Guid.Parse("77777777-7777-7777-7777-777777777777"),
-                FullName = "Ishara Senanayake",
-                Email = "ishara.senanayake@reliefcore.org",
-                PasswordHash = defaultPasswordHash,
-                PhoneNumber = "+94 77 789 0123",
-                AssignedDistrict = "Western Province Command",
-                Role = UserRole.CaseManager,
-                IsActive = true
-            });
+                context.Users.Add(new User
+                {
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777777"),
+                    FullName = "Ishara Senanayake",
+                    Email = "ishara.senanayake@reliefcore.org",
+                    PasswordHash = defaultPasswordHash,
+                    PhoneNumber = "+94 77 789 0123",
+                    AssignedDistrict = "Western Province Command",
+                    Role = UserRole.CaseManager,
+                    IsActive = true
+                });
+            }
+            if (!await context.Users.AnyAsync(u => u.Role == UserRole.ShelterManager))
+            {
+                context.Users.Add(new User
+                {
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888888"),
+                    FullName = "Tharushi De Alwis",
+                    Email = "shelter.admin@reliefcore.org",
+                    PasswordHash = defaultPasswordHash,
+                    PhoneNumber = "+94 77 123 4567",
+                    AssignedDistrict = "Western Province / Colombo Shelters",
+                    Role = UserRole.ShelterManager,
+                    IsActive = true
+                });
+            }
             await context.SaveChangesAsync();
         }
 
@@ -946,6 +974,114 @@ public static class DatabaseSeeder
             await context.IncidentAuditLogs.AddRangeAsync(auditLogs);
 
             await context.SaveChangesAsync();
+        }
+
+        // 11. Seed Initial Shelter Allocations
+        if (!await context.ShelterAllocations.AnyAsync())
+        {
+            var sheltersList = await context.Shelters.Take(4).ToListAsync();
+            if (sheltersList.Count > 0)
+            {
+                var allocations = new List<ShelterAllocation>
+                {
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList[0].Id,
+                        PersonName = "Perera Family (4 members)",
+                        NumberOfPersons = 4,
+                        CheckInDate = DateTime.UtcNow.AddHours(-4),
+                        Notes = "Step-free access (Elderly parent) | Diabetic medication refrigeration required"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 1 ? sheltersList[1].Id : sheltersList[0].Id,
+                        PersonName = "Silva Household (3 members)",
+                        NumberOfPersons = 3,
+                        CheckInDate = DateTime.UtcNow.AddHours(-3),
+                        Notes = "Family areas (Infant 4 months) | Formula and baby cot provided in family wing"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 2 ? sheltersList[2].Id : sheltersList[0].Id,
+                        PersonName = "Gunasekara Family (5 members)",
+                        NumberOfPersons = 5,
+                        CheckInDate = DateTime.UtcNow.AddHours(-2),
+                        Notes = "Medical support (Wheelchair user) | High-dependency assistance requested"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 3 ? sheltersList[3].Id : sheltersList[0].Id,
+                        PersonName = "Jayatissa Family (2 members)",
+                        NumberOfPersons = 2,
+                        CheckInDate = DateTime.UtcNow.AddHours(-1),
+                        Notes = "Accessible toilets | Secondary triage confirmation completed"
+                    }
+                };
+
+                await context.ShelterAllocations.AddRangeAsync(allocations);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        // 12. Seed Shelter Resource Allocations
+        if (!await context.ResourceAllocations.AnyAsync(r => r.ShelterId != null))
+        {
+            var sheltersList = await context.Shelters.Take(4).ToListAsync();
+            var resourcesList = await context.Resources.Take(4).ToListAsync();
+            if (sheltersList.Count > 0 && resourcesList.Count > 0)
+            {
+                var resourceRequests = new List<ResourceAllocation>
+                {
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList[0].Id,
+                        ResourceId = resourcesList[0].Id,
+                        Quantity = 60,
+                        Priority = PriorityLevel.High,
+                        DispatchStatus = 1, // Dispatched
+                        DispatchedAt = DateTime.UtcNow.AddHours(-1),
+                        Notes = "Bedding & Linens - 60 sleeping mats & blankets | Requested by Shelter Lead"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 1 ? sheltersList[1].Id : sheltersList[0].Id,
+                        ResourceId = resourcesList.Count > 1 ? resourcesList[1].Id : resourcesList[0].Id,
+                        Quantity = 120,
+                        Priority = PriorityLevel.Critical,
+                        DispatchStatus = 0, // Pending / Approved
+                        Notes = "Sanitation Kits - 120 Hygiene & Sanitation Packs | Urgent resupply"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 2 ? sheltersList[2].Id : sheltersList[0].Id,
+                        ResourceId = resourcesList.Count > 2 ? resourcesList[2].Id : resourcesList[0].Id,
+                        Quantity = 40,
+                        Priority = PriorityLevel.Medium,
+                        DispatchStatus = 0, // Pending
+                        Notes = "Baby Care & Nutrition - 40 Infant Formula & Diaper boxes"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 3 ? sheltersList[3].Id : sheltersList[0].Id,
+                        ResourceId = resourcesList.Count > 3 ? resourcesList[3].Id : resourcesList[0].Id,
+                        Quantity = 5,
+                        Priority = PriorityLevel.Critical,
+                        DispatchStatus = 0, // Pending
+                        Notes = "First Aid & Chronic Meds - 5 Emergency Medical Resupply Kits"
+                    }
+                };
+
+                await context.ResourceAllocations.AddRangeAsync(resourceRequests);
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

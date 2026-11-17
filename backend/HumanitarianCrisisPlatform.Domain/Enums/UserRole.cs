@@ -7,5 +7,6 @@ public enum UserRole
     LogisticsManager = 2,
     Volunteer = 3,
     Admin = 4,
-    CaseManager = 5
+    CaseManager = 5,
+    ShelterManager = 6
 }
