@@ -19,11 +19,39 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<ResourceAllocation> ResourceAllocations => Set<ResourceAllocation>();
     public DbSet<Volunteer> Volunteers => Set<Volunteer>();
     public DbSet<VolunteerAssignment> VolunteerAssignments => Set<VolunteerAssignment>();
+    public DbSet<VolunteerOpportunity> VolunteerOpportunities => Set<VolunteerOpportunity>();
     public DbSet<Donation> Donations => Set<Donation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        // VolunteerOpportunity → Volunteer (many-to-many via AcceptedVolunteers)
+        modelBuilder.Entity<VolunteerOpportunity>()
+            .HasMany(o => o.AcceptedVolunteers)
+            .WithMany(v => v.AcceptedOpportunities)
+            .UsingEntity(j => j.ToTable("VolunteerOpportunityAcceptances"));
+
+        // VolunteerOpportunity → PostedByUser
+        modelBuilder.Entity<VolunteerOpportunity>()
+            .HasOne(o => o.PostedByUser)
+            .WithMany()
+            .HasForeignKey(o => o.PostedByUserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // VolunteerOpportunity → CrisisEvent
+        modelBuilder.Entity<VolunteerOpportunity>()
+            .HasOne(o => o.CrisisEvent)
+            .WithMany()
+            .HasForeignKey(o => o.CrisisEventId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // VolunteerAssignment → VolunteerOpportunity
+        modelBuilder.Entity<VolunteerAssignment>()
+            .HasOne(a => a.Opportunity)
+            .WithMany(o => o.Assignments)
+            .HasForeignKey(a => a.OpportunityId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

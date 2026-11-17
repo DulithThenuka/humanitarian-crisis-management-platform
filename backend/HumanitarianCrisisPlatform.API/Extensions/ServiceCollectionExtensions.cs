@@ -37,7 +37,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IShelterService, ShelterService>();
         services.AddScoped<IResourceAllocationService, ResourceAllocationService>();
         services.AddScoped<IAIDecisionService, AIDecisionService>();
+<<<<<<< Updated upstream
         services.AddScoped<VolunteerService>();
+=======
+        services.AddScoped<IHomeService, HomeService>();
+        services.AddScoped<ICrisisService, CrisisService>();
+        services.AddScoped<IAdminService, AdminService>();
+
+        // Volunteer Service — registered via interface for DI resolution in controllers
+        services.AddScoped<IVolunteerService, HumanitarianCrisisPlatform.Infrastructure.Services.VolunteerService>();
+>>>>>>> Stashed changes
 
         // Infrastructure Services
         services.AddHttpClient<OpenAIServiceClient>();

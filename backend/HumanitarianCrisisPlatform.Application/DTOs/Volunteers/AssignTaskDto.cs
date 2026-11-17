@@ -1,9 +1,3 @@
-namespace HumanitarianCrisisPlatform.Application.DTOs.Volunteers;
-
-public class AssignTaskDto
-{
-    public Guid VolunteerId { get; set; }
-    public Guid? AssistanceRequestId { get; set; }
-    public string TaskDescription { get; set; } = string.Empty;
-    public string? Notes { get; set; }
-}
+// AssignTaskDto is now defined in VolunteerDto.cs
+// This file is kept as a compatibility stub only.
+// See: HumanitarianCrisisPlatform.Application.DTOs.Volunteers.AssignTaskDto (in VolunteerDto.cs)
