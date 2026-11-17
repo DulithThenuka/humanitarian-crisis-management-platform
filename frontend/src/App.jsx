@@ -47,6 +47,8 @@ function AppLayout() {
     location.pathname.startsWith('/donor') ||
     location.pathname.startsWith('/donations') ||
     location.pathname.startsWith('/funding-officer') ||
+    location.pathname.startsWith('/logistics') ||
+    location.pathname.startsWith('/resource') ||
     location.pathname === '/request-detail' ||
     location.pathname === '/analytics' || 
     location.pathname === '/login' || 

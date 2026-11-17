@@ -67,7 +67,7 @@ export const ResourceManagerPortal = () => {
       />
 
       {/* Main Workspace Canvas */}
-      <div className="rm-workspace-main">
+      <div className="rm-main-content">
         {/* Top Header & Coursework Prototype Banner */}
         <ResourceHeader
           activeTab={activeTab}
@@ -76,7 +76,7 @@ export const ResourceManagerPortal = () => {
         />
 
         {/* View Content Canvas */}
-        <main className="rm-canvas-content">
+        <main className="rm-workspace">
           {activeTab === 'overview' && (
             <ResourceOverviewView
               onSelectTab={setActiveTab}

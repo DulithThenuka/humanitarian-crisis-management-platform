@@ -33,39 +33,40 @@ export const ResourceSidebar = ({ activeTab, onSelectTab, onDutyToggle, onDuty =
     <aside className="rm-sidebar">
       {/* Brand Header */}
       <div className="rm-sidebar-header">
-        <div className="rm-brand-wrap">
-          <div className="rm-brand-logo-box">
-            <Shield size={20} className="rm-brand-shield-icon" />
+        <a href="/logistics" className="rm-brand-row">
+          <div className="rm-brand-logo-wrap">
+            <Shield size={22} className="rm-brand-shield-icon" />
           </div>
           <div className="rm-brand-text">
-            <span className="rm-brand-name">HumanAid</span>
+            <span className="rm-brand-title">HumanAid</span>
             <span className="rm-brand-sub">Response coordination</span>
           </div>
-        </div>
+        </a>
 
         {/* Officer Duty Card */}
         <div className="rm-officer-card">
           <div className="rm-officer-info">
             <div className="rm-officer-avatar">DP</div>
-            <div className="rm-officer-details">
-              <span className="rm-officer-badge">SIGNED IN AS</span>
+            <div className="rm-officer-meta">
+              <span className="rm-officer-pre">SIGNED IN AS</span>
               <span className="rm-officer-role">Relief / Resource Manager</span>
               <span className="rm-officer-name">Dilan Perera</span>
             </div>
           </div>
-          <button
-            type="button"
-            className={`rm-switch ${onDuty ? 'active' : ''}`}
+          <div
+            className={`rm-duty-toggle ${onDuty ? 'active' : ''}`}
             onClick={onDutyToggle}
-            aria-label="Toggle active duty"
+            title="Toggle active duty"
+            role="button"
+            tabIndex={0}
           >
-            <span className="rm-switch-knob" />
-          </button>
+            <div className="rm-duty-dot" />
+          </div>
         </div>
       </div>
 
       {/* Navigation Links */}
-      <nav className="rm-sidebar-nav">
+      <nav className="rm-nav-menu">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -75,9 +76,9 @@ export const ResourceSidebar = ({ activeTab, onSelectTab, onDutyToggle, onDuty =
               onClick={() => onSelectTab(item.id)}
               className={`rm-nav-item ${isActive ? 'active' : ''}`}
             >
-              <div className="rm-nav-item-inner">
-                <Icon size={18} className="rm-nav-icon" />
-                <span className="rm-nav-label">{item.label}</span>
+              <div className="rm-nav-item-left">
+                <Icon size={17} />
+                <span>{item.label}</span>
               </div>
               {item.badge && <span className="rm-nav-badge">{item.badge}</span>}
             </button>
@@ -88,18 +89,18 @@ export const ResourceSidebar = ({ activeTab, onSelectTab, onDutyToggle, onDuty =
       {/* Sidebar Footer */}
       <div className="rm-sidebar-footer">
         {/* Role Access Boundary Notice */}
-        <div className="rm-access-boundary-box">
-          <div className="rm-boundary-header">
-            <ShieldCheck size={14} className="rm-boundary-icon" />
-            <span className="rm-boundary-title">Resource operations access</span>
+        <div className="rm-privacy-notice-box">
+          <div className="rm-privacy-notice-header">
+            <ShieldCheck size={14} className="rm-privacy-shield-icon" />
+            <span className="rm-privacy-title">Resource operations access</span>
           </div>
-          <p className="rm-boundary-desc">
+          <p className="rm-privacy-text">
             Inventory and allocation workflows only. System administration is restricted.
           </p>
         </div>
 
         {/* Exit Link */}
-        <a href="/" className="rm-exit-link">
+        <a href="/" className="rm-signout-btn">
           <ChevronRight size={15} />
           <span>Exit resource portal</span>
         </a>
