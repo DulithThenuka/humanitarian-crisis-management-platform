@@ -98,7 +98,7 @@ import Hero from '../components/Hero';
 import { PartnerOrganisationOfficerPage } from '../pages/partner-organisation-officer/PartnerOrganisationOfficerPage';
 
 // Donor / Funding Officer Portal
-import { DonorFundingOfficerPortal } from '../pages/Donor - Funding - Officer/DonorFundingOfficerPortal';
+import { DonorFundingOfficerPortal } from '../pages/donor/DonorFundingOfficerPortal';
 export const AppRoutes = () => {
   return (
     <Routes>
