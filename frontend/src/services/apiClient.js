@@ -21,14 +21,6 @@ apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-=======
-=======
->>>>>>> Stashed changes
       const publicPaths = ['/', '/home', '/landing', '/apogee', '/login', '/signup', '/register', '/shelter-admin', '/shelter-manager', '/shelters'];
       const currentPath = window.location.pathname;
       if (!publicPaths.some(p => currentPath === p || currentPath.startsWith(p + '/'))) {
@@ -36,7 +28,6 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('user');
         window.location.href = '/login';
       }
->>>>>>> Stashed changes
     }
     return Promise.reject(error.response?.data || error);
   }

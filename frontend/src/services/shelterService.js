@@ -4,12 +4,6 @@ export const shelterService = {
   getAll: async () => {
     return await apiClient.get('/shelters');
   },
-<<<<<<< Updated upstream
-  getNearby: async (lat, lon, radius = 25) => {
-    return await apiClient.get('/shelters/nearby', { params: { lat, lon, radius } });
-  },
-=======
-
   /**
    * Fetches real-time shelter capacity and district-by-district breakdown telemetry.
    */
@@ -62,7 +56,6 @@ export const shelterService = {
   /**
    * Allocates an evacuee or family to a shelter (authorized responders).
    */
->>>>>>> Stashed changes
   allocate: async (allocationData) => {
     return await apiClient.post('/shelters/allocate', allocationData);
   },
