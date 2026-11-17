@@ -1,35 +1,37 @@
 /* =========================================================
    EMERGENCY COORDINATOR PORTAL STYLESHEET
-   RELIEFCORE Crisis Operations System - Modern Blue & Oceanic Theme
+   HumanAid Response Coordination Design System
+   Deep Pine Green Sidebar (#14291e), Pale Sage (#dbe4c6),
+   Off-White Canvas (#f4f6f2), Crisp White Cards
    ========================================================= */
 
 :root {
-  /* Signature Project Deep Slate Navy Palette */
-  --ec-sidebar-bg: #091a2b;
-  --ec-sidebar-hover: #132d4a;
-  --ec-sidebar-active-bg: #0284c7;
-  --ec-sidebar-active-text: #ffffff;
-  --ec-sidebar-text: #cbd5e1;
-  --ec-sidebar-muted: #94a3b8;
+  /* Signature HumanAid Deep Pine Green Palette */
+  --ec-sidebar-bg: #14291e;
+  --ec-sidebar-hover: #1b3829;
+  --ec-sidebar-active-bg: #dbe4c6;
+  --ec-sidebar-active-text: #14291e;
+  --ec-sidebar-text: #bcc5b9;
+  --ec-sidebar-muted: #829486;
 
   /* Canvas & Cards */
-  --ec-body-bg: #f8fafc;
+  --ec-body-bg: #f4f6f2;
   --ec-card-bg: #ffffff;
-  --ec-border: #e2e8f0;
+  --ec-border: #e2e8e0;
 
-  /* Brand Blues & Accents */
-  --ec-primary-blue: #0284c7;
-  --ec-primary-blue-hover: #0369a1;
-  --ec-primary-navy: #0f172a;
-  --ec-primary-cyan: #0e6f76;
-  --ec-accent-blue: #38bdf8;
-  --ec-accent-glow: rgba(2, 132, 199, 0.35);
+  /* Brand Accents */
+  --ec-primary-blue: #14291e;
+  --ec-primary-blue-hover: #1f3e2e;
+  --ec-primary-navy: #14291e;
+  --ec-primary-cyan: #224835;
+  --ec-accent-blue: #234d38;
+  --ec-accent-glow: rgba(20, 41, 30, 0.2);
 
-  --ec-text-dark: #0f172a;
-  --ec-text-muted: #64748b;
+  --ec-text-dark: #12281b;
+  --ec-text-muted: #6f8576;
   --ec-danger: #ef4444;
   --ec-warning: #f59e0b;
-  --ec-success: #10b981;
+  --ec-success: #15803d;
 }
 
 .ec-portal-wrapper {

@@ -1,38 +1,38 @@
 /* =========================================================
-   SHELTER ADMINISTRATOR PORTAL - Project Standard Palette
-   Deep Slate Navy Sidebar, Ocean Blue Accents, Clean Slate Canvas
-   Matching Emergency Coordinator & Audit Operations Design System
+   SHELTER ADMINISTRATOR PORTAL - HumanAid Design System
+   Deep Pine Green Sidebar (#14291e), Pale Sage (#dbe4c6),
+   Off-White Sage Canvas (#f4f6f2), Crisp White Cards
    ========================================================= */
 
 :root {
-  /* Signature Project Deep Slate Navy Palette */
-  --sh-sidebar-bg: #091a2b;
-  --sh-sidebar-hover: #132d4a;
-  --sh-sidebar-active-bg: #0284c7;
-  --sh-sidebar-active-text: #ffffff;
-  --sh-sidebar-text: #cbd5e1;
-  --sh-sidebar-muted: #94a3b8;
+  /* Signature HumanAid Deep Pine Green Palette */
+  --sh-sidebar-bg: #14291e;
+  --sh-sidebar-hover: #1b3829;
+  --sh-sidebar-active-bg: #dbe4c6;
+  --sh-sidebar-active-text: #14291e;
+  --sh-sidebar-text: #bcc5b9;
+  --sh-sidebar-muted: #829486;
 
   /* Canvas & Cards */
-  --sh-canvas-bg: #f8fafc;
+  --sh-canvas-bg: #f4f6f2;
   --sh-card-bg: #ffffff;
-  --sh-border: #e2e8f0;
-  --sh-border-subtle: #f1f5f9;
+  --sh-border: #e2e8e0;
+  --sh-border-subtle: #edf2eb;
 
   /* Typography */
-  --sh-text-primary: #0f172a;
-  --sh-text-secondary: #475569;
-  --sh-text-muted: #64748b;
-  --sh-text-light: #94a3b8;
+  --sh-text-primary: #12281b;
+  --sh-text-secondary: #4b6152;
+  --sh-text-muted: #6f8576;
+  --sh-text-light: #94a89b;
 
-  /* Brand Blues & Accents matching project */
-  --sh-primary-blue: #0284c7;
-  --sh-primary-blue-hover: #0369a1;
-  --sh-accent-blue: #38bdf8;
-  --sh-accent-glow: rgba(2, 132, 199, 0.3);
-  --sh-ice-blue-light: #f0f9ff;
-  --sh-ice-blue-border: #bae6fd;
-  --sh-ice-blue-pill: #e0f2fe;
+  /* Brand Accents matching HumanAid */
+  --sh-primary-blue: #14291e;
+  --sh-primary-blue-hover: #1f3e2e;
+  --sh-accent-blue: #234d38;
+  --sh-accent-glow: rgba(20, 41, 30, 0.2);
+  --sh-ice-blue-light: #f0f4ea;
+  --sh-ice-blue-border: #dbe4c6;
+  --sh-ice-blue-pill: #edf2e6;
 
   /* Status Colors */
   --sh-success-bg: #dcfce7;
@@ -68,13 +68,13 @@
 }
 
 /* =========================================================
-   1. Left Sidebar (Project Navy Style)
+   1. Left Sidebar (HumanAid Deep Pine Style)
    ========================================================= */
 .sh-sidebar {
   width: 260px;
   min-width: 260px;
   background-color: var(--sh-sidebar-bg);
-  background-image: linear-gradient(180deg, #091a2b 0%, #071422 100%);
+  background-image: none;
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -95,20 +95,19 @@
   align-items: center;
   gap: 12px;
   padding: 4px 8px 16px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sh-brand-icon-box {
   width: 34px;
   height: 34px;
-  border: 1px solid rgba(56, 189, 248, 0.4);
+  border: 1px solid rgba(219, 228, 198, 0.3);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  background: linear-gradient(135deg, #0284c7 0%, #0e6f76 100%);
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+  color: #dbe4c6;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .sh-brand-title {
@@ -129,7 +128,7 @@
 /* User Profile Switcher Card */
 .sh-user-card {
   margin: 14px 0 16px 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   padding: 10px 12px;
@@ -148,14 +147,13 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
-  color: #ffffff;
+  background: #ffffff;
+  color: #14291e;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
 }
 
 .sh-user-role-label {
@@ -219,11 +217,12 @@
 }
 
 .sh-toggle-switch input:checked + .sh-toggle-slider {
-  background-color: #0284c7;
+  background-color: #ffffff;
 }
 
 .sh-toggle-switch input:checked + .sh-toggle-slider:before {
   transform: translateX(16px);
+  background-color: #14291e;
 }
 
 /* Navigation List */
@@ -259,10 +258,10 @@
 }
 
 .sh-nav-btn.active {
-  background-color: var(--sh-primary-blue);
-  color: #ffffff;
+  background-color: var(--sh-sidebar-active-bg);
+  color: var(--sh-sidebar-active-text);
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+  box-shadow: none;
 }
 
 .sh-nav-btn-content {
@@ -295,8 +294,8 @@
 }
 
 .sh-boundary-box {
-  background: rgba(15, 23, 42, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   padding: 10px 12px;
 }
@@ -307,7 +306,7 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #38bdf8;
+  color: #dbe4c6;
   margin-bottom: 4px;
 }
 
@@ -430,7 +429,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: #0284c7;
+  background-color: #16a34a;
 }
 
 .sh-bell-btn {
@@ -479,8 +478,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #e0f2fe;
-  color: #0284c7;
+  background: #edf2e6;
+  color: #14291e;
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -525,12 +524,12 @@
   border-radius: 8px;
   padding: 10px 16px;
   font-size: 12.5px;
-  color: #0369a1;
+  color: #243328;
 }
 
 .sh-demo-badge-bold {
   font-weight: 700;
-  color: #0284c7;
+  color: #162e20;
 }
 
 /* View Header */
@@ -860,7 +859,7 @@
 }
 
 .sh-step-indicator-done {
-  color: #0284c7;
+  color: #14291e;
   margin-top: 1px;
 }
 

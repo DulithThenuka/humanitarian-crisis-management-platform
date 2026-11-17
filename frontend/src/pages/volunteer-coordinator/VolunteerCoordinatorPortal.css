@@ -1,20 +1,20 @@
 /* =========================================================
    VOLUNTEER COORDINATOR PORTAL - HumanAid Design System
-   Sidebar: Project Signature Dark Blue (#0b1528 / #0f172a)
-   Canvas: (#f6f8f5), Crisp Surfaces, Modern Typography
+   Sidebar: Deep Pine Green (#14291e), Pale Sage (#dbe4c6)
+   Canvas: (#f4f6f2), Crisp Surfaces, Modern Typography
    ========================================================= */
 
 :root {
-  /* Signature Project Dark Blue Sidebar Theme */
-  --vc-sidebar-bg: #0b1528;
-  --vc-sidebar-hover: #1e293b;
-  --vc-sidebar-active-bg: #dbeafe;
-  --vc-sidebar-active-text: #0f172a;
-  --vc-sidebar-text: #cbd5e1;
-  --vc-sidebar-muted: #8297b0;
+  /* Signature HumanAid Deep Pine Green Sidebar Theme */
+  --vc-sidebar-bg: #14291e;
+  --vc-sidebar-hover: #1b3829;
+  --vc-sidebar-active-bg: #dbe4c6;
+  --vc-sidebar-active-text: #14291e;
+  --vc-sidebar-text: #bcc5b9;
+  --vc-sidebar-muted: #829486;
 
   /* Canvas & Cards */
-  --vc-canvas-bg: #f6f8f5;
+  --vc-canvas-bg: #f4f6f2;
   --vc-card-bg: #ffffff;
   --vc-border: #e2e8e0;
   --vc-border-subtle: #edf2eb;
@@ -26,9 +26,9 @@
   --vc-text-light: #94a89b;
 
   /* Brand Accents & Actions */
-  --vc-primary-dark: #0b1528;
-  --vc-primary-dark-hover: #1e3a5f;
-  --vc-blue-accent: #0284c7;
+  --vc-primary-dark: #14291e;
+  --vc-primary-dark-hover: #1f3e2e;
+  --vc-blue-accent: #234d38;
   --vc-sage-light: #edf3ea;
   --vc-sage-border: #dbe7d7;
   --vc-sage-accent: #d2e5ce;
@@ -72,7 +72,7 @@
   width: 260px;
   min-width: 260px;
   background-color: var(--vc-sidebar-bg);
-  background-image: linear-gradient(180deg, #0b1528 0%, #070d19 100%);
+  background-image: none;
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -93,19 +93,19 @@
   align-items: center;
   gap: 10px;
   padding: 4px 8px 16px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .vc-brand-icon-box {
   width: 32px;
   height: 32px;
-  border: 1.5px solid rgba(147, 197, 253, 0.5);
+  border: 1px solid rgba(219, 228, 198, 0.3);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #93c5fd;
-  background: rgba(147, 197, 253, 0.1);
+  color: #dbe4c6;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .vc-brand-title {
@@ -147,9 +147,9 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #dbeafe;
-  color: #0f172a;
-  font-weight: 700;
+  background: #ffffff;
+  color: #14291e;
+  font-weight: 800;
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -167,7 +167,7 @@
 .vc-user-role-name {
   font-size: 12px;
   font-weight: 700;
-  color: #93c5fd;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -221,11 +221,12 @@
 }
 
 .vc-toggle-switch input:checked + .vc-toggle-slider {
-  background-color: #3b82f6;
+  background-color: #ffffff;
 }
 
 .vc-toggle-switch input:checked + .vc-toggle-slider:before {
   transform: translateX(16px);
+  background-color: #14291e;
 }
 
 /* Navigation Menu */
@@ -288,7 +289,7 @@
 }
 
 .vc-nav-btn.active .vc-nav-badge {
-  background: #0f172a;
+  background: #14291e;
   color: #ffffff;
 }
 
@@ -303,7 +304,7 @@
 }
 
 .vc-boundary-box {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   padding: 10px;
@@ -315,7 +316,7 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #93c5fd;
+  color: #dbe4c6;
   margin-bottom: 4px;
 }
 

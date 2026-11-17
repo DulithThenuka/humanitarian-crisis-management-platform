@@ -31,7 +31,7 @@
 .ec-breadcrumb-tiny {
   font-size: 10px;
   font-weight: 800;
-  color: #0284c7;
+  color: #657367;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -135,9 +135,9 @@
 }
 
 .ec-header-bell-btn:hover {
-  background-color: #f8fafc;
-  color: #0284c7;
-  border-color: #0284c7;
+  background-color: #f4f6f2;
+  color: #14291e;
+  border-color: #14291e;
 }
 
 .ec-bell-badge {
@@ -171,14 +171,14 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #e0f2fe;
-  color: #0284c7;
+  background-color: #edf2e6;
+  color: #14291e;
   font-weight: 800;
   font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #bae6fd;
+  border: 1px solid #dbe4c6;
 }
 
 .ec-profile-text-col {

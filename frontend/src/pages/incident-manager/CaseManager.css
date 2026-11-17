@@ -3,17 +3,17 @@
    ========================================================= */
 
 :root {
-  --cm-primary-blue: #0284c7;
-  --cm-primary-blue-hover: #0369a1;
-  --cm-navy-sidebar: #091a2b;
-  --cm-navy-dark: #06121f;
-  --cm-navy-card: #0f2742;
-  --cm-navy-border: #1e3a5f;
-  --cm-ice-blue: #f0f9ff;
-  --cm-ice-border: #bae6fd;
-  --cm-canvas-bg: #f8fafc;
-  --cm-text-main: #0f172a;
-  --cm-text-muted: #64748b;
+  --cm-primary-blue: #14291e;
+  --cm-primary-blue-hover: #1f3e2e;
+  --cm-navy-sidebar: #14291e;
+  --cm-navy-dark: #0f1f17;
+  --cm-navy-card: rgba(255, 255, 255, 0.05);
+  --cm-navy-border: rgba(255, 255, 255, 0.08);
+  --cm-ice-blue: #edf2e6;
+  --cm-ice-border: #dbe4c6;
+  --cm-canvas-bg: #f4f6f2;
+  --cm-text-main: #12281b;
+  --cm-text-muted: #6f8576;
   --cm-border: #e2e8f0;
 }
 
@@ -57,12 +57,13 @@
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(219, 228, 198, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+  color: #dbe4c6;
+  box-shadow: none;
   flex-shrink: 0;
 }
 
@@ -104,8 +105,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #1e3a5f;
-  color: #38bdf8;
+  background: #ffffff;
+  color: #14291e;
   font-size: 12px;
   font-weight: 800;
   display: flex;
@@ -193,10 +194,10 @@
 }
 
 .cm-nav-item.active {
-  background: #0284c7;
-  color: #ffffff;
+  background: #dbe4c6;
+  color: #14291e;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+  box-shadow: none;
 }
 
 .cm-nav-item-left {
