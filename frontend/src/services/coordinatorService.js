@@ -145,3 +145,5 @@ export const coordinatorService = {
     return unwrap(res);
   }
 };
+
+export default coordinatorService;

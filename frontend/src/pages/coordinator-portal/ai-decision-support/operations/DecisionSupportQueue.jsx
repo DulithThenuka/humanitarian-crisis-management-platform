@@ -15,7 +15,7 @@ import {
   Sparkles,
   ExternalLink
 } from 'lucide-react';
-import { aiGovernanceService } from '../../services/aiGovernanceService';
+import { aiGovernanceService } from '@/services/aiGovernanceService';
 
 export const DecisionSupportQueue = ({ 
   queueData = [],

@@ -26,7 +26,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { createSmoothSplinePath, createSmoothAreaPath } from './aiOperationsData';
-import { aiGovernanceService } from '../../services/aiGovernanceService';
+import { aiGovernanceService } from '@/services/aiGovernanceService';
 
 const normalizeServiceId = (id) => {
   if (!id) return 'classification';

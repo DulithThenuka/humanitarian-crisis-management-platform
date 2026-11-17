@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { aiGovernanceService } from '../../services/aiGovernanceService';
+import { aiGovernanceService } from '@/services/aiGovernanceService';
 import { 
   ChevronLeft, 
   ChevronDown, 

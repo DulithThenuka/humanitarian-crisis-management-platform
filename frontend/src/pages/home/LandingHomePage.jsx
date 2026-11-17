@@ -313,7 +313,6 @@ export const LandingHomePage = () => {
       ]
     },
     {
-    {
       id: 'donor',
       title: 'Donor & Funding Management',
       desc: 'Controlled funding workspace, dual authorization allocations, monetary & in-kind records, transparency tracking, and emergency aid packages.',
@@ -359,7 +358,6 @@ export const LandingHomePage = () => {
         { label: 'Supply Inventory', path: '/admin/resources' },
         { label: 'Audit Ledger', path: '/admin/audit' }
       ]
-    }
     }
   ];
 

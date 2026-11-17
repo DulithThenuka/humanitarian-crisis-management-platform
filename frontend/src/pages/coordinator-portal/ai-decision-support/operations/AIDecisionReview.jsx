@@ -13,7 +13,7 @@ import {
   Info,
   Check
 } from 'lucide-react';
-import { aiGovernanceService } from '../../services/aiGovernanceService';
+import { aiGovernanceService } from '@/services/aiGovernanceService';
 
 export const AIDecisionReview = ({ 
   caseId = 'AID-2051', 

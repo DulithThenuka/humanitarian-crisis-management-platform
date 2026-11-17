@@ -42,7 +42,7 @@ import { ReportsResponseAnalyticsView } from './reports/ReportsResponseAnalytics
 import { DecisionHistoryView } from './decision-history/DecisionHistoryView';
 import { NotificationsRemindersView } from './notifications/NotificationsRemindersView';
 import { ProfileSettingsView } from './profile-settings/ProfileSettingsView';
-import { AIOperationsContainer } from '../ai-operations/AIOperationsContainer';
+import { AIOperationsContainer } from './ai-decision-support/operations/AIOperationsContainer';
 
 import './EmergencyCoordinatorPortal.css';
 
