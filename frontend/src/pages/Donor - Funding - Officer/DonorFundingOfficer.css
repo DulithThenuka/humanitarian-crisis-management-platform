@@ -18,11 +18,11 @@
   --fo-shadow-md: 0 4px 14px rgba(15, 23, 42, 0.06);
   --fo-shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08);
 
-  /* Sidebar (Signature Project Deep Slate Navy Palette) */
-  --fo-sidebar-bg: #091a2b;
-  --fo-sidebar-gradient: linear-gradient(180deg, #091a2b 0%, #071422 100%);
-  --fo-sidebar-hover: #132d4a;
-  --fo-sidebar-active-bg: #0284c7;
+  /* Sidebar (Deep Teal-Green Palette matching Citizen Portal) */
+  --fo-sidebar-bg: #082128;
+  --fo-sidebar-gradient: linear-gradient(180deg, #082128 0%, #06191f 100%);
+  --fo-sidebar-hover: rgba(255, 255, 255, 0.05);
+  --fo-sidebar-active-bg: #0e6f76;
   --fo-sidebar-active-text: #ffffff;
   --fo-sidebar-text: #cbd5e1;
   --fo-sidebar-muted: #94a3b8;
@@ -267,10 +267,10 @@
 }
 
 .fo-nav-item.active {
-  background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%);
+  background: #0e6f76;
   color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+  box-shadow: 0 2px 8px rgba(14, 111, 118, 0.4);
 }
 
 .fo-nav-badge {
@@ -278,9 +278,9 @@
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 12px;
-  background-color: rgba(2, 132, 199, 0.2);
-  color: #38bdf8;
-  border: 1px solid rgba(2, 132, 199, 0.4);
+  background-color: rgba(14, 111, 118, 0.25);
+  color: #5eead4;
+  border: 1px solid rgba(14, 111, 118, 0.45);
 }
 
 .fo-nav-badge.danger {
@@ -293,7 +293,7 @@
 .fo-sidebar-footer {
   padding: 16px 14px;
   border-top: 1px solid var(--fo-sidebar-border);
-  background-color: rgba(7, 20, 34, 0.6);
+  background-color: rgba(6, 25, 31, 0.6);
 }
 
 .fo-privacy-notice-box {
