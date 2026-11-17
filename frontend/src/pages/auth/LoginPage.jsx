@@ -63,6 +63,42 @@ export const LoginPage = () => {
   const { login } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
+
+  const getRoleDashboardRoute = (role) => {
+    const normalized = String(role || '').toLowerCase();
+    switch (normalized) {
+      case 'admin':
+      case '4':
+        return '/admin';
+      case 'coordinator':
+      case '1':
+        return '/coordinator';
+      case 'logisticsmanager':
+      case '2':
+        return '/logistics';
+      case 'sheltermanager':
+      case 'shelteradministrator':
+      case 'shelteradmin':
+      case '5':
+        return '/shelter';
+      case 'volunteer':
+      case '3':
+        return '/volunteer';
+      case 'incidentmanager':
+      case '8':
+        return '/incident-manager';
+      case 'donor':
+      case '6':
+        return '/donor';
+      case 'partner':
+      case '7':
+        return '/partner';
+      case 'citizen':
+      case '0':
+      default:
+        return '/citizen';
+    }
+  };
   const location = useLocation();
 
   const searchParams = new URLSearchParams(location.search);

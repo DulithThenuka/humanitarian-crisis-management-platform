@@ -9,11 +9,11 @@ const normalizeUserObject = (payload, token) => {
   const fullName = payload.fullName || payload.name || '';
   const initials = fullName
     ? fullName
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part[0].toUpperCase())
-        .join('')
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0].toUpperCase())
+      .join('')
     : 'CM';
 
   return {
@@ -77,12 +77,18 @@ export const AuthProvider = ({ children }) => {
     setToken(rawToken);
     setUser(normalizedUser);
 
-    localStorage.setItem('token', rawToken);
-    localStorage.setItem('user', JSON.stringify(normalizedUser));
     if (rememberMe) {
+      localStorage.setItem('token', rawToken);
+      localStorage.setItem('user', JSON.stringify(normalizedUser));
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
+    } else {
       sessionStorage.setItem('token', rawToken);
       sessionStorage.setItem('user', JSON.stringify(normalizedUser));
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     }
+
 
     return true;
   }, []);
