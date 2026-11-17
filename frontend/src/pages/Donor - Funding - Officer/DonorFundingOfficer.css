@@ -494,7 +494,7 @@
   position: relative;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 8px;
   background-color: #ffffff;
   border: 1px solid #fca5a5;
   color: #f87171;
