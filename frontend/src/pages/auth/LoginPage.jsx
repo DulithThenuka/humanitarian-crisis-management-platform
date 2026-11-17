@@ -22,14 +22,29 @@ const resolvePostLoginRoute = (role, redirectParam) => {
   }
 
   const normalizedRole = (role || '').toString().trim().toLowerCase();
+  if (normalizedRole === 'admin' || normalizedRole === 'administrator' || normalizedRole.includes('admin')) {
+    return '/admin';
+  }
   if (normalizedRole === 'casemanager' || normalizedRole === 'incidentmanager' || normalizedRole.includes('case manager')) {
     return '/case-manager';
   }
-  if (normalizedRole === 'logisticsmanager') {
+  if (normalizedRole === 'sheltermanager' || normalizedRole.includes('shelter')) {
+    return '/shelter';
+  }
+  if (normalizedRole === 'logisticsmanager' || normalizedRole.includes('logistics')) {
     return '/logistics';
+  }
+  if (normalizedRole === 'volunteercoordinator' || normalizedRole.includes('volunteer coordinator')) {
+    return '/volunteer-coordinator';
   }
   if (normalizedRole === 'volunteer') {
     return '/volunteers';
+  }
+  if (normalizedRole === 'donor' || normalizedRole.includes('funding')) {
+    return '/donor';
+  }
+  if (normalizedRole === 'partner' || normalizedRole.includes('partner')) {
+    return '/partner-officer';
   }
   if (normalizedRole === 'citizen') {
     return '/citizen';
