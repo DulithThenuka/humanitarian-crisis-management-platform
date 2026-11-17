@@ -76,7 +76,6 @@ export const DonationRecordsView = ({
             className="fo-btn fo-btn-primary"
             onClick={onOpenCreateRecordModal}
           >
-            <Plus size={14} />
             <span>+ Create prototype record</span>
           </button>
         </div>
