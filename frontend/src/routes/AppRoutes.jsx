@@ -233,6 +233,9 @@ export const AppRoutes = () => {
       <Route path="/logistics/warehouses" element={<LogisticsPortalPage initialTab="depots" />} />
       <Route path="/logistics/intake" element={<LogisticsPortalPage initialTab="intake" />} />
       <Route path="/logistics/receiving" element={<LogisticsPortalPage initialTab="intake" />} />
+      <Route path="/resource-manager" element={<LogisticsPortalPage initialTab="inventory" />} />
+      <Route path="/resource-portal" element={<LogisticsPortalPage initialTab="inventory" />} />
+      <Route path="/resources" element={<LogisticsPortalPage initialTab="inventory" />} />
 
       {/* ========================================================= */}
       {/* MODULE 5: Shelter Management (/shelter/*)                 */}
