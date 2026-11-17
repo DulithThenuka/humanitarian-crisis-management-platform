@@ -494,10 +494,10 @@
   position: relative;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 50%;
   background-color: #ffffff;
-  border: 1px solid var(--fo-border);
-  color: var(--fo-text-muted);
+  border: 1px solid #fca5a5;
+  color: #f87171;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -506,9 +506,9 @@
 }
 
 .fo-alert-bell-btn:hover {
-  background-color: #f8fafc;
-  color: var(--fo-blue-primary);
-  border-color: var(--fo-blue-primary);
+  background-color: #fef2f2;
+  color: #ef4444;
+  border-color: #f87171;
 }
 
 .fo-bell-badge {
