@@ -1,261 +1,269 @@
 import React, { useState } from 'react';
-import { 
-  Download, 
-  Plus, 
-  Search, 
-  CheckCircle, 
-  HelpCircle, 
-  AlertOctagon 
-} from 'lucide-react';
+import { Search } from 'lucide-react';
 
 export const OrganisationProfileView = ({
-  records,
+  records = [],
   selectedRecordId,
-  onSelectRecord,
-  onUpdateStatus,
-  onCreateRecordClick,
-  onExportReport
+  setSelectedRecordId,
+  onOpenCreateRecordModal,
+  onExportReport,
+  onConfirmCommitment,
+  onClarifyRecord,
+  onEscalateRecord,
+  title = 'Organisation Profile',
+  searchPlaceholder = 'Search organisation profile...'
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [areaFilter, setAreaFilter] = useState('ALL');
-  const [decisionNote, setDecisionNote] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [areaFilter, setAreaFilter] = useState('All');
+  const [noteText, setNoteText] = useState('');
 
-  const selectedRecord = records.find(r => r.id === selectedRecordId) || records[0];
+  const fallbackRecords = [
+    {
+      id: 'COM-118',
+      sharedIncident: 'CR-2026-014',
+      contribution: 'Drinking water',
+      quantity: '800 units',
+      responsibleOrg: 'National Relief Unit',
+      deadline: '18 Feb · 14:00',
+      status: 'Dispatched',
+      statusBadge: 'dispatched'
+    },
+    {
+      id: 'COM-115',
+      sharedIncident: 'CR-2026-014',
+      contribution: 'Medical support team',
+      quantity: '1 team',
+      responsibleOrg: 'MedCare Lanka',
+      deadline: '18 Feb · 16:00',
+      status: 'Confirmed',
+      statusBadge: 'confirmed'
+    },
+    {
+      id: 'REQ-309',
+      sharedIncident: 'CR-2026-011',
+      contribution: 'Transport vehicles',
+      quantity: '4 vehicles',
+      responsibleOrg: 'Partner network',
+      deadline: '19 Feb · 09:00',
+      status: 'Awaiting response',
+      statusBadge: 'awaiting'
+    },
+    {
+      id: 'COM-109',
+      sharedIncident: 'CR-2026-014',
+      contribution: 'Family food kits',
+      quantity: '320 kits',
+      responsibleOrg: 'Community Relief Lanka',
+      deadline: '18 Feb · 12:00',
+      status: 'Delayed',
+      statusBadge: 'delayed'
+    }
+  ];
 
-  const filteredRecords = records.filter(r => {
+  const displayRecords = (records && records.length > 0) ? records : fallbackRecords;
+  const currentSelectedId = selectedRecordId || displayRecords[0]?.id || 'COM-118';
+  const selectedRecord = displayRecords.find(r => r.id === currentSelectedId) || displayRecords[0];
+
+  const filteredRecords = displayRecords.filter(r => {
     const matchesSearch = 
       r.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.sharedIncident.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.contribution.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.responsibleOrg.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
-    const matchesArea = areaFilter === 'ALL' || r.operationalArea === areaFilter;
-
-    return matchesSearch && matchesStatus && matchesArea;
+    const matchesStatus = statusFilter === 'All' || r.status.toLowerCase() === statusFilter.toLowerCase();
+    return matchesSearch && matchesStatus;
   });
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'Dispatched':
-        return <span className="po-tag-success" style={{ background: '#dbeafe', color: '#1e40af' }}>&bull; Dispatched</span>;
-      case 'Confirmed':
-        return <span className="po-tag-success">&bull; Confirmed</span>;
-      case 'Awaiting response':
-        return <span className="po-tag-warning">&bull; Awaiting response</span>;
-      case 'Delayed':
-        return <span className="po-tag-critical">&bull; Delayed</span>;
-      default:
-        return <span className="po-tag-warning">&bull; {status}</span>;
-    }
-  };
-
-  const handleAction = (newStatus, actionLabel) => {
-    if (!selectedRecord) return;
-    onUpdateStatus(selectedRecord.id, newStatus, decisionNote, actionLabel);
-    setDecisionNote('');
-  };
-
   return (
-    <div>
-      {/* Top Header */}
-      <div className="po-title-action-row">
+    <div className="po-workspace">
+      {/* Title & Action Block (Screenshots 2-4) */}
+      <div className="po-title-block">
         <div>
-          <div className="po-workspace-label">Partner Officer - Controlled Workspace</div>
-          <h1 className="po-page-heading">Organisation Profile</h1>
-          <p className="po-page-subtext">
+          <div className="po-eyebrow">
+            <span>PARTNER OFFICER · CONTROLLED WORKSPACE</span>
+          </div>
+          <h1 className="po-title">{title}</h1>
+          <p className="po-subtitle">
             Search, filter and review fictional records within this role's authorised scope.
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="po-title-actions">
           <button 
-            type="button" 
-            className="po-btn-white-secondary"
+            className="po-btn po-btn-secondary"
             onClick={onExportReport}
           >
-            <Download size={14} />
             <span>Export demo report</span>
           </button>
-
           <button 
-            type="button" 
-            className="po-btn-blue-primary"
-            onClick={onCreateRecordClick}
+            className="po-btn po-btn-primary"
+            onClick={onOpenCreateRecordModal}
           >
-            <Plus size={15} />
-            <span>Create prototype record</span>
+            <span>+ Create prototype record</span>
           </button>
         </div>
       </div>
 
-      {/* Main Two-Pane Layout */}
-      <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        {/* Left Table Section */}
-        <div className="po-table-card" style={{ flex: 1, minWidth: '600px' }}>
-          {/* Filters Bar */}
-          <div className="po-table-controls-bar">
-            <div style={{ position: 'relative', flex: 1, maxWidth: '340px' }}>
-              <Search size={14} className="po-search-input-icon" />
-              <input
-                type="text"
-                placeholder="Search organisation profile..."
-                className="po-table-search-field"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <select
-                className="po-dropdown-select"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="ALL">All statuses</option>
-                <option value="Dispatched">Dispatched</option>
-                <option value="Confirmed">Confirmed</option>
-                <option value="Awaiting response">Awaiting response</option>
-                <option value="Delayed">Delayed</option>
-              </select>
-
-              <select
-                className="po-dropdown-select"
-                value={areaFilter}
-                onChange={(e) => setAreaFilter(e.target.value)}
-              >
-                <option value="ALL">All operational areas</option>
-                <option value="Western Province">Western Province</option>
-                <option value="Southern Province">Southern Province</option>
-                <option value="Central Province">Central Province</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div style={{ overflowX: 'auto' }}>
-            <table className="po-enterprise-table">
-              <thead>
-                <tr>
-                  <th>Commitment</th>
-                  <th>Shared Incident</th>
-                  <th>Contribution / Request</th>
-                  <th>Quantity</th>
-                  <th>Responsible Org</th>
-                  <th>Deadline</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRecords.map((r) => (
-                  <tr
-                    key={r.id}
-                    className={selectedRecord?.id === r.id ? 'active-row' : ''}
-                    onClick={() => onSelectRecord(r.id)}
-                  >
-                    <td style={{ fontWeight: 800, color: '#0f172a', fontFamily: 'monospace' }}>{r.id}</td>
-                    <td style={{ color: '#2563eb', fontWeight: 600, fontFamily: 'monospace' }}>{r.sharedIncident}</td>
-                    <td style={{ fontWeight: 600, color: '#0f172a' }}>{r.contribution}</td>
-                    <td>{r.quantity}</td>
-                    <td>{r.responsibleOrg}</td>
-                    <td style={{ color: '#64748b', fontSize: '12px' }}>{r.deadline}</td>
-                    <td>{getStatusBadge(r.status)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* Filter Bar */}
+      <div className="po-filter-bar">
+        <div className="po-filter-search">
+          <Search size={14} className="po-search-icon" />
+          <input
+            type="text"
+            placeholder={searchPlaceholder}
+            className="po-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
-        {/* Right Detail / Decision Drawer */}
+        <div className="po-filter-selects">
+          <select 
+            className="po-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="All">All statuses</option>
+            <option value="Dispatched">Dispatched</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Awaiting response">Awaiting response</option>
+            <option value="Delayed">Delayed</option>
+          </select>
+
+          <select 
+            className="po-select"
+            value={areaFilter}
+            onChange={(e) => setAreaFilter(e.target.value)}
+          >
+            <option value="All">All operational areas</option>
+            <option value="Western">Western Province</option>
+            <option value="Southern">Southern Province</option>
+            <option value="Central">Central Province</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Split Layout: Table on left, Detail panel on right */}
+      <div className="po-split-layout">
+        {/* Table Section */}
+        <div className="po-table-container">
+          <table className="po-data-table">
+            <thead>
+              <tr>
+                <th>COMMITMENT</th>
+                <th>SHARED INCIDENT</th>
+                <th>CONTRIBUTION / REQUEST</th>
+                <th>QUANTITY</th>
+                <th>RESPONSIBLE ORG</th>
+                <th>DEADLINE</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRecords.map((item) => {
+                const isSelected = item.id === selectedRecord?.id;
+                return (
+                  <tr 
+                    key={item.id} 
+                    className={isSelected ? 'selected' : ''}
+                    onClick={() => setSelectedRecordId && setSelectedRecordId(item.id)}
+                  >
+                    <td>
+                      <span className="po-cell-record-id">{item.id}</span>
+                    </td>
+                    <td>
+                      <span style={{ color: '#405044' }}>{item.sharedIncident}</span>
+                    </td>
+                    <td>
+                      <span style={{ color: '#405044' }}>{item.contribution}</span>
+                    </td>
+                    <td>
+                      <span style={{ fontWeight: 600, color: '#162e20' }}>{item.quantity}</span>
+                    </td>
+                    <td>
+                      <span style={{ color: '#405044' }}>{item.responsibleOrg}</span>
+                    </td>
+                    <td>
+                      <span style={{ color: '#405044' }}>{item.deadline}</span>
+                    </td>
+                    <td>
+                      <span className={`po-status-badge ${item.statusBadge || item.status?.toLowerCase().replace(/\s+/g, '-')}`}>
+                        ● {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Selected Record Detail Panel (Right Column) */}
         {selectedRecord && (
-          <div className="po-detail-card-drawer">
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid #e2e8f0' }}>
-              <div>
-                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>{selectedRecord.id}</span>
-                <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>{selectedRecord.sharedIncident}</div>
-                <div style={{ fontSize: '11.5px', color: '#64748b' }}>Selected fictional record - role-scoped</div>
-              </div>
-              <div>{getStatusBadge(selectedRecord.status)}</div>
+          <div className="po-detail-card">
+            {/* Header Row */}
+            <div className="po-detail-header-row">
+              <span className="po-detail-id">{selectedRecord.id}</span>
+              <span className={`po-status-badge ${selectedRecord.statusBadge || selectedRecord.status?.toLowerCase().replace(/\s+/g, '-')}`}>
+                ● {selectedRecord.status}
+              </span>
             </div>
 
-            {/* Grid */}
-            <div className="po-drawer-attributes-grid">
-              <div>
-                <div className="po-attr-tag">Contribution / request</div>
-                <div className="po-attr-value">{selectedRecord.contribution}</div>
+            <div className="po-detail-title">{selectedRecord.sharedIncident}</div>
+            <div className="po-detail-subtitle">Selected fictional record · role-scoped</div>
+
+            {/* 2x2 Fields Grid */}
+            <div className="po-detail-grid">
+              <div className="po-detail-field">
+                <span className="po-detail-label">Contribution / request</span>
+                <span className="po-detail-val">{selectedRecord.contribution}</span>
               </div>
-              <div>
-                <div className="po-attr-tag">Quantity</div>
-                <div className="po-attr-value">{selectedRecord.quantity}</div>
+              <div className="po-detail-field">
+                <span className="po-detail-label">Quantity</span>
+                <span className="po-detail-val">{selectedRecord.quantity}</span>
               </div>
-              <div>
-                <div className="po-attr-tag">Responsible org</div>
-                <div className="po-attr-value">{selectedRecord.responsibleOrg}</div>
+              <div className="po-detail-field">
+                <span className="po-detail-label">Responsible org</span>
+                <span className="po-detail-val">{selectedRecord.responsibleOrg}</span>
               </div>
-              <div>
-                <div className="po-attr-tag">Deadline</div>
-                <div className="po-attr-value">{selectedRecord.deadline}</div>
+              <div className="po-detail-field">
+                <span className="po-detail-label">Deadline</span>
+                <span className="po-detail-val">{selectedRecord.deadline}</span>
               </div>
             </div>
 
-            {/* Note text area */}
-            <div>
-              <label className="po-attr-tag" style={{ display: 'block', marginBottom: '6px' }}>
-                Authorised Note / Decision Reason
-              </label>
+            {/* Note Textarea */}
+            <div className="po-note-section">
+              <label className="po-note-label">AUTHORISED NOTE / DECISION REASON</label>
               <textarea
-                className="po-drawer-textarea-field"
+                className="po-note-textarea"
                 placeholder="Avoid unnecessary personal information..."
-                value={decisionNote}
-                onChange={(e) => setDecisionNote(e.target.value)}
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                rows={3}
               />
             </div>
 
-            {/* Actions */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <button
-                type="button"
-                className="po-btn-blue-primary"
-                style={{ width: '100%', justifyContent: 'center' }}
-                onClick={() => handleAction('Confirmed', 'Confirmed commitment')}
+            {/* Action Buttons Stacked */}
+            <div className="po-detail-actions">
+              <button 
+                className="po-btn po-btn-primary po-btn-full"
+                onClick={() => onConfirmCommitment ? onConfirmCommitment(selectedRecord, noteText) : alert(`Commitment ${selectedRecord.id} confirmed.`)}
               >
-                <CheckCircle size={15} />
-                <span>Confirm commitment</span>
+                Confirm commitment
               </button>
-
-              <button
-                type="button"
-                className="po-btn-white-secondary"
-                style={{ width: '100%', justifyContent: 'center', padding: '9px', fontSize: '13px' }}
-                onClick={() => handleAction('Awaiting response', 'Requested clarification')}
+              <button 
+                className="po-btn po-btn-secondary po-btn-full"
+                onClick={() => onClarifyRecord && onClarifyRecord(selectedRecord)}
               >
-                <HelpCircle size={15} />
-                <span>Request clarification</span>
+                Request clarification
               </button>
-
-              <button
-                type="button"
-                style={{
-                  width: '100%',
-                  justifyContent: 'center',
-                  padding: '9px',
-                  fontSize: '13px',
-                  backgroundColor: 'transparent',
-                  color: '#dc2626',
-                  border: '1px solid #fca5a5',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-                onClick={() => handleAction('Delayed', 'Escalated priority')}
+              <button 
+                className="po-btn po-btn-secondary po-btn-full"
+                onClick={() => onEscalateRecord && onEscalateRecord(selectedRecord)}
               >
-                <AlertOctagon size={15} />
-                <span>Escalate</span>
+                Escalate
               </button>
             </div>
           </div>
@@ -265,3 +273,4 @@ export const OrganisationProfileView = ({
   );
 };
 
+export default OrganisationProfileView;

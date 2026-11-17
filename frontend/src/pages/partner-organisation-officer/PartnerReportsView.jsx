@@ -1,141 +1,204 @@
-import React from 'react';
-import { 
-  Download, 
-  TrendingUp, 
-  BarChart3, 
-  CheckCircle, 
-  PieChart, 
-  FileSpreadsheet 
-} from 'lucide-react';
+import React, { useState } from 'react';
 
-export const PartnerReportsView = ({ records, onExportReport }) => {
+export const PartnerReportsView = ({
+  onExportReport
+}) => {
+  const [selectedOperation, setSelectedOperation] = useState('Current operation');
+
+  const barData = [
+    { label: '1', height: 34 },
+    { label: '2', height: 50 },
+    { label: '3', height: 40 },
+    { label: '4', height: 65 },
+    { label: '5', height: 58 },
+    { label: '6', height: 78 },
+    { label: '7', height: 70 },
+    { label: '8', height: 92 },
+    { label: '9', height: 64 },
+    { label: '10', height: 72 },
+    { label: '11', height: 58 },
+    { label: '12', height: 52 }
+  ];
+
+  const breakdownMetrics = [
+    { label: 'Contributions', value: 68 },
+    { label: 'Fulfilled requests', value: 82 },
+    { label: 'Commitments', value: 31 },
+    { label: 'Delivery performance', value: 24 }
+  ];
+
   return (
-    <div>
-      <div className="po-title-action-row">
+    <div className="po-workspace">
+      {/* Title & Action Block (Screenshot 7) */}
+      <div className="po-title-block">
         <div>
-          <div className="po-workspace-label">Compliance & Inter-Agency Governance</div>
-          <h1 className="po-page-heading">Partner Reports</h1>
-          <p className="po-page-subtext">
-            Audited operational performance metrics, humanitarian SLA compliance, and dispatch reports.
+          <div className="po-eyebrow">
+            <span>ILLUSTRATIVE REPORTING · NOT LIVE METRICS</span>
+          </div>
+          <h1 className="po-title">Partner Officer Reports</h1>
+          <p className="po-subtitle">
+            Filterable demonstration summaries use fictional coursework records.
           </p>
         </div>
 
-        <button type="button" className="po-btn-blue-primary" onClick={onExportReport}>
-          <Download size={14} />
-          <span>Export Full Audit CSV</span>
-        </button>
-      </div>
+        <div className="po-title-actions">
+          <select
+            className="po-select"
+            value={selectedOperation}
+            onChange={(e) => setSelectedOperation(e.target.value)}
+            style={{ minWidth: '160px' }}
+          >
+            <option value="Current operation">Current operation</option>
+            <option value="Western Province Flood">Western Province Flood</option>
+            <option value="Southern Monsoon Relief">Southern Monsoon Relief</option>
+            <option value="Eastern Coastal Aid">Eastern Coastal Aid</option>
+          </select>
 
-      {/* Metrics Row */}
-      <div className="po-dashboard-kpi-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: '20px' }}>
-        <div className="po-white-metric-card">
-          <div className="po-card-meta-top">
-            <span className="po-metric-title-label">SLA Compliance Rate</span>
-            <div className="po-metric-icon-bubble" style={{ background: '#dcfce7', color: '#16a34a' }}>
-              <TrendingUp size={14} />
-            </div>
-          </div>
-          <div className="po-metric-main-number" style={{ color: '#16a34a' }}>96.4%</div>
-          <div className="po-metric-subtext">Benchmark &gt; 90%</div>
-        </div>
-
-        <div className="po-white-metric-card">
-          <div className="po-card-meta-top">
-            <span className="po-metric-title-label">Average Response Time</span>
-            <div className="po-metric-icon-bubble">
-              <BarChart3 size={14} />
-            </div>
-          </div>
-          <div className="po-metric-main-number">42 mins</div>
-          <div className="po-metric-subtext">From incident triage</div>
-        </div>
-
-        <div className="po-white-metric-card">
-          <div className="po-card-meta-top">
-            <span className="po-metric-title-label">Completed Missions</span>
-            <div className="po-metric-icon-bubble" style={{ background: '#f3e8ff', color: '#7c3aed' }}>
-              <CheckCircle size={14} />
-            </div>
-          </div>
-          <div className="po-metric-main-number">128</div>
-          <div className="po-metric-subtext">Western & Southern</div>
-        </div>
-
-        <div className="po-white-metric-card">
-          <div className="po-card-meta-top">
-            <span className="po-metric-title-label">Verification Score</span>
-            <div className="po-metric-icon-bubble" style={{ background: '#fef3c7', color: '#d97706' }}>
-              <PieChart size={14} />
-            </div>
-          </div>
-          <div className="po-metric-main-number">100%</div>
-          <div className="po-metric-subtext">Cryptographically audited</div>
+          <button 
+            className="po-btn po-btn-secondary"
+            onClick={onExportReport}
+          >
+            <span>Export demo CSV</span>
+          </button>
         </div>
       </div>
 
-      {/* Reports Table */}
-      <div className="po-table-card">
-        <div className="po-table-controls-bar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FileSpreadsheet size={16} color="#2563eb" />
-            <span style={{ fontWeight: 700, fontSize: '14px', color: '#0f172a' }}>
-              Audited Operational Statements
-            </span>
+      {/* Main Grid: Left Contributions over time, Right Operational breakdown */}
+      <div className="po-split-layout">
+        {/* Left Card (60%): Contributions over time */}
+        <div style={{ flex: '1 1 58%' }}>
+          <div className="po-panel" style={{ padding: '24px', height: '100%', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px' }}>
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#162e20', margin: 0 }}>
+                  Contributions over time
+                </h3>
+                <div style={{ fontSize: '12px', color: '#657367', marginTop: '3px' }}>
+                  Illustrative trend
+                </div>
+              </div>
+
+              <span style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                padding: '3px 10px',
+                borderRadius: '12px',
+                backgroundColor: '#eff6ff',
+                color: '#1d4ed8',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></span>
+                Demo
+              </span>
+            </div>
+
+            {/* Vertical 12-bar chart */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              height: '220px',
+              padding: '0 10px',
+              borderBottom: '1px solid #edf1eb',
+              gap: '12px'
+            }}>
+              {barData.map((bar, idx) => (
+                <div 
+                  key={idx}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    height: '100%',
+                    justifyContent: 'flex-end'
+                  }}
+                >
+                  <div 
+                    style={{
+                      width: '100%',
+                      maxWidth: '38px',
+                      height: `${bar.height}%`,
+                      background: 'linear-gradient(180deg, #244131 0%, #687452 100%)',
+                      borderRadius: '3px 3px 0 0',
+                      transition: 'height 0.4s ease'
+                    }}
+                    title={`Interval ${bar.label}: ${bar.height}%`}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom X-axis labels 1 to 12 */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '8px 10px 0 10px',
+              gap: '12px'
+            }}>
+              {barData.map((bar, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    fontSize: '11px',
+                    color: '#738075',
+                    fontWeight: 500
+                  }}
+                >
+                  {bar.label}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table className="po-enterprise-table">
-            <thead>
-              <tr>
-                <th>Report Title</th>
-                <th>Period</th>
-                <th>Authorised Sign-off</th>
-                <th>Scope</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style={{ fontWeight: 700, color: '#0f172a' }}>Western Province Flood Response - Phase 1 Manifest</td>
-                <td>Feb 2026</td>
-                <td>Partner Relief Unit / Director</td>
-                <td>800 Water Units, 4 Ambulances</td>
-                <td><span className="po-tag-success">&bull; Certified</span></td>
-                <td>
-                  <button 
-                    type="button" 
-                    className="po-btn-white-secondary"
-                    style={{ padding: '6px 12px', fontSize: '12px' }}
-                    onClick={onExportReport}
-                  >
-                    <Download size={13} /> Download
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 700, color: '#0f172a' }}>Inter-Agency Logistics Coordination Audit</td>
-                <td>Jan - Feb 2026</td>
-                <td>National Relief Coordinator</td>
-                <td>320 Food Kits, 150 Shelter Tents</td>
-                <td><span className="po-tag-success">&bull; Certified</span></td>
-                <td>
-                  <button 
-                    type="button" 
-                    className="po-btn-white-secondary"
-                    style={{ padding: '6px 12px', fontSize: '12px' }}
-                    onClick={onExportReport}
-                  >
-                    <Download size={13} /> Download
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        {/* Right Card (40%): Operational breakdown */}
+        <div style={{ flex: '1 1 38%' }}>
+          <div className="po-panel" style={{ padding: '24px', height: '100%', boxSizing: 'border-box' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#162e20', marginBottom: '28px' }}>
+              Operational breakdown
+            </h3>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {breakdownMetrics.map((item, idx) => (
+                <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 500, color: '#162e20' }}>
+                      {item.label}
+                    </span>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#162e20' }}>
+                      {item.value}%
+                    </span>
+                  </div>
+
+                  {/* Horizontal progress track */}
+                  <div style={{
+                    width: '100%',
+                    height: '6px',
+                    backgroundColor: '#e5ece0',
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: `${item.value}%`,
+                      height: '100%',
+                      backgroundColor: '#1e3d2c',
+                      borderRadius: '4px',
+                      transition: 'width 0.5s ease'
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
+export default PartnerReportsView;

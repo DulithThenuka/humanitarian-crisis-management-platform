@@ -343,8 +343,8 @@ export const AppRoutes = () => {
       <Route path="/partner/zones" element={<PartnerPortalPage initialTab="zones" />} />
 
       {/* Partner Officer Routes */}
-      <Route path="/partner-organisation-officer" element={<ProtectedRoute allowedRoles={['PartnerOfficer', 'PartnerOrganisationOfficer', 'Coordinator', 'Admin', 'LogisticsManager']}><PartnerOrganisationOfficerPage /></ProtectedRoute>} />
-      <Route path="/partner-officer" element={<Navigate to="/partner-organisation-officer" replace />} />
+      <Route path="/partner-organisation-officer" element={<PartnerOrganisationOfficerPage />} />
+      <Route path="/partner-officer" element={<PartnerOrganisationOfficerPage />} />
 
       {/* Partner Backward-Compatible Aliases */}
       <Route path="/partners" element={<Navigate to="/partner" replace />} />

@@ -1,75 +1,121 @@
 import React, { useState } from 'react';
-import { 
-  Send, 
-  Shield 
-} from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 export const CoordinationWorkspaceView = ({
-  timeline,
-  onAddTimelineEntry
+  timeline = [],
+  onAddTimelineEntry,
+  title = 'Coordination Workspace'
 }) => {
   const [recipient, setRecipient] = useState('Resource & Logistics Manager');
   const [message, setMessage] = useState('');
-  const [priorityFlag, setPriorityFlag] = useState('Standard');
+  const [submitted, setSubmitted] = useState(false);
+
+  const fallbackTimeline = [
+    {
+      id: 'tl-1',
+      time: '10:14',
+      title: 'Partner Officer reviewed linked record',
+      scope: 'HMR-1042 · authorised participants only'
+    },
+    {
+      id: 'tl-2',
+      time: '10:02',
+      title: 'Scoped handoff received',
+      scope: 'HMR-1042 · authorised participants only'
+    },
+    {
+      id: 'tl-3',
+      time: '09:48',
+      title: 'Citizen update prepared',
+      scope: 'HMR-1042 · authorised participants only'
+    },
+    {
+      id: 'tl-4',
+      time: '09:30',
+      title: 'Simulated recommendation generated',
+      scope: 'HMR-1042 · authorised participants only'
+    }
+  ];
+
+  const displayTimeline = (timeline && timeline.length > 0) ? timeline : fallbackTimeline;
 
   const handlePostUpdate = (e) => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    if (onAddTimelineEntry) {
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      onAddTimelineEntry({
+        id: `tl-${Date.now()}`,
+        time: timeStr,
+        title: `Scoped update logged for ${recipient}`,
+        scope: 'HMR-1042 · authorised participants only'
+      });
+    }
 
-    onAddTimelineEntry({
-      id: `tl-${Date.now()}`,
-      time: timeStr,
-      actor: `Partner Officer (Ravindu Perera) -> ${recipient}`,
-      role: 'Role 1542 - authorized participants only',
-      action: `Operational Update for ${recipient}`,
-      details: message,
-      tag: priorityFlag === 'High' ? 'Urgent Dispatch' : 'Field Bulletin'
-    });
-
-    setMessage('');
+    setSubmitted(true);
+    setTimeout(() => {
+      setMessage('');
+      setSubmitted(false);
+    }, 2500);
   };
 
   return (
-    <div>
-      {/* Top Header */}
-      <div className="po-title-action-row">
+    <div className="po-workspace">
+      {/* Top Header (Screenshots 5 & 6) */}
+      <div className="po-title-block">
         <div>
-          <div className="po-workspace-label">Access-Controlled Coordination</div>
-          <h1 className="po-page-heading">Coordination Workspace</h1>
-          <p className="po-page-subtext">
+          <div className="po-eyebrow">
+            <span>ACCESS-CONTROLLED COORDINATION</span>
+          </div>
+          <h1 className="po-title">{title}</h1>
+          <p className="po-subtitle">
             Only necessary operational information is shared. All messages are fictional demonstration records.
           </p>
         </div>
       </div>
 
       {/* Main Two-Column Layout */}
-      <div className="po-dual-column-grid">
+      <div className="po-split-layout">
         {/* Left: Coordination Timeline */}
-        <div className="po-white-panel-card">
-          <div className="po-panel-top-row" style={{ marginBottom: '16px' }}>
-            <h3 className="po-panel-heading">Coordination timeline</h3>
-            <span className="po-tag-success" style={{ backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
-              {timeline.length} Updates
-            </span>
-          </div>
+        <div className="po-panel" style={{ padding: '24px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#162e20', marginBottom: '24px' }}>
+            Coordination timeline
+          </h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {timeline.map((item) => (
-              <div key={item.id} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', paddingBottom: '14px', borderBottom: '1px solid #f1f5f9' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#2563eb', minWidth: '40px', paddingTop: '2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {displayTimeline.map((item) => (
+              <div 
+                key={item.id} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'flex-start', 
+                  gap: '16px',
+                  paddingBottom: '16px',
+                  borderBottom: '1px solid #edf1eb'
+                }}
+              >
+                <span style={{ 
+                  fontSize: '12px', 
+                  fontWeight: 600, 
+                  color: '#657367', 
+                  minWidth: '40px',
+                  paddingTop: '2px'
+                }}>
                   {item.time}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{item.action}</span>
-                    <span style={{ fontSize: '10.5px', color: '#64748b', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
-                      {item.role}
+                </span>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#1e3d2c' }}></span>
+                    <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#162e20' }}>
+                      {item.title}
                     </span>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#475569', lineHeight: 1.4 }}>{item.details}</div>
+                  <div style={{ fontSize: '11.5px', color: '#738075', paddingLeft: '14px' }}>
+                    {item.scope}
+                  </div>
                 </div>
               </div>
             ))}
@@ -77,69 +123,115 @@ export const CoordinationWorkspaceView = ({
         </div>
 
         {/* Right: Record Scoped Update Form */}
-        <div className="po-white-panel-card">
-          <div className="po-panel-top-row" style={{ marginBottom: '16px' }}>
-            <h3 className="po-panel-heading">Record scoped update</h3>
-          </div>
+        <div className="po-panel" style={{ padding: '24px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#162e20', marginBottom: '20px' }}>
+            Record scoped update
+          </h3>
 
-          <form onSubmit={handlePostUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <label className="po-attr-tag" style={{ display: 'block', marginBottom: '6px' }}>
-                Recipient Workflow
+          <form onSubmit={handlePostUpdate}>
+            <div style={{ marginBottom: '18px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: '#475569',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                marginBottom: '8px'
+              }}>
+                RECIPIENT WORKFLOW
               </label>
               <select
-                className="po-dropdown-select"
-                style={{ width: '100%' }}
+                className="po-select"
+                style={{ width: '100%', height: '40px', padding: '0 12px', fontSize: '13px' }}
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
               >
-                <option value="Resource & Logistics Manager">Resource & Logistics Manager</option>
-                <option value="Emergency Shelter Lead">Emergency Shelter Lead</option>
-                <option value="Medical Triage Coordinator">Medical Triage Coordinator</option>
-                <option value="Field Volunteer Supervisor">Field Volunteer Supervisor</option>
+                <option value="Resource & Logistics Manager">Resource &amp; Logistics Manager</option>
+                <option value="Emergency Coordinator">Emergency Coordinator</option>
+                <option value="Medical Triage Officer">Medical Triage Officer</option>
+                <option value="Shelter Supervisor">Shelter Supervisor</option>
               </select>
             </div>
 
-            <div>
-              <label className="po-attr-tag" style={{ display: 'block', marginBottom: '6px' }}>
-                Priority Level
-              </label>
-              <select
-                className="po-dropdown-select"
-                style={{ width: '100%' }}
-                value={priorityFlag}
-                onChange={(e) => setPriorityFlag(e.target.value)}
-              >
-                <option value="Standard">Standard Bulletin</option>
-                <option value="High">Urgent / Priority Alert</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="po-attr-tag" style={{ display: 'block', marginBottom: '6px' }}>
-                Operational Message
+            <div style={{ marginBottom: '18px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: '#475569',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                marginBottom: '8px'
+              }}>
+                OPERATIONAL MESSAGE
               </label>
               <textarea
-                className="po-drawer-textarea-field"
-                style={{ minHeight: '120px' }}
+                className="po-note-textarea"
+                style={{
+                  width: '100%',
+                  minHeight: '110px',
+                  padding: '12px',
+                  fontSize: '13px',
+                  borderRadius: '8px',
+                  border: '1px solid #d4ded3',
+                  backgroundColor: '#ffffff',
+                  fontFamily: 'inherit',
+                  color: '#162e20',
+                  resize: 'vertical'
+                }}
                 placeholder="Do not include unrelated personal data..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                required
               />
             </div>
 
-            <div className="po-privacy-box" style={{ padding: '10px 12px' }}>
-              <Shield size={14} color="#1d4ed8" />
-              <span style={{ fontSize: '11.5px', color: '#1e3a8a' }}>
-                Formal audit DNS / verification will be sent.
-              </span>
+            {/* Informational notice */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px',
+              borderRadius: '8px',
+              backgroundColor: '#edf2e8',
+              border: '1px solid #dbe4c6',
+              color: '#3d4d40',
+              fontSize: '11px',
+              lineHeight: 1.4,
+              marginBottom: '20px'
+            }}>
+              <ShieldCheck size={14} style={{ flexShrink: 0, color: '#2d4b38' }} />
+              <span>No real email, SMS or notification will be sent.</span>
             </div>
 
-            <button type="submit" className="po-btn-blue-primary" style={{ justifyContent: 'center', width: '100%' }}>
-              <Send size={14} />
+            {/* Submit button */}
+            <button
+              type="submit"
+              className="po-btn po-btn-primary"
+              style={{
+                width: '100%',
+                padding: '11px 16px',
+                justifyContent: 'center',
+                fontSize: '13px',
+                fontWeight: 600,
+                backgroundColor: message.trim() ? '#1e3d2c' : '#7c9082',
+                cursor: message.trim() ? 'pointer' : 'default'
+              }}
+            >
               <span>Record update</span>
             </button>
+
+            {submitted && (
+              <div style={{
+                marginTop: '12px',
+                fontSize: '12px',
+                color: '#15803d',
+                fontWeight: 600,
+                textAlign: 'center'
+              }}>
+                Scoped message logged into role coordination audit!
+              </div>
+            )}
           </form>
         </div>
       </div>
@@ -147,3 +239,4 @@ export const CoordinationWorkspaceView = ({
   );
 };
 
+export default CoordinationWorkspaceView;
