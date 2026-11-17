@@ -34,16 +34,18 @@ export const Sidebar = () => {
 
     // 6. Volunteer Management
     { label: 'Volunteer Portal', to: '/volunteer', roles: ['Coordinator', 'Volunteer', 'Admin'] },
+    { label: 'Volunteer Coordinator', to: '/volunteer-coordinator', roles: ['Coordinator', 'Admin'] },
     { label: 'Volunteer Roster', to: '/volunteer/roster', roles: ['Coordinator', 'Admin'] },
     { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
-
     // 7. Donor & Funding Management
-    { label: 'Donor & Funding Portal', to: '/donor', roles: ['Coordinator', 'LogisticsManager', 'Admin', 'Citizen'] },
+    { label: 'Donor & Funding Portal', to: '/donor', roles: ['Coordinator', 'Admin', 'LogisticsManager', 'Volunteer', 'Citizen'] },
 
     // 8. Partner Organisation Management
     { label: 'Partner Organisation Portal', to: '/partner', roles: ['Coordinator', 'Admin', 'LogisticsManager'] },
+    { label: 'Partner Officer Portal', to: '/partner-organisation-officer', roles: ['PartnerOfficer', 'PartnerOrganisationOfficer', 'Coordinator', 'Admin', 'LogisticsManager'] },
 
-    // 9. System Administration
+    // 9. Notifications & Platform Administration
+    { label: 'Notifications', to: '/coordinator/notifications', roles: ['Coordinator', 'Admin'] },
     { label: 'Platform Administration', to: '/admin', roles: ['Admin'] },
   ];
 

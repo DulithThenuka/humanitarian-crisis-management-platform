@@ -21,24 +21,72 @@ import {
   Check,
   RotateCw,
   X,
-  Plus
+  Plus,
+  Sparkles,
+  AlertTriangle
 } from 'lucide-react';
 import { createSmoothSplinePath, createSmoothAreaPath } from './aiOperationsData';
+import { aiGovernanceService } from '@/services/aiGovernanceService';
 
-export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService = 'classification', showToast }) => {
-  const [selectedService, setSelectedService] = useState(initialService);
+const normalizeServiceId = (id) => {
+  if (!id) return 'classification';
+  const norm = id.toLowerCase().replace(/_/g, '-');
+  if (norm.includes('classif')) return 'classification';
+  if (norm.includes('priority') || norm.includes('urgency')) return 'priority';
+  if (norm.includes('duplicate')) return 'duplicate';
+  if (norm.includes('resource')) return 'resource';
+  if (norm.includes('shelter')) return 'shelter';
+  if (norm.includes('demand') || norm.includes('forecast')) return 'demand';
+  if (norm.includes('anomaly') || norm.includes('suspicious')) return 'anomaly';
+  if (norm.includes('security') || norm.includes('content') || norm.includes('verif')) return 'security';
+  if (norm.includes('multilingual') || norm.includes('translat') || norm.includes('language')) return 'multilingual';
+  if (norm.includes('summar') || norm.includes('crisis')) return 'summarization';
+  return 'classification';
+};
+
+export const AIServiceWorkspace = ({ 
+  onBackOverview, 
+  onViewCase, 
+  initialService = 'classification', 
+  providerStatus: incomingProviderStatus = null,
+  showToast 
+}) => {
+  const [selectedService, setSelectedService] = useState(() => normalizeServiceId(initialService));
   const [searchTerm, setSearchTerm] = useState('');
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [configSaved, setConfigSaved] = useState(false);
   const [confidenceThreshold, setConfidenceThreshold] = useState(85);
   const [activeModelVersion, setActiveModelVersion] = useState('v2.4-Production');
   const [isRestarting, setIsRestarting] = useState(false);
+  const [liveExecutionInput, setLiveExecutionInput] = useState('');
+  const [executionResult, setExecutionResult] = useState(null);
+  const [executionError, setExecutionError] = useState(null);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [providerStatus, setProviderStatus] = useState(incomingProviderStatus);
 
   const carouselRef = useRef(null);
 
   useEffect(() => {
+    if (incomingProviderStatus) {
+      setProviderStatus(incomingProviderStatus);
+    } else {
+      let isMounted = true;
+      aiGovernanceService.getStatus()
+        .then(res => {
+          if (isMounted && res?.data?.data) {
+            setProviderStatus(res.data.data);
+          }
+        })
+        .catch(err => {
+          console.warn('AI provider status check unavailable:', err);
+        });
+      return () => { isMounted = false; };
+    }
+  }, [incomingProviderStatus]);
+
+  useEffect(() => {
     if (initialService) {
-      setSelectedService(initialService);
+      setSelectedService(normalizeServiceId(initialService));
     }
   }, [initialService]);
 
@@ -49,6 +97,34 @@ export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService 
       setIsRestarting(false);
       showToast?.(`${selectedService} microservice restarted successfully. Health: 100%`, 'success');
     }, 1400);
+  };
+
+  const handleExecuteLiveService = async () => {
+    setIsExecuting(true);
+    setExecutionError(null);
+    try {
+      const promptText = liveExecutionInput.trim() || 'Urgent evacuation requested: elderly couple trapped with floodwater above door level on Ward Place.';
+      const res = await aiGovernanceService.executeService(selectedService, {
+        inputText: promptText,
+        category: selectedService
+      });
+
+      if (res?.data?.succeeded) {
+        setExecutionResult(res.data.data);
+        const confText = res.data.data.confidencePercent != null && !isNaN(res.data.data.confidencePercent) ? `${res.data.data.confidencePercent}%` : 'N/A';
+        showToast?.(`Live ${res.data.data.serviceName} executed in ${res.data.data.executionTimeMs}ms with ${confText} confidence`, 'success');
+      } else {
+        const errMsg = res?.data?.message || 'Microservice execution failed on the backend.';
+        setExecutionError(errMsg);
+        showToast?.(errMsg, 'error');
+      }
+    } catch (err) {
+      const errMsg = err?.response?.data?.message || err?.message || 'Microservice execution unavailable.';
+      setExecutionError(errMsg);
+      showToast?.('Execution error: ' + errMsg, 'error');
+    } finally {
+      setIsExecuting(false);
+    }
   };
 
   const scrollCarousel = (direction) => {
@@ -436,6 +512,8 @@ export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService 
     }, 900);
   };
 
+  const BannerIcon = currentServiceMeta?.icon || Sparkles;
+
   return (
     <div className="ai-page-canvas">
       {/* Top Breadcrumb Bar */}
@@ -532,12 +610,39 @@ export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService 
         </button>
       </div>
 
+      {/* Provider Status / Configuration Notice */}
+      {providerStatus && !providerStatus.isConnected && (
+        <div 
+          className="workspace-provider-notice" 
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px',
+            padding: '12px 16px',
+            backgroundColor: '#fffbeb',
+            border: '1px solid #fde68a',
+            borderRadius: '8px',
+            marginBottom: '16px'
+          }}
+        >
+          <AlertTriangle size={18} color="#d97706" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ flex: 1, fontSize: '12.5px', color: '#92400e', lineHeight: '1.5' }}>
+            <div style={{ fontWeight: 600, marginBottom: '2px' }}>
+              AI Provider Offline / Configuration Required ({providerStatus.status})
+            </div>
+            <span>
+              {providerStatus.message || 'OpenAI API key is not configured. Live test executions operate under transparent deterministic rule-based fallback decision support. Human coordinator sign-off is mandatory.'}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Active Service Workspace Container */}
       <div className="active-service-workspace-container">
         {/* Workspace Banner */}
         <div className="workspace-header-banner">
           <div className="workspace-shield-icon">
-            <currentServiceMeta.icon size={22} color={currentServiceMeta.color} />
+            <BannerIcon size={22} color={currentServiceMeta?.color || '#0d9488'} />
           </div>
           <div style={{ flex: 1 }}>
             <h2 className="workspace-banner-title">{currentServiceMeta.bannerTitle}</h2>
@@ -562,7 +667,74 @@ export const AIServiceWorkspace = ({ onBackOverview, onViewCase, initialService 
           </div>
         </div>
 
-        {/* 2-Column Grid: Rate Breakdown + Trend Chart */}
+        {/* Live Service Sandbox & Execution Panel */}
+        <div className="ai-white-card" style={{ marginBottom: '16px', padding: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Sparkles size={16} color="#0d9488" />
+              <strong style={{ fontSize: '13px', color: '#0f172a' }}>Live AI Microservice Execution Sandbox</strong>
+              <span style={{ fontSize: '11px', color: '#64748b' }}>— Test {currentServiceMeta.title} against live operational text</span>
+            </div>
+            <button 
+              className="btn-solid-teal sm" 
+              onClick={handleExecuteLiveService}
+              disabled={isExecuting}
+            >
+              <RotateCw size={12} className={isExecuting ? 'spin-icon' : ''} />
+              <span>{isExecuting ? 'Processing...' : `Execute ${currentServiceMeta.title}`}</span>
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <input 
+              type="text"
+              placeholder={`Enter prompt or scenario text for ${currentServiceMeta.title} (e.g. Floodwater entered house, 2 children needing shelter...)`}
+              value={liveExecutionInput}
+              onChange={(e) => setLiveExecutionInput(e.target.value)}
+              style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleExecuteLiveService(); }}
+            />
+          </div>
+
+          {executionError && (
+            <div style={{ 
+              marginTop: '12px', 
+              padding: '10px 14px', 
+              background: '#fef2f2', 
+              borderRadius: '6px', 
+              border: '1px solid #fecaca',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <AlertTriangle size={15} color="#dc2626" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '12px', color: '#991b1b', fontWeight: 500 }}>
+                Service execution unavailable: {executionError}
+              </span>
+            </div>
+          )}
+
+          {executionResult && (
+            <div style={{ marginTop: '12px', padding: '12px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <strong style={{ fontSize: '13px', color: '#0f172a' }}>{executionResult.outputTitle}</strong>
+                <span style={{ fontSize: '11px', color: '#059669', fontWeight: 600 }}>
+                  Confidence: {executionResult.confidencePercent != null && !isNaN(executionResult.confidencePercent) ? `${executionResult.confidencePercent}%` : 'N/A'} ({executionResult.executionTimeMs}ms)
+                </span>
+              </div>
+              <p style={{ fontSize: '12px', color: '#334155', margin: '4px 0 0 0' }}>{executionResult.outputSummary}</p>
+              {executionResult.riskFlags && executionResult.riskFlags.length > 0 && (
+                <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {executionResult.riskFlags.map((flag, idx) => (
+                    <span key={idx} style={{ fontSize: '11px', padding: '2px 8px', background: '#fee2e2', color: '#dc2626', borderRadius: '4px' }}>
+                      ⚠ {flag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <div className="ai-charts-split-grid">
           {/* Left Column: Rate Breakdown */}
           <div className="ai-white-card">

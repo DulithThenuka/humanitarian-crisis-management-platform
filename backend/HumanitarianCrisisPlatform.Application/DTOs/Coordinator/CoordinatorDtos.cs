@@ -2,33 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HumanitarianCrisisPlatform.Application.DTOs.Coordinator;
 
-public class CoordinatorOverviewDto
-{
-    public CoordinatorMetricsDto Metrics { get; set; } = new();
-    public CoordinatorPerformanceDto Performance { get; set; } = new();
-    public CoordinatorOperationSummaryDto ActiveOperation { get; set; } = new();
-    public IReadOnlyList<CoordinatorCaseDto> PriorityCases { get; set; } = new List<CoordinatorCaseDto>();
-    public IReadOnlyList<CoordinatorActivityDto> RecentActivity { get; set; } = new List<CoordinatorActivityDto>();
-    public IReadOnlyList<CoordinatorAlertDto> EmergencyAlerts { get; set; } = new List<CoordinatorAlertDto>();
-}
-
-public class CoordinatorMetricsDto
-{
-    public int IncomingRequests { get; set; } = 248;
-    public string IncomingTrend { get; set; } = "18 today";
-    public int PendingReviews { get; set; } = 46;
-    public string PendingTrend { get; set; } = "12 due soon";
-    public int CriticalPriority { get; set; } = 64;
-    public string CriticalTrend { get; set; } = "17 critical";
-    public int MoreInfoRequired { get; set; } = 9;
-    public string MoreInfoTrend { get; set; } = "3 overdue";
-    public int ActiveEmergencies { get; set; } = 3;
-    public string EmergenciesTrend { get; set; } = "1 high severity";
-    public int VolunteersAssigned { get; set; } = 86;
-    public string VolunteersTrend { get; set; } = "12 tasks active";
-    public int OperationalSheltersCount { get; set; } = 16;
-}
-
 public class CoordinatorPerformanceDto
 {
     public decimal ReviewWithinTargetPercent { get; set; } = 84.0m;
@@ -115,15 +88,6 @@ public class CoordinatorHistoryStepDto
     public string Actor { get; set; } = string.Empty;
 }
 
-public class CoordinatorActivityDto
-{
-    public string Id { get; set; } = string.Empty;
-    public string Time { get; set; } = string.Empty;
-    public string Title { get; set; } = string.Empty;
-    public string Detail { get; set; } = string.Empty;
-    public string Type { get; set; } = "general";
-}
-
 public class VerifyCaseDto
 {
     [Required]
@@ -179,18 +143,4 @@ public class CreateCoordinatorIncidentDto
     public string Severity { get; set; } = "High";
     public string Area { get; set; } = "Western Province Sector";
     public string? LeadTeam { get; set; } = "National Relief Unit";
-}
-
-public class CoordinatorDecisionHistoryDto
-{
-    public string Id { get; set; } = string.Empty;
-    public string CaseId { get; set; } = string.Empty;
-    public string Action { get; set; } = string.Empty;
-    public string AiRecommendation { get; set; } = string.Empty;
-    public string HumanDecision { get; set; } = string.Empty;
-    public string ReviewerName { get; set; } = string.Empty;
-    public DateTime ReviewedAt { get; set; }
-    public string? Notes { get; set; }
-    public string ImmutableHash { get; set; } = string.Empty;
-    public string ModelConfidence { get; set; } = string.Empty;
 }

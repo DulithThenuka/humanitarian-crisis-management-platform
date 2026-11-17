@@ -44,12 +44,16 @@ function AppLayout() {
     location.pathname.startsWith('/emergency') || 
     location.pathname.startsWith('/assistance') || 
     location.pathname.startsWith('/requests') ||
+    location.pathname.startsWith('/donor') ||
+    location.pathname.startsWith('/donations') ||
+    location.pathname.startsWith('/funding-officer') ||
     location.pathname === '/request-detail' ||
     location.pathname === '/analytics' || 
     location.pathname === '/login' || 
     location.pathname === '/register' ||
     location.pathname === '/signup' ||
-    location.pathname === '/sign-up';
+    location.pathname === '/sign-up' ||
+    location.pathname.startsWith('/partner');
 
   if (isDedicatedLayout) {
     return (

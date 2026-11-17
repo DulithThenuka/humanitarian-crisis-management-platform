@@ -30,12 +30,6 @@ public class AuthController : BaseApiController
             return BadRequest(Result<AuthResponseDto>.Failure("Email and password are required."));
         }
 
-        // Ensure database has default seeded accounts if empty
-        if (!await _context.Users.AnyAsync())
-        {
-            await DatabaseSeeder.SeedAsync(_context);
-        }
-
         var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
 
@@ -67,7 +61,7 @@ public class AuthController : BaseApiController
             FullName = user.FullName,
             Email = user.Email,
             Role = user.Role.ToString(),
-            ExpiresAt = DateTime.UtcNow.AddHours(8)
+            ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }, "Login successful"));
     }
 
@@ -108,7 +102,7 @@ public class AuthController : BaseApiController
             FullName = user.FullName,
             Email = user.Email,
             Role = user.Role.ToString(),
-            ExpiresAt = DateTime.UtcNow.AddHours(8)
+            ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }, "Registration successful"));
     }
 
@@ -124,12 +118,12 @@ public class AuthController : BaseApiController
 
         return Ok(Result<AuthResponseDto>.Success(new AuthResponseDto
         {
-            Token = Request.Headers.Authorization.ToString().Replace("Bearer ", "").Trim(),
+            Token = JwtSettings.NormalizeBearerToken(Request.Headers.Authorization.ToString()) ?? string.Empty,
             UserId = user.Id,
             FullName = user.FullName,
             Email = user.Email,
             Role = user.Role.ToString(),
-            ExpiresAt = DateTime.UtcNow.AddHours(8)
+            ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }));
     }
 

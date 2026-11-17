@@ -20,102 +20,7 @@ import {
   Plus
 } from 'lucide-react';
 import './PartnerPortalPage.css';
-
-const PARTNER_ORGANISATIONS = [
-  {
-    id: 'PART-001',
-    name: 'Sri Lanka Red Cross Society',
-    acronym: 'SLRCS',
-    type: 'Humanitarian / First Response',
-    leadContact: 'Dr. Rohan Jayasinghe',
-    phone: '+94 11 269 1095',
-    email: 'operations@redcross.lk',
-    status: 'Active Response',
-    statusClass: 'status-active',
-    assignedZones: ['Kelani East - Sector 03', 'Kolonnawa', 'Kaduwela'],
-    commitments: [
-      { item: 'Inflatable Rescue Boats with Crew', qty: 12, status: 'Deployed' },
-      { item: 'Emergency First Aid Mobile Units', qty: 6, status: 'Deployed' },
-      { item: 'Dry Food Family Packs (7-day)', qty: 4500, status: 'Distributing' }
-    ],
-    mouStatus: 'Active MoU (2025-2027)',
-    mouBadge: 'badge-verified'
-  },
-  {
-    id: 'PART-002',
-    name: 'Sarvodaya Shramadana Movement',
-    acronym: 'SARVODAYA',
-    type: 'Community Relief & Volunteer Mobilisation',
-    leadContact: 'Nimali Senaratne',
-    phone: '+94 11 265 5255',
-    email: 'relief@sarvodaya.org',
-    status: 'Active Response',
-    statusClass: 'status-active',
-    assignedZones: ['Gampaha - Ja-Ela Basin', 'Negombo Rural'],
-    commitments: [
-      { item: 'Community Kitchen Meal Distribution', qty: 15000, status: 'Daily' },
-      { item: 'Trained Community First Responders', qty: 320, status: 'Active' },
-      { item: 'Clean Drinking Water Carts', qty: 25, status: 'Deployed' }
-    ],
-    mouStatus: 'Active MoU (2024-2027)',
-    mouBadge: 'badge-verified'
-  },
-  {
-    id: 'PART-003',
-    name: 'UNICEF Emergency Country Office',
-    acronym: 'UNICEF',
-    type: 'UN Agency / Child & Maternal Protection',
-    leadContact: 'Elena Vance (Cluster Lead)',
-    phone: '+94 11 276 8555',
-    email: 'colombo@unicef.org',
-    status: 'Active Support',
-    statusClass: 'status-active',
-    assignedZones: ['Western Province All Sectors', 'Kalutara South'],
-    commitments: [
-      { item: 'School-in-a-Box & Child Safe Spaces', qty: 18, status: 'Staged' },
-      { item: 'WASH Water Purification Tablets', qty: 120000, status: 'Delivered' },
-      { item: 'Infant Nutrition & Hygiene Kits', qty: 2800, status: 'Distributing' }
-    ],
-    mouStatus: 'UN Joint Framework Agreement',
-    mouBadge: 'badge-verified'
-  },
-  {
-    id: 'PART-004',
-    name: 'World Food Programme (WFP)',
-    acronym: 'WFP',
-    type: 'Food Security & Supply Chain Logistics',
-    leadContact: 'Marcus Sterling',
-    phone: '+94 11 250 2490',
-    email: 'srilanka.emergency@wfp.org',
-    status: 'Mobilising',
-    statusClass: 'status-warning',
-    assignedZones: ['Central Logistics Depot - Peliyagoda'],
-    commitments: [
-      { item: 'Fortified High-Energy Biscuits (MT)', qty: 45, status: 'In Transit' },
-      { item: 'Heavy-Duty 4x4 Supply Trucks', qty: 8, status: 'Staged' }
-    ],
-    mouStatus: 'Annual Humanitarian Agreement',
-    mouBadge: 'badge-verified'
-  },
-  {
-    id: 'PART-005',
-    name: 'St. John Ambulance Sri Lanka',
-    acronym: 'SJA',
-    type: 'Emergency Medical & Paramedic',
-    leadContact: 'Dinesh Perera',
-    phone: '+94 11 243 7755',
-    email: 'emergency@stjohn.lk',
-    status: 'Active Response',
-    statusClass: 'status-active',
-    assignedZones: ['Colombo North Evacuation Corridor', 'Wellampitiya'],
-    commitments: [
-      { item: 'Paramedic Ambulances with Crew', qty: 4, status: 'Active' },
-      { item: 'Triage First-Aid Tents', qty: 3, status: 'Deployed' }
-    ],
-    mouStatus: 'Active MoU (2025-2026)',
-    mouBadge: 'badge-verified'
-  }
-];
+import { partnerService } from '../../services/partnerService';
 
 export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
   const location = useLocation();
@@ -137,15 +42,61 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
       setActiveTab('overview');
     }
   }, [initialTab, location.pathname]);
+  const [partners, setPartners] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [sectorZones, setSectorZones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPartner, setSelectedPartner] = useState(PARTNER_ORGANISATIONS[0]);
+  const [selectedPartner, setSelectedPartner] = useState(null);
   const [showCommitmentModal, setShowCommitmentModal] = useState(false);
-  const [newCommitment, setNewCommitment] = useState({ item: '', qty: '', zone: 'Kelani East - Sector 03' });
+  const [newCommitment, setNewCommitment] = useState({
+    partnerOrganisationId: '',
+    item: '',
+    qty: '',
+    zone: 'Kelani East - Sector 03'
+  });
 
-  const filteredPartners = PARTNER_ORGANISATIONS.filter(p =>
+  const loadPartnerData = async () => {
+    setLoading(true);
+    setApiError('');
+    try {
+      const [partnersRes, summaryRes, zonesRes] = await Promise.all([
+        partnerService.getPartners(),
+        partnerService.getSummary(),
+        partnerService.getSectorZones()
+      ]);
+
+      const loadedPartners = partnersRes?.data || [];
+      setPartners(loadedPartners);
+      setSummary(summaryRes?.data || null);
+      setSectorZones(zonesRes?.data || []);
+
+      if (loadedPartners.length > 0) {
+        setSelectedPartner(prev =>
+          prev ? loadedPartners.find(p => p.id === prev.id) || loadedPartners[0] : loadedPartners[0]
+        );
+        setNewCommitment(prev => ({
+          ...prev,
+          partnerOrganisationId: prev.partnerOrganisationId || loadedPartners[0].id
+        }));
+      }
+    } catch (err) {
+      setApiError(err?.errors?.[0] || err?.message || 'Unable to load partner coordination data from backend.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPartnerData();
+  }, []);
+
+  const filteredPartners = partners.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.acronym.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.assignedZones.some(z => z.toLowerCase().includes(searchQuery.toLowerCase()))
+    (p.assignedZones || []).some(z => z.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -155,7 +106,7 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
         <div className="partner-header-left">
           <div className="partner-badge-row">
             <span className="partner-pill pill-navy">Module 08 · Partner Organisation Management</span>
-            <span className="partner-pill pill-green">● 14 Humanitarian Partners On-Grid</span>
+            <span className="partner-pill pill-green">● {summary?.accreditedPartnersCount ?? partners.length} Humanitarian Partners On-Grid</span>
             <span className="partner-pill pill-amber">Western Province Monsoon Operations</span>
           </div>
           <h1 className="partner-title">Inter-Agency Partner Coordination Portal</h1>
@@ -173,6 +124,12 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
         </div>
       </div>
 
+      {apiError && (
+        <div className="partner-card" style={{ marginBottom: 16, borderColor: '#ef4444' }}>
+          <p style={{ color: '#fca5a5', margin: 0 }}>{apiError}</p>
+        </div>
+      )}
+
       {/* Metrics Row */}
       <div className="partner-metrics-grid">
         <div className="partner-metric-card">
@@ -181,8 +138,8 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
           </div>
           <div>
             <span className="metric-label">Accredited Partner NGOs</span>
-            <h3 className="metric-value">14 Organisations</h3>
-            <span className="metric-subtext text-emerald">↑ 100% Verified MoUs</span>
+            <h3 className="metric-value">{summary?.accreditedPartnersCount ?? partners.length} Organisations</h3>
+            <span className="metric-subtext text-emerald">↑ {summary?.verifiedMouPercentage ?? 0}% Verified MoUs</span>
           </div>
         </div>
         <div className="partner-metric-card">
@@ -191,8 +148,8 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
           </div>
           <div>
             <span className="metric-label">Joint Response Units</span>
-            <h3 className="metric-value">28 Field Teams</h3>
-            <span className="metric-subtext text-emerald">Active across 4 districts</span>
+            <h3 className="metric-value">{summary?.jointResponseUnitsCount ?? 0} Field Teams</h3>
+            <span className="metric-subtext text-emerald">Active across {summary?.activeZonesCount ?? sectorZones.length} sectors</span>
           </div>
         </div>
         <div className="partner-metric-card">
@@ -201,8 +158,8 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
           </div>
           <div>
             <span className="metric-label">Pledged Aid Material Value</span>
-            <h3 className="metric-value">Rs. 420 Million</h3>
-            <span className="metric-subtext text-cyan">74% Dispatched to shelters</span>
+            <h3 className="metric-value">Rs. {summary?.pledgedAidValueMillionsLkr ?? 0} Million</h3>
+            <span className="metric-subtext text-cyan">{summary?.dispatchedPercentage ?? 0}% Dispatched to shelters</span>
           </div>
         </div>
         <div className="partner-metric-card">
@@ -211,8 +168,8 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
           </div>
           <div>
             <span className="metric-label">Partner Fleet Deployed</span>
-            <h3 className="metric-value">46 Vehicles / Boats</h3>
-            <span className="metric-subtext text-emerald">12 rescue boats, 8 bowsers</span>
+            <h3 className="metric-value">{summary?.fleetDeployedCount ?? 0} Vehicles / Boats</h3>
+            <span className="metric-subtext text-emerald">{summary?.totalCommitmentsCount ?? 0} active commitments</span>
           </div>
         </div>
       </div>
@@ -268,10 +225,13 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
             </div>
 
             <div className="partner-list">
+              {loading && partners.length === 0 && (
+                <p style={{ color: '#94a3b8', padding: '12px 0' }}>Loading partner organisations...</p>
+              )}
               {filteredPartners.map(partner => (
                 <div
                   key={partner.id}
-                  className={`partner-item ${selectedPartner.id === partner.id ? 'selected' : ''}`}
+                  className={`partner-item ${selectedPartner?.id === partner.id ? 'selected' : ''}`}
                   onClick={() => setSelectedPartner(partner)}
                 >
                   <div className="partner-item-top">
@@ -306,9 +266,10 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
                 <h3 className="card-title">Partner Dossier & Pledges</h3>
                 <p className="card-desc">Detailed commitments and liaison communications</p>
               </div>
-              <span className="dossier-id">{selectedPartner.id}</span>
+              <span className="dossier-id">{selectedPartner?.code || selectedPartner?.id || '—'}</span>
             </div>
 
+            {selectedPartner ? (
             <div className="dossier-body">
               <div className="dossier-highlight-box">
                 <div className="dossier-badge-row">
@@ -375,11 +336,20 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
                 <a href={`tel:${selectedPartner.phone}`} className="partner-btn btn-primary" style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }}>
                   <Phone size={16} /> Direct Comms Call
                 </a>
-                <button className="partner-btn btn-secondary" onClick={() => setShowCommitmentModal(true)}>
+                <button
+                  className="partner-btn btn-secondary"
+                  onClick={() => {
+                    setNewCommitment(prev => ({ ...prev, partnerOrganisationId: selectedPartner.id }));
+                    setShowCommitmentModal(true);
+                  }}
+                >
                   Log Inter-Agency Task
                 </button>
               </div>
             </div>
+            ) : (
+              <p style={{ color: '#94a3b8', padding: '16px 0' }}>Select a partner organisation to view its dossier.</p>
+            )}
           </div>
         </div>
       )}
@@ -406,11 +376,11 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
                 </tr>
               </thead>
               <tbody>
-                {PARTNER_ORGANISATIONS.map(p => (
+                {partners.map(p => (
                   <tr key={p.id}>
                     <td>
                       <strong>{p.name}</strong>
-                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>ID: {p.id} ({p.acronym})</div>
+                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>ID: {p.code || p.id} ({p.acronym})</div>
                     </td>
                     <td>{p.type}</td>
                     <td>{p.leadContact}</td>
@@ -452,13 +422,13 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
                 </tr>
               </thead>
               <tbody>
-                {PARTNER_ORGANISATIONS.flatMap(p =>
-                  p.commitments.map((c, i) => (
-                    <tr key={`${p.id}-${i}`}>
+                {partners.flatMap(p =>
+                  (p.commitments || []).map((c, i) => (
+                    <tr key={c.id || `${p.id}-${i}`}>
                       <td><strong>{p.acronym}</strong> ({p.name})</td>
                       <td>{c.item}</td>
-                      <td><strong>{c.qty.toLocaleString()}</strong></td>
-                      <td>{p.assignedZones[0]}</td>
+                      <td><strong>{(c.qty ?? 0).toLocaleString()}</strong></td>
+                      <td>{c.destinationZone || p.assignedZones?.[0] || '—'}</td>
                       <td>
                         <span className={`status-pill ${c.status === 'Deployed' || c.status === 'Active' || c.status === 'Delivered' ? 'status-active' : 'status-warning'}`}>
                           {c.status}
@@ -482,51 +452,25 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
             </div>
           </div>
           <div className="zones-grid-layout">
-            <div className="zone-card">
-              <div className="zone-card-header">
-                <h4>Kelani River Basin - East Zone 03</h4>
-                <span className="status-pill status-active">High Priority Flood</span>
+            {sectorZones.map(zone => (
+              <div key={zone.id} className="zone-card">
+                <div className="zone-card-header">
+                  <h4>{zone.name}</h4>
+                  <span className={`status-pill ${zone.statusClass}`}>{zone.priorityStatus}</span>
+                </div>
+                <p className="zone-desc">{zone.description}</p>
+                <div className="zone-orgs">
+                  <strong>Assigned Partners:</strong>
+                  <ul>
+                    {(zone.assignedPartners || []).map((ap, idx) => (
+                      <li key={`${zone.id}-${ap.partnerId}-${idx}`}>
+                        {ap.partnerName} ({ap.roleSummary})
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <p className="zone-desc">Covering Kolonnawa, Kaduwela, Wellampitiya, Hanwella floodplains.</p>
-              <div className="zone-orgs">
-                <strong>Assigned Partners:</strong>
-                <ul>
-                  <li>Sri Lanka Red Cross Society (Boats & First Aid)</li>
-                  <li>St. John Ambulance (Paramedics)</li>
-                  <li>UNICEF (WASH Purification)</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="zone-card">
-              <div className="zone-card-header">
-                <h4>Gampaha Ja-Ela Basin Zone 02</h4>
-                <span className="status-pill status-active">Severe Inundation</span>
-              </div>
-              <p className="zone-desc">Covering Ja-Ela, Kandana, Wattala low-lying residential clusters.</p>
-              <div className="zone-orgs">
-                <strong>Assigned Partners:</strong>
-                <ul>
-                  <li>Sarvodaya Shramadana Movement (Community Meals)</li>
-                  <li>World Food Programme (Dry Rations)</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="zone-card">
-              <div className="zone-card-header">
-                <h4>Kalutara & Kalu Ganga Basin Zone 01</h4>
-                <span className="status-pill status-warning">Monitoring Stage</span>
-              </div>
-              <p className="zone-desc">Covering Millaniya, Horana, Bulathsinhala river banks.</p>
-              <div className="zone-orgs">
-                <strong>Assigned Partners:</strong>
-                <ul>
-                  <li>UNICEF Country Office (Child Protection)</li>
-                  <li>Sri Lanka Red Cross Society (Relief Rations)</li>
-                </ul>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       )}
@@ -539,15 +483,36 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
               <h3>Pledge Partner Resource Commitment</h3>
               <button className="partner-modal-close" onClick={() => setShowCommitmentModal(false)}>×</button>
             </div>
-            <form onSubmit={(e) => {
+            <form onSubmit={async (e) => {
               e.preventDefault();
-              alert(`Commitment for ${newCommitment.qty}x ${newCommitment.item} logged successfully!`);
-              setShowCommitmentModal(false);
+              setSubmitting(true);
+              setApiError('');
+              try {
+                await partnerService.logCommitment({
+                  partnerOrganisationId: newCommitment.partnerOrganisationId || selectedPartner?.id,
+                  item: newCommitment.item,
+                  qty: Number(newCommitment.qty),
+                  destinationZone: newCommitment.zone,
+                  status: 'Pledged'
+                });
+                setShowCommitmentModal(false);
+                setNewCommitment(prev => ({ ...prev, item: '', qty: '' }));
+                await loadPartnerData();
+              } catch (err) {
+                setApiError(err?.errors?.[0] || err?.message || 'Failed to log commitment.');
+              } finally {
+                setSubmitting(false);
+              }
             }}>
               <div className="form-group">
                 <label>Partner Organisation</label>
-                <select className="form-input">
-                  {PARTNER_ORGANISATIONS.map(p => (
+                <select
+                  className="form-input"
+                  value={newCommitment.partnerOrganisationId || selectedPartner?.id || ''}
+                  onChange={e => setNewCommitment({ ...newCommitment, partnerOrganisationId: e.target.value })}
+                  required
+                >
+                  {partners.map(p => (
                     <option key={p.id} value={p.id}>{p.name} ({p.acronym})</option>
                   ))}
                 </select>
@@ -591,8 +556,8 @@ export const PartnerPortalPage = ({ initialTab = 'overview' }) => {
                 <button type="button" className="partner-btn btn-secondary" onClick={() => setShowCommitmentModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="partner-btn btn-primary">
-                  Confirm Inter-Agency Pledge
+                <button type="submit" className="partner-btn btn-primary" disabled={submitting}>
+                  {submitting ? 'Logging...' : 'Confirm Inter-Agency Pledge'}
                 </button>
               </div>
             </form>

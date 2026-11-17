@@ -85,10 +85,65 @@ public static class DatabaseSeeder
                     AssignedDistrict = "Sabaragamuwa / Ratnapura",
                     Role = UserRole.Citizen,
                     IsActive = true
+                },
+                new User
+                {
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777777"),
+                    FullName = "Ishara Senanayake",
+                    Email = "ishara.senanayake@reliefcore.org",
+                    PasswordHash = defaultPasswordHash,
+                    PhoneNumber = "+94 77 789 0123",
+                    AssignedDistrict = "Western Province Command",
+                    Role = UserRole.CaseManager,
+                    IsActive = true
+                },
+                new User
+                {
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888888"),
+                    FullName = "Tharushi De Alwis",
+                    Email = "shelter.admin@reliefcore.org",
+                    PasswordHash = defaultPasswordHash,
+                    PhoneNumber = "+94 77 123 4567",
+                    AssignedDistrict = "Western Province / Colombo Shelters",
+                    Role = UserRole.ShelterManager,
+                    IsActive = true
                 }
             };
 
             await context.Users.AddRangeAsync(users);
+            await context.SaveChangesAsync();
+        }
+        else
+        {
+            var defaultPasswordHash = PasswordHasher.HashPassword("Password123!");
+            if (!await context.Users.AnyAsync(u => u.Role == UserRole.CaseManager))
+            {
+                context.Users.Add(new User
+                {
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777777"),
+                    FullName = "Ishara Senanayake",
+                    Email = "ishara.senanayake@reliefcore.org",
+                    PasswordHash = defaultPasswordHash,
+                    PhoneNumber = "+94 77 789 0123",
+                    AssignedDistrict = "Western Province Command",
+                    Role = UserRole.CaseManager,
+                    IsActive = true
+                });
+            }
+            if (!await context.Users.AnyAsync(u => u.Role == UserRole.ShelterManager))
+            {
+                context.Users.Add(new User
+                {
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888888"),
+                    FullName = "Tharushi De Alwis",
+                    Email = "shelter.admin@reliefcore.org",
+                    PasswordHash = defaultPasswordHash,
+                    PhoneNumber = "+94 77 123 4567",
+                    AssignedDistrict = "Western Province / Colombo Shelters",
+                    Role = UserRole.ShelterManager,
+                    IsActive = true
+                });
+            }
             await context.SaveChangesAsync();
         }
 
@@ -343,6 +398,688 @@ public static class DatabaseSeeder
                 };
 
                 await context.Volunteers.AddRangeAsync(volunteers);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        // 7. Seed Corporate & Humanitarian Relief Donations
+        if (!await context.Donations.AnyAsync())
+        {
+            var donations = new List<Donation>
+            {
+                new()
+                {
+                    Id = Guid.Parse("d1111111-0000-0000-0000-000000000101"),
+                    DonorName = "Dilmah Tea Relief Trust",
+                    DonorEmail = "csr@dilmahtea.com",
+                    DonorPhone = "+94 11 482 2000",
+                    DonationType = 0, // Monetary
+                    Amount = 5000000m,
+                    Currency = "LKR",
+                    Sector = "Food & Clean Water",
+                    TargetDistrict = "Colombo (Kelani Basin)",
+                    Status = 1, // Verified & Cleared
+                    ReceivedAt = DateTime.UtcNow.AddHours(-18),
+                    VerifiedBy = "DMC Treasury Audit",
+                    TaxExemptId = "TE-2026-8841",
+                    AuditHash = "sha256-8f7a43e8bb219901"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d2222222-0000-0000-0000-000000000102"),
+                    DonorName = "UN OCHA Emergency Rapid Fund",
+                    DonorEmail = "rapid-response@un.ocha.org",
+                    DonationType = 0, // Monetary
+                    Amount = 8500000m,
+                    Currency = "LKR",
+                    Sector = "Medical Field Hospitals",
+                    TargetDistrict = "Western & Sabaragamuwa",
+                    Status = 1, // Verified & Cleared
+                    ReceivedAt = DateTime.UtcNow.AddHours(-36),
+                    VerifiedBy = "UN Comptroller Office",
+                    TaxExemptId = "UN-NGO-2026-002",
+                    AuditHash = "sha256-12c49981e4b3017a"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d3333333-0000-0000-0000-000000000103"),
+                    DonorName = "John Keells Foundation",
+                    DonorEmail = "community@keells.com",
+                    DonationType = 1, // InKind
+                    Amount = 3750000m,
+                    Currency = "LKR",
+                    ItemDescription = "Emergency Dry Ration Packs & Infant Hygiene Kits",
+                    ItemQuantity = 2500,
+                    Sector = "Dry Rations & Baby Care",
+                    TargetDistrict = "Gampaha Evacuee Shelters",
+                    Status = 2, // AllocatedToDepot
+                    ReceivedAt = DateTime.UtcNow.AddHours(-40),
+                    VerifiedBy = "Logistics Intake Dock",
+                    TaxExemptId = "TE-2026-8812",
+                    AuditHash = "sha256-99ea4871bb04bc33"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d4444444-0000-0000-0000-000000000104"),
+                    DonorName = "Commercial Bank CSR Division",
+                    DonorEmail = "csr@combank.net",
+                    DonationType = 0,
+                    Amount = 3200000m,
+                    Currency = "LKR",
+                    Sector = "Water Bowsers & Fuel Reserves",
+                    TargetDistrict = "Colombo & Kalutara",
+                    Status = 1,
+                    ReceivedAt = DateTime.UtcNow.AddHours(-52),
+                    VerifiedBy = "DMC Treasury Audit",
+                    TaxExemptId = "TE-2026-8790",
+                    AuditHash = "sha256-33d1bb89aa04ff20"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d5555555-0000-0000-0000-000000000105"),
+                    DonorName = "Sri Lanka Red Cross Society",
+                    DonorEmail = "disaster@redcross.lk",
+                    DonationType = 1,
+                    Amount = 2400000m,
+                    Currency = "LKR",
+                    ItemDescription = "Surgical Trauma & Emergency First Aid Kits",
+                    ItemQuantity = 1200,
+                    Sector = "Emergency Medical Care",
+                    TargetDistrict = "Colombo Base Stations",
+                    Status = 2,
+                    ReceivedAt = DateTime.UtcNow.AddHours(-60),
+                    VerifiedBy = "Medical Corps Logistics",
+                    TaxExemptId = "RC-MED-2026",
+                    AuditHash = "sha256-44aa9911e2477190"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d6666666-0000-0000-0000-000000000106"),
+                    DonorName = "Rotary Club Colombo West",
+                    DonorEmail = "president@rotarycolombo.lk",
+                    DonationType = 0,
+                    Amount = 1800000m,
+                    Currency = "LKR",
+                    Sector = "Shelter Bedding & Tarpaulins",
+                    TargetDistrict = "Western Province Shelters",
+                    Status = 1,
+                    ReceivedAt = DateTime.UtcNow.AddHours(-72),
+                    VerifiedBy = "DMC Treasury Audit",
+                    TaxExemptId = "TE-2026-8744",
+                    AuditHash = "sha256-aa428801990141bb"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d7777777-0000-0000-0000-000000000107"),
+                    DonorName = "Aitken Spence Logistics Aid",
+                    DonorEmail = "logistics.aid@aitkenspence.lk",
+                    DonationType = 2, // LogisticsAsset
+                    Amount = 4800000m,
+                    Currency = "LKR",
+                    ItemDescription = "6 4x4 Off-Road Transport Trucks for Flood Rescue Convoys",
+                    ItemQuantity = 6,
+                    Sector = "Flood Rescue Convoys",
+                    TargetDistrict = "Western Province Command",
+                    Status = 3, // ActiveDeployment
+                    ReceivedAt = DateTime.UtcNow.AddHours(-80),
+                    VerifiedBy = "Fleet Master Verification",
+                    TaxExemptId = "TE-2026-8711",
+                    AuditHash = "sha256-55bc9944bb2201ea"
+                },
+                new()
+                {
+                    Id = Guid.Parse("d8888888-0000-0000-0000-000000000108"),
+                    DonorName = "Australia-Sri Lanka Disaster Solidarity",
+                    DonorEmail = "aus.aid@dfat.gov.au",
+                    DonationType = 0,
+                    Amount = 2600000m,
+                    Currency = "LKR",
+                    Sector = "Mobile Water Purification Units",
+                    TargetDistrict = "Kalutara & Galle",
+                    Status = 0, // PendingAudit
+                    ReceivedAt = DateTime.UtcNow.AddHours(-96),
+                    VerifiedBy = "Central Bank Escrow Unit",
+                    TaxExemptId = "PENDING-CB",
+                    AuditHash = "sha256-77ee1134aa9940cb"
+                }
+            };
+
+            await context.Donations.AddRangeAsync(donations);
+            await context.SaveChangesAsync();
+        }
+
+        // 8. Seed Emergency Broadcasts & Alert Warnings
+        if (!await context.EmergencyBroadcasts.AnyAsync())
+        {
+            var broadcasts = new List<EmergencyBroadcast>
+            {
+                new()
+                {
+                    Id = Guid.Parse("b1111111-0000-0000-0000-000000000091"),
+                    Title = "Emergency Flash Flood Warning: Kelani River Basin",
+                    Severity = "Emergency",
+                    Channels = "SMS Broadcast, Push Notification, Field Radio",
+                    TargetRegion = "Colombo & Gampaha Lowlands",
+                    TargetAudience = "All Citizens in Zone A & B (45,200 recipients)",
+                    Message = "CRITICAL ALERT: Kelani River has exceeded major flood level (1.84m). Immediate evacuation advised for low-lying areas of Wellampitiya, Kolonnawa, Kelaniya. Proceed to designated high-ground shelters.",
+                    SentBy = "DMC Emergency Command / Sarah Johnson",
+                    DeliveryRate = "99.2%",
+                    Status = "Active Live",
+                    IsActive = true,
+                    SentAt = DateTime.UtcNow.AddMinutes(-45)
+                },
+                new()
+                {
+                    Id = Guid.Parse("b2222222-0000-0000-0000-000000000092"),
+                    Title = "Severe Road Inundation: A1 Colombo-Kandy Road at Peliyagoda",
+                    Severity = "Warning",
+                    Channels = "Push Notification, Citizen Portal",
+                    TargetRegion = "Peliyagoda & Kelaniya Corridors",
+                    TargetAudience = "Commuters & Logistics Convoys (28,400 recipients)",
+                    Message = "ROAD CLOSURE: A1 Highway submerged between Peliyagoda junction and 4th Mile Post. Light vehicles cannot pass. Use Southern Expressway or Minuwangoda diversion route.",
+                    SentBy = "Traffic Police Disaster Liaison",
+                    DeliveryRate = "98.7%",
+                    Status = "Active Live",
+                    IsActive = true,
+                    SentAt = DateTime.UtcNow.AddHours(-2)
+                },
+                new()
+                {
+                    Id = Guid.Parse("b3333333-0000-0000-0000-000000000093"),
+                    Title = "New High-Ground Relief Shelter Opened: Colombo Central School",
+                    Severity = "Advisory",
+                    Channels = "SMS Broadcast, Push Notification",
+                    TargetRegion = "Colombo District - Zone A",
+                    TargetAudience = "Registered Evacuees (18,500 recipients)",
+                    Message = "SHELTER NOTIFICATION: Colombo Central School (Capacity 500) is now open with clean water, hot meals, and a Sri Lanka Red Cross medical aid post.",
+                    SentBy = "Shelter Administration Lead",
+                    DeliveryRate = "99.4%",
+                    Status = "Active Live",
+                    IsActive = true,
+                    SentAt = DateTime.UtcNow.AddHours(-4)
+                },
+                new()
+                {
+                    Id = Guid.Parse("b4444444-0000-0000-0000-000000000094"),
+                    Title = "Precautionary Boil Water Directive: Kalutara District",
+                    Severity = "Warning",
+                    Channels = "SMS Broadcast, Field Radio",
+                    TargetRegion = "Kalutara South & Beruwala",
+                    TargetAudience = "Residents in Coastal Inundation Areas (32,100 recipients)",
+                    Message = "HEALTH DIRECTIVE: Groundwater wells contaminated due to sea surge. All tap and well water must be boiled vigorously for at least 3 minutes before drinking or food preparation.",
+                    SentBy = "Ministry of Health Disaster Response",
+                    DeliveryRate = "97.8%",
+                    Status = "Active Live",
+                    IsActive = true,
+                    SentAt = DateTime.UtcNow.AddHours(-8)
+                },
+                new()
+                {
+                    Id = Guid.Parse("b5555555-0000-0000-0000-000000000089"),
+                    Title = "Dam Spillway Gate #3 Release Notice: Laxapana Hydro Complex",
+                    Severity = "Emergency",
+                    Channels = "SMS Broadcast, Emergency Sirens",
+                    TargetRegion = "Kelani Downstream Riparian Communities",
+                    TargetAudience = "Riparian Riverfront Dwellings (24,000 recipients)",
+                    Message = "DAM GATE NOTICE: 3 spillway gates opened due to torrential catchment rainfall. Expect river crest surge between 06:00 and 10:00. Maintain 100m clearance from riverbanks.",
+                    SentBy = "Ceylon Electricity Board Hydro Security",
+                    DeliveryRate = "99.8%",
+                    Status = "Archived",
+                    IsActive = false,
+                    SentAt = DateTime.UtcNow.AddHours(-24)
+                }
+            };
+
+            await context.EmergencyBroadcasts.AddRangeAsync(broadcasts);
+            await context.SaveChangesAsync();
+        }
+
+        // 9. Seed Official Situation Reports (SITREPs)
+        if (!await context.SituationReports.AnyAsync())
+        {
+            var reports = new List<SituationReport>
+            {
+                new()
+                {
+                    Id = Guid.Parse("c1111111-0000-0000-0000-000000000014"),
+                    ReportCode = "SITREP-2026-WP-014",
+                    Title = "Kelani River Basin Flash Flooding - Situation Report #14",
+                    IncidentName = "Western Province Monsoon Inundation",
+                    DisasterType = "Flood",
+                    District = "Colombo",
+                    GeneratedBy = "Operations Administrator",
+                    CasualtiesReported = 0,
+                    PeopleDisplaced = 3200,
+                    SheltersActive = 16,
+                    TeamsDeployed = 42,
+                    RoadPassabilityStatus = "Major arterial roads restricted; boat corridors active",
+                    ExecutiveSummary = "Water level at Nagalagam Street gauge recorded 1.84m (Major Flood). Tri-forces and volunteer search-and-rescue teams have evacuated 3,200 individuals across Wellampitiya and Kolonnawa.",
+                    PriorityNeeds = "Potable water bowsers, infant care packs, emergency inflatable dinghies.",
+                    Status = "Official Approved",
+                    ReportedAt = DateTime.UtcNow.AddHours(-2)
+                },
+                new()
+                {
+                    Id = Guid.Parse("c2222222-0000-0000-0000-000000000015"),
+                    ReportCode = "SITREP-2026-WP-015",
+                    Title = "Gampaha Mudslide & Attanagalu Oya Inundation Report",
+                    IncidentName = "Gampaha Rail Corridor Landslide",
+                    DisasterType = "Landslide",
+                    District = "Gampaha",
+                    GeneratedBy = "Kasun Perera (District Lead)",
+                    CasualtiesReported = 0,
+                    PeopleDisplaced = 1450,
+                    SheltersActive = 7,
+                    TeamsDeployed = 18,
+                    RoadPassabilityStatus = "A1 highway blocked at Miriswatta; clearance ongoing",
+                    ExecutiveSummary = "Heavy mud deposits cleared from mainline railway tracks. 1,450 residents accommodated in verified secondary shelters with 100% ration coverage.",
+                    PriorityNeeds = "Heavy earthmoving excavators, fuel reserves for drainage sumps.",
+                    Status = "Official Approved",
+                    ReportedAt = DateTime.UtcNow.AddHours(-5)
+                }
+            };
+
+            await context.SituationReports.AddRangeAsync(reports);
+            await context.SaveChangesAsync();
+        }
+
+        // 10. Seed Initial Incident / Case Manager Records if none exist
+        if (!await context.Incidents.AnyAsync())
+        {
+            var caseManagerId = Guid.Parse("77777777-7777-7777-7777-777777777777");
+            var citizenId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+
+            var resolvedCaseManagerId = await context.Users
+                .Where(u => u.Role == UserRole.CaseManager)
+                .Select(u => (Guid?)u.Id)
+                .FirstOrDefaultAsync() ?? caseManagerId;
+
+            var resolvedCitizenId = await context.Users
+                .Where(u => u.Role == UserRole.Citizen)
+                .Select(u => (Guid?)u.Id)
+                .FirstOrDefaultAsync() ?? citizenId;
+
+            var now = DateTime.UtcNow;
+
+            var inc1042 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1042-4000-8000-000000001042"),
+                CaseNumber = "HMR-1042",
+                Title = "Emergency Shelter",
+                Category = IncidentCategory.EmergencyShelter,
+                CategoryDisplay = "Emergency Shelter",
+                OperationalArea = "Kelani East - Zone 03",
+                Priority = PriorityLevel.Critical,
+                Status = IncidentStatus.Open,
+                VerificationStatus = "Awaiting review",
+                AssignedToUserId = resolvedCaseManagerId,
+                AssignedStaffName = "I. Senanayake",
+                CitizenId = resolvedCitizenId,
+                AffectedPeople = 6,
+                CurrentSafety = "Temporary roadside location",
+                AccessibilityNeeds = "Older adult with limited mobility",
+                Description = "Flood water entered our home overnight. We have two children and my mother cannot walk far. We need a safe place before the water rises again.",
+                Latitude = 6.9550m,
+                Longitude = 79.9220m,
+                CreatedAt = now.AddMinutes(-8),
+                CreatedBy = "System"
+            };
+
+            var inc1039 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1039-4000-8000-000000001039"),
+                CaseNumber = "HMR-1039",
+                Title = "Medicine",
+                Category = IncidentCategory.Medicine,
+                CategoryDisplay = "Medicine",
+                OperationalArea = "Wattala South",
+                Priority = PriorityLevel.Critical,
+                Status = IncidentStatus.Assigned,
+                VerificationStatus = "Verified",
+                AssignedStaffName = "R. Perera",
+                AffectedPeople = 2,
+                CurrentSafety = "Sheltered with neighbor",
+                AccessibilityNeeds = "Insulin-dependent diabetic",
+                Description = "Urgent insulin supply needed within 6 hours. Refrigerated storage submerged.",
+                Latitude = 6.9890m,
+                Longitude = 79.8910m,
+                VerifiedAt = now.AddMinutes(-15),
+                CreatedAt = now.AddMinutes(-24),
+                CreatedBy = "System"
+            };
+
+            var inc1035 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1035-4000-8000-000000001035"),
+                CaseNumber = "HMR-1035",
+                Title = "Food",
+                Category = IncidentCategory.Food,
+                CategoryDisplay = "Food",
+                OperationalArea = "Kaduwela West",
+                Priority = PriorityLevel.Medium,
+                Status = IncidentStatus.Pending,
+                VerificationStatus = "Need information",
+                AssignedToUserId = resolvedCaseManagerId,
+                AssignedStaffName = "I. Senanayake",
+                CitizenId = resolvedCitizenId,
+                AffectedPeople = 4,
+                CurrentSafety = "Upper floor of residence",
+                AccessibilityNeeds = "Infant formula required",
+                Description = "Drinking water exhausted. Need ration pack and baby formula.",
+                Latitude = 6.9330m,
+                Longitude = 79.9840m,
+                CreatedAt = now.AddMinutes(-42),
+                CreatedBy = "System"
+            };
+
+            var inc1036 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1036-4000-8000-000000001036"),
+                CaseNumber = "HMR-1036",
+                Title = "Transport",
+                Category = IncidentCategory.Transport,
+                CategoryDisplay = "Transport",
+                OperationalArea = "Hanwella Zone 02",
+                Priority = PriorityLevel.High,
+                Status = IncidentStatus.Escalated,
+                VerificationStatus = "Verified",
+                AssignedStaffName = "S. Silva",
+                AffectedPeople = 8,
+                CurrentSafety = "Community hall",
+                AccessibilityNeeds = "Stretcher transport required",
+                Description = "Bedridden elderly resident requires medical evacuation transport to district hospital.",
+                Latitude = 6.8920m,
+                Longitude = 80.0810m,
+                VerifiedAt = now.AddMinutes(-30),
+                CreatedAt = now.AddMinutes(-58),
+                CreatedBy = "System"
+            };
+
+            var inc1028 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1028-4000-8000-000000001028"),
+                CaseNumber = "HMR-1028",
+                Title = "Rescue",
+                Category = IncidentCategory.SearchAndRescue,
+                CategoryDisplay = "Rescue",
+                OperationalArea = "Sedawatta Riverbank",
+                Priority = PriorityLevel.Critical,
+                Status = IncidentStatus.Assigned,
+                VerificationStatus = "Verified",
+                AssignedToUserId = resolvedCaseManagerId,
+                AssignedStaffName = "I. Senanayake",
+                CitizenId = resolvedCitizenId,
+                AffectedPeople = 3,
+                CurrentSafety = "Rooftop of single-story home",
+                AccessibilityNeeds = "Non-swimmers, 1 infant",
+                Description = "Trapped by rapid water level rise. Inflatable rescue boat needed immediately.",
+                Latitude = 6.9480m,
+                Longitude = 79.8880m,
+                VerifiedAt = now.AddMinutes(-40),
+                CreatedAt = now.AddMinutes(-75),
+                CreatedBy = "System"
+            };
+
+            var inc1022 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1022-4000-8000-000000001022"),
+                CaseNumber = "HMR-1022",
+                Title = "Water",
+                Category = IncidentCategory.WaterAndSanitation,
+                CategoryDisplay = "Water",
+                OperationalArea = "Kolonnawa Center",
+                Priority = PriorityLevel.Medium,
+                Status = IncidentStatus.Resolved,
+                VerificationStatus = "Verified",
+                AssignedStaffName = "R. Perera",
+                AffectedPeople = 12,
+                CurrentSafety = "Temple relief center",
+                AccessibilityNeeds = "None reported",
+                Description = "Clean drinking water delivered by Red Cross mobile bowser.",
+                Latitude = 6.9310m,
+                Longitude = 79.8970m,
+                VerifiedAt = now.AddHours(-3),
+                CreatedAt = now.AddHours(-4),
+                CreatedBy = "System"
+            };
+
+            var inc1019 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1019-4000-8000-000000001019"),
+                CaseNumber = "HMR-1019",
+                Title = "Emergency Shelter",
+                Category = IncidentCategory.EmergencyShelter,
+                CategoryDisplay = "Emergency Shelter",
+                OperationalArea = "Kelani East - Zone 03",
+                Priority = PriorityLevel.Low,
+                Status = IncidentStatus.Closed,
+                VerificationStatus = "Duplicate",
+                AssignedStaffName = "I. Senanayake",
+                CitizenId = resolvedCitizenId,
+                AffectedPeople = 2,
+                CurrentSafety = "Self-evacuated to relatives",
+                AccessibilityNeeds = "None",
+                Description = "Duplicate submission of HMR-1042 by family member.",
+                Latitude = 6.9555m,
+                Longitude = 79.9225m,
+                CreatedAt = now.AddMinutes(-5),
+                CreatedBy = "System"
+            };
+
+            var incidents = new List<Incident> { inc1042, inc1039, inc1035, inc1036, inc1028, inc1022, inc1019 };
+            await context.Incidents.AddRangeAsync(incidents);
+
+            // Seed initial communications
+            var comms = new List<IncidentCommunication>
+            {
+                new()
+                {
+                    IncidentId = inc1042.Id,
+                    SenderUserId = resolvedCaseManagerId,
+                    SenderName = "Ishara Senanayake",
+                    SenderRole = "CaseManager",
+                    RecipientWorkflow = "Resource & Logistics Manager",
+                    Title = "Case Manager reviewed linked record",
+                    Message = "Initial review of HMR-1042 shelter request completed.",
+                    CaseTag = "HMR-1042 - authorised participants only",
+                    IsInternal = true,
+                    IsVisibleToCitizen = false,
+                    SentAt = now.AddMinutes(-6)
+                },
+                new()
+                {
+                    IncidentId = inc1042.Id,
+                    SenderUserId = resolvedCaseManagerId,
+                    SenderName = "Ishara Senanayake",
+                    SenderRole = "CaseManager",
+                    RecipientWorkflow = "Shelter Coordinator",
+                    Title = "Scoped handoff received",
+                    Message = "Scoped handoff queued for Kelani East sector shelter coordinator.",
+                    CaseTag = "HMR-1042 - authorised participants only",
+                    IsInternal = true,
+                    IsVisibleToCitizen = false,
+                    SentAt = now.AddMinutes(-18)
+                },
+                new()
+                {
+                    IncidentId = inc1042.Id,
+                    SenderUserId = resolvedCaseManagerId,
+                    SenderName = "Ishara Senanayake",
+                    SenderRole = "CaseManager",
+                    RecipientWorkflow = "Citizen Notification Desk",
+                    Title = "Citizen update prepared",
+                    Message = "Your emergency shelter request HMR-1042 has been received and is under active review.",
+                    CaseTag = "HMR-1042 - authorised participants only",
+                    IsInternal = false,
+                    IsVisibleToCitizen = true,
+                    SentAt = now.AddMinutes(-32)
+                },
+                new()
+                {
+                    IncidentId = inc1042.Id,
+                    SenderUserId = resolvedCaseManagerId,
+                    SenderName = "System Decision Support",
+                    SenderRole = "System",
+                    RecipientWorkflow = "Case Manager",
+                    Title = "Simulated recommendation generated",
+                    Message = "DEMO-AI-2051 rule-based recommendation generated for human review.",
+                    CaseTag = "HMR-1042 - authorised participants only",
+                    IsInternal = true,
+                    IsVisibleToCitizen = false,
+                    SentAt = now.AddMinutes(-62)
+                }
+            };
+            await context.IncidentCommunications.AddRangeAsync(comms);
+
+            // Seed initial audit logs
+            var auditLogs = new List<IncidentAuditLog>
+            {
+                new()
+                {
+                    IncidentId = inc1042.Id,
+                    CaseNumber = "HMR-1042",
+                    Action = "RecordUpdated",
+                    Detail = "prototype record updated by authorised staff",
+                    ActorUserId = resolvedCaseManagerId,
+                    ActorName = "Ishara Senanayake",
+                    ActorRole = "CaseManager",
+                    IsInternal = true,
+                    Timestamp = now.AddMinutes(-9)
+                },
+                new()
+                {
+                    IncidentId = inc1039.Id,
+                    CaseNumber = "HMR-1039",
+                    Action = "RecordUpdated",
+                    Detail = "prototype record updated by authorised staff",
+                    ActorUserId = resolvedCaseManagerId,
+                    ActorName = "R. Perera",
+                    ActorRole = "CaseManager",
+                    IsInternal = true,
+                    Timestamp = now.AddMinutes(-12)
+                },
+                new()
+                {
+                    IncidentId = inc1035.Id,
+                    CaseNumber = "HMR-1035",
+                    Action = "RecordUpdated",
+                    Detail = "prototype record updated by authorised staff",
+                    ActorUserId = resolvedCaseManagerId,
+                    ActorName = "Ishara Senanayake",
+                    ActorRole = "CaseManager",
+                    IsInternal = true,
+                    Timestamp = now.AddMinutes(-39)
+                }
+            };
+            await context.IncidentAuditLogs.AddRangeAsync(auditLogs);
+
+            await context.SaveChangesAsync();
+        }
+
+        // 11. Seed Initial Shelter Allocations
+        if (!await context.ShelterAllocations.AnyAsync())
+        {
+            var sheltersList = await context.Shelters.Take(4).ToListAsync();
+            if (sheltersList.Count > 0)
+            {
+                var allocations = new List<ShelterAllocation>
+                {
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList[0].Id,
+                        PersonName = "Perera Family (4 members)",
+                        NumberOfPersons = 4,
+                        CheckInDate = DateTime.UtcNow.AddHours(-4),
+                        Notes = "Step-free access (Elderly parent) | Diabetic medication refrigeration required"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 1 ? sheltersList[1].Id : sheltersList[0].Id,
+                        PersonName = "Silva Household (3 members)",
+                        NumberOfPersons = 3,
+                        CheckInDate = DateTime.UtcNow.AddHours(-3),
+                        Notes = "Family areas (Infant 4 months) | Formula and baby cot provided in family wing"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 2 ? sheltersList[2].Id : sheltersList[0].Id,
+                        PersonName = "Gunasekara Family (5 members)",
+                        NumberOfPersons = 5,
+                        CheckInDate = DateTime.UtcNow.AddHours(-2),
+                        Notes = "Medical support (Wheelchair user) | High-dependency assistance requested"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 3 ? sheltersList[3].Id : sheltersList[0].Id,
+                        PersonName = "Jayatissa Family (2 members)",
+                        NumberOfPersons = 2,
+                        CheckInDate = DateTime.UtcNow.AddHours(-1),
+                        Notes = "Accessible toilets | Secondary triage confirmation completed"
+                    }
+                };
+
+                await context.ShelterAllocations.AddRangeAsync(allocations);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        // 12. Seed Shelter Resource Allocations
+        if (!await context.ResourceAllocations.AnyAsync(r => r.ShelterId != null))
+        {
+            var sheltersList = await context.Shelters.Take(4).ToListAsync();
+            var resourcesList = await context.Resources.Take(4).ToListAsync();
+            if (sheltersList.Count > 0 && resourcesList.Count > 0)
+            {
+                var resourceRequests = new List<ResourceAllocation>
+                {
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList[0].Id,
+                        ResourceId = resourcesList[0].Id,
+                        Quantity = 60,
+                        Priority = PriorityLevel.High,
+                        DispatchStatus = 1, // Dispatched
+                        DispatchedAt = DateTime.UtcNow.AddHours(-1),
+                        Notes = "Bedding & Linens - 60 sleeping mats & blankets | Requested by Shelter Lead"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 1 ? sheltersList[1].Id : sheltersList[0].Id,
+                        ResourceId = resourcesList.Count > 1 ? resourcesList[1].Id : resourcesList[0].Id,
+                        Quantity = 120,
+                        Priority = PriorityLevel.Critical,
+                        DispatchStatus = 0, // Pending / Approved
+                        Notes = "Sanitation Kits - 120 Hygiene & Sanitation Packs | Urgent resupply"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 2 ? sheltersList[2].Id : sheltersList[0].Id,
+                        ResourceId = resourcesList.Count > 2 ? resourcesList[2].Id : resourcesList[0].Id,
+                        Quantity = 40,
+                        Priority = PriorityLevel.Medium,
+                        DispatchStatus = 0, // Pending
+                        Notes = "Baby Care & Nutrition - 40 Infant Formula & Diaper boxes"
+                    },
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ShelterId = sheltersList.Count > 3 ? sheltersList[3].Id : sheltersList[0].Id,
+                        ResourceId = resourcesList.Count > 3 ? resourcesList[3].Id : resourcesList[0].Id,
+                        Quantity = 5,
+                        Priority = PriorityLevel.Critical,
+                        DispatchStatus = 0, // Pending
+                        Notes = "First Aid & Chronic Meds - 5 Emergency Medical Resupply Kits"
+                    }
+                };
+
+                await context.ResourceAllocations.AddRangeAsync(resourceRequests);
                 await context.SaveChangesAsync();
             }
         }

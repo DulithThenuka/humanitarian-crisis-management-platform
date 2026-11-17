@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   Mail, 
   Lock, 
@@ -16,9 +16,30 @@ import { useAlert } from '../../context/AlertContext';
 import { authService } from '../../services/authService';
 import reliefcoreIcon from '../../assets/reliefcore-icon.png';
 
+const resolvePostLoginRoute = (role, redirectParam) => {
+  if (redirectParam && typeof redirectParam === 'string' && redirectParam.startsWith('/') && !redirectParam.startsWith('/login')) {
+    return redirectParam;
+  }
+
+  const normalizedRole = (role || '').toString().trim().toLowerCase();
+  if (normalizedRole === 'casemanager' || normalizedRole === 'incidentmanager' || normalizedRole.includes('case manager')) {
+    return '/case-manager';
+  }
+  if (normalizedRole === 'logisticsmanager') {
+    return '/logistics';
+  }
+  if (normalizedRole === 'volunteer') {
+    return '/volunteers';
+  }
+  if (normalizedRole === 'citizen') {
+    return '/citizen';
+  }
+  return '/coordinator';
+};
+
 export const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedLang, setSelectedLang] = useState('English');
@@ -63,27 +84,33 @@ export const LoginPage = () => {
         return '/citizen';
     }
   };
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const redirectParam = searchParams.get('redirect') || location.state?.from;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await authService.login(formData);
+      const response = await authService.login({
+        email: formData.email.trim(),
+        password: formData.password
+      });
       if (response?.succeeded && response?.data?.token) {
-        login(response.data);
-        showAlert(response.message || "Login successful", "success");
-        const targetRoute = getRoleDashboardRoute(response.data.role);
+        login(response.data, rememberMe);
+        showAlert(response.message || 'Login successful', 'success');
+        const targetRoute = resolvePostLoginRoute(response.data.role, redirectParam);
         navigate(targetRoute, { replace: true });
       } else {
-        const errorMsg = response?.errors?.[0] || response?.message || "Invalid email or password";
-        showAlert(errorMsg, "error");
+        showAlert(response?.errors?.[0] || response?.message || 'Invalid credentials', 'error');
       }
     } catch (err) {
-      const errorMsg =
+      const errorMessage =
         err?.errors?.[0] ||
         err?.message ||
-        (typeof err === 'string' ? err : "Invalid email or password. Please try again.");
-      showAlert(errorMsg, "error");
+        'Unable to sign in. Please verify your email and password.';
+      showAlert(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

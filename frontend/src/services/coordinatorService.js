@@ -1,16 +1,21 @@
 import apiClient from './apiClient';
 
-export const coordinatorService = {
-  /**
-   * Fetches high-level coordinator metrics, operational summaries, priority cases, and active alerts.
-   */
-  getOverview: async () => {
-    return await apiClient.get('/coordinator/overview');
-  },
+const unwrap = (res) => {
+  if (!res) return null;
+  if (res.data !== undefined && res.data !== null) {
+    if (res.data.data !== undefined && res.data.data !== null && typeof res.data.data === 'object') {
+      return res.data.data;
+    }
+    return res.data;
+  }
+  return res;
+};
 
-  /**
-   * Searches and filters assistance requests for coordinator review.
-   */
+export const coordinatorService = {
+  getOverview: async () => {
+    const res = await apiClient.get('/coordinator/overview');
+    return unwrap(res);
+  },
   getCases: async ({ status, category, priority, search } = {}) => {
     const params = new URLSearchParams();
     if (status) params.append('status', status);
@@ -19,92 +24,125 @@ export const coordinatorService = {
     if (search) params.append('search', search);
 
     const query = params.toString() ? `?${params.toString()}` : '';
-    return await apiClient.get(`/coordinator/cases${query}`);
+    const res = await apiClient.get(`/coordinator/cases${query}`);
+    return unwrap(res);
   },
-
-  /**
-   * Retrieves full details, checklist items, and internal notes for a case.
-   */
   getCaseById: async (idOrReference) => {
-    return await apiClient.get(`/coordinator/cases/${encodeURIComponent(idOrReference)}`);
+    const res = await apiClient.get(`/coordinator/cases/${encodeURIComponent(idOrReference)}`);
+    return unwrap(res);
   },
-
-  /**
-   * Verifies a citizen request with field reason notes.
-   */
   verifyCase: async (idOrReference, { reason, confirmedCheck = true, assignedTeam, notes }) => {
-    return await apiClient.post(`/coordinator/cases/${encodeURIComponent(idOrReference)}/verify`, {
+    const res = await apiClient.post(`/coordinator/cases/${encodeURIComponent(idOrReference)}/verify`, {
       reason,
       confirmedCheck,
       assignedTeam,
       notes
     });
+    return unwrap(res);
   },
-
-  /**
-   * Appends an internal operational note to a case record.
-   */
   addCaseNote: async (idOrReference, text) => {
-    return await apiClient.post(`/coordinator/cases/${encodeURIComponent(idOrReference)}/notes`, {
+    const res = await apiClient.post(`/coordinator/cases/${encodeURIComponent(idOrReference)}/notes`, {
       text
     });
+    return unwrap(res);
   },
-
-  /**
-   * Reviews an AI triage decision (Approve or Override) with human reasoning audit.
-   */
   reviewAIDecision: async (idOrReference, { action = 'Approve', overriddenPriority, reason, decisionAuditId }) => {
-    return await apiClient.post(`/coordinator/cases/${encodeURIComponent(idOrReference)}/ai-review`, {
+    const res = await apiClient.post(`/coordinator/cases/${encodeURIComponent(idOrReference)}/ai-review`, {
       action,
       overriddenPriority: overriddenPriority || 0,
       reason: reason || '',
       decisionAuditId: decisionAuditId || '00000000-0000-0000-0000-000000000000'
     });
+    return unwrap(res);
   },
-
-  /**
-   * Retrieves high-priority emergency broadcast alerts.
-   */
-  getAlerts: async () => {
-    return await apiClient.get('/coordinator/alerts');
-  },
-
-  /**
-   * Issues and broadcasts an emergency alert to responders.
-   */
-  createAlert: async ({ title, severity = 'Critical', area = 'Western Province', instructions }) => {
-    return await apiClient.post('/coordinator/alerts', {
-      title,
-      severity,
-      area,
-      instructions
-    });
-  },
-
-  /**
-   * Retrieves active crisis incidents in the humanitarian operation zone.
-   */
-  getIncidents: async () => {
-    return await apiClient.get('/coordinator/incidents');
-  },
-
-  /**
-   * Declares and registers a new crisis incident.
-   */
-  createIncident: async ({ title, severity = 'High', area = 'Western Province Sector', leadTeam = 'National Relief Unit' }) => {
-    return await apiClient.post('/coordinator/incidents', {
-      title,
-      severity,
-      area,
-      leadTeam
-    });
-  },
-
-  /**
-   * Retrieves human-in-the-loop and AI decision audit history.
-   */
   getDecisionHistory: async (take = 20) => {
-    return await apiClient.get(`/coordinator/history?take=${take}`);
+    const res = await apiClient.get(`/coordinator/history?take=${take}`);
+    return unwrap(res);
+  },
+  verifyRequest: async (id, data) => {
+    const res = await apiClient.post(`/coordinator/requests/${id}/verify`, data);
+    return unwrap(res);
+  },
+  escalateRequest: async (id, data) => {
+    const res = await apiClient.post(`/coordinator/requests/${id}/escalate`, data);
+    return unwrap(res);
+  },
+  addNote: async (id, data) => {
+    const res = await apiClient.post(`/coordinator/requests/${id}/notes`, data);
+    return unwrap(res);
+  },
+  requestInfo: async (id, data) => {
+    const res = await apiClient.post(`/coordinator/requests/${id}/request-info`, data);
+    return unwrap(res);
+  },
+  getCrisisEvents: async (activeOnly = false) => {
+    const res = await apiClient.get('/crisisevents', { params: { activeOnly } });
+    return unwrap(res);
+  },
+  getCrisisEventById: async (id) => {
+    const res = await apiClient.get(`/crisisevents/${id}`);
+    return unwrap(res);
+  },
+  createCrisisEvent: async (data) => {
+    const res = await apiClient.post('/crisisevents', data);
+    return unwrap(res);
+  },
+  getAlerts: async (tab = null) => {
+    const params = tab && tab !== 'all' ? { tab } : {};
+    const res = await apiClient.get('/alerts', { params });
+    return unwrap(res);
+  },
+  getAlertById: async (id) => {
+    const res = await apiClient.get(`/alerts/${id}`);
+    return unwrap(res);
+  },
+  createAlert: async (data) => {
+    const res = await apiClient.post('/alerts', data);
+    return unwrap(res);
+  },
+  updateAlert: async (id, data) => {
+    const res = await apiClient.put(`/alerts/${id}`, data);
+    return unwrap(res);
+  },
+  resolveAlert: async (id, data = null) => {
+    const res = await apiClient.post(`/alerts/${id}/resolve`, data || {});
+    return unwrap(res);
+  },
+  publishAlert: async (id) => {
+    const res = await apiClient.post(`/alerts/${id}/publish`);
+    return unwrap(res);
+  },
+  getIncidents: async () => {
+    const res = await apiClient.get('/coordinator/incidents');
+    return unwrap(res);
+  },
+  createIncident: async (data) => {
+    const res = await apiClient.post('/coordinator/incidents', data);
+    return unwrap(res);
+  },
+  getResourceCoordination: async () => {
+    const res = await apiClient.get('/coordinator/resources');
+    return unwrap(res);
+  },
+  submitResourceAllocationRequest: async (data) => {
+    const res = await apiClient.post('/coordinator/resources/allocation-requests', data);
+    return unwrap(res);
+  },
+  getShelterVolunteerCoordination: async () => {
+    const res = await apiClient.get('/coordinator/shelter-volunteer');
+    return unwrap(res);
+  },
+  submitShelterPlacementRequest: async (data) => {
+    const res = await apiClient.post('/coordinator/shelter-requests', data);
+    return unwrap(res);
+  },
+  submitVolunteerAssignmentRequest: async (data) => {
+    const res = await apiClient.post('/coordinator/volunteer-requests', data);
+    return unwrap(res);
+  },
+  getAnalytics: async (params = {}) => {
+    const res = await apiClient.get('/coordinator/analytics', { params });
+    return unwrap(res);
   }
 };
 

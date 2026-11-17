@@ -60,6 +60,7 @@ import {
   VolunteerRosterPage,
   TaskAssignmentPage
 } from '../pages/volunteer';
+import { VolunteerCoordinatorPortal } from '../pages/volunteer-coordinator/VolunteerCoordinatorPortal';
 
 // ==========================================
 // 7. Donor & Funding Management
@@ -93,6 +94,11 @@ import { RegisterPage } from '../pages/auth/RegisterPage';
 import { UnauthorizedPage } from '../pages/auth/UnauthorizedPage';
 import Hero from '../components/Hero';
 
+// Partner Organisation Officer Pages
+import { PartnerOrganisationOfficerPage } from '../pages/partner-organisation-officer/PartnerOrganisationOfficerPage';
+
+// Donor / Funding Officer Portal
+import { DonorFundingOfficerPortal } from '../pages/Donor - Funding - Officer/DonorFundingOfficerPortal';
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -286,6 +292,17 @@ export const AppRoutes = () => {
       <Route path="/volunteers/roster" element={<VolunteerPortal initialTab="schedule" />} />
       <Route path="/volunteers/assignments" element={<VolunteerPortal initialTab="assignments" />} />
 
+      {/* Volunteer Coordinator Portal */}
+      <Route path="/volunteer-coordinator" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/*" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/dashboard" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/directory" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/scheduling" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/ai-matching" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/activity-safety" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/reports" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator-portal" element={<VolunteerCoordinatorPortal />} />
+
       {/* ========================================================= */}
       {/* MODULE 7: Donor & Funding Management (/donor/*)           */}
       {/* ========================================================= */}
@@ -296,10 +313,24 @@ export const AppRoutes = () => {
       <Route path="/donor/tracking" element={<DonorPortalPage initialTab="tracking" />} />
       <Route path="/donor/contribute" element={<DonorPortalPage initialTab="overview" />} />
 
+      {/* Donor / Funding Officer Portal Routes */}
+      <Route path="/donor/donors" element={<DonorFundingOfficerPortal initialActiveTab="donors" />} />
+      <Route path="/donor/records" element={<DonorFundingOfficerPortal initialActiveTab="donations" />} />
+      <Route path="/donor/campaigns" element={<DonorFundingOfficerPortal initialActiveTab="campaigns" />} />
+      <Route path="/donor/allocations" element={<DonorFundingOfficerPortal initialActiveTab="allocations" />} />
+      <Route path="/donor/suspicious" element={<DonorFundingOfficerPortal initialActiveTab="suspicious" />} />
+      <Route path="/donor/reports" element={<DonorFundingOfficerPortal initialActiveTab="reports" />} />
+      <Route path="/donor-funding-officer" element={<DonorFundingOfficerPortal />} />
+      <Route path="/funding-officer" element={<DonorFundingOfficerPortal />} />
+      <Route path="/donor-management" element={<DonorFundingOfficerPortal initialActiveTab="donors" />} />
+
       {/* Donations Backward-Compatible Aliases */}
       <Route path="/donations" element={<DonorPortalPage initialTab="overview" />} />
       <Route path="/donations/portal" element={<DonorPortalPage initialTab="overview" />} />
       <Route path="/donations/legacy" element={<DonationsPage />} />
+      <Route path="/donations/records" element={<DonorFundingOfficerPortal initialActiveTab="donations" />} />
+      <Route path="/donations/campaigns" element={<DonorFundingOfficerPortal initialActiveTab="campaigns" />} />
+      <Route path="/donations/allocations" element={<DonorFundingOfficerPortal initialActiveTab="allocations" />} />
 
       {/* ========================================================= */}
       {/* MODULE 8: Partner Organisation Management (/partner/*)    */}
@@ -310,6 +341,10 @@ export const AppRoutes = () => {
       <Route path="/partner/directory" element={<PartnerPortalPage initialTab="directory" />} />
       <Route path="/partner/commitments" element={<PartnerPortalPage initialTab="commitments" />} />
       <Route path="/partner/zones" element={<PartnerPortalPage initialTab="zones" />} />
+
+      {/* Partner Officer Routes */}
+      <Route path="/partner-organisation-officer" element={<ProtectedRoute allowedRoles={['PartnerOfficer', 'PartnerOrganisationOfficer', 'Coordinator', 'Admin', 'LogisticsManager']}><PartnerOrganisationOfficerPage /></ProtectedRoute>} />
+      <Route path="/partner-officer" element={<Navigate to="/partner-organisation-officer" replace />} />
 
       {/* Partner Backward-Compatible Aliases */}
       <Route path="/partners" element={<Navigate to="/partner" replace />} />
@@ -349,3 +384,4 @@ export const AppRoutes = () => {
     </Routes>
   );
 };
+

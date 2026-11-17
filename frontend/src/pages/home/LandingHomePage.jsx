@@ -41,6 +41,7 @@ import {
   FileBarChart,
   Settings,
   Gift,
+  HeartHandshake,
   Lock,
   ClipboardList,
   Brain,
@@ -314,12 +315,12 @@ export const LandingHomePage = () => {
     {
       id: 'donor',
       title: 'Donor & Funding Management',
-      desc: 'Emergency relief funding packages, transparency tracking, dry ration contributions, and resource pledges.',
+      desc: 'Controlled funding workspace, dual authorization allocations, monetary & in-kind records, transparency tracking, and emergency aid packages.',
       path: '/donor',
       badge: 'Funding & Aid',
-      icon: Gift,
+      icon: HeartHandshake,
       color: '#ec4899',
-      featured: 'Relief funding packages & public contributions',
+      featured: 'Dual authorization & transparent audit trails',
       sublinks: [
         { label: 'Relief Packages', path: '/donor/packages' },
         { label: 'Tracking Ledger', path: '/donor/tracking' },

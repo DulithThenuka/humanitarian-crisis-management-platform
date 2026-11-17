@@ -224,3 +224,195 @@ public class AdminAuditLogDto
     public DateTime? ReviewedAt { get; set; }
     public string VerificationHash { get; set; } = string.Empty;
 }
+
+// -------------------------------------------------------------
+// Financial Grants & Donations DTOs
+// -------------------------------------------------------------
+public class AdminDonationDto
+{
+    public Guid Id { get; set; }
+    public string DonorName { get; set; } = string.Empty;
+    public string? DonorEmail { get; set; }
+    public string? DonorPhone { get; set; }
+    public int DonationType { get; set; }
+    public string TypeLabel { get; set; } = "Monetary Grant";
+    public decimal? Amount { get; set; }
+    public string Currency { get; set; } = "LKR";
+    public string AmountFormatted { get; set; } = string.Empty;
+    public string? ItemDescription { get; set; }
+    public int? ItemQuantity { get; set; }
+    public string Sector { get; set; } = string.Empty;
+    public string TargetDistrict { get; set; } = string.Empty;
+    public int Status { get; set; }
+    public string StatusLabel { get; set; } = "Verified & Cleared";
+    public string? VerifiedBy { get; set; }
+    public string? TaxExemptId { get; set; }
+    public string AuditHash { get; set; } = string.Empty;
+    public DateTime? ReceivedAt { get; set; }
+}
+
+public class CreateAdminDonationDto
+{
+    [Required]
+    [StringLength(120, MinimumLength = 2)]
+    public string DonorName { get; set; } = string.Empty;
+
+    [EmailAddress]
+    public string? DonorEmail { get; set; }
+
+    public string? DonorPhone { get; set; }
+
+    public int DonationType { get; set; } = 0; // 0=Monetary, 1=InKind, 2=LogisticsAsset
+
+    public decimal? Amount { get; set; }
+
+    public string Currency { get; set; } = "LKR";
+
+    public string? ItemDescription { get; set; }
+
+    public int? ItemQuantity { get; set; }
+
+    [Required]
+    public string Sector { get; set; } = "Emergency Relief";
+
+    [Required]
+    public string TargetDistrict { get; set; } = "Western Province";
+
+    public string? TaxExemptId { get; set; }
+}
+
+public class VerifyDonationDto
+{
+    public string VerifiedBy { get; set; } = "DMC Treasury Audit";
+}
+
+public class AdminDonationsSummaryDto
+{
+    public int TotalDonationsCount { get; set; }
+    public decimal TotalMonetaryGrantValueLkr { get; set; }
+    public int TotalInKindItemsCount { get; set; }
+    public int VerifiedCount { get; set; }
+    public int PendingAuditCount { get; set; }
+    public int AllocatedToDepotCount { get; set; }
+    public Dictionary<string, decimal> SectorBreakdownLkr { get; set; } = new();
+}
+
+// -------------------------------------------------------------
+// Emergency Broadcasts DTOs
+// -------------------------------------------------------------
+public class AdminBroadcastDto
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Severity { get; set; } = "Emergency";
+    public List<string> Channels { get; set; } = new();
+    public string TargetRegion { get; set; } = string.Empty;
+    public string TargetAudience { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string SentBy { get; set; } = string.Empty;
+    public string DeliveryRate { get; set; } = "99.2%";
+    public string Status { get; set; } = "Active Live";
+    public bool IsActive { get; set; } = true;
+    public DateTime SentAt { get; set; }
+}
+
+public class CreateAdminBroadcastDto
+{
+    [Required]
+    [StringLength(180, MinimumLength = 5)]
+    public string Title { get; set; } = string.Empty;
+
+    [Required]
+    public string Severity { get; set; } = "Emergency"; // Emergency, Warning, Advisory, Info
+
+    public List<string> Channels { get; set; } = new() { "SMS Broadcast", "Push Notification" };
+
+    [Required]
+    public string TargetRegion { get; set; } = "Western Province";
+
+    [Required]
+    public string TargetAudience { get; set; } = "All Registered Citizens";
+
+    [Required]
+    [StringLength(1000, MinimumLength = 10)]
+    public string Message { get; set; } = string.Empty;
+}
+
+// -------------------------------------------------------------
+// Situation Reports (SITREP) DTOs
+// -------------------------------------------------------------
+public class AdminSitrepDto
+{
+    public Guid Id { get; set; }
+    public string ReportCode { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string IncidentName { get; set; } = string.Empty;
+    public string DisasterType { get; set; } = string.Empty;
+    public string District { get; set; } = string.Empty;
+    public string GeneratedBy { get; set; } = string.Empty;
+    public int CasualtiesReported { get; set; }
+    public int PeopleDisplaced { get; set; }
+    public int SheltersActive { get; set; }
+    public int TeamsDeployed { get; set; }
+    public string RoadPassabilityStatus { get; set; } = string.Empty;
+    public string ExecutiveSummary { get; set; } = string.Empty;
+    public string PriorityNeeds { get; set; } = string.Empty;
+    public string Status { get; set; } = "Official Approved";
+    public DateTime ReportedAt { get; set; }
+}
+
+public class GenerateSitrepRequestDto
+{
+    [Required]
+    public string Title { get; set; } = string.Empty;
+
+    [Required]
+    public string IncidentName { get; set; } = string.Empty;
+
+    public string DisasterType { get; set; } = "Flood";
+
+    [Required]
+    public string District { get; set; } = "Western Province";
+
+    public string ExecutiveSummary { get; set; } = string.Empty;
+
+    public string PriorityNeeds { get; set; } = string.Empty;
+}
+
+// -------------------------------------------------------------
+// AI Governance DTOs
+// -------------------------------------------------------------
+public class AdminAiGovernanceStatsDto
+{
+    public int TotalDecisionsCount { get; set; }
+    public double AutomaticApprovalRate { get; set; } = 83.3;
+    public double HumanOverrideRate { get; set; } = 16.7;
+    public double AverageConfidencePercent { get; set; } = 94.6;
+    public Dictionary<string, int> ConfidenceDistribution { get; set; } = new();
+    public List<string> KeyTriageKeywords { get; set; } = new();
+    public List<AdminAuditLogDto> RecentDecisions { get; set; } = new();
+}
+
+public class CalibrateAiModelDto
+{
+    [Range(50.0, 99.0)]
+    public double ConfidenceThreshold { get; set; } = 85.0;
+
+    public bool EnableAutomaticTriage { get; set; } = true;
+
+    public bool RequireHumanReviewForCritical { get; set; } = true;
+}
+
+// -------------------------------------------------------------
+// System Diagnostics DTOs
+// -------------------------------------------------------------
+public class SystemDiagnosticsResultDto
+{
+    public bool DatabaseIntegrityValid { get; set; } = true;
+    public bool LedgerHashChainValid { get; set; } = true;
+    public int TotalRecordsVerified { get; set; }
+    public string CacheStatus { get; set; } = "Warm (Operational)";
+    public double LatencyMs { get; set; } = 12.4;
+    public DateTime DiagnosticsTimestampUtc { get; set; } = DateTime.UtcNow;
+    public List<string> ChecksPassed { get; set; } = new();
+}

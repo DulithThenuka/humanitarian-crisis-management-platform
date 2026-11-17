@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Download, 
@@ -15,6 +15,7 @@ import {
   Sparkles,
   ExternalLink
 } from 'lucide-react';
+import { aiGovernanceService } from '@/services/aiGovernanceService';
 
 export const DecisionSupportQueue = ({ 
   queueData = [],
@@ -28,9 +29,29 @@ export const DecisionSupportQueue = ({
   const [selectedPriority, setSelectedPriority] = useState('All');
   const [selectedDate, setSelectedDate] = useState('All');
   const [activePage, setActivePage] = useState(1);
+  const [liveQueue, setLiveQueue] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Exact Queue items from Screenshot 3
-  const queueItems = [
+  useEffect(() => {
+    let isMounted = true;
+    const fetchQueue = async () => {
+      try {
+        const res = await aiGovernanceService.getQueue();
+        if (isMounted && res?.data?.data) {
+          setLiveQueue(res.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to load decision support queue:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchQueue();
+    return () => { isMounted = false; };
+  }, []);
+
+  const baseItems = liveQueue.length > 0 ? liveQueue : [
     {
       decisionId: 'AID-2051',
       relatedRecord: 'HMR-1042',
@@ -93,31 +114,42 @@ export const DecisionSupportQueue = ({
     }
   ];
 
+  const pendingCount = baseItems.filter(i => (i.reviewStatus || '').toLowerCase().includes('pending')).length;
+  const criticalCount = baseItems.filter(i => (i.priority || '').toLowerCase() === 'critical').length;
+  const lowConfCount = baseItems.filter(i => i.confidence < 85).length;
+  const duplicateCount = baseItems.filter(i => (i.service || '').toLowerCase().includes('duplicate')).length;
+  const resourceCount = baseItems.filter(i => (i.service || '').toLowerCase().includes('resource')).length;
+  const flagsCount = baseItems.filter(i => (i.riskFlag && i.riskFlag !== 'None') || (i.priority || '').toLowerCase() === 'critical').length;
+
   const filterTabs = [
-    { id: 'Pending', label: 'Pending', count: 38 },
-    { id: 'Critical', label: 'Critical', count: 12 },
-    { id: 'Low confidence', label: 'Low confidence', count: 8 },
-    { id: 'Duplicate candidates', label: 'Duplicate candidates', count: 6 },
-    { id: 'Resource conflicts', label: 'Resource conflicts', count: 3 },
-    { id: 'Investigation flags', label: 'Investigation flags', count: 4 },
+    { id: 'Pending', label: 'Pending', count: pendingCount },
+    { id: 'Critical', label: 'Critical', count: criticalCount },
+    { id: 'Low confidence', label: 'Low confidence', count: lowConfCount },
+    { id: 'Duplicate candidates', label: 'Duplicate candidates', count: duplicateCount },
+    { id: 'Resource conflicts', label: 'Resource conflicts', count: resourceCount },
+    { id: 'Investigation flags', label: 'Investigation flags', count: flagsCount },
     { id: 'Reviewed', label: 'Reviewed', count: null }
   ];
 
   // Filtering
-  const filteredItems = queueItems.filter(item => {
+  const filteredItems = baseItems.filter(item => {
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
-      const matchId = item.decisionId.toLowerCase().includes(q);
-      const matchRec = item.relatedRecord.toLowerCase().includes(q);
-      const matchServ = item.service.toLowerCase().includes(q);
-      const matchRecom = item.recommendation.toLowerCase().includes(q);
+      const matchId = (item.decisionId || '').toLowerCase().includes(q);
+      const matchRec = (item.relatedRecord || '').toLowerCase().includes(q);
+      const matchServ = (item.service || '').toLowerCase().includes(q);
+      const matchRecom = (item.recommendation || '').toLowerCase().includes(q);
       if (!matchId && !matchRec && !matchServ && !matchRecom) return false;
     }
 
-    if (activeTabFilter === 'Critical' && item.priority !== 'Critical') return false;
-    if (activeTabFilter === 'Low confidence' && item.confidence >= 80) return false;
-    if (activeTabFilter === 'Duplicate candidates' && item.service !== 'Duplicate Detection') return false;
-    if (activeTabFilter === 'Resource conflicts' && item.service !== 'Resource Matching') return false;
+    if (activeTabFilter === 'Pending' && !(item.reviewStatus || '').toLowerCase().includes('pending')) return false;
+    if (activeTabFilter === 'Critical' && (item.priority || '').toLowerCase() !== 'critical') return false;
+    if (activeTabFilter === 'Low confidence' && item.confidence >= 85) return false;
+    if (activeTabFilter === 'Duplicate candidates' && !(item.service || '').toLowerCase().includes('duplicate')) return false;
+    if (activeTabFilter === 'Resource conflicts' && !(item.service || '').toLowerCase().includes('resource')) return false;
+    if (activeTabFilter === 'Investigation flags' && (!item.riskFlag || item.riskFlag === 'None') && (item.priority || '').toLowerCase() !== 'critical') return false;
+    if (activeTabFilter === 'Reviewed' && (item.reviewStatus || '').toLowerCase().includes('pending')) return false;
+
     if (selectedService !== 'All' && item.service !== selectedService) return false;
     if (selectedPriority !== 'All' && item.priority !== selectedPriority) return false;
 
@@ -280,15 +312,19 @@ export const DecisionSupportQueue = ({
                   </td>
 
                   <td className="cell-confidence">
-                    <div className="confidence-gauge-bar-wrap">
-                      <div className="gauge-track">
-                        <div 
-                          className="gauge-fill-blue"
-                          style={{ width: `${row.confidence}%` }}
-                        ></div>
+                    {typeof row.confidence === 'number' && !isNaN(row.confidence) ? (
+                      <div className="confidence-gauge-bar-wrap">
+                        <div className="gauge-track">
+                          <div 
+                            className="gauge-fill-blue"
+                            style={{ width: `${Math.min(100, Math.max(0, row.confidence))}%` }}
+                          ></div>
+                        </div>
+                        <span className="gauge-pct-text">{row.confidence}%</span>
                       </div>
-                      <span className="gauge-pct-text">{row.confidence}%</span>
-                    </div>
+                    ) : (
+                      <span style={{ color: '#64748b', fontSize: '12px', fontWeight: 500 }}>N/A</span>
+                    )}
                   </td>
 
                   <td className="cell-priority">
@@ -321,7 +357,7 @@ export const DecisionSupportQueue = ({
         {/* Table Footer with Pagination */}
         <div className="ai-queue-table-footer">
           <div className="footer-count-text">
-            Showing 1-{filteredItems.length} of 36 recommendations
+            Showing 1-{filteredItems.length} of {filteredItems.length} recommendations
           </div>
 
           <div className="pagination-controls">

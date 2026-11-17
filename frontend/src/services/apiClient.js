@@ -1,7 +1,61 @@
 import axios from 'axios';
 
-// Default to Vite proxy '/api' to avoid self-signed SSL / CORS issues in development
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== 'undefined' && (window.location.port === '3000' || window.location.port === '5173')
+    ? '/api'
+    : 'http://localhost:5001/api');
+
+/**
+ * Validates that a token string is a well-formed, non-expired JWT (3 dot-separated base64url parts)
+ * and never a placeholder token.
+ */
+export const isValidJwtToken = (rawToken) => {
+  if (!rawToken || typeof rawToken !== 'string') return false;
+  const trimmed = rawToken.replace(/^Bearer\s+/i, '').trim();
+  if (!trimmed || trimmed === 'reliefcore-session-token') return false;
+
+  const segments = trimmed.split('.');
+  if (segments.length !== 3 || segments.some((s) => !s)) return false;
+
+  try {
+    const base64 = segments[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const payload = JSON.parse(atob(padded));
+    if (payload && typeof payload.exp === 'number') {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      if (payload.exp <= nowSeconds) {
+        return false;
+      }
+    }
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const clearStoredAuth = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('humanaid:auth-cleared'));
+  }
+};
+
+export const getStoredAuthToken = () => {
+  const raw = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (!raw) return null;
+
+  const normalized = raw.replace(/^Bearer\s+/i, '').trim();
+  if (!isValidJwtToken(normalized)) {
+    clearStoredAuth();
+    return null;
+  }
+
+  return normalized;
+};
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -10,24 +64,33 @@ const apiClient = axios.create({
   }
 });
 
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token && token !== 'reliefcore-session-token') {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, (error) => Promise.reject(error));
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = getStoredAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else if (config.headers?.Authorization) {
+      delete config.headers.Authorization;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-      const publicPaths = ['/', '/home', '/landing', '/login', '/signup', '/register'];
-      const currentPath = window.location.pathname;
-      if (!publicPaths.includes(currentPath)) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+      const reqUrl = (error.config?.url || '').toLowerCase();
+      const isAuthEndpoint = reqUrl.includes('/auth/login') || reqUrl.includes('/auth/register');
+      const publicPaths = ['/', '/home', '/landing', '/login', '/signup', '/register', '/bloom', '/map', '/services', '/capabilities', '/emergency-directory'];
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+
+      clearStoredAuth();
+
+      if (!isAuthEndpoint && typeof window !== 'undefined' && !publicPaths.includes(currentPath) && !currentPath.startsWith('/login')) {
+        const redirectTarget = `${window.location.pathname}${window.location.search}`;
+        window.location.href = `/login?redirect=${encodeURIComponent(redirectTarget)}`;
       }
     }
     return Promise.reject(error.response?.data || error);

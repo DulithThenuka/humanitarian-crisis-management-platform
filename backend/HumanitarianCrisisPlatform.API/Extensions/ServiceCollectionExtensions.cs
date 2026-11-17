@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
         var useInMemory = config.GetValue<bool>("UseInMemoryDatabase", false);
         var connectionString = config.GetConnectionString("DefaultConnection");
 
-        if (useInMemory)
+        if (useInMemory || string.IsNullOrWhiteSpace(connectionString))
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseInMemoryDatabase("HumanitarianCrisisDb"));
@@ -42,7 +42,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAssistanceRequestRepository, AssistanceRequestRepository>();
         services.AddScoped<IShelterRepository, ShelterRepository>();
         services.AddScoped<IResourceRepository, ResourceRepository>();
+        services.AddScoped<IVolunteerRepository, VolunteerRepository>();
         services.AddScoped<IAIDecisionAuditRepository, AIDecisionAuditRepository>();
+        services.AddScoped<IPartnerRepository, PartnerRepository>();
+        services.AddScoped<IIncidentRepository, IncidentRepository>();
 
         // Domain & Application Services
         services.AddScoped<IAssistanceRequestService, AssistanceRequestService>();
@@ -53,15 +56,24 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICrisisService, CrisisService>();
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<ICoordinatorService, CoordinatorService>();
+        services.AddScoped<IPartnerService, PartnerService>();
+        services.AddScoped<IDonationService, DonationService>();
         services.AddScoped<VolunteerService>();
+        services.AddScoped<IIncidentService, IncidentService>();
+        services.AddScoped<ICaseAssignmentService, CaseAssignmentService>();
+        services.AddScoped<IIncidentAIReviewService, IncidentAIReviewService>();
+        services.AddScoped<IIncidentReportingService, IncidentReportingService>();
+        services.AddScoped<IIncidentDuplicateDetectionService, RuleBasedIncidentDuplicateDetectionService>();
 
         // Infrastructure Services
         services.AddHttpClient<OpenAIServiceClient>();
         services.AddSingleton<RuleBasedFallbackAIService>();
+        services.AddSingleton<IIncidentAIProvider, RuleBasedIncidentAIProvider>();
         services.AddScoped<IAIServiceClient, OpenAIServiceClient>();
         services.AddSingleton<IMappingService, OpenStreetMapService>();
         services.AddScoped<INotificationService, EmailNotificationService>();
-        services.AddSingleton<JwtTokenGenerator>();
+        services.AddSingleton<IConfiguration>(config);
+        services.AddSingleton(_ => new JwtTokenGenerator(config));
 
         return services;
     }
