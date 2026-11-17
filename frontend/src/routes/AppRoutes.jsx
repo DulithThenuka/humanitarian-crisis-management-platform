@@ -126,19 +126,23 @@ export const AppRoutes = () => {
       <Route path="/citizen/home" element={<CitizenPortalPage />} />
       <Route path="/citizen/shelters" element={<CitizenPortalPage initialTab="shelters" />} />
       <Route path="/citizen/requests" element={<CitizenPortalPage initialTab="requests" />} />
-      <Route path="/citizen/requests/new" element={<SubmitRequestPage />} />
-      <Route path="/citizen/submit" element={<CitizenPortalPage initialTab="request" />} />
+      <Route path="/citizen/requests/new" element={<CitizenPortalPage initialTab="submit" />} />
+      <Route path="/citizen/submit" element={<CitizenPortalPage initialTab="submit" />} />
       <Route path="/citizen/track" element={<CitizenPortalPage initialTab="requests" />} />
+      <Route path="/citizen/my-requests" element={<CitizenPortalPage initialTab="requests" />} />
       <Route path="/citizen/alerts" element={<CitizenPortalPage initialTab="alerts" />} />
       <Route path="/citizen/safety" element={<CitizenPortalPage initialTab="safety" />} />
       <Route path="/citizen/safety-guide" element={<CitizenPortalPage initialTab="safety" />} />
       <Route path="/citizen/support" element={<CitizenPortalPage initialTab="support" />} />
       <Route path="/citizen/help" element={<CitizenPortalPage initialTab="support" />} />
+      <Route path="/citizen/ai" element={<CitizenPortalPage initialTab="ai-assistance" />} />
+      <Route path="/citizen/ai-assistance" element={<CitizenPortalPage initialTab="ai-assistance" />} />
       <Route path="/citizen/profile" element={<CitizenPortalPage initialTab="profile" />} />
 
       {/* Legacy / Direct Citizen Aliases */}
       <Route path="/shelters" element={<CitizenPortalPage initialTab="shelters" />} />
       <Route path="/track" element={<CitizenPortalPage initialTab="requests" />} />
+      <Route path="/my-requests" element={<CitizenPortalPage initialTab="requests" />} />
       <Route path="/alerts" element={<CitizenPortalPage initialTab="alerts" />} />
       <Route path="/emergency-alerts" element={<CitizenPortalPage initialTab="alerts" />} />
       <Route path="/safety" element={<CitizenPortalPage initialTab="safety" />} />
@@ -146,8 +150,8 @@ export const AppRoutes = () => {
       <Route path="/support" element={<CitizenPortalPage initialTab="support" />} />
       <Route path="/help" element={<CitizenPortalPage initialTab="support" />} />
       <Route path="/profile" element={<CitizenPortalPage initialTab="profile" />} />
-      <Route path="/requests/new" element={<SubmitRequestPage />} />
-      <Route path="/assistance-request" element={<SubmitRequestPage />} />
+      <Route path="/requests/new" element={<CitizenPortalPage initialTab="submit" />} />
+      <Route path="/assistance-request" element={<CitizenPortalPage initialTab="submit" />} />
 
       {/* ========================================================= */}
       {/* MODULE 2: Emergency Coordinator (/coordinator/*)          */}

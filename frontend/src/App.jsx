@@ -30,6 +30,9 @@ function AppLayout() {
     location.pathname.startsWith('/citizen') || 
     location.pathname.startsWith('/alerts') || 
     location.pathname.startsWith('/safety') || 
+    location.pathname.startsWith('/support') || 
+    location.pathname.startsWith('/help') || 
+    location.pathname.startsWith('/my-requests') || 
     location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/shelter') || 
     location.pathname.startsWith('/shelters') || 

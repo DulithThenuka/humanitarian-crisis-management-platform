@@ -11,3 +11,4 @@ export { EmergencyAlertsPage } from './emergency-alerts/EmergencyAlertsPage';
 export { SafetyGuidePage } from './safety-guide/SafetyGuidePage';
 export { CitizenSupportPage } from './support-helpline/CitizenSupportPage';
 export { CitizenProfilePage } from './household-profile/CitizenProfilePage';
+export * from './data/citizenPortalData';
