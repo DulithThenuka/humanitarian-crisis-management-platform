@@ -6,5 +6,11 @@ export const authService = {
   },
   register: async (userData) => {
     return await apiClient.post('/auth/register', userData);
+  },
+  getCurrentUser: async () => {
+    return await apiClient.get('/auth/me');
+  },
+  logout: async () => {
+    return await apiClient.post('/auth/logout');
   }
 };

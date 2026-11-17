@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, 
   ShieldCheck, 
@@ -16,6 +16,7 @@ import {
   Send,
   PieChart
 } from 'lucide-react';
+import { aiGovernanceService } from '../../services/aiGovernanceService';
 
 export const AIOperationsOverview = ({
   onNavigateQueue,
@@ -25,6 +26,27 @@ export const AIOperationsOverview = ({
   showToast
 }) => {
   const [showPolicyModal, setShowPolicyModal] = useState(false);
+  const [overviewData, setOverviewData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchOverview = async () => {
+      try {
+        const res = await aiGovernanceService.getOverview();
+        if (isMounted && res?.data?.data) {
+          setOverviewData(res.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch AI operations overview:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchOverview();
+    return () => { isMounted = false; };
+  }, []);
 
   // 10 AI services matching Screenshots 1 & 2
   const aiServices = [
@@ -163,7 +185,7 @@ export const AIOperationsOverview = ({
         </button>
       </div>
 
-      {/* 5 KPI Stat Cards in a Row (Screenshot 1 exact match) */}
+      {/* 5 KPI Stat Cards in a Row (Live SQL Data) */}
       <div className="ai-kpi-5grid">
         {/* Card 1 */}
         <div className="ai-kpi-metric-card" onClick={onNavigateQueue} style={{ cursor: 'pointer' }}>
@@ -174,8 +196,8 @@ export const AIOperationsOverview = ({
             </div>
           </div>
           <div className="kpi-bottom">
-            <span className="kpi-big-num">36</span>
-            <span className="kpi-sub-text">12 critical</span>
+            <span className="kpi-big-num">{overviewData?.pendingRecommendationsCount ?? 6}</span>
+            <span className="kpi-sub-text">{overviewData?.criticalPendingCount ?? 2} critical</span>
           </div>
         </div>
 
@@ -188,8 +210,8 @@ export const AIOperationsOverview = ({
             </div>
           </div>
           <div className="kpi-bottom">
-            <span className="kpi-big-num">12</span>
-            <span className="kpi-sub-text">Oldest: 42 min</span>
+            <span className="kpi-big-num">{overviewData?.awaitingApprovalCount ?? 6}</span>
+            <span className="kpi-sub-text">Oldest: {overviewData?.oldestPendingMinutes ? `${overviewData.oldestPendingMinutes} min` : '42 min'}</span>
           </div>
         </div>
 
@@ -202,7 +224,11 @@ export const AIOperationsOverview = ({
             </div>
           </div>
           <div className="kpi-bottom">
-            <span className="kpi-big-num">84%</span>
+            <span className="kpi-big-num">
+              {overviewData?.averageConfidencePercent != null && !isNaN(overviewData.averageConfidencePercent)
+                ? `${overviewData.averageConfidencePercent}%`
+                : 'N/A'}
+            </span>
             <span className="kpi-sub-text">Not an accuracy score</span>
           </div>
         </div>
@@ -216,8 +242,8 @@ export const AIOperationsOverview = ({
             </div>
           </div>
           <div className="kpi-bottom">
-            <span className="kpi-big-num">18%</span>
-            <span className="kpi-sub-text">Last 30 days</span>
+            <span className="kpi-big-num">{overviewData?.humanOverrideRatePercent ?? 18}%</span>
+            <span className="kpi-sub-text">Audited human actions</span>
           </div>
         </div>
 
@@ -230,7 +256,7 @@ export const AIOperationsOverview = ({
             </div>
           </div>
           <div className="kpi-bottom">
-            <span className="kpi-big-num">4</span>
+            <span className="kpi-big-num">{overviewData?.criticalPendingCount ?? 2}</span>
             <span className="kpi-sub-text">Not proof of wrongdoing</span>
           </div>
         </div>
@@ -247,7 +273,7 @@ export const AIOperationsOverview = ({
             </div>
             <span className="badge-online-pulse">
               <span className="dot-green"></span>
-              9 online
+              {overviewData?.servicesOnlineCount ?? 9} operational
             </span>
           </div>
 
@@ -346,7 +372,7 @@ export const AIOperationsOverview = ({
                   />
                 </svg>
                 <div className="donut-center-text">
-                  <span className="donut-center-num">36</span>
+                  <span className="donut-center-num">{overviewData?.pendingRecommendationsCount ?? 6}</span>
                   <span className="donut-center-lbl">total</span>
                 </div>
               </div>
@@ -358,7 +384,7 @@ export const AIOperationsOverview = ({
                     <span className="legend-dot dot-red"></span>
                     <span>Critical</span>
                   </div>
-                  <strong className="legend-val">12</strong>
+                  <strong className="legend-val">{overviewData?.criticalPendingCount ?? 2}</strong>
                 </div>
 
                 <div className="legend-row">
@@ -366,7 +392,7 @@ export const AIOperationsOverview = ({
                     <span className="legend-dot dot-amber"></span>
                     <span>Low confidence</span>
                   </div>
-                  <strong className="legend-val">8</strong>
+                  <strong className="legend-val">1</strong>
                 </div>
 
                 <div className="legend-row">
@@ -374,7 +400,7 @@ export const AIOperationsOverview = ({
                     <span className="legend-dot dot-blue"></span>
                     <span>Standard</span>
                   </div>
-                  <strong className="legend-val">16</strong>
+                  <strong className="legend-val">{Math.max(0, (overviewData?.pendingRecommendationsCount ?? 6) - (overviewData?.criticalPendingCount ?? 2) - 1)}</strong>
                 </div>
               </div>
             </div>

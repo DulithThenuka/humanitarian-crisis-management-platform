@@ -14,18 +14,18 @@ export const COORDINATOR_USER = {
 };
 
 export const INITIAL_METRICS = {
-  incomingRequests: 248,
-  incomingTrend: '18 today',
-  pendingReviews: 46,
-  pendingTrend: '12 due soon',
-  criticalPriority: 64,
-  criticalTrend: '17 critical',
-  moreInfoRequired: 9,
-  moreInfoTrend: '3 overdue',
-  activeEmergencies: 3,
-  emergenciesTrend: '1 high severity',
-  volunteersAssigned: 86,
-  volunteersTrend: '12 tasks active'
+  incomingRequests: 0,
+  incomingTrend: 'Connecting to database...',
+  pendingReviews: 0,
+  pendingTrend: 'Connecting to database...',
+  criticalPriority: 0,
+  criticalTrend: 'Connecting to database...',
+  moreInfoRequired: 0,
+  moreInfoTrend: 'Connecting to database...',
+  activeEmergencies: 0,
+  emergenciesTrend: 'Connecting to database...',
+  volunteersAssigned: 0,
+  volunteersTrend: 'Connecting to database...'
 };
 
 export const RESPONSE_PERFORMANCE = [

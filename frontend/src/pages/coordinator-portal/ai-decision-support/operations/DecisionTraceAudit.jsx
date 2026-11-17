@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { aiGovernanceService } from '../../services/aiGovernanceService';
 import { 
   ChevronLeft, 
   ChevronDown, 
@@ -80,6 +81,7 @@ export const DecisionTraceAudit = ({
 
   // Decision Details State: Supervisor incident notes
   const [supervisorNoteInput, setSupervisorNoteInput] = useState('');
+  const [traceData, setTraceData] = useState(null);
   const [incidentNotes, setIncidentNotes] = useState([
     {
       id: 1,
@@ -96,6 +98,26 @@ export const DecisionTraceAudit = ({
       text: 'Approved resource override under Emergency Ordinance Protocol E-04. National Hospital Colombo Emergency Department notified for reception of 6 patients if evacuation is deemed critical on scene.'
     }
   ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchTrace = async () => {
+      try {
+        const res = await aiGovernanceService.getTrace(caseId);
+        if (isMounted && res?.data?.data) {
+          setTraceData(res.data.data);
+          if (res.data.data.supervisorNotes && res.data.data.supervisorNotes.length > 0) {
+            setIncidentNotes(res.data.data.supervisorNotes);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load decision trace:', err);
+      }
+    };
+
+    fetchTrace();
+    return () => { isMounted = false; };
+  }, [caseId]);
 
   // AI Analysis Token Saliency Inspector
   const [selectedToken, setSelectedToken] = useState({
@@ -191,19 +213,30 @@ export const DecisionTraceAudit = ({
     { id: 'c6', label: 'Cryptographic Ledger: SHA-256 block committed to audit chain', checked: true }
   ]);
 
-  const handleAddIncidentNote = (e) => {
+  const handleAddIncidentNote = async (e) => {
     e?.preventDefault();
     if (!supervisorNoteInput.trim()) return;
-    const newNote = {
-      id: Date.now(),
-      author: 'Amara Perera',
-      role: 'Field Coordinator',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      text: supervisorNoteInput.trim()
-    };
-    setIncidentNotes(prev => [...prev, newNote]);
-    setSupervisorNoteInput('');
-    showToast?.('Coordinator note permanently appended to audit trail', 'success');
+
+    try {
+      const targetCase = traceData?.caseNumber || caseId;
+      const res = await aiGovernanceService.addNote(targetCase, supervisorNoteInput.trim());
+      if (res?.data?.succeeded) {
+        const newNote = res.data.data || {
+          id: Date.now(),
+          author: 'Jane Coordinator',
+          role: 'Emergency Coordinator',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          text: supervisorNoteInput.trim()
+        };
+        setIncidentNotes(prev => [...prev, newNote]);
+        setSupervisorNoteInput('');
+        showToast?.('Coordinator note permanently appended to SQL audit trail', 'success');
+      } else {
+        showToast?.('Failed to append supervisor note', 'error');
+      }
+    } catch (err) {
+      showToast?.('Failed to append supervisor note', 'error');
+    }
   };
 
   const handlePingUnit = (unitId) => {
@@ -452,14 +485,14 @@ export const DecisionTraceAudit = ({
 
           <div className="trace-header-details">
             <div className="trace-id-badge-line">
-              <span className="trace-case-id">{caseId}</span>
-              <span className="badge-priority critical">CRITICAL</span>
+              <span className="trace-case-id">{traceData?.caseNumber || caseId}</span>
+              <span className={`badge-priority ${(traceData?.priority || 'CRITICAL').toLowerCase()}`}>{traceData?.priority || 'CRITICAL'}</span>
             </div>
             <div className="trace-sub-desc">
-              Medical Emergency | Colombo | 02 Nov 2026, 10:15 AM
+              {traceData?.category || 'Medical Emergency'} | {traceData?.address || 'Western Province'} | Verified Case
             </div>
             <div className="trace-source-channel">
-              Submitted via Mobile App
+              Affected: {traceData?.affectedCount ?? 6} people | Caller: {traceData?.caller || '+94 77 123 4567'}
             </div>
           </div>
         </div>

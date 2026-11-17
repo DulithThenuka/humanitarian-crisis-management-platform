@@ -7,6 +7,28 @@ using HumanitarianCrisisPlatform.Infrastructure.Data.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Ensure appsettings from the assembly base directory are loaded even if the process
+// is launched from the solution or repository root directory.
+var baseDirSettings = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+if (!File.Exists(Path.Combine(builder.Environment.ContentRootPath, "appsettings.json")) && File.Exists(baseDirSettings))
+{
+    builder.Configuration.AddJsonFile(baseDirSettings, optional: true, reloadOnChange: false);
+    var baseDirEnvSettings = Path.Combine(AppContext.BaseDirectory, $"appsettings.{builder.Environment.EnvironmentName}.json");
+    if (File.Exists(baseDirEnvSettings))
+    {
+        builder.Configuration.AddJsonFile(baseDirEnvSettings, optional: true, reloadOnChange: false);
+    }
+}
+
+// In Development, ensure .NET User Secrets are registered
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>(optional: true);
+}
+
+// Ensure Environment Variables (supporting production Jwt__Key) are registered
+builder.Configuration.AddEnvironmentVariables();
+
 // Add services
 builder.Services.AddControllers(options =>
 {
@@ -100,3 +122,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

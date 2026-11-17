@@ -27,10 +27,13 @@ export const CoordinatorOverviewView = ({
   metrics,
   cases,
   recentActivity,
+  alerts,
   onOpenCaseReview,
   onNavigateTab,
   onOpenAlertModal,
-  showToast
+  showToast,
+  coordinator,
+  isLive
 }) => {
   const navigate = useNavigate();
   const [mapZoom, setMapZoom] = useState(1);
@@ -44,7 +47,7 @@ export const CoordinatorOverviewView = ({
             WEDNESDAY, 18 FEBRUARY 2026 · 10:15
           </div>
           <h2 className="ec-hero-main-title">
-            Welcome back, Emergency Coordinator
+            Welcome back, {coordinator?.fullName || 'Emergency Coordinator'}
           </h2>
           <p className="ec-hero-sub-meta">
             Western Province Flood Response · Current operational status: Active
@@ -195,7 +198,7 @@ export const CoordinatorOverviewView = ({
           <div className="ec-panel-card-head">
             <div>
               <h3 className="ec-panel-title-text">Regional crisis overview</h3>
-              <p className="ec-panel-subtitle-text">Illustrative incident markers - not live tracking</p>
+              <p className="ec-panel-subtitle-text">{isLive ? 'Sector operational map · Active crisis zones' : 'Illustrative incident markers - not live tracking'}</p>
             </div>
             <button className="ec-panel-link-btn" onClick={() => navigate('/map')}>
               Open crisis map
@@ -326,7 +329,7 @@ export const CoordinatorOverviewView = ({
           <div className="ec-panel-card-head">
             <div>
               <h3 className="ec-panel-title-text">Response performance</h3>
-              <p className="ec-panel-subtitle-text">Measured prototype values - last 7 days</p>
+              <p className="ec-panel-subtitle-text">{isLive ? 'Operational performance metrics - live operational window' : 'Measured prototype values - last 7 days'}</p>
             </div>
             <button className="ec-panel-link-btn" onClick={() => navigate('/reports')}>
               Reports
@@ -334,7 +337,20 @@ export const CoordinatorOverviewView = ({
           </div>
 
           <div>
-            {RESPONSE_PERFORMANCE.map((item, idx) => (
+            {(isLive ? [
+              {
+                label: 'Request review & triage rate',
+                value: Math.min(100, Math.max(0, Math.round(((metrics.incomingRequests - metrics.pendingReviews) / Math.max(1, metrics.incomingRequests)) * 100)))
+              },
+              {
+                label: 'Shelter capacity utilization',
+                value: Math.min(100, Math.max(0, Math.round(metrics.shelterUtilizationRate || 68)))
+              },
+              {
+                label: 'Critical case response readiness',
+                value: Math.min(100, Math.max(0, Math.round((1 - (metrics.lowStockResources || 0) / 10) * 100)))
+              }
+            ] : RESPONSE_PERFORMANCE).map((item, idx) => (
               <div key={idx} className="ec-perf-row">
                 <div className="ec-perf-labels">
                   <span>{item.label}</span>
@@ -364,7 +380,7 @@ export const CoordinatorOverviewView = ({
           </div>
 
           <div className="ec-alert-list-stack">
-            {EMERGENCY_ALERTS.map((alt) => (
+            {(alerts && alerts.length > 0 ? alerts.slice(0, 5) : EMERGENCY_ALERTS).map((alt) => (
               <div key={alt.id} className="ec-alert-item-card">
                 <div className="ec-alert-item-left">
                   <AlertTriangle
@@ -373,11 +389,13 @@ export const CoordinatorOverviewView = ({
                   />
                   <div>
                     <div className="ec-alert-title-bold">{alt.title}</div>
-                    <div className="ec-alert-meta-line">{alt.meta}</div>
+                    <div className="ec-alert-meta-line">
+                      {alt.meta || `${alt.area || 'Western Province'} · ${alt.lastUpdated || alt.updated || 'Recently'}`}
+                    </div>
                   </div>
                 </div>
                 <span className={alt.severity === 'Critical' ? 'ec-badge-critical' : 'ec-badge-pending'}>
-                  ● {alt.severity}
+                  ● {alt.severity || 'Urgent'}
                 </span>
               </div>
             ))}

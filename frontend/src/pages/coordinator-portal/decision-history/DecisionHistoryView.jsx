@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   GitBranch,
   Search,
@@ -12,17 +12,43 @@ import {
   Clock,
   UserCheck
 } from 'lucide-react';
+import coordinatorService from '../../../services/coordinatorService';
 import { DECISION_HISTORY_DATA } from '../data/coordinatorPortalData';
 import './DecisionHistoryView.css';
 
 export const DecisionHistoryView = ({ showToast }) => {
   const [records, setRecords] = useState(DECISION_HISTORY_DATA.records);
+  const [summary, setSummary] = useState(DECISION_HISTORY_DATA.summary);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [resultFilter, setResultFilter] = useState('all');
   const [selectedRecordModal, setSelectedRecordModal] = useState(null);
 
-  const { summary } = DECISION_HISTORY_DATA;
+  useEffect(() => {
+    let isMounted = true;
+    coordinatorService.getDecisionHistory().then(data => {
+      if (isMounted && data) {
+        if (data.summary) {
+          setSummary(prev => ({
+            ...prev,
+            decisionsToday: data.summary.decisionsToday ?? prev.decisionsToday,
+            aiReviews: data.summary.aiReviews ?? prev.aiReviews,
+            escalations: data.summary.escalations ?? prev.escalations
+          }));
+        }
+        if (data.records && data.records.length > 0) {
+          setRecords(prev => {
+            const ids = new Set(prev.map(p => p.id));
+            const newOnly = data.records.filter(r => !ids.has(r.id));
+            return [...newOnly, ...prev];
+          });
+        }
+      }
+    }).catch(err => {
+      console.warn('Backend decision history offline or unauthenticated, using default list:', err.message);
+    });
+    return () => { isMounted = false; };
+  }, []);
 
   const filteredRecords = useMemo(() => {
     return records.filter((rec) => {

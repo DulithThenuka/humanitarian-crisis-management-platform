@@ -323,6 +323,19 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.ec-badge-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background-color: #eff6ff;
   color: #0284c7;
   border: 1px solid #bae6fd;

@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Shield, 
-  ShieldCheck, 
-  Sparkles, 
-  CheckSquare, 
-  FileText, 
-  Layers, 
-  GitCommit, 
-  Search, 
-  Bell, 
-  ChevronDown, 
+import { useAuth } from '../../context/AuthContext';
+import { aiGovernanceService } from '../../services/aiGovernanceService';
+import {
+  Shield,
+  ShieldCheck,
+  Sparkles,
+  CheckSquare,
+  FileText,
+  Layers,
+  GitCommit,
+  Search,
+  Bell,
+  ChevronDown,
   ChevronLeft,
   CheckCircle2,
   X
@@ -25,11 +27,101 @@ import { AIGovernanceSettings } from './AIGovernanceSettings';
 
 import './AIOperationsCommon.css';
 
-export const AIOperationsContainer = ({ 
-  initialSubView = 'overview', 
-  onBack = null 
+class AIErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('AI Operations Component Exception:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          padding: '36px 24px',
+          textAlign: 'center',
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          margin: '24px auto',
+          maxWidth: '720px',
+          border: '1px solid #fee2e2',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+        }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: '#fee2e2',
+            color: '#dc2626',
+            marginBottom: '16px'
+          }}>
+            <span style={{ fontSize: '22px' }}>⚠️</span>
+          </div>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
+            AI Service Workspace Temporarily Unavailable
+          </h2>
+          <p style={{ fontSize: '13px', color: '#64748b', maxWidth: '520px', margin: '0 auto 20px', lineHeight: '1.5' }}>
+            {this.state.error?.message || 'An unexpected rendering error occurred while loading this view.'}
+          </p>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+            <button 
+              onClick={() => this.setState({ hasError: false, error: null })}
+              style={{
+                padding: '8px 16px',
+                background: '#0d9488',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: '13px'
+              }}
+            >
+              Retry Loading
+            </button>
+            <button 
+              onClick={() => this.props.onReset ? this.props.onReset() : window.location.reload()}
+              style={{
+                padding: '8px 16px',
+                background: '#f1f5f9',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: '13px'
+              }}
+            >
+              Return to Overview
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export const AIOperationsContainer = ({
+  initialSubView = 'overview',
+  onBack = null
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const fullName = user?.fullName || user?.name || 'Jane Coordinator';
+  const initials = user?.initials || (fullName ? fullName.split(' ').filter(Boolean).map(p => p[0]).join('').slice(0, 2).toUpperCase() : 'JC');
+  const role = user?.role === 'Coordinator' ? 'Emergency Coordinator' : (user?.role || 'Emergency Coordinator');
+
   const [activeSubView, setActiveSubView] = useState(initialSubView);
   const [selectedCaseId, setSelectedCaseId] = useState('AID-2051');
   const [selectedWorkspace, setSelectedWorkspace] = useState('classification');
@@ -37,6 +129,34 @@ export const AIOperationsContainer = ({
   const [activeOperation, setActiveOperation] = useState('Western Province Flood');
   const [topSearch, setTopSearch] = useState('');
   const [toast, setToast] = useState(null);
+  const [providerStatus, setProviderStatus] = useState(null);
+  const [queueCount, setQueueCount] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchStatusAndCount = async () => {
+      try {
+        const [statusRes, queueRes] = await Promise.all([
+          aiGovernanceService.getStatus().catch(() => null),
+          aiGovernanceService.getQueue().catch(() => null)
+        ]);
+
+        if (isMounted) {
+          if (statusRes?.data?.data) {
+            setProviderStatus(statusRes.data.data);
+          }
+          if (queueRes?.data?.data) {
+            setQueueCount(queueRes.data.data.length);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load AI provider status:', err);
+      }
+    };
+
+    fetchStatusAndCount();
+    return () => { isMounted = false; };
+  }, []);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type, id: Date.now() });
@@ -97,14 +217,14 @@ export const AIOperationsContainer = ({
           {/* Authorised Reviewer User Card */}
           <div className="ai-reviewer-card">
             <div className="ai-reviewer-meta-left">
-              <div className="ai-reviewer-avatar">MF</div>
+              <div className="ai-reviewer-avatar">{initials}</div>
               <div>
                 <span className="ai-reviewer-tag">AUTHORISED REVIEWER</span>
-                <div className="ai-reviewer-role">Emergency Coordinator</div>
-                <div className="ai-reviewer-name">Maya Fernando</div>
+                <div className="ai-reviewer-role">{role}</div>
+                <div className="ai-reviewer-name">{fullName}</div>
               </div>
             </div>
-            <div 
+            <div
               className={`ai-duty-toggle-switch ${dutyActive ? 'active' : 'inactive'}`}
               onClick={() => {
                 setDutyActive(!dutyActive);
@@ -136,7 +256,7 @@ export const AIOperationsContainer = ({
                 <CheckSquare size={16} />
                 <span>Decision Support Queue</span>
               </div>
-              <span className="queue-red-count-badge">36</span>
+              <span className="queue-red-count-badge">{queueCount !== null ? queueCount : '·'}</span>
             </button>
 
             <button
@@ -201,9 +321,9 @@ export const AIOperationsContainer = ({
 
           <div className="top-nav-center-search">
             <Search size={15} className="top-search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search decisions, requests, AI services..." 
+            <input
+              type="text"
+              placeholder="Search decisions, requests, AI services..."
               value={topSearch}
               onChange={(e) => setTopSearch(e.target.value)}
               className="top-search-input"
@@ -220,7 +340,7 @@ export const AIOperationsContainer = ({
               </div>
             </div>
 
-            <button 
+            <button
               className="top-nav-bell-btn"
               onClick={() => showToast('12 unreviewed high-priority AI recommendations awaiting action', 'info')}
               title="Notifications"
@@ -230,91 +350,100 @@ export const AIOperationsContainer = ({
             </button>
 
             <div className="top-nav-user-badge">
-              <div className="user-avatar-circle">MF</div>
+              <div className="user-avatar-circle">{initials}</div>
               <div className="user-badge-text">
-                <strong className="user-name">Maya Fernando</strong>
-                <span className="user-role">Emergency Coordinator</span>
+                <strong className="user-name">{fullName}</strong>
+                <span className="user-role">{role}</span>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Simulated AI Outputs Warning Ribbon */}
-        <div className="ai-simulated-ribbon">
+        {/* AI Provider Status Ribbon */}
+        <div className={`ai-simulated-ribbon ${providerStatus?.isConnected ? 'online-status' : 'config-required-status'}`}>
           <Sparkles size={14} className="ribbon-sparkle-icon" />
-          <span className="ribbon-bold">Simulated AI outputs</span>
+          <span className="ribbon-bold">
+            {providerStatus?.isConnected
+              ? `AI Provider: ${providerStatus.provider} (${providerStatus.model}) - ONLINE`
+              : `AI Provider: Rule-Based Fallback (${providerStatus?.status || 'CONFIG_REQUIRED'})`}
+          </span>
           <span className="ribbon-text">
-            No AI provider is connected. All recommendations and service activity are labeled demonstration examples.
+            {providerStatus?.isConnected
+              ? 'Real-time structured AI decision support is active. Human coordinator sign-off is required for all actions.'
+              : (providerStatus?.message || 'OpenAI API key not configured. Operating in deterministic rule-based decision governance. Human verification required.')}
           </span>
         </div>
 
         {/* 3. Subview Body */}
         <main className="ai-portal-page-body">
-          {activeSubView === 'overview' && (
-            <AIOperationsOverview 
-              onNavigateQueue={() => setActiveSubView('queue')}
-              onNavigateReview={(id = 'AID-2051') => {
-                setSelectedCaseId(id);
-                setActiveSubView('review');
-              }}
-              onNavigateWorkspaces={(ws = 'classification') => {
-                setSelectedWorkspace(ws);
-                setActiveSubView('workspace');
-              }}
-              onNavigateGovernance={() => setActiveSubView('governance')}
-              showToast={showToast}
-            />
-          )}
+          <AIErrorBoundary onReset={() => setActiveSubView('overview')}>
+            {activeSubView === 'overview' && (
+              <AIOperationsOverview
+                onNavigateQueue={() => setActiveSubView('queue')}
+                onNavigateReview={(id = 'AID-2051') => {
+                  setSelectedCaseId(id);
+                  setActiveSubView('review');
+                }}
+                onNavigateWorkspaces={(ws = 'classification') => {
+                  setSelectedWorkspace(ws);
+                  setActiveSubView('workspace');
+                }}
+                onNavigateGovernance={() => setActiveSubView('governance')}
+                showToast={showToast}
+              />
+            )}
 
-          {activeSubView === 'queue' && (
-            <DecisionSupportQueue 
-              onOpenReview={(id = 'AID-2051') => {
-                setSelectedCaseId(id);
-                setActiveSubView('review');
-              }}
-              onBackOverview={() => setActiveSubView('overview')}
-              showToast={showToast}
-            />
-          )}
+            {activeSubView === 'queue' && (
+              <DecisionSupportQueue
+                onOpenReview={(id = 'AID-2051') => {
+                  setSelectedCaseId(id);
+                  setActiveSubView('review');
+                }}
+                onBackOverview={() => setActiveSubView('overview')}
+                showToast={showToast}
+              />
+            )}
 
-          {activeSubView === 'review' && (
-            <AIDecisionReview 
-              caseId={selectedCaseId}
-              onBackToQueue={() => setActiveSubView('queue')}
-              showToast={showToast}
-            />
-          )}
+            {activeSubView === 'review' && (
+              <AIDecisionReview
+                caseId={selectedCaseId}
+                onBackToQueue={() => setActiveSubView('queue')}
+                showToast={showToast}
+              />
+            )}
 
-          {activeSubView === 'workspace' && (
-            <AIServiceWorkspace 
-              initialService={selectedWorkspace}
-              onBackOverview={() => setActiveSubView('overview')}
-              onViewCase={(id = 'AID-2051') => {
-                setSelectedCaseId(id);
-                setActiveSubView('review');
-              }}
-              showToast={showToast}
-            />
-          )}
+            {activeSubView === 'workspace' && (
+              <AIServiceWorkspace
+                initialService={selectedWorkspace}
+                providerStatus={providerStatus}
+                onBackOverview={() => setActiveSubView('overview')}
+                onViewCase={(id = 'AID-2051') => {
+                  setSelectedCaseId(id);
+                  setActiveSubView('review');
+                }}
+                showToast={showToast}
+              />
+            )}
 
-          {activeSubView === 'trace' && (
-            <DecisionTraceAudit 
-              caseId={selectedCaseId}
-              onBackToQueue={() => setActiveSubView('queue')}
-              showToast={showToast}
-            />
-          )}
+            {activeSubView === 'trace' && (
+              <DecisionTraceAudit
+                caseId={selectedCaseId}
+                onBackToQueue={() => setActiveSubView('queue')}
+                showToast={showToast}
+              />
+            )}
 
-          {activeSubView === 'governance' && (
-            <AIGovernanceSettings 
-              onNavigateWorkspace={(wsId) => {
-                setSelectedWorkspace(wsId);
-                setActiveSubView('workspace');
-              }}
-              onBackOverview={() => setActiveSubView('overview')}
-              showToast={showToast}
-            />
-          )}
+            {activeSubView === 'governance' && (
+              <AIGovernanceSettings
+                onNavigateWorkspace={(wsId) => {
+                  setSelectedWorkspace(wsId);
+                  setActiveSubView('workspace');
+                }}
+                onBackOverview={() => setActiveSubView('overview')}
+                showToast={showToast}
+              />
+            )}
+          </AIErrorBoundary>
         </main>
       </div>
     </div>

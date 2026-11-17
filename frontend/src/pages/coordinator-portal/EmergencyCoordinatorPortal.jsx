@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle2 } from 'lucide-react';
-import { coordinatorService } from '../../services';
+import { useAuth } from '../../context/AuthContext';
+
+// API Services
+import coordinatorService from '../../services/coordinatorService';
+import incidentService from '../../services/incidentService';
 
 // Data
 import {
@@ -11,7 +14,8 @@ import {
   PRIORITY_CASES,
   ASSISTANCE_REQUESTS_LIST,
   CRISIS_INCIDENTS_DATA,
-  AI_DECISION_SUPPORT_DATA
+  AI_DECISION_SUPPORT_DATA,
+  EMERGENCY_ALERTS_LIST
 } from './data/coordinatorPortalData';
 
 // Shared Components
@@ -38,7 +42,7 @@ import { ReportsResponseAnalyticsView } from './reports/ReportsResponseAnalytics
 import { DecisionHistoryView } from './decision-history/DecisionHistoryView';
 import { NotificationsRemindersView } from './notifications/NotificationsRemindersView';
 import { ProfileSettingsView } from './profile-settings/ProfileSettingsView';
-import { AIOperationsContainer } from './ai-decision-support/operations/AIOperationsContainer';
+import { AIOperationsContainer } from '../ai-operations/AIOperationsContainer';
 
 import './EmergencyCoordinatorPortal.css';
 
@@ -46,49 +50,17 @@ export const EmergencyCoordinatorPortal = ({
   initialActiveTab = 'overview',
   initialCaseId = 'HMR-1042'
 }) => {
-  const location = useLocation();
-  const params = useParams();
+  // Authentication & Logged-in User Identity
+  const { user: authUser } = useAuth();
+  const coordinatorUser = {
+    fullName: authUser?.fullName || authUser?.name || COORDINATOR_USER.fullName,
+    initials: authUser?.initials || (authUser?.fullName ? authUser.fullName.split(' ').filter(Boolean).map(p => p[0]).join('').slice(0, 2).toUpperCase() : COORDINATOR_USER.initials),
+    role: authUser?.role === 'Coordinator' ? 'Emergency Coordinator' : (authUser?.role || COORDINATOR_USER.role)
+  };
 
   // Navigation & View States
   const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [selectedCaseId, setSelectedCaseId] = useState(initialCaseId);
-
-  // Sync activeTab & selectedCaseId reactively when URL route or props change
-  useEffect(() => {
-    if (initialActiveTab) {
-      setActiveTab(initialActiveTab);
-    }
-    const path = (location.pathname || '').toLowerCase();
-    if (path.includes('/coordinator/review') || path.includes('/ai-review')) {
-      setActiveTab('review');
-      if (params.id) setSelectedCaseId(params.id);
-    } else if (path.includes('/coordinator/cases') || path.includes('/coordinator/requests')) {
-      setActiveTab('requests');
-      if (params.id) setSelectedCaseId(params.id);
-    } else if (path.includes('/coordinator/incidents') || path.includes('/coordinator/crisis')) {
-      setActiveTab('crisis');
-    } else if (path.includes('/coordinator/resources')) {
-      setActiveTab('resources');
-    } else if (path.includes('/coordinator/shelters')) {
-      setActiveTab('shelters');
-    } else if (path.includes('/coordinator/alerts')) {
-      setActiveTab('alerts');
-    } else if (path.includes('/coordinator/reports')) {
-      setActiveTab('reports');
-    } else if (path.includes('/coordinator/history')) {
-      setActiveTab('history');
-    } else if (path.includes('/coordinator/notifications')) {
-      setActiveTab('notifications');
-    } else if (path.includes('/coordinator/settings')) {
-      setActiveTab('settings');
-    } else if (path.includes('/coordinator/ai-ops') || path.includes('/ai-operations')) {
-      setActiveTab('ai-ops');
-    } else if (path.includes('/coordinator/ai-support')) {
-      setActiveTab('ai-support');
-    } else if (path === '/coordinator' || path === '/coordinator/' || path === '/coordinator/overview' || path === '/coordinator/portal') {
-      setActiveTab('overview');
-    }
-  }, [initialActiveTab, location.pathname, params.id]);
 
   // Core Data States
   const [cases, setCases] = useState(PRIORITY_CASES);
@@ -97,8 +69,12 @@ export const EmergencyCoordinatorPortal = ({
   const [selectedIncidentId, setSelectedIncidentId] = useState('CR-2026-014');
   const [recentActivity, setRecentActivity] = useState(INITIAL_RECENT_ACTIVITY);
   const [metrics, setMetrics] = useState(INITIAL_METRICS);
+  const [isLive, setIsLive] = useState(false);
+  const [apiError, setApiError] = useState(null);
+  const [alerts, setAlerts] = useState([]);
 
   // Controls & HUD
+  const [autoNextEnabled, setAutoNextEnabled] = useState(false);
   const [dutyActive, setDutyActive] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
@@ -125,83 +101,176 @@ export const EmergencyCoordinatorPortal = ({
   });
   const [newAlertForm, setNewAlertForm] = useState({
     title: '',
+    category: 'Flood warning',
     severity: 'Critical',
-    area: 'Kelani East - Zone 03'
+    area: 'Kelani East - Zone 03',
+    relatedIncident: '',
+    message: '',
+    safetyInstructions: 'Move vital medicines, dry rations and identity documents to high ground.\nDo not attempt to walk or drive through flowing water.\nFollow instructions from authorized relief personnel.',
+    scheduledDate: ''
   });
 
   // Selected Objects
   const currentCase = cases.find(c => c.id === selectedCaseId) || cases[0];
   const currentIncident = incidents.find(inc => inc.id === selectedIncidentId) || incidents[0];
 
-  // Fetch live backend overview on mount
-  useEffect(() => {
-    let isMounted = true;
-    coordinatorService.getOverview()
-      .then(res => {
-        if (!isMounted || !res?.data) return;
-        const data = res.data;
-        if (data.metrics) {
-          setMetrics(prev => ({
-            ...prev,
-            incomingRequests: data.metrics.incomingRequests ?? prev.incomingRequests,
-            pendingReviews: data.metrics.pendingReviews ?? prev.pendingReviews,
-            criticalPriority: data.metrics.criticalPriority ?? prev.criticalPriority,
-            activeEmergencies: data.metrics.activeEmergencies ?? prev.activeEmergencies,
-            volunteersAssigned: data.metrics.volunteersAssigned ?? prev.volunteersAssigned
-          }));
-        }
-        if (Array.isArray(data.priorityCases) && data.priorityCases.length > 0) {
-          const mapped = data.priorityCases.map(c => ({
-            id: c.ticketReference || c.id,
-            category: c.category || 'Emergency Relief',
-            categoryIcon: c.categoryIcon || 'package',
-            location: c.location || 'Colombo',
-            district: c.district || 'Colombo',
-            timeAgo: c.timeAgo || 'Recent',
-            severity: c.severity || 'High',
-            status: c.status || 'Pending verification',
-            assignedTo: c.assignedTo || 'Assigned to you',
-            requesterName: c.requesterName || 'Displaced Citizen',
-            contactNumber: c.contactNumber || '+94 77 000 0000',
-            contactStatus: c.contactStatus || 'Pending call-back',
-            affectedSummary: c.affectedSummary || 'Household assistance',
-            description: c.description || '',
-            generalLocation: c.generalLocation || 'Zone 03',
-            accessibility: c.accessibility || 'Standard access',
-            emergencyContext: c.emergencyContext || 'Active incident',
-            numberOfPeople: c.numberOfPeople || 1,
-            aiPriorityScore: c.aiPriorityScore || 0.88,
-            aiConfidence: c.aiConfidence || 0.94,
-            aiSuggestion: c.aiSuggestion || 'AI automated triage',
-            attachmentsCount: c.attachmentsCount || 1,
-            attachment: c.attachment || {
-              fileName: 'evidence.jpg',
-              fileSize: '2.4 MB',
-              uploadType: 'Citizen upload',
-              previewUrl: '/assets/req-drawer-flood.jpg'
-            },
-            checklist: Array.isArray(c.checklist) && c.checklist.length > 0 ? c.checklist : [
-              { id: 'c1', label: 'Request category is consistent with description', checked: true, required: false },
-              { id: 'c2', label: 'General location is within active operation boundaries', checked: true, required: false },
-              { id: 'c3', label: 'Citizen contact information has been verified', checked: false, required: true },
-              { id: 'c4', label: 'Supporting photo/evidence has been reviewed', checked: false, required: true }
-            ],
-            notes: Array.isArray(c.notes) ? c.notes : [],
-            history: Array.isArray(c.history) ? c.history : []
-          }));
-          setCases(mapped);
-          if (mapped[0]?.id) setSelectedCaseId(mapped[0].id);
-        }
-        if (Array.isArray(data.recentActivity) && data.recentActivity.length > 0) {
-          setRecentActivity(data.recentActivity);
-        }
-      })
-      .catch(err => {
-        console.warn('Coordinator live API sync skipped (using cached/mock telemetry):', err);
-      });
+  const loadPortalData = useCallback(async () => {
+    try {
+      const overview = await coordinatorService.getOverview();
+      if (overview) {
+        const payload = overview.metrics ? overview : (overview.data?.metrics ? overview.data : (overview.data || overview));
+        const rawMetrics = payload.metrics || payload;
 
-    return () => { isMounted = false; };
-  }, []);
+        if (rawMetrics && (rawMetrics.totalIncomingRequests !== undefined || rawMetrics.incomingRequests !== undefined)) {
+          setIsLive(true);
+          setApiError(null);
+          setMetrics({
+            incomingRequests: rawMetrics.totalIncomingRequests ?? rawMetrics.incomingRequests ?? 0,
+            incomingTrend: `${rawMetrics.totalIncomingRequests ?? 0} in db`,
+            pendingReviews: rawMetrics.pendingReviews ?? 0,
+            pendingTrend: `${rawMetrics.pendingReviews ?? 0} pending action`,
+            criticalPriority: rawMetrics.criticalRequests ?? rawMetrics.criticalPriority ?? 0,
+            criticalTrend: `${rawMetrics.criticalRequests ?? 0} critical level`,
+            moreInfoRequired: rawMetrics.needInformation ?? rawMetrics.moreInfoRequired ?? 0,
+            moreInfoTrend: `${rawMetrics.needInformation ?? 0} unresolved`,
+            activeEmergencies: rawMetrics.activeCrisisEvents ?? rawMetrics.activeIncidents ?? rawMetrics.activeEmergencies ?? 0,
+            emergenciesTrend: `${rawMetrics.activeIncidents ?? 0} active ops`,
+            volunteersAssigned: rawMetrics.availableVolunteers ?? rawMetrics.volunteersAssigned ?? 0,
+            volunteersTrend: `${rawMetrics.availableVolunteers ?? 0} available`
+          });
+
+          const rawCases = payload.priorityCases || overview.priorityCases;
+          if (rawCases && rawCases.length > 0) {
+            setCases(rawCases);
+            // Sync selectedCaseId if previous id is not in priorityCases
+            if (!rawCases.some(c => c.id === selectedCaseId)) {
+              setSelectedCaseId(rawCases[0].id);
+            }
+
+            // Also map live priority cases into requestsList for the requests view
+            const mappedReqList = rawCases.map(c => {
+              const isReqVerified = c.status === 'Verified' || c.verificationStatus === 'Verified';
+              const isReqMoreInfo = c.status === 'Need information' ||
+                                    c.verificationStatus === 'More Information Required' ||
+                                    c.verificationStatus === 'Information Requested';
+              const verificationLabel = isReqVerified ? 'Verified' : isReqMoreInfo ? 'Need information' : 'Pending review';
+              const statusLabel = isReqVerified ? 'Verified & Scheduled' : isReqMoreInfo ? 'Need information' : (c.status || 'Awaiting Review');
+              const statusClass = isReqVerified ? 'status-verified' : isReqMoreInfo ? 'status-info' : 'status-awaiting';
+
+              return {
+                id: c.id,
+                category: c.category || 'Emergency Assistance',
+                submitted: c.submittedAt || 'Today',
+                location: c.location || 'Western Province',
+                people: c.affectedPeople ?? (c.id === 'HMR-1042' ? 6 : 1),
+                aiPriority: c.severity || 'High',
+                aiScore: (c.aiPriorityScore || 85) / 100,
+                verification: verificationLabel,
+                coordinator: coordinatorUser.fullName,
+                status: statusLabel,
+                statusClass: statusClass
+              };
+            });
+            setRequestsList(mappedReqList);
+          }
+
+          const rawActivity = payload.recentActivity || overview.recentActivity;
+          if (rawActivity && rawActivity.length > 0) {
+            setRecentActivity(rawActivity);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Coordinator overview API connection error, displaying offline state:', err.message || err);
+      setIsLive(false);
+      const errMsg = err.message || (typeof err === 'string' ? err : 'Backend unreachable');
+      setApiError(errMsg);
+      setMetrics({
+        incomingRequests: '—',
+        incomingTrend: 'Backend offline',
+        pendingReviews: '—',
+        pendingTrend: 'Backend offline',
+        criticalPriority: '—',
+        criticalTrend: 'Backend offline',
+        moreInfoRequired: '—',
+        moreInfoTrend: 'Backend offline',
+        activeEmergencies: '—',
+        emergenciesTrend: 'Backend offline',
+        volunteersAssigned: '—',
+        volunteersTrend: 'Backend offline'
+      });
+    }
+
+    try {
+      const events = await coordinatorService.getCrisisEvents();
+      if (events && events.length > 0) {
+        const mappedEvents = events.map(ev => ({
+          id: ev.incidentId || ev.id,
+          title: ev.name || ev.title,
+          leadTeam: 'National Relief Unit',
+          severity: ev.severity || 'High',
+          severityPillClass: (ev.severity || '').toLowerCase() === 'critical' ? 'pill-critical' : 'pill-high',
+          area: ev.location || 'Western Province',
+          stats: `${ev.affectedPopulation ? ev.affectedPopulation.toLocaleString() : '0'} affected`,
+          affectedEstimate: ev.affectedPopulation ? `${ev.affectedPopulation.toLocaleString()} citizens` : 'Under assessment',
+          relatedRequests: 'Open',
+          assignedCoordinator: coordinatorUser.fullName,
+          currentStatus: ev.status || 'Active response',
+          unresolvedIssues: [],
+          timeline: [
+            {
+              time: ev.startDate ? new Date(ev.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '08:00 AM',
+              event: ev.description || 'Active crisis response',
+              actor: 'System Record'
+            }
+          ]
+        }));
+        setIncidents(mappedEvents);
+        if (mappedEvents[0]) {
+          setSelectedIncidentId(mappedEvents[0].id);
+        }
+      }
+    } catch (err) {
+      console.warn('Crisis events API offline, keeping default seed data:', err.message);
+    }
+
+    try {
+      const backendAlerts = await coordinatorService.getAlerts();
+      const rawAlerts = Array.isArray(backendAlerts) ? backendAlerts : (backendAlerts?.data && Array.isArray(backendAlerts.data) ? backendAlerts.data : null);
+      if (rawAlerts && rawAlerts.length > 0) {
+        const mappedAlerts = rawAlerts.map(a => ({
+          id: a.id,
+          sourceCrisisEventId: a.sourceCrisisEventId,
+          title: a.title,
+          category: a.category || 'Flood warning',
+          severity: a.severity || 'Critical',
+          severityClass: (a.severity || '').toLowerCase() === 'critical' ? 'pill-critical' : (a.severity || '').toLowerCase() === 'high' ? 'pill-high' : 'pill-moderate',
+          area: a.area || 'Western Province',
+          relatedIncident: a.relatedIncident || '',
+          publication: a.publication || 'Published',
+          tab: a.tab || 'active',
+          createdBy: a.createdBy || coordinatorUser.fullName,
+          createdDate: a.createdDate || a.lastUpdated || 'Recently',
+          lastUpdated: a.lastUpdated || 'Recently',
+          startTime: a.startTime || 'Now',
+          expiryTime: a.expiryTime || 'Until further notice',
+          scheduledDate: a.scheduledDate || null,
+          resolutionNotes: a.resolutionNotes || null,
+          resolvedAt: a.resolvedAt || null,
+          resolvedBy: a.resolvedBy || null,
+          message: a.message || '',
+          safetyInstructions: a.safetyInstructions && a.safetyInstructions.length > 0 ? a.safetyInstructions : ['Follow official evacuation route signage.']
+        }));
+        setAlerts(mappedAlerts);
+      }
+    } catch (err) {
+      console.warn('Emergency alerts API offline:', err.message || err);
+    }
+  }, [coordinatorUser.fullName, selectedCaseId]);
+
+  useEffect(() => {
+    loadPortalData();
+  }, [loadPortalData]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -222,7 +291,7 @@ export const EmergencyCoordinatorPortal = ({
     setCases(prevCases =>
       prevCases.map(item => {
         if (item.id === currentCase.id) {
-          const updatedChecklist = item.checklist.map(chk =>
+          const updatedChecklist = (item.checklist || []).map(chk =>
             chk.id === checkId ? { ...chk, checked: !chk.checked } : chk
           );
           return { ...item, checklist: updatedChecklist };
@@ -233,53 +302,90 @@ export const EmergencyCoordinatorPortal = ({
   };
 
   // Add Internal Coordinator Note
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
     if (!newNoteText.trim()) return;
 
+    const noteText = newNoteText.trim();
+    const reqId = currentCase.id;
     const newNoteObj = {
       id: `n-${Date.now()}`,
-      author: COORDINATOR_USER.fullName,
+      author: coordinatorUser.fullName,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      text: newNoteText.trim()
+      text: noteText
     };
 
     setCases(prevCases =>
       prevCases.map(item => {
-        if (item.id === currentCase.id) {
-          return { ...item, notes: [...item.notes, newNoteObj] };
+        if (item.id === reqId) {
+          return { ...item, notes: [...(item.notes || []), newNoteObj] };
         }
         return item;
       })
     );
 
     setNewNoteText('');
-    showToast(`Note logged for request ${currentCase.id}`);
 
-    // Sync note with backend
-    coordinatorService.addCaseNote(currentCase.id, newNoteText.trim())
-      .catch(err => console.warn('Note logged locally (offline/fallback mode):', err));
+    try {
+      await coordinatorService.addNote(reqId, { text: noteText });
+      showToast(`Note logged for request ${reqId}`);
+    } catch (err) {
+      console.warn('Backend note sync error (client state updated):', err.message);
+      showToast(`Note logged locally for request ${reqId}`);
+    }
   };
 
+  // Auto-Next Advance Handler
+  const advanceToNextActionableCase = useCallback((currentReqId, updatedList) => {
+    const list = updatedList || cases;
+    const priorityWeight = { Critical: 1, High: 2, Medium: 3, Low: 4 };
+
+    const actionable = list.filter(c => {
+      if (c.id === currentReqId) return false;
+      const isVerified = c.status === 'Verified' || c.verificationStatus === 'Verified';
+      const isNeedInfo = c.status === 'Need information' ||
+                         c.verificationStatus === 'More Information Required' ||
+                         c.verificationStatus === 'Information Requested';
+      const isRejected = c.status === 'Rejected';
+      return !isVerified && !isNeedInfo && !isRejected;
+    });
+
+    if (actionable.length > 0) {
+      actionable.sort((a, b) => {
+        const pA = priorityWeight[a.severity] || 3;
+        const pB = priorityWeight[b.severity] || 3;
+        return pA - pB;
+      });
+      const nextCase = actionable[0];
+      setSelectedCaseId(nextCase.id);
+      showToast(`Auto-Next: Advanced to ${nextCase.id} (${nextCase.severity || 'Pending'})`, 'info');
+    } else {
+      showToast('Auto-Next: All pending requests in review queue have been addressed!', 'success');
+    }
+  }, [cases, showToast]);
+
   // Confirm Verification
-  const handleConfirmVerification = () => {
+  const handleConfirmVerification = async () => {
     if (!verifyReason.trim() || !verifyConfirmedCheck) return;
 
-    setCases(prevCases =>
-      prevCases.map(item => {
-        if (item.id === currentCase.id) {
-          return {
-            ...item,
-            status: 'Verified',
-            checklist: item.checklist.map(chk => ({ ...chk, checked: true }))
-          };
-        }
-        return item;
-      })
-    );
+    const reqId = currentCase.id;
+    const reason = verifyReason.trim();
+
+    const updatedCases = cases.map(item => {
+      if (item.id === reqId) {
+        return {
+          ...item,
+          status: 'Verified',
+          verificationStatus: 'Verified',
+          checklist: (item.checklist || []).map(chk => ({ ...chk, checked: true }))
+        };
+      }
+      return item;
+    });
+    setCases(updatedCases);
 
     setRequestsList(prevList =>
       prevList.map(req =>
-        req.id === currentCase.id
+        req.id === reqId
           ? { ...req, verification: 'Verified', status: 'Verified', statusClass: 'status-verified' }
           : req
       )
@@ -289,7 +395,7 @@ export const EmergencyCoordinatorPortal = ({
       id: `ACT-${Date.now()}`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       title: 'Verified request',
-      detail: `${currentCase.id} - ${verifyReason.trim().slice(0, 32)}...`,
+      detail: `${reqId} - ${reason.slice(0, 32)}...`,
       type: 'verified'
     };
     setRecentActivity(prev => [newActivity, ...prev]);
@@ -299,44 +405,260 @@ export const EmergencyCoordinatorPortal = ({
       pendingReviews: Math.max(0, prev.pendingReviews - 1)
     }));
 
-    const caseIdToVerify = currentCase.id;
-    const reasonToVerify = verifyReason.trim();
-
     setShowVerifyModal(false);
     setVerifyReason('');
     setVerifyConfirmedCheck(false);
-    showToast(`Request ${caseIdToVerify} verified and scheduled for dispatch!`, 'success');
 
-    // Sync verification with backend
-    coordinatorService.verifyCase(caseIdToVerify, {
-      reason: reasonToVerify,
-      confirmedCheck: true
-    }).catch(err => console.warn('Verification logged locally (offline/fallback mode):', err));
+    try {
+      await coordinatorService.verifyRequest(reqId, {
+        reason: reason,
+        checklistConfirmed: true
+      });
+      showToast(`Request ${reqId} verified and scheduled for dispatch!`, 'success');
+      if (autoNextEnabled) {
+        advanceToNextActionableCase(reqId, updatedCases);
+      }
+    } catch (err) {
+      console.warn('Backend verification sync warning (client state updated):', err.message);
+      showToast(`Request ${reqId} verified locally!`, 'success');
+    }
   };
 
-  // Accept AI Recommendation
-  const handleAcceptAIRecommendation = (finalPriority, reason) => {
-    setAiReviewed(true);
-    showToast(`Accepted AI recommendation (${finalPriority}) for ${AI_DECISION_SUPPORT_DATA.assessmentId}`, 'success');
+  // Escalate Request
+  const handleEscalateRequest = async (reqId, reason) => {
+    try {
+      await coordinatorService.escalateRequest(reqId, {
+        urgency: 3,
+        reason: reason || 'Escalated to Critical by Emergency Coordinator'
+      });
+      const updatedCases = cases.map(item =>
+        item.id === reqId ? { ...item, severity: 'Critical' } : item
+      );
+      setCases(updatedCases);
+      setRequestsList(prevList =>
+        prevList.map(req =>
+          req.id === reqId ? { ...req, aiPriority: 'Critical' } : req
+        )
+      );
+      showToast(`Operational priority for ${reqId} escalated to Critical Emergency Command`, 'warning');
+      if (autoNextEnabled) {
+        advanceToNextActionableCase(reqId, updatedCases);
+      }
+    } catch (err) {
+      console.warn('Backend escalation error:', err.message);
+      showToast(`Operational priority for ${reqId} escalated to Critical`, 'warning');
+    }
+  };
 
+  // Request Information
+  const handleRequestInfo = async (reqId, reason) => {
+    if (!reason || !reason.trim()) {
+      showToast('Please provide an information request message', 'error');
+      return;
+    }
+    const messageText = reason.trim();
+    try {
+      await coordinatorService.requestInfo(reqId, { message: messageText, reason: messageText });
+
+      const newHistoryItem = {
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        event: `Additional information requested: ${messageText}`,
+        actor: `Emergency Coordinator (${coordinatorUser.fullName})`
+      };
+
+      const newCommunication = {
+        id: `comm-${Date.now()}`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        title: 'Additional Information Requested',
+        message: messageText,
+        recipient: 'Citizen / Requestor',
+        senderName: coordinatorUser.fullName,
+        senderRole: 'Emergency Coordinator',
+        sentAt: new Date().toISOString()
+      };
+
+      // 1. Update cases state
+      const updatedCases = cases.map(item =>
+        item.id === reqId
+          ? {
+              ...item,
+              status: 'Need information',
+              verificationStatus: 'More Information Required',
+              verification: 'Need information',
+              history: [...(item.history || []), newHistoryItem],
+              communications: [newCommunication, ...(item.communications || [])]
+            }
+          : item
+      );
+      setCases(updatedCases);
+
+      // 2. Update requestsList state
+      setRequestsList(prevList =>
+        prevList.map(req =>
+          req.id === reqId
+            ? {
+                ...req,
+                verification: 'Need information',
+                status: 'Need information',
+                statusClass: 'status-info'
+              }
+            : req
+        )
+      );
+
+      // 3. Update metrics state immediately
+      setMetrics(prev => ({
+        ...prev,
+        moreInfoRequired: (typeof prev.moreInfoRequired === 'number' ? prev.moreInfoRequired : 0) + 1,
+        moreInfoTrend: `${(typeof prev.moreInfoRequired === 'number' ? prev.moreInfoRequired : 0) + 1} unresolved`
+      }));
+
+      // 4. Record recent activity
+      const newActivity = {
+        id: `act-${Date.now()}`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        title: 'Information requested from citizen',
+        detail: `${reqId}: ${messageText.length > 40 ? messageText.slice(0, 37) + '...' : messageText}`,
+        type: 'general'
+      };
+      setRecentActivity(prev => [newActivity, ...prev]);
+
+      showToast(`Additional information requested for ${reqId}. Status updated.`, 'success');
+      if (autoNextEnabled) {
+        advanceToNextActionableCase(reqId, updatedCases);
+      }
+
+      // 5. Reload from backend to confirm database sync
+      await loadPortalData();
+    } catch (err) {
+      console.error('Backend info request error:', err);
+      showToast(err.response?.data?.message || err.message || `Failed to request info for ${reqId}`, 'error');
+    }
+  };
+
+  // Reject Request
+  const handleRejectRequest = async (reqId, reason) => {
+    const rejectText = `[REJECTED] ${reason || 'Operational rationale logged'}`;
+    try {
+      await coordinatorService.addNote(reqId, { text: rejectText });
+      const updatedCases = cases.map(item =>
+        item.id === reqId ? { ...item, status: 'Rejected' } : item
+      );
+      setCases(updatedCases);
+      setRequestsList(prevList =>
+        prevList.map(req =>
+          req.id === reqId ? { ...req, status: 'Rejected', statusClass: 'status-rejected' } : req
+        )
+      );
+      showToast(`Request ${reqId} rejected with logged operational rationale`, 'error');
+      if (autoNextEnabled) {
+        advanceToNextActionableCase(reqId, updatedCases);
+      }
+    } catch (err) {
+      console.warn('Backend rejection error:', err.message);
+      showToast(`Request ${reqId} rejected`, 'error');
+    }
+  };
+
+  // Record Human Decision on AI Assessment (Accept, Adjust, Reject)
+  const handleRecordAIDecision = async (caseId, decisionType, finalPriority, reason) => {
+    const decLabel = decisionType === 'accept' ? 'Approved' : decisionType === 'adjust' ? 'Overridden' : 'Rejected';
+    const targetCase = cases.find(c => c.id === caseId) || currentCase;
+    const appliedPriority = decisionType === 'accept' ? (targetCase?.severity || 'High') : finalPriority;
+
+    // 1. Attempt backend incident AI review endpoint
+    try {
+      await incidentService.recordAIReviewDecision(caseId, {
+        decision: decLabel,
+        reason: reason,
+        overriddenPriority: decisionType === 'adjust' ? appliedPriority : null
+      });
+    } catch (err) {
+      console.warn('Incident AI review endpoint note:', err.message);
+    }
+
+    // 2. Add audit note via coordinator service
+    try {
+      await coordinatorService.addNote(caseId, {
+        text: `[AI REVIEW ${decLabel.toUpperCase()}] Priority: ${appliedPriority}. Reviewer: ${coordinatorUser.fullName}. Rationale: ${reason}`
+      });
+    } catch (err) {
+      console.warn('Coordinator note sync fallback:', err.message);
+    }
+
+    // 3. If adjusted to Critical or escalate, call escalateRequest
+    if (decisionType === 'adjust' && appliedPriority === 'Critical') {
+      try {
+        await coordinatorService.escalateRequest(caseId, {
+          urgency: 3,
+          reason: `Priority adjusted to Critical via AI Decision Review: ${reason}`
+        });
+      } catch (err) {
+        console.warn('Coordinator escalate fallback:', err.message);
+      }
+    }
+
+    // 4. Update local state
+    setCases(prevCases =>
+      prevCases.map(item =>
+        item.id === caseId
+          ? {
+              ...item,
+              severity: appliedPriority,
+              status: decisionType === 'reject' ? item.status : 'Verified',
+              verificationStatus: decisionType === 'reject' ? item.verificationStatus : 'Verified',
+              aiReviewed: true,
+              history: [
+                ...(item.history || []),
+                {
+                  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  event: `AI Recommendation ${decLabel}: priority set to ${appliedPriority}`,
+                  actor: `Emergency Coordinator (${coordinatorUser.fullName})`
+                }
+              ]
+            }
+          : item
+      )
+    );
+
+    setRequestsList(prevList =>
+      prevList.map(req =>
+        req.id === caseId
+          ? {
+              ...req,
+              aiPriority: appliedPriority,
+              verification: decisionType === 'reject' ? req.verification : 'Verified',
+              status: decisionType === 'reject' ? req.status : 'Verified',
+              statusClass: decisionType === 'reject' ? req.statusClass : 'status-verified'
+            }
+          : req
+      )
+    );
+
+    // 5. Update activity feed
     const newActivity = {
       id: `ACT-${Date.now()}`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      title: 'AI priority accepted',
-      detail: `AID-2051 for ${AI_DECISION_SUPPORT_DATA.relatedCaseId}`,
-      type: 'approved'
+      title: `AI Review: ${decLabel}`,
+      detail: `${caseId} priority set to ${appliedPriority}`,
+      type: decisionType === 'reject' ? 'general' : 'approved'
     };
     setRecentActivity(prev => [newActivity, ...prev]);
 
-    // Sync decision audit with backend
-    coordinatorService.reviewAIDecision(currentCase.id, {
-      action: 'Approve',
-      reason: reason || `Accepted AI recommendation (${finalPriority})`
-    }).catch(err => console.warn('AI review logged locally (offline/fallback mode):', err));
+    setAiReviewed(true);
+    showToast(`Human decision (${decLabel}: ${appliedPriority}) recorded for ${caseId}`, 'success');
+
+    // 6. Reload from backend to confirm database sync
+    await loadPortalData();
+  };
+
+  // Backwards-compatible alias for existing handlers
+  const handleAcceptAIRecommendation = async (finalPriority, reason) => {
+    await handleRecordAIDecision(currentCase.id, 'accept', finalPriority, reason);
   };
 
   // Create Incident
-  const handleCreateIncident = (e) => {
+  const handleCreateIncident = async (e) => {
     e.preventDefault();
     if (!newIncidentForm.title.trim()) return;
 
@@ -351,14 +673,14 @@ export const EmergencyCoordinatorPortal = ({
       stats: '0 requests · Team pending · Initializing',
       affectedEstimate: 'Under assessment',
       relatedRequests: '0 open',
-      assignedCoordinator: COORDINATOR_USER.fullName,
+      assignedCoordinator: coordinatorUser.fullName,
       currentStatus: 'Active response',
       unresolvedIssues: [],
       timeline: [
         {
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           event: 'Incident record created',
-          actor: `Recorded by ${COORDINATOR_USER.fullName}`
+          actor: `Recorded by ${coordinatorUser.fullName}`
         }
       ]
     };
@@ -366,46 +688,93 @@ export const EmergencyCoordinatorPortal = ({
     setIncidents(prev => [newInc, ...prev]);
     setSelectedIncidentId(newId);
     setShowCreateIncidentModal(false);
-
-    const incidentDataToCreate = {
-      title: newIncidentForm.title.trim(),
-      severity: newIncidentForm.severity,
-      area: newIncidentForm.area || 'Western Province Sector'
-    };
-
+    const formCopy = { ...newIncidentForm };
     setNewIncidentForm({ title: '', severity: 'High', area: '', stats: '' });
-    showToast(`Incident ${newId} logged successfully!`, 'success');
 
-    // Sync incident with backend
-    coordinatorService.createIncident(incidentDataToCreate)
-      .catch(err => console.warn('Incident logged locally (offline/fallback mode):', err));
+    try {
+      const created = await coordinatorService.createCrisisEvent({
+        name: formCopy.title.trim(),
+        disasterType: 'General Emergency',
+        severity: formCopy.severity,
+        location: formCopy.area || 'Western Province Sector',
+        description: formCopy.stats || 'Emergency Incident logged via Coordinator Portal',
+        affectedPopulation: 0
+      });
+      if (created && created.incidentId) {
+        showToast(`Incident ${created.incidentId} logged successfully in database!`, 'success');
+      } else {
+        showToast(`Incident ${newId} logged successfully!`, 'success');
+      }
+    } catch (err) {
+      console.warn('Backend incident creation sync warning:', err.message);
+      showToast(`Incident ${newId} logged locally!`, 'success');
+    }
   };
 
-  // Create Alert
-  const handleCreateAlert = (e) => {
-    e.preventDefault();
-    if (!newAlertForm.title.trim()) return;
+  // Create Alert (from Modal or Overview)
+  const handleCreateAlert = async (formData) => {
+    const data = formData && formData.title ? formData : newAlertForm;
+    if (!data || !data.title?.trim()) {
+      showToast('Please enter an alert title', 'error');
+      return;
+    }
 
-    const alertDataToCreate = {
-      title: newAlertForm.title.trim(),
-      severity: newAlertForm.severity,
-      area: newAlertForm.area
-    };
+    const action = data.publicationAction || 'publish';
+    const isDraft = action === 'draft';
+    const isScheduled = action === 'schedule';
+    const publicationStatus = isDraft ? 'Draft' : isScheduled ? 'Scheduled' : 'Published';
+
+    const instructionsArray = typeof data.safetyInstructions === 'string'
+      ? data.safetyInstructions.split('\n').map(s => s.trim()).filter(Boolean)
+      : (Array.isArray(data.safetyInstructions) ? data.safetyInstructions : ['Follow official guidance.']);
 
     setShowCreateAlertModal(false);
-    setNewAlertForm({ title: '', severity: 'Critical', area: 'Kelani East - Zone 03' });
-    showToast('Emergency broadcast alert queued for dispatch!', 'success');
+    setNewAlertForm({
+      title: '',
+      category: 'Flood warning',
+      severity: 'Critical',
+      area: 'Kelani East - Zone 03',
+      relatedIncident: '',
+      message: '',
+      safetyInstructions: 'Move vital medicines, dry rations and identity documents to high ground.\nDo not attempt to walk or drive through flowing water.\nFollow instructions from authorized relief personnel.',
+      scheduledDate: ''
+    });
 
-    // Sync alert with backend
-    coordinatorService.createAlert(alertDataToCreate)
-      .catch(err => console.warn('Alert queued locally (offline/fallback mode):', err));
+    try {
+      const payload = {
+        title: data.title.trim(),
+        category: data.category || 'Flood warning',
+        severity: data.severity || 'Critical',
+        area: data.area || 'Western Province',
+        relatedIncident: data.relatedIncident || '',
+        message: data.message || `Emergency broadcast alert: ${data.title.trim()}`,
+        safetyInstructions: instructionsArray,
+        isDraft,
+        publicationStatus,
+        scheduledDate: isScheduled ? data.scheduledDate : null
+      };
+
+      const created = await coordinatorService.createAlert(payload);
+      await loadPortalData();
+
+      const successMsg = isDraft
+        ? `Alert ${created?.id || ''} saved to drafts queue.`
+        : isScheduled
+        ? `Alert ${created?.id || ''} scheduled for future broadcast.`
+        : `Emergency Alert ${created?.id || ''} broadcast published successfully!`;
+      showToast(successMsg, 'success');
+    } catch (err) {
+      console.error('Backend alert persist error:', err);
+      const msg = err.response?.data?.message || err.message || 'Failed to save emergency alert.';
+      showToast(msg, 'error');
+    }
   };
 
   if (activeTab === 'ai-ops') {
     return (
-      <AIOperationsContainer 
-        initialSubView="overview" 
-        onBack={() => setActiveTab('overview')} 
+      <AIOperationsContainer
+        initialSubView="overview"
+        onBack={() => setActiveTab('overview')}
       />
     );
   }
@@ -428,6 +797,7 @@ export const EmergencyCoordinatorPortal = ({
         setDutyActive={setDutyActive}
         onShowAlertModal={() => setShowCreateAlertModal(true)}
         showToast={showToast}
+        coordinator={coordinatorUser}
       />
 
       {/* 2. Main Layout Area */}
@@ -437,6 +807,10 @@ export const EmergencyCoordinatorPortal = ({
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           showToast={showToast}
+          isLive={isLive}
+          apiError={apiError}
+          onRetry={loadPortalData}
+          coordinator={coordinatorUser}
         />
 
         {/* 3. Dynamic Views */}
@@ -445,16 +819,23 @@ export const EmergencyCoordinatorPortal = ({
             requestsList={requestsList}
             onOpenCaseReview={handleOpenCaseReview}
             showToast={showToast}
+            metrics={metrics}
           />
         )}
 
         {activeTab === 'ai-support' && (
           <AIDecisionSupportView
+            cases={cases}
+            selectedCaseId={selectedCaseId}
+            onSelectCase={setSelectedCaseId}
+            currentCase={currentCase}
             onOpenCaseReview={handleOpenCaseReview}
             onInspectDuplicate={() => setShowDuplicateModal(true)}
             onAcceptRecommendation={handleAcceptAIRecommendation}
+            onRecordAIDecision={handleRecordAIDecision}
             aiReviewed={aiReviewed}
             showToast={showToast}
+            coordinatorUser={coordinatorUser}
           />
         )}
 
@@ -472,7 +853,13 @@ export const EmergencyCoordinatorPortal = ({
 
         {activeTab === 'review' && (
           <RequestReviewView
+            cases={cases}
+            selectedCaseId={selectedCaseId}
+            onSelectCase={setSelectedCaseId}
             currentCase={currentCase}
+            metrics={metrics}
+            autoNextEnabled={autoNextEnabled}
+            setAutoNextEnabled={setAutoNextEnabled}
             onBackToRequests={() => setActiveTab('requests')}
             onToggleChecklist={handleToggleChecklist}
             newNoteText={newNoteText}
@@ -484,25 +871,38 @@ export const EmergencyCoordinatorPortal = ({
               setShowImagePreview(true);
             }}
             onReviewAIRecommendation={() => setActiveTab('ai-support')}
+            onEscalateRequest={handleEscalateRequest}
+            onRequestInfo={handleRequestInfo}
+            onRejectRequest={handleRejectRequest}
             showToast={showToast}
           />
         )}
 
         {activeTab === 'resources' && (
           <ResourceCoordinationView
+            cases={cases}
+            coordinatorUser={coordinatorUser}
             showToast={showToast}
+            onNavigateTab={setActiveTab}
           />
         )}
 
         {activeTab === 'shelters' && (
           <ShelterVolunteerCoordinationView
+            cases={cases}
+            coordinatorUser={coordinatorUser}
             showToast={showToast}
+            onNavigateTab={setActiveTab}
           />
         )}
 
         {activeTab === 'alerts' && (
           <EmergencyAlertsView
             showToast={showToast}
+            alerts={alerts}
+            setAlerts={setAlerts}
+            onRefreshAlerts={loadPortalData}
+            cases={cases}
           />
         )}
 
@@ -523,6 +923,8 @@ export const EmergencyCoordinatorPortal = ({
             onOpenCaseReview={handleOpenCaseReview}
             onNavigateTab={setActiveTab}
             showToast={showToast}
+            cases={cases}
+            metrics={metrics}
           />
         )}
 
@@ -537,10 +939,13 @@ export const EmergencyCoordinatorPortal = ({
             metrics={metrics}
             cases={cases}
             recentActivity={recentActivity}
+            alerts={alerts}
             onOpenCaseReview={handleOpenCaseReview}
             onNavigateTab={setActiveTab}
             onOpenAlertModal={() => setShowCreateAlertModal(true)}
             showToast={showToast}
+            coordinator={coordinatorUser}
+            isLive={isLive}
           />
         )}
       </main>
@@ -559,6 +964,7 @@ export const EmergencyCoordinatorPortal = ({
       <DuplicateInspectModal
         isOpen={showDuplicateModal}
         onClose={() => setShowDuplicateModal(false)}
+        currentCase={currentCase}
         onMarkDistinct={() => {
           setShowDuplicateModal(false);
           showToast('Marked as verified distinct case (non-duplicate)');
@@ -579,6 +985,7 @@ export const EmergencyCoordinatorPortal = ({
         newAlertForm={newAlertForm}
         setNewAlertForm={setNewAlertForm}
         onSubmit={handleCreateAlert}
+        cases={cases}
       />
 
       <AttachmentPreviewModal

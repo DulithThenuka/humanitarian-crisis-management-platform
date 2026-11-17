@@ -85,10 +85,37 @@ public static class DatabaseSeeder
                     AssignedDistrict = "Sabaragamuwa / Ratnapura",
                     Role = UserRole.Citizen,
                     IsActive = true
+                },
+                new User
+                {
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777777"),
+                    FullName = "Ishara Senanayake",
+                    Email = "ishara.senanayake@reliefcore.org",
+                    PasswordHash = defaultPasswordHash,
+                    PhoneNumber = "+94 77 789 0123",
+                    AssignedDistrict = "Western Province Command",
+                    Role = UserRole.CaseManager,
+                    IsActive = true
                 }
             };
 
             await context.Users.AddRangeAsync(users);
+            await context.SaveChangesAsync();
+        }
+        else if (!await context.Users.AnyAsync(u => u.Role == UserRole.CaseManager))
+        {
+            var defaultPasswordHash = PasswordHasher.HashPassword("Password123!");
+            context.Users.Add(new User
+            {
+                Id = Guid.Parse("77777777-7777-7777-7777-777777777777"),
+                FullName = "Ishara Senanayake",
+                Email = "ishara.senanayake@reliefcore.org",
+                PasswordHash = defaultPasswordHash,
+                PhoneNumber = "+94 77 789 0123",
+                AssignedDistrict = "Western Province Command",
+                Role = UserRole.CaseManager,
+                IsActive = true
+            });
             await context.SaveChangesAsync();
         }
 
@@ -625,6 +652,299 @@ public static class DatabaseSeeder
             };
 
             await context.SituationReports.AddRangeAsync(reports);
+            await context.SaveChangesAsync();
+        }
+
+        // 10. Seed Initial Incident / Case Manager Records if none exist
+        if (!await context.Incidents.AnyAsync())
+        {
+            var caseManagerId = Guid.Parse("77777777-7777-7777-7777-777777777777");
+            var citizenId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+
+            var resolvedCaseManagerId = await context.Users
+                .Where(u => u.Role == UserRole.CaseManager)
+                .Select(u => (Guid?)u.Id)
+                .FirstOrDefaultAsync() ?? caseManagerId;
+
+            var resolvedCitizenId = await context.Users
+                .Where(u => u.Role == UserRole.Citizen)
+                .Select(u => (Guid?)u.Id)
+                .FirstOrDefaultAsync() ?? citizenId;
+
+            var now = DateTime.UtcNow;
+
+            var inc1042 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1042-4000-8000-000000001042"),
+                CaseNumber = "HMR-1042",
+                Title = "Emergency Shelter",
+                Category = IncidentCategory.EmergencyShelter,
+                CategoryDisplay = "Emergency Shelter",
+                OperationalArea = "Kelani East - Zone 03",
+                Priority = PriorityLevel.Critical,
+                Status = IncidentStatus.Open,
+                VerificationStatus = "Awaiting review",
+                AssignedToUserId = resolvedCaseManagerId,
+                AssignedStaffName = "I. Senanayake",
+                CitizenId = resolvedCitizenId,
+                AffectedPeople = 6,
+                CurrentSafety = "Temporary roadside location",
+                AccessibilityNeeds = "Older adult with limited mobility",
+                Description = "Flood water entered our home overnight. We have two children and my mother cannot walk far. We need a safe place before the water rises again.",
+                Latitude = 6.9550m,
+                Longitude = 79.9220m,
+                CreatedAt = now.AddMinutes(-8),
+                CreatedBy = "System"
+            };
+
+            var inc1039 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1039-4000-8000-000000001039"),
+                CaseNumber = "HMR-1039",
+                Title = "Medicine",
+                Category = IncidentCategory.Medicine,
+                CategoryDisplay = "Medicine",
+                OperationalArea = "Wattala South",
+                Priority = PriorityLevel.Critical,
+                Status = IncidentStatus.Assigned,
+                VerificationStatus = "Verified",
+                AssignedStaffName = "R. Perera",
+                AffectedPeople = 2,
+                CurrentSafety = "Sheltered with neighbor",
+                AccessibilityNeeds = "Insulin-dependent diabetic",
+                Description = "Urgent insulin supply needed within 6 hours. Refrigerated storage submerged.",
+                Latitude = 6.9890m,
+                Longitude = 79.8910m,
+                VerifiedAt = now.AddMinutes(-15),
+                CreatedAt = now.AddMinutes(-24),
+                CreatedBy = "System"
+            };
+
+            var inc1035 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1035-4000-8000-000000001035"),
+                CaseNumber = "HMR-1035",
+                Title = "Food",
+                Category = IncidentCategory.Food,
+                CategoryDisplay = "Food",
+                OperationalArea = "Kaduwela West",
+                Priority = PriorityLevel.Medium,
+                Status = IncidentStatus.Pending,
+                VerificationStatus = "Need information",
+                AssignedToUserId = resolvedCaseManagerId,
+                AssignedStaffName = "I. Senanayake",
+                CitizenId = resolvedCitizenId,
+                AffectedPeople = 4,
+                CurrentSafety = "Upper floor of residence",
+                AccessibilityNeeds = "Infant formula required",
+                Description = "Drinking water exhausted. Need ration pack and baby formula.",
+                Latitude = 6.9330m,
+                Longitude = 79.9840m,
+                CreatedAt = now.AddMinutes(-42),
+                CreatedBy = "System"
+            };
+
+            var inc1036 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1036-4000-8000-000000001036"),
+                CaseNumber = "HMR-1036",
+                Title = "Transport",
+                Category = IncidentCategory.Transport,
+                CategoryDisplay = "Transport",
+                OperationalArea = "Hanwella Zone 02",
+                Priority = PriorityLevel.High,
+                Status = IncidentStatus.Escalated,
+                VerificationStatus = "Verified",
+                AssignedStaffName = "S. Silva",
+                AffectedPeople = 8,
+                CurrentSafety = "Community hall",
+                AccessibilityNeeds = "Stretcher transport required",
+                Description = "Bedridden elderly resident requires medical evacuation transport to district hospital.",
+                Latitude = 6.8920m,
+                Longitude = 80.0810m,
+                VerifiedAt = now.AddMinutes(-30),
+                CreatedAt = now.AddMinutes(-58),
+                CreatedBy = "System"
+            };
+
+            var inc1028 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1028-4000-8000-000000001028"),
+                CaseNumber = "HMR-1028",
+                Title = "Rescue",
+                Category = IncidentCategory.Rescue,
+                CategoryDisplay = "Rescue",
+                OperationalArea = "Sedawatta Riverbank",
+                Priority = PriorityLevel.Critical,
+                Status = IncidentStatus.Assigned,
+                VerificationStatus = "Verified",
+                AssignedToUserId = resolvedCaseManagerId,
+                AssignedStaffName = "I. Senanayake",
+                CitizenId = resolvedCitizenId,
+                AffectedPeople = 3,
+                CurrentSafety = "Rooftop of single-story home",
+                AccessibilityNeeds = "Non-swimmers, 1 infant",
+                Description = "Trapped by rapid water level rise. Inflatable rescue boat needed immediately.",
+                Latitude = 6.9480m,
+                Longitude = 79.8880m,
+                VerifiedAt = now.AddMinutes(-40),
+                CreatedAt = now.AddMinutes(-75),
+                CreatedBy = "System"
+            };
+
+            var inc1022 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1022-4000-8000-000000001022"),
+                CaseNumber = "HMR-1022",
+                Title = "Water",
+                Category = IncidentCategory.Water,
+                CategoryDisplay = "Water",
+                OperationalArea = "Kolonnawa Center",
+                Priority = PriorityLevel.Medium,
+                Status = IncidentStatus.Resolved,
+                VerificationStatus = "Verified",
+                AssignedStaffName = "R. Perera",
+                AffectedPeople = 12,
+                CurrentSafety = "Temple relief center",
+                AccessibilityNeeds = "None reported",
+                Description = "Clean drinking water delivered by Red Cross mobile bowser.",
+                Latitude = 6.9310m,
+                Longitude = 79.8970m,
+                VerifiedAt = now.AddHours(-3),
+                CreatedAt = now.AddHours(-4),
+                CreatedBy = "System"
+            };
+
+            var inc1019 = new Incident
+            {
+                Id = Guid.Parse("aaaaaaaa-1019-4000-8000-000000001019"),
+                CaseNumber = "HMR-1019",
+                Title = "Emergency Shelter",
+                Category = IncidentCategory.EmergencyShelter,
+                CategoryDisplay = "Emergency Shelter",
+                OperationalArea = "Kelani East - Zone 03",
+                Priority = PriorityLevel.Low,
+                Status = IncidentStatus.Rejected,
+                VerificationStatus = "Duplicate",
+                AssignedStaffName = "I. Senanayake",
+                CitizenId = resolvedCitizenId,
+                AffectedPeople = 2,
+                CurrentSafety = "Self-evacuated to relatives",
+                AccessibilityNeeds = "None",
+                Description = "Duplicate submission of HMR-1042 by family member.",
+                Latitude = 6.9555m,
+                Longitude = 79.9225m,
+                CreatedAt = now.AddMinutes(-5),
+                CreatedBy = "System"
+            };
+
+            var incidents = new List<Incident> { inc1042, inc1039, inc1035, inc1036, inc1028, inc1022, inc1019 };
+            await context.Incidents.AddRangeAsync(incidents);
+
+            // Seed initial communications
+            var comms = new List<IncidentCommunication>
+            {
+                new()
+                {
+                    IncidentId = inc1042.Id,
+                    SenderUserId = resolvedCaseManagerId,
+                    SenderName = "Ishara Senanayake",
+                    SenderRole = "CaseManager",
+                    RecipientWorkflow = "Resource & Logistics Manager",
+                    Title = "Case Manager reviewed linked record",
+                    Message = "Initial review of HMR-1042 shelter request completed.",
+                    CaseTag = "HMR-1042 - authorised participants only",
+                    IsInternal = true,
+                    IsVisibleToCitizen = false,
+                    SentAt = now.AddMinutes(-6)
+                },
+                new()
+                {
+                    IncidentId = inc1042.Id,
+                    SenderUserId = resolvedCaseManagerId,
+                    SenderName = "Ishara Senanayake",
+                    SenderRole = "CaseManager",
+                    RecipientWorkflow = "Shelter Coordinator",
+                    Title = "Scoped handoff received",
+                    Message = "Scoped handoff queued for Kelani East sector shelter coordinator.",
+                    CaseTag = "HMR-1042 - authorised participants only",
+                    IsInternal = true,
+                    IsVisibleToCitizen = false,
+                    SentAt = now.AddMinutes(-18)
+                },
+                new()
+                {
+                    IncidentId = inc1042.Id,
+                    SenderUserId = resolvedCaseManagerId,
+                    SenderName = "Ishara Senanayake",
+                    SenderRole = "CaseManager",
+                    RecipientWorkflow = "Citizen Notification Desk",
+                    Title = "Citizen update prepared",
+                    Message = "Your emergency shelter request HMR-1042 has been received and is under active review.",
+                    CaseTag = "HMR-1042 - authorised participants only",
+                    IsInternal = false,
+                    IsVisibleToCitizen = true,
+                    SentAt = now.AddMinutes(-32)
+                },
+                new()
+                {
+                    IncidentId = inc1042.Id,
+                    SenderUserId = resolvedCaseManagerId,
+                    SenderName = "System Decision Support",
+                    SenderRole = "System",
+                    RecipientWorkflow = "Case Manager",
+                    Title = "Simulated recommendation generated",
+                    Message = "DEMO-AI-2051 rule-based recommendation generated for human review.",
+                    CaseTag = "HMR-1042 - authorised participants only",
+                    IsInternal = true,
+                    IsVisibleToCitizen = false,
+                    SentAt = now.AddMinutes(-62)
+                }
+            };
+            await context.IncidentCommunications.AddRangeAsync(comms);
+
+            // Seed initial audit logs
+            var auditLogs = new List<IncidentAuditLog>
+            {
+                new()
+                {
+                    IncidentId = inc1042.Id,
+                    CaseNumber = "HMR-1042",
+                    Action = "RecordUpdated",
+                    Detail = "prototype record updated by authorised staff",
+                    ActorUserId = resolvedCaseManagerId,
+                    ActorName = "Ishara Senanayake",
+                    ActorRole = "CaseManager",
+                    IsInternal = true,
+                    Timestamp = now.AddMinutes(-9)
+                },
+                new()
+                {
+                    IncidentId = inc1039.Id,
+                    CaseNumber = "HMR-1039",
+                    Action = "RecordUpdated",
+                    Detail = "prototype record updated by authorised staff",
+                    ActorUserId = resolvedCaseManagerId,
+                    ActorName = "R. Perera",
+                    ActorRole = "CaseManager",
+                    IsInternal = true,
+                    Timestamp = now.AddMinutes(-12)
+                },
+                new()
+                {
+                    IncidentId = inc1035.Id,
+                    CaseNumber = "HMR-1035",
+                    Action = "RecordUpdated",
+                    Detail = "prototype record updated by authorised staff",
+                    ActorUserId = resolvedCaseManagerId,
+                    ActorName = "Ishara Senanayake",
+                    ActorRole = "CaseManager",
+                    IsInternal = true,
+                    Timestamp = now.AddMinutes(-39)
+                }
+            };
+            await context.IncidentAuditLogs.AddRangeAsync(auditLogs);
+
             await context.SaveChangesAsync();
         }
     }
