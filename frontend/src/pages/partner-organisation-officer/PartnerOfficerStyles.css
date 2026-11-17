@@ -336,16 +336,16 @@
   color: #ffffff;
 }
 
-/* Active Pill Style (Clean White Pill with Blue Text) */
+/* Active Pill Style (Matching Crisis Command Center Teal-Green Active Item) */
 .po-menu-btn.active {
-  background-color: #ffffff;
-  color: #1e40af;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #0e6f76;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(14, 111, 118, 0.4);
 }
 
 .po-menu-btn.active .po-menu-btn-icon {
-  color: #1e40af;
+  color: #ffffff;
 }
 
 .po-menu-badge-red {
