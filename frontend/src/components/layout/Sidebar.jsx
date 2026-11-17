@@ -38,7 +38,7 @@ export const Sidebar = () => {
     { label: 'Volunteer Roster', to: '/volunteer/roster', roles: ['Coordinator', 'Admin'] },
     { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
     // 7. Donor & Funding Management
-    { label: 'Donor & Funding Portal', to: '/donor', roles: ['Coordinator', 'LogisticsManager', 'Admin', 'Citizen'] },
+    { label: 'Donor & Funding Portal', to: '/donor', roles: ['Coordinator', 'Admin', 'LogisticsManager', 'Volunteer', 'Citizen'] },
 
     // 8. Partner Organisation Management
     { label: 'Partner Organisation Portal', to: '/partner', roles: ['Coordinator', 'Admin', 'LogisticsManager'] },
