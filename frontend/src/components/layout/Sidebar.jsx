@@ -34,6 +34,7 @@ export const Sidebar = () => {
 
     // 6. Volunteer Management
     { label: 'Volunteer Portal', to: '/volunteer', roles: ['Coordinator', 'Volunteer', 'Admin'] },
+    { label: 'Volunteer Coordinator', to: '/volunteer-coordinator', roles: ['Coordinator', 'Admin'] },
     { label: 'Volunteer Roster', to: '/volunteer/roster', roles: ['Coordinator', 'Admin'] },
     { label: 'Task Assignments', to: '/volunteers/assignments', roles: ['Coordinator', 'Volunteer', 'Admin'] },
 

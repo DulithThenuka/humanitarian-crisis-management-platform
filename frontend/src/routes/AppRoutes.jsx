@@ -60,6 +60,7 @@ import {
   VolunteerRosterPage,
   TaskAssignmentPage
 } from '../pages/volunteer';
+import { VolunteerCoordinatorPortal } from '../pages/volunteer-coordinator/VolunteerCoordinatorPortal';
 
 // ==========================================
 // 7. Donor & Funding Management
@@ -285,6 +286,17 @@ export const AppRoutes = () => {
       <Route path="/volunteers/dashboard" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteers/roster" element={<VolunteerPortal initialTab="schedule" />} />
       <Route path="/volunteers/assignments" element={<VolunteerPortal initialTab="assignments" />} />
+
+      {/* Volunteer Coordinator Portal */}
+      <Route path="/volunteer-coordinator" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/*" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/dashboard" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/directory" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/scheduling" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/ai-matching" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/activity-safety" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator/reports" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-coordinator-portal" element={<VolunteerCoordinatorPortal />} />
 
       {/* ========================================================= */}
       {/* MODULE 7: Donor & Funding Management (/donor/*)           */}
