@@ -26,6 +26,7 @@ import {
   RECENT_COORDINATOR_ACTIVITY,
   INITIAL_VOLUNTEERS
 } from './data/coordinatorData';
+import { volunteerService } from '../../services/volunteerService';
 
 import { CoordinatorDashboardView } from './views/CoordinatorDashboardView';
 import { VolunteerDirectoryView } from './views/VolunteerDirectoryView';
@@ -60,8 +61,28 @@ export const VolunteerCoordinatorPortal = () => {
   const [metrics, setMetrics] = useState(INITIAL_METRICS);
   const [notificationCount, setNotificationCount] = useState(COORDINATOR_USER.notificationCount);
 
+  // Live backend sync with fallback
+  React.useEffect(() => {
+    let isMounted = true;
+    volunteerService.getCoordinatorDashboard()
+      .then((res) => {
+        if (!isMounted || !res?.data) return;
+        const d = res.data;
+        if (d.metrics) setMetrics(d.metrics);
+        if (d.volunteers?.length) setVolunteers(d.volunteers);
+        if (d.notificationCount !== undefined) setNotificationCount(d.notificationCount);
+      })
+      .catch(() => {
+        // Fall back gracefully to prototype data
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Handlers for record updates
   const handleCreateVolunteer = (newRecord) => {
+    volunteerService.createRecord(newRecord).catch(() => {});
     setVolunteers([newRecord, ...volunteers]);
     setMetrics((prev) => ({
       ...prev,
@@ -71,6 +92,7 @@ export const VolunteerCoordinatorPortal = () => {
   };
 
   const handleAssignShift = (volunteerId, shiftTime, shiftTask, note) => {
+    volunteerService.assignShift({ volunteerId, shiftTime, shiftTask, note }).catch(() => {});
     setVolunteers((prev) =>
       prev.map((v) => {
         if (v.id === volunteerId) {

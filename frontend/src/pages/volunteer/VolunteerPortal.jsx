@@ -31,6 +31,7 @@ import {
   INITIAL_PREFERRED_CATEGORIES,
   SERVICE_AREAS
 } from './data/volunteerData';
+import { volunteerService } from '../../services/volunteerService';
 
 // Views
 import { OverviewView } from './views/OverviewView';
@@ -124,8 +125,33 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
     help: 'Help & Support'
   };
 
+  // Live backend sync with fallback
+  useEffect(() => {
+    let isMounted = true;
+    volunteerService.getDashboard()
+      .then((res) => {
+        if (!isMounted || !res?.data) return;
+        const d = res.data;
+        if (d.profile) setUser((prev) => ({ ...prev, ...d.profile }));
+        if (d.metrics) setMetrics(d.metrics);
+        if (d.upcomingAssignment) setUpcomingAssignment(d.upcomingAssignment);
+        if (d.upcomingList?.length) setUpcomingList(d.upcomingList);
+        if (d.notifications?.length) setNotifications(d.notifications);
+        if (d.activitySummary) setActivitySummary(d.activitySummary);
+        if (d.opportunities?.length) setOpportunities(d.opportunities);
+        if (d.assignments?.length) setAssignments(d.assignments);
+      })
+      .catch(() => {
+        // Fall back gracefully to prototype seed data
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Handlers
   const handleAcceptTask = (opp) => {
+    volunteerService.acceptOpportunity(opp.id).catch(() => {});
     // Add to assignments
     const newAssignment = {
       id: opp.id,
@@ -155,6 +181,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   };
 
   const handleAssignmentResponse = (taskId, action) => {
+    volunteerService.updateAssignmentStatus(taskId, action).catch(() => {});
     if (action === 'Accept') {
       setAssignments((prev) =>
         prev.map((a) =>

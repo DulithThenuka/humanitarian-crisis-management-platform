@@ -58,6 +58,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICoordinatorService, CoordinatorService>();
         services.AddScoped<IPartnerService, PartnerService>();
         services.AddScoped<IDonationService, DonationService>();
+        services.AddScoped<IVolunteerService, VolunteerService>();
         services.AddScoped<VolunteerService>();
         services.AddScoped<IIncidentService, IncidentService>();
         services.AddScoped<ICaseAssignmentService, CaseAssignmentService>();
