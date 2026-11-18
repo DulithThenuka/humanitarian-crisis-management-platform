@@ -402,7 +402,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
             <Link to="/coordinator/dashboard" onClick={() => setActiveNav('dashboard')}>
               <img
                 src={reliefcoreLogoWhite}
-                alt="RELIEFCORE Humanitarian Operations"
+                alt="HumanAid Humanitarian Operations"
                 className="coord-brand-logo"
               />
             </Link>

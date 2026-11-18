@@ -1,6 +1,6 @@
 /**
  * Emergency Coordinator Portal - Illustrative Operations Dataset
- * Designed for HumanAid / RELIEFCORE Crisis Response Coordination
+ * Designed for HumanAid Crisis Response Coordination
  */
 
 export const COORDINATOR_USER = {

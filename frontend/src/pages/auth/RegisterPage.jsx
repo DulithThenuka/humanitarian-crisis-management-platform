@@ -155,10 +155,10 @@ export const RegisterPage = () => {
             <Link to="/" className="flex items-center gap-3 no-underline group" title="Return to Homepage">
               <img 
                 src={reliefcoreIcon} 
-                alt="RELIEFCORE Crisis Command" 
+                alt="HumanAid Crisis Command" 
                 className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform" 
               />
-              <span className="font-semibold text-xl tracking-tight text-white uppercase">RELIEFCORE</span>
+              <span className="font-semibold text-xl tracking-tight text-white">HumanAid</span>
               <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white/60 ml-1">
                 Registration
               </span>
@@ -178,7 +178,7 @@ export const RegisterPage = () => {
             <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform">
               <img 
                 src={reliefcoreIcon} 
-                alt="RELIEFCORE Emblem" 
+                alt="HumanAid Emblem" 
                 className="w-13 h-13 object-contain" 
               />
             </div>
@@ -316,7 +316,7 @@ export const RegisterPage = () => {
                     id="reg-email-input"
                     className="w-full bg-transparent border-none outline-none text-white placeholder-white/30 text-sm font-display focus:ring-0"
                     type="email"
-                    placeholder="responder@reliefcore.org"
+                    placeholder="responder@humanaid.org"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required

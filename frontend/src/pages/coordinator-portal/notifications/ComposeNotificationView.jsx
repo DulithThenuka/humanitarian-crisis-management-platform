@@ -454,7 +454,7 @@ export const ComposeNotificationView = ({
 
             <div className="mock-sms-bubble">
               <div style={{ fontSize: '10px', color: '#a7f3d0', fontWeight: 800, textTransform: 'uppercase', marginBottom: '2px' }}>
-                [RELIEFCORE DISPATCH · {formData.category || 'EMERGENCY'}]
+                [HUMANAID DISPATCH · {formData.category || 'EMERGENCY'}]
               </div>
               <strong style={{ color: '#ffffff' }}>
                 {formData.title || 'Untitled Notification Alert'}

@@ -133,7 +133,7 @@ export const CoordinatorHeader = ({
           <div className="ec-ribbon-msg">
             <AlertTriangle size={14} color="#dc2626" />
             <span>
-              <strong>Backend Disconnected:</strong> Unable to connect to RELIEFCORE API ({apiError}). Showing disconnected state.
+              <strong>Backend Disconnected:</strong> Unable to connect to HUMANAID API ({apiError}). Showing disconnected state.
             </span>
           </div>
           {onRetry && (
@@ -149,7 +149,7 @@ export const CoordinatorHeader = ({
         <div className="ec-prototype-ribbon">
           <CheckCircle2 size={14} color="#3d6b4f" />
           <span>
-            <strong>Coordinator prototype:</strong> All records are illustrative data. Actions are simulated locally and follow RELIEFCORE operational standards.
+            <strong>Coordinator prototype:</strong> All records are illustrative data. Actions are simulated locally and follow HumanAid operational standards.
           </span>
         </div>
       )}

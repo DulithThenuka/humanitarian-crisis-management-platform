@@ -419,10 +419,10 @@ export const LandingHomePage = () => {
       )}
 
       {/* =========================================================
-         2. HumanAid / RELIEFCORE Crisis Hero Section
+         2. HumanAid Crisis Hero Section
          ========================================================= */}
       <Hero
-        brandName="HumanAid / RELIEFCORE"
+        brandName="HumanAid"
         brandLogo={
           <div className="flex items-center gap-2.5">
             <img 
@@ -1215,7 +1215,7 @@ export const LandingHomePage = () => {
               <div className="flex items-center gap-2.5 mb-4">
                 <img 
                   src={reliefcoreLogoWhite} 
-                  alt="RELIEFCORE" 
+                  alt="HumanAid" 
                   className="h-[28px] w-auto object-contain"
                 />
               </div>
@@ -1291,7 +1291,7 @@ export const LandingHomePage = () => {
           </div>
 
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-white/50">
-            <span>© 2026 RELIEFCORE Crisis Operations System. Western Province, Sri Lanka.</span>
+            <span>© 2026 HumanAid Crisis Operations System. Western Province, Sri Lanka.</span>
             <span>Humanitarian AI Architecture · Rapid Disaster Response · Open Data Protocols</span>
           </div>
         </div>

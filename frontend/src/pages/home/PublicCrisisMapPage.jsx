@@ -87,7 +87,7 @@ export const PublicCrisisMapPage = () => {
             <Link to="/" className="flex items-center gap-2 text-decoration-none">
               <img
                 src={reliefcoreLogoWhite}
-                alt="RELIEFCORE"
+                alt="HumanAid"
                 className="h-[26px] w-auto object-contain"
               />
             </Link>

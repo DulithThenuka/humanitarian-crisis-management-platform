@@ -229,7 +229,7 @@ export const AuditCenterPage = () => {
             <Link to="/coordinator/dashboard">
               <img
                 src={reliefcoreLogoWhite}
-                alt="RELIEFCORE Humanitarian Operations"
+                alt="HumanAid Humanitarian Operations"
                 className="audit-brand-logo"
               />
             </Link>

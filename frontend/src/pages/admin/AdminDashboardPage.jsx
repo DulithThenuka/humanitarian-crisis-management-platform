@@ -1089,9 +1089,9 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
         <div className="adm-ss-sidebar-top">
           {/* Brand Header */}
           <div className="adm-ss-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <img src={reliefcoreIcon} alt="RELIEFCORE" className="adm-ss-brand-logo" />
+            <img src={reliefcoreIcon} alt="HumanAid" className="adm-ss-brand-logo" />
             <div>
-              <h2 className="adm-ss-brand-title">RELIEFCORE</h2>
+              <h2 className="adm-ss-brand-title">HumanAid</h2>
               <span className="adm-ss-brand-sub">Humanitarian Operations</span>
             </div>
           </div>

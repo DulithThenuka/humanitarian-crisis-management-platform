@@ -38,7 +38,7 @@ export const ReceiptPreviewModal = ({ isOpen, onClose, record }) => {
                   <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Heart size={16} color="#fff" />
                   </div>
-                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>RELIEFCORE</span>
+                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>HumanAid</span>
                 </div>
                 <div style={{ fontSize: '11px', color: '#64748b' }}>HumanAid Emergency Response Directorate</div>
                 <div style={{ fontSize: '10px', color: '#94a3b8' }}>Western Province Crisis Response Fund · LK-TAX-EXEMPT-0941</div>

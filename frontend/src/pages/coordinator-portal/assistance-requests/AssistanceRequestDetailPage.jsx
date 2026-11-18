@@ -817,7 +817,7 @@ export const AssistanceRequestDetailPage = ({
                 <div style={{ fontSize: '11.5px', color: '#657367' }}>15 Jun 2026, 10:24 AM</div>
                 <div style={{ fontWeight: 600, color: '#14291e', marginTop: '2px' }}>SMS Sent to +94 77 123 4567</div>
                 <div style={{ fontSize: '12px', color: '#4a5b4a', marginTop: '2px' }}>
-                  "ReliefCore Alert: Your assistance request #REQ-2026-01842 has been received. Our coordination team is evaluating dispatch."
+                  "HumanAid Alert: Your assistance request #REQ-2026-01842 has been received. Our coordination team is evaluating dispatch."
                 </div>
               </div>
             </div>

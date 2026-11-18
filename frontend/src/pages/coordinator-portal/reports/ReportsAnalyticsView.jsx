@@ -495,7 +495,7 @@ export const ReportsAnalyticsView = () => {
   // JSON Export Handler
   const handleExportJSON = () => {
     const payload = {
-      platform: 'RELIEFCORE Disaster Intelligence Engine',
+      platform: 'HumanAid Disaster Intelligence Engine',
       generatedAt: new Date().toISOString(),
       activeFilters: {
         range: activeRange,
@@ -1869,7 +1869,7 @@ export const ReportsAnalyticsView = () => {
               {/* Document Header */}
               <div className="doc-top-ribbon">
                 <div>
-                  <span className="doc-org-title">RELIEFCORE DISASTER COMMAND CENTER</span>
+                  <span className="doc-org-title">HUMANAID DISASTER COMMAND CENTER</span>
                   <div className="doc-meta-row">
                     <span><strong>Incident:</strong> {CRISES.find((c) => c.id === selectedCrisis)?.label || 'All Combined Operations'}</span>
                     <span><strong>Date:</strong> {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
@@ -1958,7 +1958,7 @@ export const ReportsAnalyticsView = () => {
                   <span className="sign-line">Certified by: Sarah Johnson, Chief Emergency Coordinator</span>
                   <span className="sign-hash">Cryptographic SHA-256 Digest: 8f4b29a...d9e13a (Verified Immutable)</span>
                 </div>
-                <div className="sign-stamp">RELIEFCORE OFFICIAL</div>
+                <div className="sign-stamp">HUMANAID OFFICIAL</div>
               </div>
             </div>
           </div>
