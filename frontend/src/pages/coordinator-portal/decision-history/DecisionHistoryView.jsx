@@ -106,7 +106,7 @@ export const DecisionHistoryView = ({ showToast }) => {
       <div className="ec-rc-toolbar-container" style={{ padding: '12px 18px', marginBottom: '18px' }}>
         <div className="ec-rc-filter-bar">
           <div className="ec-rc-search-box">
-            <Search size={14} color="#94a3b8" />
+            <Search size={14} color="#8a9480" />
             <input
               type="text"
               placeholder="Search history, request or incident..."
@@ -167,18 +167,18 @@ export const DecisionHistoryView = ({ showToast }) => {
             {filteredRecords.map((rec) => (
               <tr key={rec.id} onClick={() => setSelectedRecordModal(rec)}>
                 <td className="ec-table-req-id">{rec.id}</td>
-                <td style={{ fontWeight: 600, color: '#0f172a' }}>{rec.action}</td>
-                <td style={{ color: '#0284c7', fontWeight: 600, fontFamily: 'monospace' }}>
+                <td style={{ fontWeight: 600, color: '#14291e' }}>{rec.action}</td>
+                <td style={{ color: '#3d6b4f', fontWeight: 600, fontFamily: 'monospace' }}>
                   {rec.relatedRecord}
                 </td>
-                <td style={{ color: '#334155' }}>{rec.coordinator}</td>
+                <td style={{ color: '#2a4a35' }}>{rec.coordinator}</td>
                 <td>
                   <span className={`ec-svc-status-pill ${rec.status === 'Escalated' ? 'pill-critical' : 'pill-available'}`}>
                     <span className="ec-rc-status-dot"></span>
                     {rec.status}
                   </span>
                 </td>
-                <td style={{ color: '#64748b', fontWeight: 600 }}>{rec.time}</td>
+                <td style={{ color: '#657367', fontWeight: 600 }}>{rec.time}</td>
                 <td>
                   <ChevronRight size={16} className="ec-rc-chevron" />
                 </td>
@@ -225,9 +225,9 @@ export const DecisionHistoryView = ({ showToast }) => {
                 </div>
               </div>
 
-              <div className="ec-factor-row" style={{ backgroundColor: '#f0f9ff', borderColor: '#bae6fd' }}>
-                <ShieldCheck size={18} color="#0284c7" />
-                <span style={{ fontSize: '12.5px', color: '#0369a1' }}>
+              <div className="ec-factor-row" style={{ backgroundColor: '#f4f6f2', borderColor: '#c7dbc0' }}>
+                <ShieldCheck size={18} color="#3d6b4f" />
+                <span style={{ fontSize: '12.5px', color: '#2d5a3e' }}>
                   <strong>SHA-256 Audit Integrity:</strong> Record signed with authorised coordinator digital certificate. Verified against National Crisis Ledger.
                 </span>
               </div>

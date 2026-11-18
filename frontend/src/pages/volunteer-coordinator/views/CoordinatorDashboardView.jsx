@@ -146,7 +146,7 @@ export const CoordinatorDashboardView = ({
           <div className="vc-card-header">
             <div>
               <h3 className="vc-card-title">Priority attention</h3>
-              <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+              <div style={{ fontSize: '11.5px', color: '#657367' }}>
                 Show-impact records requiring review
               </div>
             </div>
@@ -193,7 +193,7 @@ export const CoordinatorDashboardView = ({
                     />
                     {item.badgeText}
                   </span>
-                  <ChevronRight size={15} style={{ color: '#94a3b8' }} />
+                  <ChevronRight size={15} style={{ color: '#8a9480' }} />
                 </div>
               </div>
             ))}
@@ -205,7 +205,7 @@ export const CoordinatorDashboardView = ({
           <div className="vc-card-header">
             <div>
               <h3 className="vc-card-title">Connected assistance workflow</h3>
-              <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+              <div style={{ fontSize: '11.5px', color: '#657367' }}>
                 End-to-end humanitarian response coordination
               </div>
             </div>

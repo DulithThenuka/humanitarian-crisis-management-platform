@@ -6,12 +6,12 @@ export const LoadingSpinner = ({ size = 32, message = "Loading..." }) => {
       <div style={{
         width: `${size}px`,
         height: `${size}px`,
-        border: '3px solid #334155',
+        border: '3px solid #2a4a35',
         borderTop: '3px solid #3b82f6',
         borderRadius: '50%',
         animation: 'spin 1s linear infinite'
       }} />
-      {message && <span style={{ color: '#94a3b8', fontSize: '13px' }}>{message}</span>}
+      {message && <span style={{ color: '#8a9480', fontSize: '13px' }}>{message}</span>}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }

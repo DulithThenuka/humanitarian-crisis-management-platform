@@ -140,7 +140,7 @@ export const FailedNotificationHandlingView = ({
             key={item.id}
             style={{ 
               background: '#ffffff', 
-              border: '1px solid #e2e8f0', 
+              border: '1px solid #dfe5d8', 
               borderLeft: '4px solid #ef4444', 
               borderRadius: '10px', 
               padding: '18px 20px',
@@ -153,15 +153,15 @@ export const FailedNotificationHandlingView = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                  <strong style={{ fontSize: '14px', color: '#0f172a' }}>{item.ref} · {item.recipient}</strong>
+                  <strong style={{ fontSize: '14px', color: '#14291e' }}>{item.ref} · {item.recipient}</strong>
                   <span style={{ background: '#fef2f2', color: '#991b1b', padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>
                     {item.channel} Delivery Failed
                   </span>
-                  <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 6px', borderRadius: '4px', fontSize: '10.5px' }}>
+                  <span style={{ background: '#eef1ea', color: '#4a5b4a', padding: '2px 6px', borderRadius: '4px', fontSize: '10.5px' }}>
                     {item.timestamp}
                   </span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#64748b' }}>
+                <div style={{ fontSize: '12px', color: '#657367' }}>
                   Destination: <b>{item.phone}</b> · Error Code: <code style={{ color: '#dc2626' }}>{item.failureCode}</code>
                 </div>
               </div>
@@ -178,7 +178,7 @@ export const FailedNotificationHandlingView = ({
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap', paddingTop: '6px', borderTop: '1px solid #eef1ea' }}>
               <button 
                 type="button" 
                 className="btn-notif-outline"
@@ -211,10 +211,10 @@ export const FailedNotificationHandlingView = ({
         ))}
 
         {exceptions.length === 0 && (
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '48px', textAlign: 'center' }}>
+          <div style={{ background: '#ffffff', border: '1px solid #dfe5d8', borderRadius: '10px', padding: '48px', textAlign: 'center' }}>
             <CheckCircle2 size={36} color="#10b981" style={{ margin: '0 auto 12px auto' }} />
-            <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>Zero Failed Transmissions</h3>
-            <p style={{ margin: '6px 0 16px 0', fontSize: '12.5px', color: '#64748b' }}>
+            <h3 style={{ margin: 0, fontSize: '16px', color: '#14291e' }}>Zero Failed Transmissions</h3>
+            <p style={{ margin: '6px 0 16px 0', fontSize: '12.5px', color: '#657367' }}>
               All recipient dispatches have been confirmed and acknowledged by local telecom towers.
             </p>
             <button 

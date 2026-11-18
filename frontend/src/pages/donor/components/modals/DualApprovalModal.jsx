@@ -43,8 +43,8 @@ export const DualApprovalModal = ({ isOpen, onClose, record, onConfirmApproval }
               gap: '10px',
               alignItems: 'center'
             }}>
-              <AlertCircle size={20} color="#0284c7" style={{ flexShrink: 0 }} />
-              <div style={{ fontSize: '12px', color: '#0369a1', lineHeight: 1.4 }}>
+              <AlertCircle size={20} color="#3d6b4f" style={{ flexShrink: 0 }} />
+              <div style={{ fontSize: '12px', color: '#2d5a3e', lineHeight: 1.4 }}>
                 Pursuant to humanitarian financial governance rules, disbursements and allocations exceeding LKR 250,000 require dual officer signoff.
               </div>
             </div>
@@ -53,34 +53,34 @@ export const DualApprovalModal = ({ isOpen, onClose, record, onConfirmApproval }
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
               gap: '12px',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              backgroundColor: '#f4f6f2',
+              border: '1px solid #dfe5d8',
               borderRadius: '8px',
               padding: '12px 14px'
             }}>
               <div>
-                <span style={{ fontSize: '10.5px', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Target Record</span>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#0284c7', marginTop: '2px' }}>{record.id}</div>
-                <div style={{ fontSize: '11px', color: '#334155' }}>{record.source || record.title}</div>
+                <span style={{ fontSize: '10.5px', color: '#657367', textTransform: 'uppercase', fontWeight: 600 }}>Target Record</span>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#3d6b4f', marginTop: '2px' }}>{record.id}</div>
+                <div style={{ fontSize: '11px', color: '#2a4a35' }}>{record.source || record.title}</div>
               </div>
               <div>
-                <span style={{ fontSize: '10.5px', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Value / Commitment</span>
+                <span style={{ fontSize: '10.5px', color: '#657367', textTransform: 'uppercase', fontWeight: 600 }}>Value / Commitment</span>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#059669', marginTop: '2px' }}>
                   {record.recordedValue || record.allocatedAmount}
                 </div>
-                <div style={{ fontSize: '11px', color: '#334155' }}>{record.allocation || record.cluster}</div>
+                <div style={{ fontSize: '11px', color: '#2a4a35' }}>{record.allocation || record.cluster}</div>
               </div>
             </div>
 
             <div className="fo-form-group">
               <label className="fo-form-label">Primary Authorizer (Signed)</label>
               <div style={{
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                backgroundColor: '#f4f6f2',
+                border: '1px solid #dfe5d8',
                 borderRadius: '8px',
                 padding: '9px 12px',
                 fontSize: '12.5px',
-                color: '#0f172a',
+                color: '#14291e',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',

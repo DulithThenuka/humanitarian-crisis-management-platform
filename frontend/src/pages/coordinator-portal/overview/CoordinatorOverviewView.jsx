@@ -80,7 +80,7 @@ export const CoordinatorOverviewView = ({
             <strong className="ec-status-bold">Operations active</strong> All core coordination services available
           </span>
         </div>
-        <span style={{ fontSize: '11px', color: '#64748b' }}>
+        <span style={{ fontSize: '11px', color: '#657367' }}>
           Last operational update 2 minutes ago
         </span>
       </div>
@@ -95,7 +95,7 @@ export const CoordinatorOverviewView = ({
         >
           <div className="ec-kpi-card-head">
             <span className="ec-kpi-title-label">Incoming requests</span>
-            <div className="ec-kpi-icon-pill" style={{ backgroundColor: '#eff6ff', color: '#0284c7' }}>
+            <div className="ec-kpi-icon-pill" style={{ backgroundColor: '#eff6ff', color: '#3d6b4f' }}>
               <FileText size={14} />
             </div>
           </div>
@@ -180,7 +180,7 @@ export const CoordinatorOverviewView = ({
         >
           <div className="ec-kpi-card-head">
             <span className="ec-kpi-title-label">Volunteers assigned</span>
-            <div className="ec-kpi-icon-pill" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+            <div className="ec-kpi-icon-pill" style={{ backgroundColor: '#edf2e6', color: '#3d6b4f' }}>
               <Users size={14} />
             </div>
           </div>
@@ -218,7 +218,7 @@ export const CoordinatorOverviewView = ({
               <path
                 d="M -20 180 Q 150 160 300 200 T 620 170"
                 fill="none"
-                stroke="#93c5fd"
+                stroke="#b8ccaa"
                 strokeWidth="24"
                 opacity="0.8"
               />
@@ -237,7 +237,7 @@ export const CoordinatorOverviewView = ({
 
               {/* Resource Depot Marker */}
               <g transform="translate(350, 95)">
-                <rect width="84" height="20" rx="4" fill="#0284c7" />
+                <rect width="84" height="20" rx="4" fill="#3d6b4f" />
                 <text x="42" y="14" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
                   RES-021 · 240
                 </text>
@@ -277,7 +277,7 @@ export const CoordinatorOverviewView = ({
                 <span>Verified shelters</span>
               </div>
               <div className="ec-layer-item">
-                <span style={{ color: '#0284c7' }}>●</span>
+                <span style={{ color: '#3d6b4f' }}>●</span>
                 <span>Resource depots</span>
               </div>
             </div>
@@ -314,7 +314,7 @@ export const CoordinatorOverviewView = ({
                   <span className={c.severity === 'Critical' ? 'ec-badge-critical' : c.severity === 'High' ? 'ec-badge-high' : 'ec-badge-medium'}>
                     ● {c.severity}
                   </span>
-                  <ChevronRight size={14} color="#94a3b8" />
+                  <ChevronRight size={14} color="#8a9480" />
                 </div>
               </div>
             ))}
@@ -420,7 +420,7 @@ export const CoordinatorOverviewView = ({
                 <span className="ec-time-stamp-col">{act.time}</span>
                 <div className="ec-activity-body-col">
                   <div className="ec-activity-title-bold">
-                    <CheckCircle2 size={12} color="#0284c7" />
+                    <CheckCircle2 size={12} color="#3d6b4f" />
                     <span>{act.title}</span>
                   </div>
                   <div className="ec-activity-sub-ref">{act.detail}</div>
@@ -439,7 +439,7 @@ export const CoordinatorOverviewView = ({
             className="ec-qa-btn"
             onClick={() => onNavigateTab('requests')}
           >
-            <FileText size={13} color="#0284c7" />
+            <FileText size={13} color="#3d6b4f" />
             <span>Review incoming requests</span>
           </button>
 
@@ -447,7 +447,7 @@ export const CoordinatorOverviewView = ({
             className="ec-qa-btn"
             onClick={() => navigate('/logistics/inventory')}
           >
-            <Package size={13} color="#0284c7" />
+            <Package size={13} color="#3d6b4f" />
             <span>View resource availability</span>
           </button>
 
@@ -455,7 +455,7 @@ export const CoordinatorOverviewView = ({
             className="ec-qa-btn"
             onClick={() => navigate('/shelters/directory')}
           >
-            <Home size={13} color="#0284c7" />
+            <Home size={13} color="#3d6b4f" />
             <span>Check shelters</span>
           </button>
         </div>

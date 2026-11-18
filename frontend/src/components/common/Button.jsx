@@ -18,10 +18,10 @@ export const Button = ({ children, variant = 'primary', onClick, type = 'button'
 
   const variants = {
     primary: { backgroundColor: '#3b82f6', color: '#ffffff' },
-    secondary: { backgroundColor: '#334155', color: '#f8fafc' },
+    secondary: { backgroundColor: '#2a4a35', color: '#f4f6f2' },
     danger: { backgroundColor: '#ef4444', color: '#ffffff' },
     success: { backgroundColor: '#10b981', color: '#ffffff' },
-    outline: { backgroundColor: 'transparent', border: '1px solid #475569', color: '#f8fafc' }
+    outline: { backgroundColor: 'transparent', border: '1px solid #4a5b4a', color: '#f4f6f2' }
   };
 
   const currentVariant = variants[variant] || variants.primary;

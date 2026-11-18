@@ -257,7 +257,7 @@ export const VolunteerCoordinatorPortal = () => {
           <div className="vc-breadcrumb">
             <span>VOLUNTEER COORDINATOR PORTAL</span>
             <ChevronRight size={12} />
-            <span style={{ color: '#0f172a', fontWeight: 600 }}>
+            <span style={{ color: '#14291e', fontWeight: 600 }}>
               {navItems.find((n) => n.id === activeTab)?.label || 'Dashboard'}
             </span>
           </div>
@@ -265,7 +265,7 @@ export const VolunteerCoordinatorPortal = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             {/* Global Search */}
             <div className="vc-search-bar">
-              <Search size={14} color="#64748b" />
+              <Search size={14} color="#657367" />
               <input
                 type="text"
                 placeholder="Search authorised records..."
@@ -324,8 +324,8 @@ export const VolunteerCoordinatorPortal = () => {
                 alignItems: 'center',
                 gap: '8px',
                 padding: '4px 10px 4px 6px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                background: '#f4f6f2',
+                border: '1px solid #dfe5d8',
                 borderRadius: '20px'
               }}
             >
@@ -334,7 +334,7 @@ export const VolunteerCoordinatorPortal = () => {
                   width: '26px',
                   height: '26px',
                   borderRadius: '50%',
-                  background: '#0b1528',
+                  background: '#14291e',
                   color: '#ffffff',
                   fontSize: '11px',
                   fontWeight: 700,
@@ -346,10 +346,10 @@ export const VolunteerCoordinatorPortal = () => {
                 {COORDINATOR_USER.avatar}
               </div>
               <div style={{ lineHeight: 1.2 }}>
-                <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a' }}>
+                <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#14291e' }}>
                   {COORDINATOR_USER.name}
                 </div>
-                <div style={{ fontSize: '9.5px', color: '#64748b' }}>
+                <div style={{ fontSize: '9.5px', color: '#657367' }}>
                   {COORDINATOR_USER.role}
                 </div>
               </div>

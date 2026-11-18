@@ -218,7 +218,7 @@ export const OverviewView = ({
                 <div className="vol-item-left">
                   <div className="vol-item-icon-box">
                     {notif.type === 'assignment' && <Bell size={17} style={{ color: '#ea580c' }} />}
-                    {notif.type === 'safety' && <ShieldCheck size={17} style={{ color: '#0284c7' }} />}
+                    {notif.type === 'safety' && <ShieldCheck size={17} style={{ color: '#3d6b4f' }} />}
                     {notif.type === 'approval' && <CheckCircle2 size={17} style={{ color: '#16a34a' }} />}
                   </div>
                   <div>

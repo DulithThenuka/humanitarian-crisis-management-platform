@@ -1,83 +1,15 @@
 import React from 'react';
-import { BrowserRouter, useLocation } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AlertProvider } from './context/AlertContext';
-import { Navbar } from './components/layout/Navbar';
-import { Sidebar } from './components/layout/Sidebar';
 import { AppRoutes } from './routes/AppRoutes';
 import './assets/styles.css';
 
 function AppLayout() {
-  const location = useLocation();
-  const isDedicatedLayout = 
-    location.pathname === '/' || 
-    location.pathname === '/home' ||
-    location.pathname === '/landing' ||
-    location.pathname === '/dashboard' ||
-    location.pathname.startsWith('/coordinator') || 
-    location.pathname.startsWith('/audit') ||
-    location.pathname.startsWith('/reports') ||
-    location.pathname.startsWith('/notifications') ||
-    location.pathname.startsWith('/ai-operations') ||
-    location.pathname.startsWith('/ai-ops') ||
-    location.pathname.startsWith('/ai-workspaces') ||
-    location.pathname.startsWith('/ai-governance') ||
-    location.pathname.startsWith('/case-manager') ||
-    location.pathname.startsWith('/incident-manager') ||
-    location.pathname.startsWith('/incident') ||
-    location.pathname.startsWith('/cases') ||
-    location.pathname.startsWith('/map') ||
-    location.pathname.startsWith('/citizen') || 
-    location.pathname.startsWith('/alerts') || 
-    location.pathname.startsWith('/safety') || 
-    location.pathname.startsWith('/support') || 
-    location.pathname.startsWith('/help') || 
-    location.pathname.startsWith('/my-requests') || 
-    location.pathname.startsWith('/admin') ||
-    location.pathname.startsWith('/shelter') || 
-    location.pathname.startsWith('/shelters') || 
-    location.pathname.startsWith('/shelter-admin') || 
-    location.pathname.startsWith('/shelter-manager') || 
-    location.pathname.startsWith('/shelter-dashboard') || 
-    location.pathname.startsWith('/volunteer') || 
-    location.pathname.startsWith('/donor') || 
-    location.pathname.startsWith('/donations') || 
-    location.pathname.startsWith('/partner') || 
-    location.pathname.startsWith('/track') || 
-    location.pathname.startsWith('/emergency') || 
-    location.pathname.startsWith('/assistance') || 
-    location.pathname.startsWith('/requests') ||
-    location.pathname.startsWith('/donor') ||
-    location.pathname.startsWith('/donations') ||
-    location.pathname.startsWith('/funding-officer') ||
-    location.pathname.startsWith('/logistics') ||
-    location.pathname.startsWith('/resource') ||
-    location.pathname === '/request-detail' ||
-    location.pathname === '/analytics' || 
-    location.pathname === '/login' || 
-    location.pathname === '/register' ||
-    location.pathname === '/signup' ||
-    location.pathname === '/sign-up' ||
-    location.pathname.startsWith('/partner');
-
-  if (isDedicatedLayout) {
-    return (
-      <main style={{ minHeight: '100vh', width: '100%', overflowX: 'clip' }}>
-        <AppRoutes />
-      </main>
-    );
-  }
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#0f172a' }}>
-      <Navbar />
-      <div style={{ display: 'flex', flex: 1 }}>
-        <Sidebar />
-        <main style={{ flex: 1, backgroundColor: '#0b1120', minHeight: 'calc(100vh - 64px)', overflowY: 'auto' }}>
-          <AppRoutes />
-        </main>
-      </div>
-    </div>
+    <main style={{ minHeight: '100vh', width: '100%', overflowX: 'clip' }}>
+      <AppRoutes />
+    </main>
   );
 }
 

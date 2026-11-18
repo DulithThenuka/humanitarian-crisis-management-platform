@@ -67,10 +67,10 @@ class AIErrorBoundary extends React.Component {
           }}>
             <span style={{ fontSize: '22px' }}>⚠️</span>
           </div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#14291e', marginBottom: '8px' }}>
             AI Service Workspace Temporarily Unavailable
           </h2>
-          <p style={{ fontSize: '13px', color: '#64748b', maxWidth: '520px', margin: '0 auto 20px', lineHeight: '1.5' }}>
+          <p style={{ fontSize: '13px', color: '#657367', maxWidth: '520px', margin: '0 auto 20px', lineHeight: '1.5' }}>
             {this.state.error?.message || 'An unexpected rendering error occurred while loading this view.'}
           </p>
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
@@ -93,9 +93,9 @@ class AIErrorBoundary extends React.Component {
               onClick={() => this.props.onReset ? this.props.onReset() : window.location.reload()}
               style={{
                 padding: '8px 16px',
-                background: '#f1f5f9',
-                color: '#334155',
-                border: '1px solid #cbd5e1',
+                background: '#eef1ea',
+                color: '#2a4a35',
+                border: '1px solid #c5ccbe',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 600,

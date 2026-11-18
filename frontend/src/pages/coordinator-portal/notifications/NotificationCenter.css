@@ -13,7 +13,7 @@
   padding: 16px 28px 48px 28px;
   box-sizing: border-box;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #0f172a;
+  color: #14291e;
 }
 
 /* =========================================================
@@ -88,7 +88,7 @@
   align-items: center;
   gap: 8px;
   font-size: 12.5px;
-  color: #64748b;
+  color: #657367;
   font-weight: 500;
 }
 
@@ -98,7 +98,7 @@
   gap: 6px;
   background: transparent;
   border: none;
-  color: #0f172a;
+  color: #14291e;
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
@@ -112,7 +112,7 @@
 
 .notif-breadcrumb-path-text {
   font-size: 11.5px;
-  color: #94a3b8;
+  color: #8a9480;
   font-weight: 500;
 }
 
@@ -144,14 +144,14 @@
 .notif-page-title {
   font-size: 24px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
   letter-spacing: -0.02em;
 }
 
 .notif-page-subtitle {
   font-size: 13px;
-  color: #64748b;
+  color: #657367;
   margin: 3px 0 0 0;
   font-weight: 400;
 }
@@ -168,20 +168,20 @@
   gap: 6px;
   padding: 8px 14px;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   border-radius: 8px;
   font-size: 12.5px;
   font-weight: 600;
-  color: #334155;
+  color: #2a4a35;
   cursor: pointer;
   transition: all 0.15s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .btn-notif-outline:hover {
-  background-color: #f8fafc;
-  border-color: #94a3b8;
-  color: #0f172a;
+  background-color: #f4f6f2;
+  border-color: #8a9480;
+  color: #14291e;
 }
 
 .btn-notif-primary {
@@ -262,7 +262,7 @@
 
 .hero-operation-meta {
   font-size: 11.5px;
-  color: #94a3b8;
+  color: #8a9480;
 }
 
 .badge-operational-status {
@@ -312,7 +312,7 @@
   align-items: center;
   justify-content: space-between;
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 16px 18px;
   cursor: pointer;
@@ -354,14 +354,14 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background-color: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background-color: #eef1ea;
+  border: 1px solid #dfe5d8;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 800;
-  color: #475569;
+  color: #4a5b4a;
   flex-shrink: 0;
 }
 
@@ -380,7 +380,7 @@
 .tile-title {
   font-size: 13.5px;
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .notif-hub-tile-card:hover .tile-title {
@@ -389,12 +389,12 @@
 
 .tile-desc {
   font-size: 11.5px;
-  color: #64748b;
+  color: #657367;
   line-height: 1.35;
 }
 
 .tile-arrow-icon {
-  color: #94a3b8;
+  color: #8a9480;
   transition: transform 0.18s ease, color 0.18s ease;
   flex-shrink: 0;
 }
@@ -422,7 +422,7 @@
 
 .notif-feature-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 16px;
   display: flex;
@@ -435,7 +435,7 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background-color: #f1f5f9;
+  background-color: #eef1ea;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -452,12 +452,12 @@
 .feature-title {
   font-size: 13px;
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .feature-desc {
   font-size: 11.5px;
-  color: #64748b;
+  color: #657367;
   line-height: 1.45;
 }
 
@@ -469,7 +469,7 @@
   align-items: center;
   gap: 12px;
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 6px 10px;
   flex-wrap: wrap;
@@ -479,7 +479,7 @@
 .subscreens-label {
   font-size: 10px;
   font-weight: 800;
-  color: #94a3b8;
+  color: #8a9480;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -500,7 +500,7 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: #657367;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.15s ease;
@@ -508,13 +508,13 @@
 
 .module-screen-tab-btn:hover {
   color: #0f766e;
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
 }
 
 .module-screen-tab-btn.active {
-  background-color: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #0f172a;
+  background-color: #eef1ea;
+  border-color: #c5ccbe;
+  color: #14291e;
   font-weight: 700;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
@@ -537,7 +537,7 @@
 
 .notif-main-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
@@ -550,7 +550,7 @@
   justify-content: space-between;
   gap: 10px;
   padding: 14px 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #dfe5d8;
   flex-wrap: wrap;
 }
 
@@ -573,7 +573,7 @@
 .notif-search-icon {
   position: absolute;
   left: 10px;
-  color: #94a3b8;
+  color: #8a9480;
   pointer-events: none;
 }
 
@@ -581,11 +581,11 @@
   width: 100%;
   padding: 7px 10px 7px 30px;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   border-radius: 6px;
   font-size: 12px;
   outline: none;
-  color: #0f172a;
+  color: #14291e;
   transition: border-color 0.15s ease;
 }
 
@@ -599,10 +599,10 @@
   gap: 6px;
   padding: 7px 10px;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   border-radius: 6px;
   font-size: 12px;
-  color: #334155;
+  color: #2a4a35;
   cursor: pointer;
   outline: none;
 }
@@ -616,19 +616,19 @@
 }
 
 .notif-data-table thead th {
-  background-color: #f8fafc;
-  color: #64748b;
+  background-color: #f4f6f2;
+  color: #657367;
   font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 0.06em;
   padding: 10px 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #dfe5d8;
   text-transform: uppercase;
 }
 
 .notif-data-table tbody td {
   padding: 12px 16px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #eef1ea;
   vertical-align: middle;
 }
 
@@ -638,12 +638,12 @@
 }
 
 .notif-table-row:hover {
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
 }
 
 .cell-reference {
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
   font-family: inherit;
 }
 
@@ -654,16 +654,16 @@
 
 .cell-name-title {
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .cell-name-sub {
   font-size: 11px;
-  color: #64748b;
+  color: #657367;
 }
 
 .cell-category-tag {
-  color: #475569;
+  color: #4a5b4a;
   font-weight: 500;
   font-size: 12px;
 }
@@ -717,13 +717,13 @@
 
 .cell-updated-time {
   font-size: 12px;
-  color: #475569;
+  color: #4a5b4a;
   font-weight: 500;
 }
 
 .cell-action-arrow {
   text-align: right;
-  color: #94a3b8;
+  color: #8a9480;
 }
 
 .notif-table-row:hover .cell-action-arrow {
@@ -737,9 +737,9 @@
   justify-content: space-between;
   padding: 10px 16px;
   background-color: #ffffff;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid #eef1ea;
   font-size: 11.5px;
-  color: #64748b;
+  color: #657367;
 }
 
 .pagination-btn-group {
@@ -753,10 +753,10 @@
   height: 26px;
   border-radius: 4px;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   font-size: 11.5px;
   font-weight: 600;
-  color: #334155;
+  color: #2a4a35;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -774,10 +774,10 @@
   height: 26px;
   border-radius: 4px;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   font-size: 11.5px;
   font-weight: 600;
-  color: #334155;
+  color: #2a4a35;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -786,7 +786,7 @@
 /* Right Sidebar Operational Summary */
 .notif-sidebar-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 16px;
   display: flex;
@@ -798,7 +798,7 @@
 .sidebar-summary-title {
   font-size: 13.5px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
 }
 
@@ -813,18 +813,18 @@
   align-items: center;
   justify-content: space-between;
   padding-bottom: 8px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #eef1ea;
 }
 
 .sidebar-kpi-label {
   font-size: 12px;
-  color: #64748b;
+  color: #657367;
 }
 
 .sidebar-kpi-num {
   font-size: 18px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .sidebar-exception-callout {
@@ -874,7 +874,7 @@
 
 .compose-form-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 24px;
   display: flex;
@@ -894,33 +894,33 @@
   align-items: flex-start;
   gap: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #eef1ea;
 }
 
 .section-num-badge {
   width: 26px;
   height: 26px;
   border-radius: 6px;
-  background-color: #f1f5f9;
+  background-color: #eef1ea;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
   font-weight: 800;
-  color: #475569;
+  color: #4a5b4a;
   flex-shrink: 0;
 }
 
 .section-title-wrap h3 {
   font-size: 13.5px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
 }
 
 .section-subtext {
   font-size: 11.5px;
-  color: #64748b;
+  color: #657367;
   margin: 2px 0 0 0;
 }
 
@@ -945,7 +945,7 @@
 .form-field-label {
   font-size: 11.5px;
   font-weight: 600;
-  color: #334155;
+  color: #2a4a35;
 }
 
 .form-field-label span.req {
@@ -958,10 +958,10 @@
   width: 100%;
   padding: 8px 12px;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   border-radius: 6px;
   font-size: 12.5px;
-  color: #0f172a;
+  color: #14291e;
   outline: none;
   box-sizing: border-box;
   font-family: inherit;
@@ -975,8 +975,8 @@
 }
 
 .form-input-text.readonly {
-  background-color: #f8fafc;
-  color: #64748b;
+  background-color: #f4f6f2;
+  color: #657367;
 }
 
 .form-textarea {
@@ -990,13 +990,13 @@
   justify-content: flex-end;
   gap: 10px;
   padding-top: 14px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid #eef1ea;
 }
 
 /* Right Guidance Checklist */
 .compose-guide-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 18px;
   display: flex;
@@ -1008,7 +1008,7 @@
 .guide-title {
   font-size: 13px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
 }
 
@@ -1033,20 +1033,20 @@
 .point-bold-title {
   font-size: 12px;
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .point-desc {
   font-size: 11px;
-  color: #64748b;
+  color: #657367;
   line-height: 1.35;
   margin-top: 2px;
 }
 
 /* Smartphone Live Preview HUD */
 .mobile-preview-box {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 8px;
   padding: 12px;
   display: flex;
@@ -1059,7 +1059,7 @@
   align-items: center;
   justify-content: space-between;
   font-size: 10.5px;
-  color: #64748b;
+  color: #657367;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -1105,7 +1105,7 @@
 /* Recipient Drawer Sliding Panel */
 .recipient-drawer-dock {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 20px;
   display: flex;
@@ -1137,12 +1137,12 @@
 .drawer-name-title {
   font-size: 16px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .drawer-role-tag {
   font-size: 12px;
-  color: #64748b;
+  color: #657367;
 }
 
 .channel-status-grid {
@@ -1152,8 +1152,8 @@
 }
 
 .channel-card-item {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 8px;
   padding: 10px;
   display: flex;
@@ -1164,14 +1164,14 @@
 .channel-name-head {
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: #657367;
   text-transform: uppercase;
 }
 
 .channel-val-text {
   font-size: 12px;
   font-weight: 600;
-  color: #0f172a;
+  color: #14291e;
   word-break: break-all;
 }
 
@@ -1182,7 +1182,7 @@
   position: fixed;
   bottom: 24px;
   right: 28px;
-  background-color: #0f172a;
+  background-color: #14291e;
   color: #ffffff;
   padding: 12px 18px;
   border-radius: 8px;
@@ -1201,7 +1201,7 @@
 }
 
 .notif-toast-hud.info {
-  border-left: 4px solid #38bdf8;
+  border-left: 4px solid #7caa7e;
 }
 
 @keyframes toastFadeIn {

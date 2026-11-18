@@ -506,7 +506,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
 
           {/* Search Box */}
           <div className="sh-top-search-box">
-            <Search size={16} color="#64748b" />
+            <Search size={16} color="#657367" />
             <input
               type="text"
               className="sh-top-search-input"
@@ -544,7 +544,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         <main className="sh-content-body">
           {/* Coursework Demonstration Banner */}
           <div className="sh-demo-banner">
-            <ShieldCheck size={18} color="#0284c7" />
+            <ShieldCheck size={18} color="#3d6b4f" />
             <span>
               <span className="sh-demo-badge-bold">Coursework prototype</span>: All records, AI results and transactions are fictional demonstration data. Actions are local UI simulations.
             </span>
@@ -652,7 +652,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
       {toastMessage && (
         <div className="sh-toast-container">
           <div className="sh-toast">
-            <CheckCircle2 size={18} color="#38bdf8" />
+            <CheckCircle2 size={18} color="#7caa7e" />
             <span>{toastMessage}</span>
           </div>
         </div>

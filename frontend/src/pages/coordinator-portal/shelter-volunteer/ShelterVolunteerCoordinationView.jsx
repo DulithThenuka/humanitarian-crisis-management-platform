@@ -412,7 +412,7 @@ export const ShelterVolunteerCoordinationView = ({
       {/* Role Boundary Notice Banner */}
       <div className="ec-svc-role-notice">
         <div className="ec-svc-role-notice-icon">
-          <ShieldCheck size={18} color="#0284c7" />
+          <ShieldCheck size={18} color="#3d6b4f" />
         </div>
         <div className="ec-svc-role-notice-text">
           <strong>Coordinator Scope (Recommend &rarr; Request &rarr; Track):</strong> The Emergency Coordinator identifies crisis requirements, evaluates shelter suitability, recommends facilities, and submits formal requests to <em>Shelter Managers</em> and <em>Volunteer Managers</em>. Shelter occupancy updates, facility maintenance, and direct volunteer assignment are managed exclusively in their respective manager portals.
@@ -550,7 +550,7 @@ export const ShelterVolunteerCoordinationView = ({
               className="ec-btn-action-secondary ec-btn-highlight"
               onClick={() => setShowRecommendModal(true)}
             >
-              <Sparkles size={14} color="#0284c7" />
+              <Sparkles size={14} color="#3d6b4f" />
               <span>Recommend Shelter for Incident</span>
             </button>
           </div>
@@ -559,7 +559,7 @@ export const ShelterVolunteerCoordinationView = ({
           <div className="ec-svc-toolbar-container">
             <div className="ec-svc-filter-bar">
               <div className="ec-svc-search-box">
-                <Search size={15} color="#94a3b8" />
+                <Search size={15} color="#8a9480" />
                 <input
                   type="text"
                   placeholder="Search shelter by name, location, or facility..."
@@ -631,7 +631,7 @@ export const ShelterVolunteerCoordinationView = ({
                   <div className="ec-shelter-details-grid">
                     <div className="ec-shelter-stat-cell">
                       <span className="ec-shelter-cell-lbl">Remaining Capacity</span>
-                      <span className="ec-shelter-cell-val" style={{ color: isFull ? '#dc2626' : isNearCapacity ? '#d97706' : '#0284c7' }}>
+                      <span className="ec-shelter-cell-val" style={{ color: isFull ? '#dc2626' : isNearCapacity ? '#d97706' : '#3d6b4f' }}>
                         {sh.remainingCapacity} beds
                       </span>
                     </div>
@@ -651,7 +651,7 @@ export const ShelterVolunteerCoordinationView = ({
                   </div>
 
                   <div className="ec-shelter-access-info">
-                    <Accessibility size={13} color="#0284c7" />
+                    <Accessibility size={13} color="#3d6b4f" />
                     <span>{sh.accessibilityInfo}</span>
                   </div>
 
@@ -678,7 +678,7 @@ export const ShelterVolunteerCoordinationView = ({
 
             {filteredShelters.length === 0 && (
               <div className="ec-svc-empty-card">
-                <Building2 size={32} color="#0284c7" />
+                <Building2 size={32} color="#3d6b4f" />
                 <h3>No Shelters Found</h3>
                 <p>No active emergency shelters match your current search and filters in HumanitarianCrisisDb.</p>
               </div>
@@ -709,7 +709,7 @@ export const ShelterVolunteerCoordinationView = ({
           <div className="ec-svc-toolbar-container">
             <div className="ec-svc-filter-bar">
               <div className="ec-svc-search-box">
-                <Search size={15} color="#94a3b8" />
+                <Search size={15} color="#8a9480" />
                 <input
                   type="text"
                   placeholder="Search placement requests by #, shelter, incident..."
@@ -970,7 +970,7 @@ export const ShelterVolunteerCoordinationView = ({
           <div className="ec-svc-toolbar-container">
             <div className="ec-svc-filter-bar">
               <div className="ec-svc-search-box">
-                <Search size={15} color="#94a3b8" />
+                <Search size={15} color="#8a9480" />
                 <input
                   type="text"
                   placeholder="Search volunteer requests by #, task, incident..."
@@ -1108,7 +1108,7 @@ export const ShelterVolunteerCoordinationView = ({
           <div className="ec-svc-toolbar-container">
             <div className="ec-svc-filter-bar">
               <div className="ec-svc-search-box">
-                <Search size={15} color="#94a3b8" />
+                <Search size={15} color="#8a9480" />
                 <input
                   type="text"
                   placeholder="Search by request #, incident, target, or submitter..."
@@ -1272,7 +1272,7 @@ export const ShelterVolunteerCoordinationView = ({
               </div>
 
               <div className="ec-suitability-access-box">
-                <Accessibility size={16} color="#0284c7" />
+                <Accessibility size={16} color="#3d6b4f" />
                 <div>
                   <strong>Accessibility Infrastructure:</strong>
                   <p>{selectedSuitabilityShelter.accessibilityInfo}</p>
@@ -1366,7 +1366,7 @@ export const ShelterVolunteerCoordinationView = ({
 
                 {shelterRecommendations.length === 0 && (
                   <div className="ec-svc-empty-card">
-                    <Sparkles size={28} color="#0284c7" />
+                    <Sparkles size={28} color="#3d6b4f" />
                     <h3>No Active Shelter Recommendations</h3>
                     <p>All active incident evacuees currently have recommended or assigned placements.</p>
                   </div>
@@ -1406,7 +1406,7 @@ export const ShelterVolunteerCoordinationView = ({
 
             <form onSubmit={handleSubmitShelterRequest} className="ec-modal-form">
               <div className="ec-svc-modal-notice">
-                <Info size={15} color="#0284c7" />
+                <Info size={15} color="#3d6b4f" />
                 <span>
                   This request will be sent to the <strong>Shelter Manager</strong> for formal bed reservation and intake verification.
                 </span>
@@ -1556,7 +1556,7 @@ export const ShelterVolunteerCoordinationView = ({
 
             <form onSubmit={handleSubmitVolunteerRequest} className="ec-modal-form">
               <div className="ec-svc-modal-notice">
-                <Info size={15} color="#0284c7" />
+                <Info size={15} color="#3d6b4f" />
                 <span>
                   This requirement will be submitted to the <strong>Volunteer Manager</strong> to select certified volunteers and dispatch teams.
                 </span>

@@ -218,7 +218,7 @@ export const LiveSatelliteCrisisMap = ({ onProvinceChange }) => {
           <h4>${item.id}</h4>
           <p>${item.type}</p>
           <div class="popup-meta">Status: Under Review</div>
-          <a href="/coordinator/requests/${item.id}" style="display:inline-block; margin-top:8px; padding:4px 8px; background:#0e6f76; color:#ffffff; border-radius:4px; font-size:11px; font-weight:600; text-decoration:none;">View Request Details &rarr;</a>
+          <a href="/coordinator/requests/${item.id}" style="display:inline-block; margin-top:8px; padding:4px 8px; background:#3d6b4f; color:#ffffff; border-radius:4px; font-size:11px; font-weight:600; text-decoration:none;">View Request Details &rarr;</a>
         </div>
       `);
       layerGroups.requests.addLayer(marker);
@@ -379,7 +379,7 @@ export const LiveSatelliteCrisisMap = ({ onProvinceChange }) => {
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
           <span>{selectedProvince}</span>
-          <ChevronDown size={13} color="#64748b" className={dropdownOpen ? 'rotate-180' : ''} />
+          <ChevronDown size={13} color="#657367" className={dropdownOpen ? 'rotate-180' : ''} />
         </button>
 
         {dropdownOpen && (

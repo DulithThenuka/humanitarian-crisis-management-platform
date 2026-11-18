@@ -7,8 +7,8 @@
   flex-direction: column;
   width: 100%;
   height: calc(100vh - 60px);
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #f4f6f2;
+  color: #14291e;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   box-sizing: border-box;
@@ -22,7 +22,7 @@
   top: 60px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #0f172a;
+  background-color: #14291e;
   color: #ffffff;
   padding: 8px 16px;
   border-radius: 9999px;
@@ -38,7 +38,7 @@
 }
 
 .map-feedback-toast .toast-sparkle {
-  color: #38bdf8;
+  color: #7caa7e;
 }
 
 @keyframes fadeInDown {
@@ -52,7 +52,7 @@
 .cmd-map-topbar {
   height: 48px;
   background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #dfe5d8;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -70,19 +70,19 @@
 
 .crumb-dim {
   font-size: 11px;
-  color: #64748b;
+  color: #657367;
   font-weight: 500;
 }
 
 .crumb-slash {
   font-size: 11px;
-  color: #cbd5e1;
+  color: #c5ccbe;
 }
 
 .crumb-title {
   font-size: 13.5px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -126,7 +126,7 @@
 /* Map Style Switcher Pills */
 .map-style-toggle-group {
   display: flex;
-  background-color: #f1f5f9;
+  background-color: #eef1ea;
   padding: 2px;
   border-radius: 6px;
   gap: 2px;
@@ -137,7 +137,7 @@
   border: none;
   font-size: 10.5px;
   font-weight: 600;
-  color: #64748b;
+  color: #657367;
   padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
@@ -148,12 +148,12 @@
 }
 
 .style-btn:hover {
-  color: #0f172a;
+  color: #14291e;
 }
 
 .style-btn.active {
   background-color: #ffffff;
-  color: #0e6f76;
+  color: #3d6b4f;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -166,20 +166,20 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   background-color: #ffffff;
-  color: #334155;
+  color: #2a4a35;
   transition: all 0.15s ease;
 }
 
 .cmd-btn:hover {
-  background-color: #f8fafc;
-  border-color: #94a3b8;
+  background-color: #f4f6f2;
+  border-color: #8a9480;
 }
 
 .btn-capture {
-  background-color: #0e6f76;
-  border-color: #0e6f76;
+  background-color: #3d6b4f;
+  border-color: #3d6b4f;
   color: #ffffff;
 }
 
@@ -202,12 +202,12 @@
 }
 
 .btn-locate {
-  color: #334155;
+  color: #2a4a35;
 }
 
 .btn-reset-center {
   padding: 5px 8px;
-  color: #64748b;
+  color: #657367;
 }
 
 /* -------------------------------------------------------------------------
@@ -223,8 +223,8 @@
 
 /* LEFT CONTROLS DOCK */
 .cmd-left-dock {
-  background-color: #f8fafc;
-  border-right: 1px solid #e2e8f0;
+  background-color: #f4f6f2;
+  border-right: 1px solid #dfe5d8;
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -235,7 +235,7 @@
 
 .dock-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 8px;
   padding: 10px 12px;
   display: flex;
@@ -253,14 +253,14 @@
 .card-heading-upper {
   font-size: 9.5px;
   font-weight: 800;
-  color: #64748b;
+  color: #657367;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .layer-count-chip {
   font-size: 9.5px;
-  color: #0e6f76;
+  color: #3d6b4f;
   font-weight: 700;
   background-color: #f0fdfa;
   padding: 1px 6px;
@@ -280,15 +280,15 @@
   padding: 5px 7px;
   border-radius: 5px;
   font-size: 11px;
-  color: #334155;
+  color: #2a4a35;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.12s ease;
 }
 
 .dock-layer-item:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: #eef1ea;
+  color: #14291e;
 }
 
 .layer-item-left {
@@ -298,7 +298,7 @@
 }
 
 .dock-layer-item input[type="checkbox"] {
-  accent-color: #0e6f76;
+  accent-color: #3d6b4f;
   cursor: pointer;
   width: 13px;
   height: 13px;
@@ -312,11 +312,11 @@
 }
 
 .dot-red { background-color: #ef4444; }
-.dot-cyan { background-color: #0284c7; }
+.dot-cyan { background-color: #3d6b4f; }
 .dot-emerald { background-color: #10b981; }
 .dot-amber { background-color: #f59e0b; }
 .dot-purple { background-color: #8b5cf6; }
-.dot-teal { background-color: #0e7490; }
+.dot-teal { background-color: #3d6b4f; }
 
 /* Active Crisis Light Alert Box */
 .crisis-dock-card {
@@ -419,7 +419,7 @@
 
 .coverage-narrative {
   font-size: 10px;
-  color: #475569;
+  color: #4a5b4a;
   line-height: 1.35;
   margin: 0;
 }
@@ -464,13 +464,13 @@
 }
 
 .sector-jump-grid button {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 4px;
   padding: 4px 6px;
   font-size: 10px;
   font-weight: 600;
-  color: #334155;
+  color: #2a4a35;
   cursor: pointer;
   transition: all 0.12s ease;
 }
@@ -485,7 +485,7 @@
 .dock-legend-bottom {
   margin-top: auto;
   padding-top: 8px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #dfe5d8;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -494,7 +494,7 @@
 .legend-head {
   font-size: 9px;
   font-weight: 800;
-  color: #64748b;
+  color: #657367;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -504,7 +504,7 @@
   align-items: center;
   gap: 6px;
   font-size: 10px;
-  color: #475569;
+  color: #4a5b4a;
 }
 
 /* -------------------------------------------------------------------------
@@ -514,7 +514,7 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #f1f5f9;
+  background-color: #eef1ea;
   overflow: hidden;
 }
 
@@ -570,7 +570,7 @@
 }
 
 .leaflet-light-container {
-  background-color: #f1f5f9 !important;
+  background-color: #eef1ea !important;
   font-family: inherit;
 }
 
@@ -614,11 +614,11 @@
 
 .scale-box {
   background-color: rgba(255, 255, 255, 0.95);
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   border-radius: 4px;
   padding: 3px 8px;
   font-size: 9.5px;
-  color: #475569;
+  color: #4a5b4a;
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -628,10 +628,10 @@
   bottom: 12px;
   right: 14px;
   font-size: 9.5px;
-  color: #0e7490;
+  color: #3d6b4f;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   background-color: rgba(255, 255, 255, 0.95);
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   padding: 3px 9px;
   border-radius: 4px;
   z-index: 500;
@@ -650,7 +650,7 @@
   transform: translateX(-50%);
   width: 300px;
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 12px;
   padding: 16px 18px;
   box-shadow: 0 14px 35px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
@@ -682,7 +682,7 @@
   border-radius: 4px;
 }
 
-.pill-service { background-color: #e0f2fe; color: #0369a1; }
+.pill-service { background-color: #edf2e6; color: #2d5a3e; }
 .pill-shelter { background-color: #d1fae5; color: #047857; }
 .pill-request { background-color: #fee2e2; color: #b91c1c; }
 .pill-resource { background-color: #fef3c7; color: #b45309; }
@@ -692,7 +692,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #94a3b8;
+  color: #8a9480;
   padding: 2px;
   display: flex;
   align-items: center;
@@ -701,29 +701,29 @@
 }
 
 .figma-popup-close-btn:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: #eef1ea;
+  color: #14291e;
 }
 
 .figma-popup-title {
   font-size: 14px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   line-height: 1.25;
   margin: 0;
 }
 
 .figma-popup-subtitle {
   font-size: 11px;
-  color: #64748b;
+  color: #657367;
   margin: 0;
 }
 
 .figma-popup-shelter-stats {
   display: flex;
   justify-content: space-around;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 8px;
   padding: 8px 10px;
   margin: 4px 0;
@@ -739,7 +739,7 @@
 .stat-label {
   font-size: 9px;
   font-weight: 700;
-  color: #94a3b8;
+  color: #8a9480;
 }
 
 .figma-popup-route-box {
@@ -769,12 +769,12 @@
 .route-dist-tag {
   font-size: 10.5px;
   font-weight: 700;
-  color: #0284c7;
+  color: #3d6b4f;
 }
 
 .route-note-p {
   font-size: 9.5px;
-  color: #64748b;
+  color: #657367;
   line-height: 1.35;
   margin: 0;
 }
@@ -787,9 +787,9 @@
 }
 
 .figma-popup-tags span {
-  background-color: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  background-color: #eef1ea;
+  border: 1px solid #dfe5d8;
+  color: #4a5b4a;
   font-size: 9px;
   font-weight: 600;
   padding: 2px 7px;
@@ -797,7 +797,7 @@
 }
 
 .figma-btn-dispatch {
-  background-color: #0e6f76;
+  background-color: #3d6b4f;
   color: #ffffff;
   border: none;
   border-radius: 6px;
@@ -821,8 +821,8 @@
    3. RIGHT DOCK: LOCATION CAPTURE FORM OR PROXIMITY DISPATCH
    ------------------------------------------------------------------------- */
 .cmd-right-dock {
-  background-color: #f8fafc;
-  border-left: 1px solid #e2e8f0;
+  background-color: #f4f6f2;
+  border-left: 1px solid #dfe5d8;
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -872,7 +872,7 @@
 .drawer-close-x {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #8a9480;
   cursor: pointer;
   padding: 2px;
   display: flex;
@@ -880,7 +880,7 @@
 }
 
 .drawer-close-x:hover {
-  color: #0f172a;
+  color: #14291e;
 }
 
 .captured-coords-display-box {
@@ -923,18 +923,18 @@
 .form-group label {
   font-size: 10px;
   font-weight: 700;
-  color: #475569;
+  color: #4a5b4a;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   border-radius: 6px;
   padding: 6px 8px;
   font-size: 11px;
-  color: #0f172a;
+  color: #14291e;
   outline: none;
   transition: border-color 0.15s ease;
   font-family: inherit;
@@ -943,7 +943,7 @@
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: #0e6f76;
+  border-color: #3d6b4f;
   box-shadow: 0 0 0 2px rgba(14, 111, 118, 0.12);
 }
 
@@ -954,13 +954,13 @@
 }
 
 .sev-btn {
-  background-color: #f1f5f9;
-  border: 1px solid #cbd5e1;
+  background-color: #eef1ea;
+  border: 1px solid #c5ccbe;
   border-radius: 4px;
   padding: 4px 6px;
   font-size: 9.5px;
   font-weight: 700;
-  color: #64748b;
+  color: #657367;
   cursor: pointer;
   transition: all 0.12s ease;
 }
@@ -978,9 +978,9 @@
 }
 
 .sev-btn.sev-medium {
-  background-color: #e0f2fe;
-  border-color: #bae6fd;
-  color: #0369a1;
+  background-color: #edf2e6;
+  border-color: #c7dbc0;
+  color: #2d5a3e;
 }
 
 .submit-register-btn {
@@ -988,7 +988,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background-color: #0e6f76;
+  background-color: #3d6b4f;
   color: #ffffff;
   border: none;
   border-radius: 6px;
@@ -1007,7 +1007,7 @@
 /* Default Proximity Matching Cards */
 .engine-sub-chip {
   font-size: 8.5px;
-  color: #0e7490;
+  color: #3d6b4f;
   font-weight: 700;
   background-color: #f0fdfa;
   border: 1px solid #ccfbf1;
@@ -1017,18 +1017,18 @@
 
 .dock-subnote {
   font-size: 9.5px;
-  color: #64748b;
+  color: #657367;
   line-height: 1.35;
   margin: 0;
 }
 
 .dock-subnote strong {
-  color: #0f172a;
+  color: #14291e;
 }
 
 .match-card-item {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 6px;
   padding: 8px 10px;
   display: flex;
@@ -1058,7 +1058,7 @@
 .rank-num {
   width: 16px;
   height: 16px;
-  background-color: #0e6f76;
+  background-color: #3d6b4f;
   color: #ffffff;
   border-radius: 50%;
   font-size: 9px;
@@ -1070,26 +1070,26 @@
 
 .m-hub-title {
   font-size: 11px;
-  color: #0f172a;
+  color: #14291e;
   line-height: 1.2;
 }
 
 .m-dist-val {
   font-size: 11px;
   font-weight: 800;
-  color: #0284c7;
+  color: #3d6b4f;
 }
 
 .m-card-meta {
   display: flex;
   justify-content: space-between;
   font-size: 9.5px;
-  color: #64748b;
+  color: #657367;
 }
 
 .stat-near-cap { color: #d97706; font-weight: 600; }
 .stat-operational { color: #059669; font-weight: 600; }
-.stat-high-stock { color: #0284c7; font-weight: 600; }
+.stat-high-stock { color: #3d6b4f; font-weight: 600; }
 
 .dispatch-1click-btn {
   background-color: #f0fdfa;
@@ -1109,21 +1109,21 @@
 }
 
 .dispatch-1click-btn:hover {
-  background-color: #0e6f76;
+  background-color: #3d6b4f;
   color: #ffffff;
-  border-color: #0e6f76;
+  border-color: #3d6b4f;
 }
 
 /* Turn-by-Turn Route Guidance */
 .step-count-chip {
   font-size: 9px;
-  color: #64748b;
+  color: #657367;
   font-weight: 600;
 }
 
 .route-step-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 6px;
   padding: 7px 9px;
   display: flex;
@@ -1140,7 +1140,7 @@
 .step-badge {
   width: 15px;
   height: 15px;
-  background-color: #0e6f76;
+  background-color: #3d6b4f;
   color: #ffffff;
   border-radius: 50%;
   font-size: 8.5px;
@@ -1158,7 +1158,7 @@
 
 .step-title {
   font-size: 10.5px;
-  color: #0f172a;
+  color: #14291e;
   line-height: 1.3;
 }
 
@@ -1168,7 +1168,7 @@
 
 .step-note {
   font-size: 9px;
-  color: #64748b;
+  color: #657367;
   margin-left: 21px;
 }
 
@@ -1191,5 +1191,5 @@
 .text-red { color: #dc2626; }
 .text-amber { color: #d97706; }
 .text-teal { color: #0d9488; }
-.text-cyan { color: #0284c7; }
+.text-cyan { color: #3d6b4f; }
 .text-orange { color: #ea580c; }

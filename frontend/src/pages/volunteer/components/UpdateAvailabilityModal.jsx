@@ -28,12 +28,12 @@ export const UpdateAvailabilityModal = ({ user, onClose, onSave }) => {
 
         <div className="vol-modal-body">
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: '#f8fafc', border: '1px solid #e2e8e0', borderRadius: '8px', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: '#f4f6f2', border: '1px solid #e2e8e0', borderRadius: '8px', cursor: 'pointer' }}>
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#183526' }}>
                   Available for Field Deployments
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+                <div style={{ fontSize: '11.5px', color: '#657367' }}>
                   Coordinators can allocate urgent tasks to your roster
                 </div>
               </div>
@@ -47,7 +47,7 @@ export const UpdateAvailabilityModal = ({ user, onClose, onSave }) => {
           </div>
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4a5b4a', marginBottom: '6px' }}>
               Availability Notes / Shift Preference
             </label>
             <input
@@ -60,7 +60,7 @@ export const UpdateAvailabilityModal = ({ user, onClose, onSave }) => {
           </div>
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4a5b4a', marginBottom: '6px' }}>
               Active Service Area
             </label>
             <select

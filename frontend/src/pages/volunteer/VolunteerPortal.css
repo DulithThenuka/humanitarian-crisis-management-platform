@@ -48,10 +48,10 @@
   --vol-danger-border: #fecaca;
   --vol-danger-dot: #ef4444;
 
-  --vol-info-bg: #e0f2fe;
-  --vol-info-text: #0369a1;
-  --vol-info-border: #bae6fd;
-  --vol-info-dot: #0ea5e9;
+  --vol-info-bg: #edf2e6;
+  --vol-info-text: #2d5a3e;
+  --vol-info-border: #c7dbc0;
+  --vol-info-dot: #5a8c6a;
 
   --vol-orange-bg: #ffedd5;
   --vol-orange-text: #c2410c;
@@ -520,8 +520,8 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #dbeafe;
-  color: #0f172a;
+  background: #dbe4c6;
+  color: #14291e;
   font-size: 11px;
   font-weight: 800;
   display: flex;
@@ -716,8 +716,8 @@
 }
 
 .vol-stat-icon-box.blue {
-  background: #e0f2fe;
-  color: #0284c7;
+  background: #edf2e6;
+  color: #3d6b4f;
 }
 
 .vol-stat-icon-box.orange {
@@ -726,8 +726,8 @@
 }
 
 .vol-stat-icon-box.gray {
-  background: #f1f5f9;
-  color: #64748b;
+  background: #eef1ea;
+  color: #657367;
 }
 
 .vol-stat-icon-box.green {
@@ -833,9 +833,9 @@
 }
 
 .vol-pill.tag-blue {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
+  background: #edf2e6;
+  color: #2d5a3e;
+  border: 1px solid #c7dbc0;
 }
 
 .vol-pill.tag-green {
@@ -900,7 +900,7 @@
 
 .vol-btn-outline:hover {
   background: var(--vol-canvas-bg);
-  border-color: #cbd5e1;
+  border-color: #c5ccbe;
 }
 
 /* =========================================================
@@ -975,7 +975,7 @@
 
 .vol-list-item:hover {
   background: #ffffff;
-  border-color: #cbd5e1;
+  border-color: #c5ccbe;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
 }
 
@@ -1227,15 +1227,15 @@
 }
 
 .vol-opp-priority-pill.blue {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
+  background: #edf2e6;
+  color: #2d5a3e;
+  border: 1px solid #c7dbc0;
 }
 
 .vol-opp-priority-pill.gray {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background: #eef1ea;
+  color: #4a5b4a;
+  border: 1px solid #dfe5d8;
 }
 
 .vol-opp-title {
@@ -1333,7 +1333,7 @@
 }
 
 .vol-data-table th {
-  background: #f8fafc;
+  background: #f4f6f2;
   padding: 12px 16px;
   font-size: 11px;
   font-weight: 700;
@@ -1449,7 +1449,7 @@
 }
 
 .vol-day-col {
-  background: #f8fafc;
+  background: #f4f6f2;
   border: 1px solid var(--vol-border);
   border-radius: 8px;
   padding: 8px 6px;
@@ -1686,7 +1686,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  background: #f8fafc;
+  background: #f4f6f2;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
 }

@@ -142,8 +142,8 @@ export const AIGovernanceSettings = ({ onNavigateWorkspace, onBackOverview, show
       id: 'resource',
       title: 'Resource Matching',
       icon: Box,
-      iconColor: '#0284c7',
-      iconBg: '#e0f2fe',
+      iconColor: '#3d6b4f',
+      iconBg: '#edf2e6',
       workspaceId: 'resource'
     },
     {
@@ -158,8 +158,8 @@ export const AIGovernanceSettings = ({ onNavigateWorkspace, onBackOverview, show
       id: 'demand',
       title: 'Demand Forecasting',
       icon: TrendingUp,
-      iconColor: '#0284c7',
-      iconBg: '#e0f2fe',
+      iconColor: '#3d6b4f',
+      iconBg: '#edf2e6',
       workspaceId: 'demand'
     },
     {
@@ -674,12 +674,12 @@ export const AIGovernanceSettings = ({ onNavigateWorkspace, onBackOverview, show
                   </div>
                   <div>
                     <div className="srv-config-name" style={{ fontSize: '13.5px' }}>{srv.title}</div>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>Model: BERT-Crisis-v2.4 | Latency SLA: &lt; 250ms</div>
+                    <div style={{ fontSize: '11px', color: '#657367' }}>Model: BERT-Crisis-v2.4 | Latency SLA: &lt; 250ms</div>
                   </div>
                 </div>
 
                 <div className="srv-config-right" style={{ gap: '14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#475569' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#4a5b4a' }}>
                     <span>Confidence Cutoff:</span>
                     <strong style={{ color: '#059669' }}>85%</strong>
                   </div>
@@ -786,7 +786,7 @@ export const AIGovernanceSettings = ({ onNavigateWorkspace, onBackOverview, show
             </div>
           </div>
 
-          <div style={{ padding: '14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12.5px', color: '#334155' }}>
+          <div style={{ padding: '14px', background: '#f4f6f2', borderRadius: '8px', border: '1px solid #dfe5d8', fontSize: '12.5px', color: '#2a4a35' }}>
             All algorithmic suggestions are accompanied by human-readable explanation vectors, model confidence metrics, and immutable audit logs available for inspection under the UN OCHA Relief Standard.
           </div>
         </div>

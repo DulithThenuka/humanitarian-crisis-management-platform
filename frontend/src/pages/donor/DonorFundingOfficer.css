@@ -63,7 +63,7 @@
   --fo-danger-border: #fecaca;
 
   --fo-info: #1d4ed8;
-  --fo-info-bg: #dbeafe;
+  --fo-info-bg: #dbe4c6;
   --fo-info-border: #bfdbfe;
 
   --fo-purple: #6d28d9;
@@ -1094,7 +1094,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #475569;
+  color: #4a5b4a;
   margin-bottom: 6px;
 }
 
@@ -1419,9 +1419,9 @@
 }
 
 .fo-status-badge.allocated {
-  background-color: #f1f5f9;
-  color: #334155;
-  border: 1px solid #e2e8f0;
+  background-color: #eef1ea;
+  color: #2a4a35;
+  border: 1px solid #dfe5d8;
 }
 
 .fo-status-badge.review {

@@ -25,7 +25,7 @@ class GlobalErrorBoundary extends React.Component {
         <div style={{
           minHeight: '100vh',
           backgroundColor: '#0a0d1a',
-          color: '#f8fafc',
+          color: '#f4f6f2',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -59,7 +59,7 @@ class GlobalErrorBoundary extends React.Component {
                 <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#fca5a5' }}>
                   Platform Interface Notice
                 </h1>
-                <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>
+                <p style={{ margin: 0, fontSize: '13px', color: '#8a9480' }}>
                   A rendering exception occurred in the humanitarian platform view.
                 </p>
               </div>
@@ -79,7 +79,7 @@ class GlobalErrorBoundary extends React.Component {
             }}>
               {this.state.error?.toString() || 'Unknown error'}
               {this.state.errorInfo?.componentStack && (
-                <div style={{ color: '#94a3b8', marginTop: '10px' }}>
+                <div style={{ color: '#8a9480', marginTop: '10px' }}>
                   {this.state.errorInfo.componentStack}
                 </div>
               )}

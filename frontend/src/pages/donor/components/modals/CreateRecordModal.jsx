@@ -37,7 +37,7 @@ export const CreateRecordModal = ({ isOpen, onClose, onCreateRecord }) => {
       allocation: formData.allocation,
       allocationTarget: `${formData.allocation} Rapid Reserve`,
       status: 'Allocated',
-      statusColor: '#0284c7',
+      statusColor: '#3d6b4f',
       statusBg: '#eff6ff',
       statusBorder: '#bfdbfe',
       operationalArea: formData.operationalArea,
@@ -56,7 +56,7 @@ export const CreateRecordModal = ({ isOpen, onClose, onCreateRecord }) => {
       <div className="fo-modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="fo-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Plus size={18} color="#0284c7" />
+            <Plus size={18} color="#3d6b4f" />
             <span className="fo-modal-title">Create Prototype Record</span>
           </div>
           <button className="fo-modal-close-btn" onClick={onClose}>
@@ -66,7 +66,7 @@ export const CreateRecordModal = ({ isOpen, onClose, onCreateRecord }) => {
 
         <form onSubmit={handleSubmit}>
           <div className="fo-modal-body">
-            <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '12px', color: '#657367', lineHeight: 1.5 }}>
               Enter demonstration donor or material contribution details to simulate funding allocation workflows within the western province disaster response scope.
             </p>
 

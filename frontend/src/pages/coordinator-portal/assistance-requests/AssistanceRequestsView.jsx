@@ -71,7 +71,7 @@ export const AssistanceRequestsView = ({
           <span className="ec-req-stat-label">Critical</span>
         </div>
         <div className="ec-req-stat-pill">
-          <span className="ec-req-stat-num" style={{ color: '#38bdf8' }}>{metrics?.moreInfoRequired ?? 0}</span>
+          <span className="ec-req-stat-num" style={{ color: '#7caa7e' }}>{metrics?.moreInfoRequired ?? 0}</span>
           <span className="ec-req-stat-label">Need information</span>
         </div>
       </div>
@@ -80,7 +80,7 @@ export const AssistanceRequestsView = ({
       <div className="ec-req-toolbar-card">
         <div className="ec-req-toolbar-row">
           <div className="ec-req-search-box">
-            <Search size={14} color="#94a3b8" />
+            <Search size={14} color="#8a9480" />
             <input
               type="text"
               placeholder="Search request ID or location..."
@@ -89,7 +89,7 @@ export const AssistanceRequestsView = ({
               onChange={(e) => setReqSearchInput(e.target.value)}
             />
             {reqSearchInput && (
-              <X size={13} style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={() => setReqSearchInput('')} />
+              <X size={13} style={{ cursor: 'pointer', color: '#8a9480' }} onClick={() => setReqSearchInput('')} />
             )}
           </div>
 
@@ -157,7 +157,7 @@ export const AssistanceRequestsView = ({
               <X size={11} />
             </span>
           ))}
-          <span style={{ fontSize: '11px', color: '#64748b' }}>
+          <span style={{ fontSize: '11px', color: '#657367' }}>
             {appliedFilters.length} filters applied
           </span>
         </div>
@@ -193,7 +193,7 @@ export const AssistanceRequestsView = ({
                 <td>
                   <span style={{ fontWeight: 600 }}>{row.category}</span>
                 </td>
-                <td style={{ color: '#64748b' }}>{row.submitted}</td>
+                <td style={{ color: '#657367' }}>{row.submitted}</td>
                 <td>{row.location}</td>
                 <td style={{ fontWeight: 700 }}>{row.people}</td>
                 <td>
@@ -210,20 +210,20 @@ export const AssistanceRequestsView = ({
                     ● {row.verification}
                   </span>
                 </td>
-                <td style={{ color: '#475569' }}>{row.coordinator}</td>
+                <td style={{ color: '#4a5b4a' }}>{row.coordinator}</td>
                 <td>
                   <span style={{
                     fontSize: '11px',
                     fontWeight: 700,
                     color: (row.status === 'Verified' || row.status?.startsWith('Verified')) ? '#059669' :
-                           (row.status === 'Need information' || row.status === 'More Information Required') ? '#0284c7' :
-                           row.status === 'Assigned' ? '#0284c7' : '#d97706'
+                           (row.status === 'Need information' || row.status === 'More Information Required') ? '#3d6b4f' :
+                           row.status === 'Assigned' ? '#3d6b4f' : '#d97706'
                   }}>
                     ● {row.status}
                   </span>
                 </td>
                 <td onClick={(e) => { e.stopPropagation(); onOpenCaseReview(row.id); }}>
-                  <span style={{ color: '#94a3b8', fontSize: '16px', letterSpacing: '2px', cursor: 'pointer' }}>
+                  <span style={{ color: '#8a9480', fontSize: '16px', letterSpacing: '2px', cursor: 'pointer' }}>
                     •••
                   </span>
                 </td>

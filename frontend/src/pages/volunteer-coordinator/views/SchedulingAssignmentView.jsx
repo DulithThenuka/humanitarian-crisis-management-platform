@@ -72,12 +72,12 @@ const ConfirmAssignmentModal = ({ isOpen, volunteer, shiftTime, shiftTask, onCan
         </div>
 
         {/* Title */}
-        <h3 style={{ margin: '0 0 6px 0', fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+        <h3 style={{ margin: '0 0 6px 0', fontSize: '16px', fontWeight: 800, color: '#14291e' }}>
           Confirm this reviewed action?
         </h3>
 
         {/* Subtitle */}
-        <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>
+        <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#657367', lineHeight: 1.5 }}>
           UI-only prototype action. No backend transaction occurs. Reviewer, reason and timestamp
           are represented in the local audit trail.
         </p>
@@ -91,7 +91,7 @@ const ConfirmAssignmentModal = ({ isOpen, volunteer, shiftTime, shiftTask, onCan
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
-              color: '#475569',
+              color: '#4a5b4a',
               marginBottom: '8px'
             }}
           >
@@ -107,16 +107,16 @@ const ConfirmAssignmentModal = ({ isOpen, volunteer, shiftTime, shiftTask, onCan
               boxSizing: 'border-box',
               padding: '10px 12px',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid #dfe5d8',
               fontSize: '13px',
-              color: '#0f172a',
+              color: '#14291e',
               fontFamily: 'inherit',
               resize: 'vertical',
-              backgroundColor: '#f8fafc',
+              backgroundColor: '#f4f6f2',
               outline: 'none'
             }}
-            onFocus={(e) => { e.target.style.borderColor = '#0b1528'; e.target.style.backgroundColor = '#fff'; }}
-            onBlur={(e) => { e.target.style.borderColor = '#e2e8f0'; e.target.style.backgroundColor = '#f8fafc'; }}
+            onFocus={(e) => { e.target.style.borderColor = '#14291e'; e.target.style.backgroundColor = '#fff'; }}
+            onBlur={(e) => { e.target.style.borderColor = '#dfe5d8'; e.target.style.backgroundColor = '#f4f6f2'; }}
           />
         </div>
 
@@ -127,7 +127,7 @@ const ConfirmAssignmentModal = ({ isOpen, volunteer, shiftTime, shiftTask, onCan
             alignItems: 'center',
             gap: '10px',
             fontSize: '13px',
-            color: '#334155',
+            color: '#2a4a35',
             cursor: 'pointer',
             marginBottom: '24px',
             userSelect: 'none'
@@ -137,7 +137,7 @@ const ConfirmAssignmentModal = ({ isOpen, volunteer, shiftTime, shiftTask, onCan
             type="checkbox"
             checked={reviewed}
             onChange={(e) => setReviewed(e.target.checked)}
-            style={{ width: '15px', height: '15px', accentColor: '#0b1528', cursor: 'pointer' }}
+            style={{ width: '15px', height: '15px', accentColor: '#14291e', cursor: 'pointer' }}
           />
           I reviewed the available information and role scope.
         </label>
@@ -149,15 +149,15 @@ const ConfirmAssignmentModal = ({ isOpen, volunteer, shiftTime, shiftTask, onCan
             style={{
               padding: '9px 20px',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid #dfe5d8',
               backgroundColor: '#ffffff',
-              color: '#475569',
+              color: '#4a5b4a',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
               fontFamily: 'inherit'
             }}
-            onMouseEnter={(e) => { e.target.style.backgroundColor = '#f1f5f9'; }}
+            onMouseEnter={(e) => { e.target.style.backgroundColor = '#eef1ea'; }}
             onMouseLeave={(e) => { e.target.style.backgroundColor = '#ffffff'; }}
           >
             Cancel
@@ -169,7 +169,7 @@ const ConfirmAssignmentModal = ({ isOpen, volunteer, shiftTime, shiftTask, onCan
               padding: '9px 20px',
               borderRadius: '8px',
               border: 'none',
-              backgroundColor: reviewed ? '#0b1528' : '#94a3b8',
+              backgroundColor: reviewed ? '#14291e' : '#8a9480',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700,
@@ -177,7 +177,7 @@ const ConfirmAssignmentModal = ({ isOpen, volunteer, shiftTime, shiftTask, onCan
               fontFamily: 'inherit'
             }}
             onMouseEnter={(e) => { if (reviewed) e.target.style.backgroundColor = '#1e3a5f'; }}
-            onMouseLeave={(e) => { if (reviewed) e.target.style.backgroundColor = '#0b1528'; }}
+            onMouseLeave={(e) => { if (reviewed) e.target.style.backgroundColor = '#14291e'; }}
           >
             Confirm prototype action
           </button>
@@ -345,7 +345,7 @@ export const SchedulingAssignmentView = ({
               left: 10,
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#94a3b8'
+              color: '#8a9480'
             }}
           />
           <input
@@ -402,7 +402,7 @@ export const SchedulingAssignmentView = ({
               <tbody>
                 {filteredVolunteers.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: '#64748b' }}>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: '#657367' }}>
                       No volunteers found matching your query.
                     </td>
                   </tr>
@@ -423,12 +423,12 @@ export const SchedulingAssignmentView = ({
                         onClick={() => setSelectedVolunteerId(vol.id)}
                         style={{ cursor: 'pointer' }}
                       >
-                        <td style={{ fontWeight: 600, color: '#0f172a' }}>{vol.id}</td>
-                        <td style={{ color: '#334155' }}>{vol.skills}</td>
-                        <td style={{ color: '#475569' }}>{vol.serviceArea}</td>
-                        <td style={{ color: '#475569' }}>{vol.availability}</td>
-                        <td style={{ color: '#475569' }}>{vol.currentShift}</td>
-                        <td style={{ color: '#334155' }}>
+                        <td style={{ fontWeight: 600, color: '#14291e' }}>{vol.id}</td>
+                        <td style={{ color: '#2a4a35' }}>{vol.skills}</td>
+                        <td style={{ color: '#4a5b4a' }}>{vol.serviceArea}</td>
+                        <td style={{ color: '#4a5b4a' }}>{vol.availability}</td>
+                        <td style={{ color: '#4a5b4a' }}>{vol.currentShift}</td>
+                        <td style={{ color: '#2a4a35' }}>
                           <span
                             style={{
                               display: 'inline-flex',
@@ -505,13 +505,13 @@ export const SchedulingAssignmentView = ({
             </div>
 
             {/* Shift Assignment Selector */}
-            <div style={{ marginTop: '16px', padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '8px' }}>
+            <div style={{ marginTop: '16px', padding: '12px', background: '#f4f6f2', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#4a5b4a', textTransform: 'uppercase', marginBottom: '8px' }}>
                 Shift Allocation Options
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
                 <div>
-                  <label style={{ fontSize: '10px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Shift Window</label>
+                  <label style={{ fontSize: '10px', color: '#657367', display: 'block', marginBottom: '4px' }}>Shift Window</label>
                   <select
                     className="vc-filter-select"
                     style={{ width: '100%', fontSize: '12px' }}
@@ -525,7 +525,7 @@ export const SchedulingAssignmentView = ({
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '10px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Task Type</label>
+                  <label style={{ fontSize: '10px', color: '#657367', display: 'block', marginBottom: '4px' }}>Task Type</label>
                   <select
                     className="vc-filter-select"
                     style={{ width: '100%', fontSize: '12px' }}

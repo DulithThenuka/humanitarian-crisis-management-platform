@@ -50,10 +50,10 @@
   --sh-danger-border: #fecaca;
   --sh-danger-dot: #ef4444;
 
-  --sh-info-bg: #e0f2fe;
-  --sh-info-text: #0369a1;
-  --sh-info-border: #bae6fd;
-  --sh-info-dot: #0ea5e9;
+  --sh-info-bg: #edf2e6;
+  --sh-info-text: #2d5a3e;
+  --sh-info-border: #c7dbc0;
+  --sh-info-dot: #5a8c6a;
 }
 
 /* Base Wrapper */
@@ -199,7 +199,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #334155;
+  background-color: #2a4a35;
   transition: 0.3s;
   border-radius: 20px;
 }
@@ -385,7 +385,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
   border: 1px solid var(--sh-border);
   border-radius: 8px;
   padding: 6px 14px;
@@ -422,7 +422,7 @@
   padding: 5px 12px;
   font-size: 12px;
   font-weight: 600;
-  color: #0369a1;
+  color: #2d5a3e;
 }
 
 .sh-op-indicator-dot {
@@ -437,7 +437,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #475569;
+  color: #4a5b4a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -447,7 +447,7 @@
 }
 
 .sh-bell-btn:hover {
-  background-color: #f1f5f9;
+  background-color: #eef1ea;
 }
 
 .sh-bell-badge {
@@ -607,8 +607,8 @@
 }
 
 .sh-btn-outline:hover {
-  background-color: #f1f5f9;
-  border-color: #cbd5e1;
+  background-color: #eef1ea;
+  border-color: #c5ccbe;
 }
 
 /* =========================================================
@@ -745,8 +745,8 @@
 }
 
 .sh-priority-item:hover {
-  background-color: #f8fafc;
-  border-color: #cbd5e1;
+  background-color: #f4f6f2;
+  border-color: #c5ccbe;
   transform: translateX(2px);
 }
 
@@ -760,8 +760,8 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: #f1f5f9;
-  color: #334155;
+  background-color: #eef1ea;
+  color: #2a4a35;
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -867,8 +867,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 1.5px solid #cbd5e1;
-  color: #64748b;
+  border: 1.5px solid #c5ccbe;
+  color: #657367;
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -1025,7 +1025,7 @@
 }
 
 .sh-data-table th {
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
   border-bottom: 1px solid var(--sh-border);
   padding: 12px 14px;
   font-size: 10.5px;
@@ -1048,17 +1048,17 @@
 }
 
 .sh-data-table tr:hover {
-  background-color: #f1f5f9;
+  background-color: #eef1ea;
 }
 
 .sh-data-table tr.selected-row {
-  background-color: #f0f9ff;
+  background-color: #f4f6f2;
   border-left: 3px solid var(--sh-primary-blue);
 }
 
 .sh-shelter-title-cell {
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
 }
 
 /* Right Detail Panel */
@@ -1109,7 +1109,7 @@
 }
 
 .sh-detail-stat-tile {
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
   border: 1px solid var(--sh-border);
   border-radius: 8px;
   padding: 10px 12px;
@@ -1236,8 +1236,8 @@
 }
 
 .sh-btn-secondary-full:hover {
-  background-color: #f1f5f9;
-  border-color: #cbd5e1;
+  background-color: #eef1ea;
+  border-color: #c5ccbe;
 }
 
 /* =========================================================
@@ -1285,7 +1285,7 @@
 
 .sh-modal-close-corner-btn:hover {
   color: var(--sh-text-primary);
-  background-color: #f1f5f9;
+  background-color: #eef1ea;
 }
 
 .sh-action-card-title {
@@ -1375,7 +1375,7 @@
 }
 
 .sh-action-card-btn-cancel:hover {
-  background-color: #f1f5f9;
+  background-color: #eef1ea;
 }
 
 .sh-action-card-btn-confirm {
@@ -1504,7 +1504,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
 }
 
 /* Toast Notifications */
@@ -1519,7 +1519,7 @@
 }
 
 .sh-toast {
-  background-color: #0f172a;
+  background-color: #14291e;
   color: #ffffff;
   border-radius: 8px;
   padding: 12px 18px;

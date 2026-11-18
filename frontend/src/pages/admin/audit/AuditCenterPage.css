@@ -5,7 +5,7 @@
   width: 100%;
   background-color: #f4f6f2;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #0f172a;
+  color: #14291e;
   overflow-x: hidden;
 }
 
@@ -71,7 +71,7 @@
 }
 
 .audit-nav-item.active {
-  background-color: #0e6f76;
+  background-color: #3d6b4f;
   color: #ffffff;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(14, 111, 118, 0.35);
@@ -264,7 +264,7 @@
   align-items: center;
   gap: 8px;
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 7px;
   padding: 8px 14px;
   flex: 1;
@@ -281,7 +281,7 @@
   background: transparent;
   outline: none;
   font-size: 12px;
-  color: #0f172a;
+  color: #14291e;
   width: 100%;
 }
 
@@ -306,24 +306,24 @@
 
 .filter-chip {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 11.5px;
   font-weight: 600;
-  color: #64748b;
+  color: #657367;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .filter-chip:hover {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #f4f6f2;
+  color: #14291e;
 }
 
 .filter-chip.active {
-  background-color: #0e6f76;
-  border-color: #0e6f76;
+  background-color: #3d6b4f;
+  border-color: #3d6b4f;
   color: #ffffff;
   box-shadow: 0 1px 4px rgba(14, 111, 118, 0.25);
 }
@@ -349,13 +349,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
   border-bottom: 1px solid #edf2f7;
 }
 
 .table-count-label {
   font-size: 11.5px;
-  color: #475569;
+  color: #4a5b4a;
 }
 
 .table-hint-text {
@@ -379,20 +379,20 @@
   padding: 10px 12px;
   font-size: 10px;
   font-weight: 700;
-  color: #64748b;
+  color: #657367;
   background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #dfe5d8;
   letter-spacing: 0.03em;
 }
 
 .audit-row {
   cursor: pointer;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #eef1ea;
   transition: background-color 0.12s ease;
 }
 
 .audit-row:hover {
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
 }
 
 .audit-row.row-active {
@@ -403,12 +403,12 @@
 .audit-row td {
   padding: 10px 12px;
   vertical-align: middle;
-  color: #334155;
+  color: #2a4a35;
 }
 
 .cell-time {
   font-weight: 600;
-  color: #64748b;
+  color: #657367;
   font-size: 11px;
 }
 
@@ -417,7 +417,7 @@
   align-items: center;
   gap: 7px;
   font-weight: 600;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .actor-icon {
@@ -436,18 +436,18 @@
 }
 
 .cell-role {
-  color: #64748b;
+  color: #657367;
 }
 
 .cell-action {
   font-weight: 600;
-  color: #1e293b;
+  color: #1e3328;
 }
 
 .entity-chip {
-  color: #0284c7;
+  color: #3d6b4f;
   font-weight: 700;
-  background-color: #f0f9ff;
+  background-color: #f4f6f2;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 10.5px;
@@ -465,11 +465,11 @@
 
 .text-decision {
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .cell-chevron {
-  color: #cbd5e1;
+  color: #c5ccbe;
   text-align: right;
 }
 
@@ -489,8 +489,8 @@
 }
 
 .status-accepted {
-  background-color: #e0f2fe;
-  color: #0369a1;
+  background-color: #edf2e6;
+  color: #2d5a3e;
 }
 
 .status-override {
@@ -512,7 +512,7 @@
 .drawer-header {
   padding: 14px 16px;
   border-bottom: 1px solid #edf2f7;
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -521,13 +521,13 @@
 .drawer-title {
   font-size: 13.5px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
 }
 
 .drawer-subtitle {
   font-size: 10px;
-  color: #64748b;
+  color: #657367;
   margin: 2px 0 0 0;
 }
 
@@ -542,7 +542,7 @@
   display: flex;
   flex-direction: column;
   gap: 9px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #eef1ea;
   padding-bottom: 12px;
 }
 
@@ -561,7 +561,7 @@
 
 .meta-val {
   font-size: 11px;
-  color: #1e293b;
+  color: #1e3328;
 }
 
 .entity-link-box {
@@ -573,12 +573,12 @@
 .entity-id-bold {
   font-size: 11px;
   font-weight: 700;
-  color: #0284c7;
+  color: #3d6b4f;
 }
 
 .entity-type-tag {
   font-size: 9.5px;
-  color: #64748b;
+  color: #657367;
 }
 
 .actor-line {
@@ -590,15 +590,15 @@
 .sub-role-pill {
   font-size: 9px;
   background-color: #f4f6f2;
-  color: #475569;
+  color: #4a5b4a;
   padding: 1px 5px;
   border-radius: 4px;
 }
 
 /* Decision Diff Card */
 .decision-diff-card {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 8px;
   padding: 10px 12px;
 }
@@ -606,7 +606,7 @@
 .diff-heading {
   font-size: 9.5px;
   font-weight: 800;
-  color: #64748b;
+  color: #657367;
   letter-spacing: 0.04em;
   display: block;
   margin-bottom: 8px;
@@ -633,7 +633,7 @@
   gap: 4px;
   font-size: 8.5px;
   font-weight: 700;
-  color: #64748b;
+  color: #657367;
   margin-bottom: 4px;
 }
 
@@ -702,7 +702,7 @@
 
 .ledger-desc {
   font-size: 10px;
-  color: #334155;
+  color: #2a4a35;
   margin: 4px 0 8px 0;
   line-height: 1.35;
 }

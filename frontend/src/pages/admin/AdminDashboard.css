@@ -1,18 +1,18 @@
 /* =========================================================
    RELIEFCORE HUMANITARIAN OPERATIONS - ADMIN & OPERATOR PORTAL
-   Exact Match to Screenshots (Teal Sidebar #062329 + Clean Light Enterprise Canvas #F4F7FB)
+   Exact Match to Screenshots (Teal Sidebar #14291e + Clean Light Enterprise Canvas #F4F7FB)
    ========================================================= */
 
 .adm-ss-layout {
   display: flex;
   min-height: 100vh;
   background-color: #f4f6f2;
-  color: #0f172a;
+  color: #14291e;
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* ---------------------------------------------------------
-   1. Left Sidebar (#062329 Dark Teal)
+   1. Left Sidebar (#14291e Dark Teal)
    --------------------------------------------------------- */
 .adm-ss-sidebar {
   width: 250px;
@@ -193,7 +193,7 @@
 .adm-ss-topbar {
   height: 70px;
   background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #dfe5d8;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -222,14 +222,14 @@
 .adm-ss-page-heading {
   font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
   line-height: 1.2;
 }
 
 .adm-ss-page-subheading {
   font-size: 12px;
-  color: #64748b;
+  color: #657367;
   margin: 2px 0 0 0;
 }
 
@@ -238,8 +238,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 9px;
   padding: 8px 14px;
   width: 340px;
@@ -247,7 +247,7 @@
 }
 
 .adm-ss-search-box:focus-within {
-  border-color: #0e7490;
+  border-color: #3d6b4f;
   background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.1);
 }
@@ -257,12 +257,12 @@
   background: transparent;
   outline: none;
   font-size: 13px;
-  color: #0f172a;
+  color: #14291e;
   width: 100%;
 }
 
 .adm-ss-search-input::placeholder {
-  color: #94a3b8;
+  color: #8a9480;
 }
 
 .adm-ss-actions-right {
@@ -276,19 +276,19 @@
   width: 38px;
   height: 38px;
   border-radius: 9px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: #657367;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .adm-ss-bell-btn:hover {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #f4f6f2;
+  color: #14291e;
 }
 
 .adm-ss-bell-dot {
@@ -313,7 +313,7 @@
 }
 
 .adm-ss-profile-pill:hover {
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
 }
 
 /* ---------------------------------------------------------
@@ -338,7 +338,7 @@
   flex: 1;
   min-width: 180px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 12px;
   padding: 16px 18px;
   display: flex;
@@ -372,7 +372,7 @@
 .adm-ss-kpi-label {
   font-size: 11.5px;
   font-weight: 500;
-  color: #64748b;
+  color: #657367;
   margin-bottom: 2px;
 }
 
@@ -385,7 +385,7 @@
 .adm-ss-kpi-number {
   font-size: 22px;
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
   line-height: 1;
 }
 
@@ -432,7 +432,7 @@
    --------------------------------------------------------- */
 .adm-ss-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 14px;
   padding: 22px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -450,13 +450,13 @@
 .adm-ss-card-title {
   font-size: 15px;
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
 }
 
 .adm-ss-card-subtitle {
   font-size: 12px;
-  color: #64748b;
+  color: #657367;
   margin: 2px 0 0 0;
 }
 
@@ -469,8 +469,8 @@
 }
 
 .adm-ss-category-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 11px;
   padding: 14px;
   text-align: center;
@@ -482,7 +482,7 @@
 }
 
 .adm-ss-category-card:hover {
-  border-color: #0e7490;
+  border-color: #3d6b4f;
   background: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
@@ -500,12 +500,12 @@
 .adm-ss-category-name {
   font-size: 12.5px;
   font-weight: 600;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .adm-ss-category-items {
   font-size: 11px;
-  color: #64748b;
+  color: #657367;
   margin-top: 2px;
 }
 
@@ -532,10 +532,10 @@
   height: 36px;
   padding: 0 12px;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   border-radius: 8px;
   font-size: 12.5px;
-  color: #334155;
+  color: #2a4a35;
   outline: none;
   cursor: pointer;
 }
@@ -543,11 +543,11 @@
 .adm-ss-btn-reset {
   height: 36px;
   padding: 0 12px;
-  background-color: #f1f5f9;
-  border: 1px solid #cbd5e1;
+  background-color: #eef1ea;
+  border: 1px solid #c5ccbe;
   border-radius: 8px;
   font-size: 12px;
-  color: #475569;
+  color: #4a5b4a;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -556,13 +556,13 @@
 }
 
 .adm-ss-btn-reset:hover {
-  background-color: #e2e8f0;
+  background-color: #dfe5d8;
 }
 
 .adm-ss-table-container {
   overflow-x: auto;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
 }
 
 .adm-ss-table {
@@ -573,25 +573,25 @@
 }
 
 .adm-ss-table th {
-  background-color: #f8fafc;
-  color: #475569;
+  background-color: #f4f6f2;
+  color: #4a5b4a;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 12px 14px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #dfe5d8;
 }
 
 .adm-ss-table td {
   padding: 13px 14px;
-  border-bottom: 1px solid #f1f5f9;
-  color: #1e293b;
+  border-bottom: 1px solid #eef1ea;
+  color: #1e3328;
   vertical-align: middle;
 }
 
 .adm-ss-table tbody tr:hover {
-  background-color: #f8fafc;
+  background-color: #f4f6f2;
 }
 
 /* Badges */
@@ -612,7 +612,7 @@
 .adm-ss-pill.pill-blue { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
 .adm-ss-pill.pill-purple { background: #faf5ff; color: #9333ea; border: 1px solid #e9d5ff; }
 .adm-ss-pill.pill-teal { background: #ecfeff; color: #0891b2; border: 1px solid #a5f3fc; }
-.adm-ss-pill.pill-gray { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.adm-ss-pill.pill-gray { background: #eef1ea; color: #4a5b4a; border: 1px solid #dfe5d8; }
 
 /* Table Action Icons */
 .adm-ss-row-actions {
@@ -625,9 +625,9 @@
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   background: #ffffff;
-  color: #64748b;
+  color: #657367;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -636,8 +636,8 @@
 }
 
 .adm-ss-icon-btn:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: #eef1ea;
+  color: #14291e;
 }
 
 /* ---------------------------------------------------------
@@ -660,7 +660,7 @@
   border-radius: 10px;
   overflow: hidden;
   position: relative;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
 }
 
 .adm-ss-map-bg {
@@ -688,7 +688,7 @@
   gap: 6px;
   margin-top: 5px;
   font-size: 11px;
-  color: #334155;
+  color: #2a4a35;
 }
 
 /* Donut Meter Visual */
@@ -707,7 +707,7 @@
     #059669 0% 62%,
     #d97706 62% 86%,
     #dc2626 86% 94%,
-    #94a3b8 94% 100%
+    #8a9480 94% 100%
   );
   display: flex;
   align-items: center;
@@ -729,12 +729,12 @@
 .adm-ss-donut-val {
   font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .adm-ss-donut-sub {
   font-size: 10px;
-  color: #64748b;
+  color: #657367;
 }
 
 /* Modals */
@@ -757,7 +757,7 @@
   max-width: 520px;
   padding: 26px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
 }
 
 .adm-ss-form-group {
@@ -768,23 +768,23 @@
   display: block;
   font-size: 12px;
   font-weight: 600;
-  color: #334155;
+  color: #2a4a35;
   margin-bottom: 5px;
 }
 
 .adm-ss-form-input {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   border-radius: 8px;
   font-size: 13px;
-  color: #0f172a;
+  color: #14291e;
   outline: none;
   box-sizing: border-box;
 }
 
 .adm-ss-form-input:focus {
-  border-color: #0e7490;
+  border-color: #3d6b4f;
   box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.1);
 }
 
@@ -792,7 +792,7 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #0f172a;
+  background: #14291e;
   color: #ffffff;
   padding: 12px 20px;
   border-radius: 10px;
@@ -817,7 +817,7 @@
   border-radius: 12px;
   overflow: hidden;
   position: relative;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   background-color: #0b2228;
 }
 
@@ -859,9 +859,9 @@
 .adm-ss-threshold-btn {
   padding: 8px 14px;
   border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  background: #f8fafc;
-  color: #334155;
+  border: 1px solid #c5ccbe;
+  background: #f4f6f2;
+  color: #2a4a35;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -872,20 +872,20 @@
 }
 
 .adm-ss-threshold-btn:hover {
-  background: #f1f5f9;
+  background: #eef1ea;
 }
 
 .adm-ss-threshold-btn.active {
-  background: #0e7490;
+  background: #3d6b4f;
   color: #ffffff;
-  border-color: #0e7490;
+  border-color: #3d6b4f;
   box-shadow: 0 2px 6px rgba(14, 116, 144, 0.25);
 }
 
 .adm-ss-progress-track {
   width: 100%;
   height: 8px;
-  background-color: #e2e8f0;
+  background-color: #dfe5d8;
   border-radius: 9999px;
   overflow: hidden;
 }

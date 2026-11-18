@@ -67,11 +67,11 @@ export const CasePermissionsProfileView = ({ activeUser = CASE_MANAGER_USER, sho
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <CheckCircle2 size={16} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 12px', background: '#f4f6f2', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+              <CheckCircle2 size={16} color="#3d6b4f" style={{ marginTop: '2px', flexShrink: 0 }} />
               <div style={{ fontSize: '12px' }}>
-                <strong style={{ display: 'block', color: '#0f172a' }}>Role-Scoped Case Access</strong>
-                <span style={{ color: '#64748b' }}>Permitted to view and update cases explicitly routed to Western Province Kelani East sector.</span>
+                <strong style={{ display: 'block', color: '#14291e' }}>Role-Scoped Case Access</strong>
+                <span style={{ color: '#657367' }}>Permitted to view and update cases explicitly routed to Western Province Kelani East sector.</span>
               </div>
             </div>
 

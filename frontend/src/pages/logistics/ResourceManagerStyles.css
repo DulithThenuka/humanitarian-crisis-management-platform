@@ -63,7 +63,7 @@
   --rm-danger-border: #fecaca;
 
   --rm-info: #1d4ed8;
-  --rm-info-bg: #dbeafe;
+  --rm-info-bg: #dbe4c6;
   --rm-info-border: #bfdbfe;
 }
 
@@ -900,9 +900,9 @@
 }
 
 .rm-status-badge.neutral {
-  background-color: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background-color: #eef1ea;
+  color: #4a5b4a;
+  border: 1px solid #dfe5d8;
 }
 
 /* Detail Card */

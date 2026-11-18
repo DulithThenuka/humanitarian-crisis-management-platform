@@ -346,8 +346,8 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
           top: '20px',
           right: '24px',
           zIndex: 9999,
-          background: '#091a2b',
-          border: '1px solid #0284c7',
+          background: '#14291e',
+          border: '1px solid #3d6b4f',
           color: '#ffffff',
           borderRadius: '10px',
           padding: '12px 18px',
@@ -358,11 +358,11 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
           fontSize: '13px',
           fontWeight: 600
         }}>
-          <CheckCircle2 size={16} color="#38bdf8" />
+          <CheckCircle2 size={16} color="#7caa7e" />
           <span>{toast.message}</span>
           <button 
             onClick={() => setToast(null)} 
-            style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', marginLeft: '6px' }}
+            style={{ background: 'transparent', border: 'none', color: '#8a9480', cursor: 'pointer', marginLeft: '6px' }}
           >
             <X size={14} />
           </button>
@@ -476,7 +476,7 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
         <div className="cm-sidebar-bottom">
           <div className="cm-role-boundary-box">
             <div className="cm-boundary-head">
-              <ShieldCheck size={15} color="#38bdf8" />
+              <ShieldCheck size={15} color="#7caa7e" />
               <span className="cm-boundary-title">Role access boundary</span>
             </div>
             <p className="cm-boundary-text">
@@ -484,7 +484,7 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
             </p>
           </div>
 
-          <button className="cm-btn-signout" onClick={() => navigate('/')} style={{ marginBottom: '6px', color: '#38bdf8' }}>
+          <button className="cm-btn-signout" onClick={() => navigate('/')} style={{ marginBottom: '6px', color: '#7caa7e' }}>
             <span>&gt; Platform Home</span>
           </button>
 
@@ -525,7 +525,7 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
                   style={{
                     background: 'transparent',
                     border: 'none',
-                    color: '#f8fafc',
+                    color: '#f4f6f2',
                     fontWeight: 600,
                     fontSize: '0.82rem',
                     cursor: 'pointer',
@@ -533,10 +533,10 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
                     padding: 0
                   }}
                 >
-                  <option value="Western Province Flood" style={{ background: '#0f172a', color: '#f8fafc' }}>Western Province Flood</option>
-                  <option value="2024 Southern Province Floods" style={{ background: '#0f172a', color: '#f8fafc' }}>2024 Southern Province Floods</option>
-                  <option value="Badulla District Landslide" style={{ background: '#0f172a', color: '#f8fafc' }}>Badulla District Landslide</option>
-                  <option value="All Active Operations" style={{ background: '#0f172a', color: '#f8fafc' }}>All Active Operations</option>
+                  <option value="Western Province Flood" style={{ background: '#14291e', color: '#f4f6f2' }}>Western Province Flood</option>
+                  <option value="2024 Southern Province Floods" style={{ background: '#14291e', color: '#f4f6f2' }}>2024 Southern Province Floods</option>
+                  <option value="Badulla District Landslide" style={{ background: '#14291e', color: '#f4f6f2' }}>Badulla District Landslide</option>
+                  <option value="All Active Operations" style={{ background: '#14291e', color: '#f4f6f2' }}>All Active Operations</option>
                 </select>
               </div>
             </div>

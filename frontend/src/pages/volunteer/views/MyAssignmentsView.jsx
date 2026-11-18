@@ -59,7 +59,7 @@ export const MyAssignmentsView = ({
               left: 10,
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#94a3b8'
+              color: '#8a9480'
             }}
           />
           <input
@@ -122,7 +122,7 @@ export const MyAssignmentsView = ({
           <tbody>
             {filteredAssignments.length === 0 ? (
               <tr>
-                <td colSpan="9" style={{ textAlign: 'center', padding: '36px', color: '#64748b' }}>
+                <td colSpan="9" style={{ textAlign: 'center', padding: '36px', color: '#657367' }}>
                   No assignments found matching your criteria.
                 </td>
               </tr>
@@ -131,8 +131,8 @@ export const MyAssignmentsView = ({
                 <tr key={row.id}>
                   <td className="vol-task-id-mono">{row.id}</td>
                   <td style={{ fontWeight: 600 }}>{row.taskTitle}</td>
-                  <td style={{ color: '#64748b' }}>{row.assigned}</td>
-                  <td style={{ color: '#475569', fontWeight: 500 }}>{row.deadline}</td>
+                  <td style={{ color: '#657367' }}>{row.assigned}</td>
+                  <td style={{ color: '#4a5b4a', fontWeight: 500 }}>{row.deadline}</td>
                   <td>{row.location}</td>
                   <td>{row.coordinator}</td>
                   <td>
@@ -154,8 +154,8 @@ export const MyAssignmentsView = ({
                             row.priority === 'High'
                               ? '#ea580c'
                               : row.priority === 'Medium'
-                              ? '#0284c7'
-                              : '#64748b',
+                              ? '#3d6b4f'
+                              : '#657367',
                           display: 'inline-block'
                         }}
                       />

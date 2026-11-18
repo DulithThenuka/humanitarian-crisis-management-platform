@@ -124,7 +124,7 @@ export const NotificationsRemindersView = ({
       <div className="ec-rc-toolbar-container" style={{ padding: '12px 18px', marginBottom: '18px' }}>
         <div className="ec-rc-filter-bar">
           <div className="ec-rc-search-box">
-            <Search size={14} color="#94a3b8" />
+            <Search size={14} color="#8a9480" />
             <input
               type="text"
               placeholder="Search reminders, record codes..."
@@ -169,11 +169,11 @@ export const NotificationsRemindersView = ({
             {filteredReminders.map((rem) => (
               <tr key={rem.id} onClick={() => handleActionReminder(rem)}>
                 <td className="ec-table-req-id">{rem.id}</td>
-                <td style={{ fontWeight: 600, color: '#0f172a' }}>{rem.reminder}</td>
-                <td style={{ color: '#0284c7', fontWeight: 600, fontFamily: 'monospace' }}>
+                <td style={{ fontWeight: 600, color: '#14291e' }}>{rem.reminder}</td>
+                <td style={{ color: '#3d6b4f', fontWeight: 600, fontFamily: 'monospace' }}>
                   {rem.relatedRecord}
                 </td>
-                <td style={{ color: '#475569', fontSize: '12px' }}>{rem.timing}</td>
+                <td style={{ color: '#4a5b4a', fontSize: '12px' }}>{rem.timing}</td>
                 <td>
                   <span
                     className={`ec-svc-status-pill ${

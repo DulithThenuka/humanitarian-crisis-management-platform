@@ -31,13 +31,13 @@ export const AcceptTaskModal = ({ opportunity, onClose, onConfirm }) => {
             </div>
           </div>
 
-          <div style={{ fontSize: '12.5px', color: '#334155', marginBottom: '14px' }}>
+          <div style={{ fontSize: '12.5px', color: '#2a4a35', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-              <Calendar size={14} style={{ color: '#64748b' }} />
+              <Calendar size={14} style={{ color: '#657367' }} />
               <span>Shift Time: {opportunity.shift || '08:30 - 13:30'} ({opportunity.duration})</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-              <MapPin size={14} style={{ color: '#64748b' }} />
+              <MapPin size={14} style={{ color: '#657367' }} />
               <span>Deployment Staging: {opportunity.location}</span>
             </div>
           </div>
@@ -48,12 +48,12 @@ export const AcceptTaskModal = ({ opportunity, onClose, onConfirm }) => {
               alignItems: 'flex-start',
               gap: '10px',
               padding: '12px',
-              background: '#f8fafc',
+              background: '#f4f6f2',
               border: '1px solid #e2e8e0',
               borderRadius: '8px',
               cursor: 'pointer',
               fontSize: '12px',
-              color: '#1e293b',
+              color: '#1e3328',
               lineHeight: 1.4
             }}
           >

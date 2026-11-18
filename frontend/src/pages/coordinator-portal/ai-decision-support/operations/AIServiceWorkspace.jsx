@@ -185,7 +185,7 @@ export const AIServiceWorkspace = ({
       title: 'Demand Forecasting',
       sub: 'Predict future needs',
       icon: TrendingUp,
-      color: '#0284c7',
+      color: '#3d6b4f',
       bannerTitle: 'Demand Forecasting',
       bannerDesc: 'Predictive modeling of relief supplies, rations, and shelter capacities 48-72 hours in advance.'
     },
@@ -239,7 +239,7 @@ export const AIServiceWorkspace = ({
         { name: 'Protection', count: '28 (15%)', pct: '15%', color: '#ec4899' },
         { name: 'Water & Sanitation', count: '22 (12%)', pct: '12%', color: '#8b5cf6' },
         { name: 'Education', count: '14 (7%)', pct: '7%', color: '#0d9488' },
-        { name: 'Other', count: '10 (5%)', pct: '5%', color: '#64748b' }
+        { name: 'Other', count: '10 (5%)', pct: '5%', color: '#657367' }
       ],
       tableHead: ['Request ID', 'Request Summary', 'Predicted Category', 'Confidence', 'Status', 'Action'],
       rows: [
@@ -672,8 +672,8 @@ export const AIServiceWorkspace = ({
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Sparkles size={16} color="#0d9488" />
-              <strong style={{ fontSize: '13px', color: '#0f172a' }}>Live AI Microservice Execution Sandbox</strong>
-              <span style={{ fontSize: '11px', color: '#64748b' }}>— Test {currentServiceMeta.title} against live operational text</span>
+              <strong style={{ fontSize: '13px', color: '#14291e' }}>Live AI Microservice Execution Sandbox</strong>
+              <span style={{ fontSize: '11px', color: '#657367' }}>— Test {currentServiceMeta.title} against live operational text</span>
             </div>
             <button 
               className="btn-solid-teal sm" 
@@ -691,7 +691,7 @@ export const AIServiceWorkspace = ({
               placeholder={`Enter prompt or scenario text for ${currentServiceMeta.title} (e.g. Floodwater entered house, 2 children needing shelter...)`}
               value={liveExecutionInput}
               onChange={(e) => setLiveExecutionInput(e.target.value)}
-              style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+              style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid #c5ccbe', fontSize: '13px' }}
               onKeyDown={(e) => { if (e.key === 'Enter') handleExecuteLiveService(); }}
             />
           </div>
@@ -715,14 +715,14 @@ export const AIServiceWorkspace = ({
           )}
 
           {executionResult && (
-            <div style={{ marginTop: '12px', padding: '12px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+            <div style={{ marginTop: '12px', padding: '12px', background: '#f4f6f2', borderRadius: '6px', border: '1px solid #dfe5d8' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <strong style={{ fontSize: '13px', color: '#0f172a' }}>{executionResult.outputTitle}</strong>
+                <strong style={{ fontSize: '13px', color: '#14291e' }}>{executionResult.outputTitle}</strong>
                 <span style={{ fontSize: '11px', color: '#059669', fontWeight: 600 }}>
                   Confidence: {executionResult.confidencePercent != null && !isNaN(executionResult.confidencePercent) ? `${executionResult.confidencePercent}%` : 'N/A'} ({executionResult.executionTimeMs}ms)
                 </span>
               </div>
-              <p style={{ fontSize: '12px', color: '#334155', margin: '4px 0 0 0' }}>{executionResult.outputSummary}</p>
+              <p style={{ fontSize: '12px', color: '#2a4a35', margin: '4px 0 0 0' }}>{executionResult.outputSummary}</p>
               {executionResult.riskFlags && executionResult.riskFlags.length > 0 && (
                 <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {executionResult.riskFlags.map((flag, idx) => (
@@ -782,10 +782,10 @@ export const AIServiceWorkspace = ({
                     onClick={() => setActiveSeries(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
                     className="legend-item interactive"
                     style={{
-                      background: isVisible ? 'transparent' : '#f1f5f9',
+                      background: isVisible ? 'transparent' : '#eef1ea',
                       opacity: isVisible ? 1 : 0.45,
                       border: '1px solid',
-                      borderColor: isVisible ? '#e2e8f0' : 'transparent',
+                      borderColor: isVisible ? '#dfe5d8' : 'transparent',
                       borderRadius: '20px',
                       padding: '3px 10px',
                       cursor: 'pointer',
@@ -843,12 +843,12 @@ export const AIServiceWorkspace = ({
                 </defs>
 
                 {/* Gridlines */}
-                <line x1="45" y1="20" x2="585" y2="20" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="45" y1="58" x2="585" y2="58" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="45" y1="96" x2="585" y2="96" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="45" y1="134" x2="585" y2="134" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="45" y1="172" x2="585" y2="172" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="45" y1="210" x2="585" y2="210" stroke="#e2e8f0" strokeWidth="1" />
+                <line x1="45" y1="20" x2="585" y2="20" stroke="#eef1ea" strokeWidth="1" />
+                <line x1="45" y1="58" x2="585" y2="58" stroke="#eef1ea" strokeWidth="1" />
+                <line x1="45" y1="96" x2="585" y2="96" stroke="#eef1ea" strokeWidth="1" />
+                <line x1="45" y1="134" x2="585" y2="134" stroke="#eef1ea" strokeWidth="1" />
+                <line x1="45" y1="172" x2="585" y2="172" stroke="#eef1ea" strokeWidth="1" />
+                <line x1="45" y1="210" x2="585" y2="210" stroke="#dfe5d8" strokeWidth="1" />
 
                 <text x="35" y="24" className="chart-axis-text" textAnchor="end">100</text>
                 <text x="35" y="62" className="chart-axis-text" textAnchor="end">80</text>
@@ -864,7 +864,7 @@ export const AIServiceWorkspace = ({
                     y1="20" 
                     x2={hoveredPoint.x} 
                     y2="210" 
-                    stroke="#94a3b8" 
+                    stroke="#8a9480" 
                     strokeWidth="1.5" 
                     strokeDasharray="4 3" 
                   />
@@ -944,7 +944,7 @@ export const AIServiceWorkspace = ({
                     minWidth: '150px'
                   }}
                 >
-                  <div style={{ fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.15)', paddingBottom: '4px', marginBottom: '6px', color: '#38bdf8' }}>
+                  <div style={{ fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.15)', paddingBottom: '4px', marginBottom: '6px', color: '#7caa7e' }}>
                     {hoveredPoint.day} · Telemetry
                   </div>
                   {computedTrendSeries.map(s => {
@@ -954,7 +954,7 @@ export const AIServiceWorkspace = ({
                       <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginTop: '3px' }}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                           <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: s.color }}></span>
-                          <span style={{ color: '#cbd5e1' }}>{s.label}:</span>
+                          <span style={{ color: '#c5ccbe' }}>{s.label}:</span>
                         </span>
                         <strong style={{ color: '#ffffff' }}>{val} / hr</strong>
                       </div>
@@ -969,7 +969,7 @@ export const AIServiceWorkspace = ({
                     key={d} 
                     style={{ 
                       fontWeight: hoveredPoint?.dayIdx === i ? 700 : 500,
-                      color: hoveredPoint?.dayIdx === i ? '#059669' : '#64748b'
+                      color: hoveredPoint?.dayIdx === i ? '#059669' : '#657367'
                     }}
                   >
                     {d}

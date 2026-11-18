@@ -88,10 +88,10 @@ export const ActivitySafetyView = ({ onRecordUpdate }) => {
               style={{
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#0f172a',
+                color: '#14291e',
                 marginBottom: '16px',
                 paddingBottom: '8px',
-                borderBottom: '1px solid #f1f5f9'
+                borderBottom: '1px solid #eef1ea'
               }}
             >
               Coordination timeline
@@ -118,7 +118,7 @@ export const ActivitySafetyView = ({ onRecordUpdate }) => {
                         top: '18px',
                         bottom: '0',
                         width: '2px',
-                        backgroundColor: '#e2e8f0'
+                        backgroundColor: '#dfe5d8'
                       }}
                     />
                   )}
@@ -129,7 +129,7 @@ export const ActivitySafetyView = ({ onRecordUpdate }) => {
                       width: '38px',
                       fontSize: '12px',
                       fontWeight: 600,
-                      color: '#64748b',
+                      color: '#657367',
                       paddingTop: '2px',
                       flexShrink: 0
                     }}
@@ -152,25 +152,25 @@ export const ActivitySafetyView = ({ onRecordUpdate }) => {
 
                   {/* Content */}
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#14291e' }}>
                       {item.title}
                     </div>
                     {item.messageContent && (
                       <div
                         style={{
                           fontSize: '12px',
-                          color: '#334155',
+                          color: '#2a4a35',
                           marginTop: '4px',
                           padding: '6px 10px',
-                          backgroundColor: '#f8fafc',
+                          backgroundColor: '#f4f6f2',
                           borderRadius: '6px',
-                          border: '1px solid #e2e8f0'
+                          border: '1px solid #dfe5d8'
                         }}
                       >
                         "{item.messageContent}"
                       </div>
                     )}
-                    <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+                    <div style={{ fontSize: '11px', color: '#8a9480', marginTop: '2px' }}>
                       {item.scope}
                     </div>
                   </div>
@@ -187,10 +187,10 @@ export const ActivitySafetyView = ({ onRecordUpdate }) => {
               style={{
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#0f172a',
+                color: '#14291e',
                 marginBottom: '14px',
                 paddingBottom: '8px',
-                borderBottom: '1px solid #f1f5f9'
+                borderBottom: '1px solid #eef1ea'
               }}
             >
               Record scoped update
@@ -204,7 +204,7 @@ export const ActivitySafetyView = ({ onRecordUpdate }) => {
                     fontSize: '11px',
                     fontWeight: 700,
                     textTransform: 'uppercase',
-                    color: '#64748b',
+                    color: '#657367',
                     marginBottom: '6px'
                   }}
                 >
@@ -231,7 +231,7 @@ export const ActivitySafetyView = ({ onRecordUpdate }) => {
                     fontSize: '11px',
                     fontWeight: 700,
                     textTransform: 'uppercase',
-                    color: '#64748b',
+                    color: '#657367',
                     marginBottom: '6px'
                   }}
                 >
@@ -252,14 +252,14 @@ export const ActivitySafetyView = ({ onRecordUpdate }) => {
                   alignItems: 'center',
                   gap: '8px',
                   padding: '10px 12px',
-                  backgroundColor: '#f8fafc',
+                  backgroundColor: '#f4f6f2',
                   borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid #dfe5d8',
                   marginBottom: '16px'
                 }}
               >
-                <ShieldCheck size={16} style={{ color: '#64748b', flexShrink: 0 }} />
-                <div style={{ fontSize: '11px', color: '#64748b', lineHeight: 1.4 }}>
+                <ShieldCheck size={16} style={{ color: '#657367', flexShrink: 0 }} />
+                <div style={{ fontSize: '11px', color: '#657367', lineHeight: 1.4 }}>
                   No real email, SMS or notification will be sent.
                 </div>
               </div>

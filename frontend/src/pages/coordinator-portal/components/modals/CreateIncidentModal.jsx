@@ -15,7 +15,7 @@ export const CreateIncidentModal = ({
       <div className="ec-verify-modal-card" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertTriangle size={18} color="#0284c7" />
+            <AlertTriangle size={18} color="#3d6b4f" />
             <h3 className="ec-modal-title">Create Crisis Incident Record</h3>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>

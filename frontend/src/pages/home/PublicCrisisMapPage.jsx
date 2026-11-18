@@ -152,7 +152,7 @@ export const PublicCrisisMapPage = () => {
             <button
               className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition border cursor-pointer ${
                 selectedDistrict === 'colombo'
-                  ? 'bg-[#0e7490] text-white border-[#0e7490] shadow-sm'
+                  ? 'bg-[#3d6b4f] text-white border-[#3d6b4f] shadow-sm'
                   : 'bg-white/[0.06] hover:bg-white/[0.12] text-white/80 border-white/10'
               }`}
               onClick={() => setSelectedDistrict('colombo')}
@@ -162,7 +162,7 @@ export const PublicCrisisMapPage = () => {
             <button
               className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition border cursor-pointer ${
                 selectedDistrict === 'gampaha'
-                  ? 'bg-[#0e7490] text-white border-[#0e7490] shadow-sm'
+                  ? 'bg-[#3d6b4f] text-white border-[#3d6b4f] shadow-sm'
                   : 'bg-white/[0.06] hover:bg-white/[0.12] text-white/80 border-white/10'
               }`}
               onClick={() => setSelectedDistrict('gampaha')}
@@ -172,7 +172,7 @@ export const PublicCrisisMapPage = () => {
             <button
               className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition border cursor-pointer ${
                 selectedDistrict === 'kalutara'
-                  ? 'bg-[#0e7490] text-white border-[#0e7490] shadow-sm'
+                  ? 'bg-[#3d6b4f] text-white border-[#3d6b4f] shadow-sm'
                   : 'bg-white/[0.06] hover:bg-white/[0.12] text-white/80 border-white/10'
               }`}
               onClick={() => setSelectedDistrict('kalutara')}

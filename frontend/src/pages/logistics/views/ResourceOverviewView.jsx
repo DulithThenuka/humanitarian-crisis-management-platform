@@ -121,7 +121,7 @@ export const ResourceOverviewView = ({
         <div className="rm-metric-card" onClick={() => handleNav('allocations')} style={{ cursor: 'pointer' }}>
           <div className="rm-metric-top">
             <span className="rm-metric-label">Approved allocations</span>
-            <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#f1f5f9', color: '#475569' }}>
+            <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#eef1ea', color: '#4a5b4a' }}>
               <FileText size={15} />
             </div>
           </div>

@@ -12,7 +12,7 @@
 
 .ec-hsum-card {
   background: #ffffff;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid #dfe5d8;
   border-radius: 12px;
   padding: 18px 22px;
   display: flex;
@@ -23,7 +23,7 @@
 }
 
 .ec-hsum-card:hover {
-  border-color: #0284c7;
+  border-color: #3d6b4f;
   box-shadow: 0 6px 18px rgba(2, 132, 199, 0.1);
   transform: translateY(-2px);
 }
@@ -31,7 +31,7 @@
 .ec-hsum-lbl {
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: #657367;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -39,7 +39,7 @@
 .ec-hsum-val {
   font-size: 26px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   letter-spacing: -0.02em;
 }
 

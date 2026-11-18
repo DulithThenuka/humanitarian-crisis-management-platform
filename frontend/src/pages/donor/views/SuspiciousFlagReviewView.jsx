@@ -129,7 +129,7 @@ export const SuspiciousFlagReviewView = ({
                 borderBottom: '1px solid #edf1eb'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <CheckCircle2 size={16} color="#475569" />
+                  <CheckCircle2 size={16} color="#4a5b4a" />
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 600, color: '#162e20' }}>
                       Operational fit
@@ -144,13 +144,13 @@ export const SuspiciousFlagReviewView = ({
                   fontWeight: 600,
                   padding: '3px 10px',
                   borderRadius: '12px',
-                  backgroundColor: '#f1f5f9',
-                  color: '#475569',
+                  backgroundColor: '#eef1ea',
+                  color: '#4a5b4a',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px'
                 }}>
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#64748b' }}></span>
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#657367' }}></span>
                   High
                 </span>
               </div>
@@ -164,7 +164,7 @@ export const SuspiciousFlagReviewView = ({
                 borderBottom: '1px solid #edf1eb'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <CheckCircle2 size={16} color="#475569" />
+                  <CheckCircle2 size={16} color="#4a5b4a" />
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 600, color: '#162e20' }}>
                       Availability
@@ -179,13 +179,13 @@ export const SuspiciousFlagReviewView = ({
                   fontWeight: 600,
                   padding: '3px 10px',
                   borderRadius: '12px',
-                  backgroundColor: '#f1f5f9',
-                  color: '#475569',
+                  backgroundColor: '#eef1ea',
+                  color: '#4a5b4a',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px'
                 }}>
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#64748b' }}></span>
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#657367' }}></span>
                   Medium
                 </span>
               </div>
@@ -199,7 +199,7 @@ export const SuspiciousFlagReviewView = ({
                 borderBottom: '1px solid #edf1eb'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <CheckCircle2 size={16} color="#475569" />
+                  <CheckCircle2 size={16} color="#4a5b4a" />
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 600, color: '#162e20' }}>
                       Human authority
@@ -275,7 +275,7 @@ export const SuspiciousFlagReviewView = ({
                   display: 'block',
                   fontSize: '11px',
                   fontWeight: 700,
-                  color: '#475569',
+                  color: '#4a5b4a',
                   letterSpacing: '0.04em',
                   textTransform: 'uppercase',
                   marginBottom: '8px'
@@ -284,7 +284,7 @@ export const SuspiciousFlagReviewView = ({
                 </label>
                 <select
                   className="fo-select"
-                  style={{ width: '100%', height: '40px', padding: '0 12px', fontSize: '13px', color: selectedDecision ? '#162e20' : '#94a3b8' }}
+                  style={{ width: '100%', height: '40px', padding: '0 12px', fontSize: '13px', color: selectedDecision ? '#162e20' : '#8a9480' }}
                   value={selectedDecision}
                   onChange={(e) => setSelectedDecision(e.target.value)}
                 >
@@ -302,7 +302,7 @@ export const SuspiciousFlagReviewView = ({
                   display: 'block',
                   fontSize: '11px',
                   fontWeight: 700,
-                  color: '#475569',
+                  color: '#4a5b4a',
                   letterSpacing: '0.04em',
                   textTransform: 'uppercase',
                   marginBottom: '8px'

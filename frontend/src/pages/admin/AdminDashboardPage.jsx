@@ -987,7 +987,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           title: 'Crisis Command Center',
           subtitle: 'Real-time overview of humanitarian operations and emergency coordination',
           icon: Home,
-          iconBg: 'bg-[#0e7490]'
+          iconBg: 'bg-[#3d6b4f]'
         };
       case 'crisis':
         return {
@@ -1072,7 +1072,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           title: 'Platform Administration & RBAC',
           subtitle: 'Manage user credentials, security roles, system health, and global controls',
           icon: Settings,
-          iconBg: 'bg-[#0e7490]'
+          iconBg: 'bg-[#3d6b4f]'
         };
     }
   };
@@ -1281,7 +1281,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                       <p className="adm-ss-card-subtitle">Real-time geospatial disaster overlays for Western Province</p>
                     </div>
                     <button
-                      className="text-[12px] font-semibold text-[#0e7490] hover:underline bg-transparent border-0 cursor-pointer"
+                      className="text-[12px] font-semibold text-[#3d6b4f] hover:underline bg-transparent border-0 cursor-pointer"
                       onClick={() => setActiveTab('maps')}
                     >
                       View Full Map →
@@ -1374,7 +1374,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                   <div className="adm-ss-card-header">
                     <h3 className="adm-ss-card-title">Recent Volunteers & Responders</h3>
                     <button
-                      className="text-[12px] font-semibold text-[#0e7490] hover:underline bg-transparent border-0 cursor-pointer"
+                      className="text-[12px] font-semibold text-[#3d6b4f] hover:underline bg-transparent border-0 cursor-pointer"
                       onClick={() => setActiveTab('volunteers')}
                     >
                       View All →
@@ -2324,7 +2324,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
               <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
                 <button
                   className={`px-4 py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-0 transition-colors ${
-                    settingsSubTab === 'users' ? 'bg-[#0e7490] text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+                    settingsSubTab === 'users' ? 'bg-[#3d6b4f] text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
                   }`}
                   onClick={() => setSettingsSubTab('users')}
                 >
@@ -2332,7 +2332,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                 </button>
                 <button
                   className={`px-4 py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-0 transition-colors ${
-                    settingsSubTab === 'system' ? 'bg-[#0e7490] text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+                    settingsSubTab === 'system' ? 'bg-[#3d6b4f] text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
                   }`}
                   onClick={() => setSettingsSubTab('system')}
                 >
@@ -2931,7 +2931,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                         })
                         .map((c) => (
                           <tr key={c.id}>
-                            <td className="font-mono text-[11.5px] font-semibold text-[#0e7490]">{c.id}</td>
+                            <td className="font-mono text-[11.5px] font-semibold text-[#3d6b4f]">{c.id}</td>
                             <td>
                               <div className="font-semibold text-slate-900">{c.title}</div>
                               <div className="text-[11px] text-slate-500">Declared: {c.declaredAt} · Lead: {c.leadCoordinator}</div>
@@ -2952,7 +2952,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                             <td className="text-slate-600">{c.areaSqKm} km²</td>
                             <td>
                               <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-[#0e7490]">{c.teamsDeployed}</span>
+                                <span className="font-bold text-[#3d6b4f]">{c.teamsDeployed}</span>
                                 <span className="text-[11px] text-slate-500">teams</span>
                               </div>
                             </td>
@@ -2982,7 +2982,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                                   <RefreshCw size={13} />
                                 </button>
                                 <button
-                                  className="adm-ss-icon-btn text-[#0e7490]"
+                                  className="adm-ss-icon-btn text-[#3d6b4f]"
                                   title="Dispatch Reinforcement Units (+2)"
                                   onClick={() => handleDispatchRescueTeams(c.id)}
                                 >
@@ -3047,13 +3047,13 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
-                          <Droplets size={16} className="text-[#0e7490]" />
+                          <Droplets size={16} className="text-[#3d6b4f]" />
                           <span className="text-[13px] font-bold text-slate-900">Attanagalu Oya (Dunamale Gauge)</span>
                         </div>
                         <span className="adm-ss-pill pill-green font-mono">1.45m / Max 1.80m</span>
                       </div>
                       <div className="adm-ss-progress-track mb-1.5">
-                        <div className="adm-ss-progress-fill bg-[#0e7490]" style={{ width: '64%' }}></div>
+                        <div className="adm-ss-progress-fill bg-[#3d6b4f]" style={{ width: '64%' }}></div>
                       </div>
                       <div className="flex justify-between text-[11px] text-slate-500">
                         <span>Threshold: Alert Level Active</span>
@@ -3217,10 +3217,10 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     <div>
                       <div className="flex justify-between text-[12.5px] font-semibold text-slate-800 mb-1">
                         <span>Food & Clean Drinking Water</span>
-                        <span className="text-[#0e7490]">Rs. 9,443,000 (38%)</span>
+                        <span className="text-[#3d6b4f]">Rs. 9,443,000 (38%)</span>
                       </div>
                       <div className="adm-ss-progress-track">
-                        <div className="adm-ss-progress-fill bg-[#0e7490]" style={{ width: '38%' }}></div>
+                        <div className="adm-ss-progress-fill bg-[#3d6b4f]" style={{ width: '38%' }}></div>
                       </div>
                     </div>
 
@@ -3278,7 +3278,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                       </div>
                       <div className="flex justify-between text-[12px]">
                         <span className="text-slate-500">Tax Exemption Certs:</span>
-                        <span className="font-semibold text-[#0e7490]">38 Issued of 38 Eligible</span>
+                        <span className="font-semibold text-[#3d6b4f]">38 Issued of 38 Eligible</span>
                       </div>
                       <div className="flex justify-between text-[12px]">
                         <span className="text-slate-500">Ledger Root Hash:</span>
@@ -3393,7 +3393,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                         })
                         .map((d) => (
                           <tr key={d.id}>
-                            <td className="font-mono text-[11.5px] font-semibold text-[#0e7490]">{d.id}</td>
+                            <td className="font-mono text-[11.5px] font-semibold text-[#3d6b4f]">{d.id}</td>
                             <td>
                               <div className="font-semibold text-slate-900">{d.donorName}</div>
                               <div className="text-[11px] text-slate-500">Date: {d.date} · Verified by {d.verifiedBy}</div>
@@ -3688,7 +3688,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                         })
                         .map((item) => (
                           <tr key={item.id}>
-                            <td className="font-mono text-[11.5px] font-semibold text-[#0e7490]">{item.id}</td>
+                            <td className="font-mono text-[11.5px] font-semibold text-[#3d6b4f]">{item.id}</td>
                             <td>
                               <div className="font-semibold text-slate-900">{item.requester}</div>
                               <div className="text-[11px] text-slate-500">{item.phone} · {item.timestamp}</div>
@@ -3783,7 +3783,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     <span className="text-[12px] font-semibold text-slate-600 mr-1">District Radar:</span>
                     <button
                       className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold border-0 cursor-pointer transition ${
-                        mapDistrict === 'all' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        mapDistrict === 'all' ? 'bg-[#3d6b4f] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                       }`}
                       onClick={() => setMapDistrict('all')}
                     >
@@ -3791,7 +3791,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     </button>
                     <button
                       className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold border-0 cursor-pointer transition ${
-                        mapDistrict === 'colombo' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        mapDistrict === 'colombo' ? 'bg-[#3d6b4f] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                       }`}
                       onClick={() => setMapDistrict('colombo')}
                     >
@@ -3799,7 +3799,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     </button>
                     <button
                       className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold border-0 cursor-pointer transition ${
-                        mapDistrict === 'gampaha' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        mapDistrict === 'gampaha' ? 'bg-[#3d6b4f] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                       }`}
                       onClick={() => setMapDistrict('gampaha')}
                     >
@@ -3807,7 +3807,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     </button>
                     <button
                       className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold border-0 cursor-pointer transition ${
-                        mapDistrict === 'kalutara' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        mapDistrict === 'kalutara' ? 'bg-[#3d6b4f] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                       }`}
                       onClick={() => setMapDistrict('kalutara')}
                     >
@@ -3818,7 +3818,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                   {/* Satellite Coordinates HUD */}
                   <div className="flex items-center gap-3 text-[11.5px] text-slate-500 font-mono bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
                     <span className="flex items-center gap-1">
-                      <Compass size={13} className="text-[#0e7490]" />
+                      <Compass size={13} className="text-[#3d6b4f]" />
                       <span>6.9271° N, 79.8612° E</span>
                     </span>
                     <span>·</span>
@@ -4070,7 +4070,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                       <div className="text-[14px] font-bold text-slate-900 mb-1">
                         {selectedMapSector ? selectedMapSector.title : 'Kelani River Basin Flash Flooding'}
                       </div>
-                      <div className="text-[12px] text-[#0e7490] font-semibold mb-3">
+                      <div className="text-[12px] text-[#3d6b4f] font-semibold mb-3">
                         {selectedMapSector ? selectedMapSector.type : 'Major Flood (Red Alert)'}
                       </div>
 
@@ -4095,7 +4095,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                         </div>
                         <div className="flex justify-between py-1">
                           <span className="text-slate-500">Nearest Evac Shelter:</span>
-                          <span className="font-semibold text-[#0e7490]">
+                          <span className="font-semibold text-[#3d6b4f]">
                             {selectedMapSector ? selectedMapSector.shelter : 'Colombo Central School (3.1km)'}
                           </span>
                         </div>
@@ -4142,7 +4142,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     </div>
                     <div className="flex justify-between">
                       <span>Deployed Units:</span>
-                      <span className="font-semibold text-[#0e7490]">24 Response Teams</span>
+                      <span className="font-semibold text-[#3d6b4f]">24 Response Teams</span>
                     </div>
                   </div>
                 </div>
@@ -4166,7 +4166,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     </div>
                     <div className="flex justify-between">
                       <span>Deployed Units:</span>
-                      <span className="font-semibold text-[#0e7490]">11 Response Teams</span>
+                      <span className="font-semibold text-[#3d6b4f]">11 Response Teams</span>
                     </div>
                   </div>
                 </div>
@@ -4190,7 +4190,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     </div>
                     <div className="flex justify-between">
                       <span>Deployed Units:</span>
-                      <span className="font-semibold text-[#0e7490]">7 Navy SBS Teams</span>
+                      <span className="font-semibold text-[#3d6b4f]">7 Navy SBS Teams</span>
                     </div>
                   </div>
                 </div>
@@ -4376,7 +4376,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                         })
                         .map((b) => (
                           <tr key={b.id}>
-                            <td className="font-mono text-[11.5px] font-semibold text-[#0e7490]">{b.id}</td>
+                            <td className="font-mono text-[11.5px] font-semibold text-[#3d6b4f]">{b.id}</td>
                             <td>
                               <div className="font-semibold text-slate-900">{b.title}</div>
                               <div className="text-[11.5px] text-slate-500 max-w-[280px] line-clamp-1">{b.message}</div>
@@ -4420,7 +4420,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                             <td>
                               <div className="adm-ss-row-actions">
                                 <button
-                                  className="adm-ss-icon-btn text-[#0e7490]"
+                                  className="adm-ss-icon-btn text-[#3d6b4f]"
                                   title="Retransmit Broadcast"
                                   onClick={() => handleRetransmitBroadcast(b)}
                                 >
@@ -4795,7 +4795,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[12px] font-semibold text-[#0e7490]">{selectedCrisis.id}</span>
+                  <span className="font-mono text-[12px] font-semibold text-[#3d6b4f]">{selectedCrisis.id}</span>
                   <span className={`adm-ss-pill ${
                     selectedCrisis.severity === 'Critical' ? 'pill-red' :
                     selectedCrisis.severity === 'High' ? 'pill-orange' : 'pill-green'
@@ -4843,12 +4843,12 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
               </div>
 
               <div className="flex items-center justify-between p-3 rounded-lg bg-cyan-50 border border-cyan-200">
-                <div className="flex items-center gap-2 text-[#0e7490]">
+                <div className="flex items-center gap-2 text-[#3d6b4f]">
                   <Truck size={16} />
                   <span className="font-bold">Deployed Multi-Agency Units: {selectedCrisis.teamsDeployed} Teams</span>
                 </div>
                 <button
-                  className="px-3 py-1.5 rounded-lg bg-[#0e7490] text-white text-[11.5px] font-bold border-0 cursor-pointer shadow-sm"
+                  className="px-3 py-1.5 rounded-lg bg-[#3d6b4f] text-white text-[11.5px] font-bold border-0 cursor-pointer shadow-sm"
                   onClick={() => {
                     handleDispatchRescueTeams(selectedCrisis.id);
                     setSelectedCrisis(prev => ({ ...prev, teamsDeployed: prev.teamsDeployed + 2 }));
@@ -4889,7 +4889,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           <div className="adm-ss-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <Gift size={20} className="text-[#0e7490]" />
+                <Gift size={20} className="text-[#3d6b4f]" />
                 <h3 className="text-[18px] font-bold text-slate-900 m-0">Record Relief Contribution / Grant</h3>
               </div>
               <button
@@ -4997,7 +4997,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           <div className="adm-ss-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <div>
-                <span className="font-mono text-[11.5px] font-semibold text-[#0e7490]">{selectedDonation.id}</span>
+                <span className="font-mono text-[11.5px] font-semibold text-[#3d6b4f]">{selectedDonation.id}</span>
                 <h3 className="text-[17px] font-bold text-slate-900 m-0">Donation Audit Certificate</h3>
               </div>
               <button
@@ -5019,7 +5019,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Contribution Value:</span>
-                <span className="font-bold text-[#0e7490]">{selectedDonation.amountFormatted}</span>
+                <span className="font-bold text-[#3d6b4f]">{selectedDonation.amountFormatted}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Allocated Sector:</span>
@@ -5061,7 +5061,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[12px] font-semibold text-[#0e7490]">{selectedAiLog.id}</span>
+                  <span className="font-mono text-[12px] font-semibold text-[#3d6b4f]">{selectedAiLog.id}</span>
                   <span className={`adm-ss-pill ${
                     selectedAiLog.priority === 'Critical' ? 'pill-red' :
                     selectedAiLog.priority === 'High' ? 'pill-orange' : 'pill-green'

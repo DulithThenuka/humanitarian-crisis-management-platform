@@ -167,8 +167,8 @@ export const CaseCommunicationView = ({
               />
             </div>
 
-            <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11.5px', color: '#64748b', display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <ShieldCheck size={16} color="#0284c7" style={{ flexShrink: 0 }} />
+            <div style={{ background: '#f4f6f2', padding: '10px 12px', borderRadius: '8px', border: '1px solid #dfe5d8', fontSize: '11.5px', color: '#657367', display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <ShieldCheck size={16} color="#3d6b4f" style={{ flexShrink: 0 }} />
               <span>Internal coordination messages are not exposed to citizen accounts.</span>
             </div>
 

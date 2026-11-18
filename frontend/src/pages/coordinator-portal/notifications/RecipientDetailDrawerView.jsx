@@ -159,7 +159,7 @@ export const RecipientDetailDrawerView = ({
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>
+              <span style={{ fontSize: '12px', color: '#657367' }}>
                 Showing <b>{filteredRecipients.length}</b> verified contacts
               </span>
             </div>
@@ -214,7 +214,7 @@ export const RecipientDetailDrawerView = ({
                     </td>
                     <td className="cell-updated-time">{r.location}</td>
                     <td className="cell-action-arrow">
-                      <ChevronRight size={14} color={isSelected ? '#059669' : '#94a3b8'} />
+                      <ChevronRight size={14} color={isSelected ? '#059669' : '#8a9480'} />
                     </td>
                   </tr>
                 );
@@ -239,18 +239,18 @@ export const RecipientDetailDrawerView = ({
               <button 
                 type="button" 
                 onClick={() => setDrawerOpen(false)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#8a9480' }}
               >
                 <X size={16} />
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px', color: '#475569', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px', color: '#4a5b4a', background: '#f4f6f2', padding: '12px', borderRadius: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Phone size={13} color="#0f766e" />
                 <strong>{selectedRecipient.phone}</strong>
               </div>
-              <div style={{ fontSize: '11px', color: '#64748b' }}>
+              <div style={{ fontSize: '11px', color: '#657367' }}>
                 Carrier: {selectedRecipient.carrier}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
@@ -265,7 +265,7 @@ export const RecipientDetailDrawerView = ({
 
             {/* Channel Status */}
             <div>
-              <h4 style={{ margin: '0 0 8px 0', fontSize: '12.5px', color: '#0f172a' }}>Configured Channels</h4>
+              <h4 style={{ margin: '0 0 8px 0', fontSize: '12.5px', color: '#14291e' }}>Configured Channels</h4>
               <div className="channel-status-grid">
                 <div className="channel-card-item">
                   <span className="channel-name-head">SMS</span>
@@ -284,17 +284,17 @@ export const RecipientDetailDrawerView = ({
 
             {/* Recent Message History for this Recipient */}
             <div>
-              <h4 style={{ margin: '0 0 8px 0', fontSize: '12.5px', color: '#0f172a' }}>Delivery Dispatch History</h4>
+              <h4 style={{ margin: '0 0 8px 0', fontSize: '12.5px', color: '#14291e' }}>Delivery Dispatch History</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {selectedRecipient.recentAlerts.map((alert, idx) => (
-                  <div key={idx} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', fontSize: '11.5px' }}>
+                  <div key={idx} style={{ background: '#ffffff', border: '1px solid #dfe5d8', borderRadius: '6px', padding: '8px 10px', fontSize: '11.5px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <strong style={{ color: '#0f172a' }}>{alert.title}</strong>
+                      <strong style={{ color: '#14291e' }}>{alert.title}</strong>
                       <span className={`status-pill-badge ${alert.status.toLowerCase()}`} style={{ fontSize: '10px', padding: '1px 6px' }}>
                         {alert.status}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '10.5px', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#657367', fontSize: '10.5px', marginTop: '4px' }}>
                       <span>{alert.time} · {alert.channel}</span>
                       <span>Latency: {alert.latency}</span>
                     </div>

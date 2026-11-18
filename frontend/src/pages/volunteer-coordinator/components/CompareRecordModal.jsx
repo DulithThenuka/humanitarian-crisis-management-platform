@@ -20,7 +20,7 @@ export const CompareRecordModal = ({ isOpen, onClose }) => {
         <div className="vc-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Scale size={18} style={{ color: '#233831' }} />
-            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#14291e' }}>
               Compare Suspected Duplicate / Related Records
             </h3>
           </div>
@@ -54,12 +54,12 @@ export const CompareRecordModal = ({ isOpen, onClose }) => {
           {/* Comparison Table / Columns */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
             {/* Record 1 */}
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', backgroundColor: '#f8fafc' }}>
+            <div style={{ border: '1px solid #dfe5d8', borderRadius: '8px', padding: '14px', backgroundColor: '#f4f6f2' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>VOL-0104 (Active)</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#14291e' }}>VOL-0104 (Active)</span>
                 <span className="vc-status-badge vc-status-eligible">Eligible</span>
               </div>
-              <div style={{ fontSize: '12px', color: '#475569', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ fontSize: '12px', color: '#4a5b4a', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div><strong>Name:</strong> Nimali Senanayake</div>
                 <div><strong>Skills:</strong> Logistics, First Aid</div>
                 <div><strong>Area:</strong> Kelani East</div>
@@ -70,12 +70,12 @@ export const CompareRecordModal = ({ isOpen, onClose }) => {
             </div>
 
             {/* Record 2 */}
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', backgroundColor: '#ffffff' }}>
+            <div style={{ border: '1px solid #dfe5d8', borderRadius: '8px', padding: '14px', backgroundColor: '#ffffff' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>VOL-0212 (Duplicate Flag)</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#14291e' }}>VOL-0212 (Duplicate Flag)</span>
                 <span className="vc-status-badge vc-status-assigned">Assigned</span>
               </div>
-              <div style={{ fontSize: '12px', color: '#475569', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ fontSize: '12px', color: '#4a5b4a', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div><strong>Name:</strong> Dinesh Wickramasinghe</div>
                 <div><strong>Skills:</strong> Driving, Distribution</div>
                 <div><strong>Area:</strong> Niyagama North</div>
@@ -87,7 +87,7 @@ export const CompareRecordModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Analysis Note */}
-          <div style={{ fontSize: '12px', color: '#64748b', backgroundColor: '#f1f5f9', padding: '10px 12px', borderRadius: '6px', marginBottom: '16px' }}>
+          <div style={{ fontSize: '12px', color: '#657367', backgroundColor: '#eef1ea', padding: '10px 12px', borderRadius: '6px', marginBottom: '16px' }}>
             <strong>Analysis:</strong> Different individuals, non-conflicting national IDs. Flagged solely due to adjacent transport corridor in Kelani basin. No identity overlap detected.
           </div>
 

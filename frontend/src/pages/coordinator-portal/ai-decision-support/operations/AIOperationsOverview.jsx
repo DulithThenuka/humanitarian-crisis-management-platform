@@ -364,7 +364,7 @@ export const AIOperationsOverview = ({
                     cy="80"
                     r="48"
                     fill="none"
-                    stroke="#0284c7"
+                    stroke="#3d6b4f"
                     strokeWidth="18"
                     strokeDasharray="135 166"
                     strokeDashoffset="-91"
@@ -451,7 +451,7 @@ export const AIOperationsOverview = ({
           <div className="ai-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <ShieldCheck size={20} color="#0284c7" />
+                <ShieldCheck size={20} color="#3d6b4f" />
                 <h3 className="modal-title">Human-Governed AI Policy &amp; Safety Mandate</h3>
               </div>
               <button className="modal-close-btn" onClick={() => setShowPolicyModal(false)}>

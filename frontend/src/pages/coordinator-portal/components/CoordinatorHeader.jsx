@@ -70,7 +70,7 @@ export const CoordinatorHeader = ({
         </div>
 
         <div className="ec-header-center-search">
-          <Search size={14} color="#94a3b8" />
+          <Search size={14} color="#8a9480" />
           <input
             type="text"
             placeholder="Search requests, incidents, resources..."
@@ -147,7 +147,7 @@ export const CoordinatorHeader = ({
       {/* 2. Fallback Prototype Notice: Rendered ONLY when offline without explicit error */}
       {!isLive && !apiError && (
         <div className="ec-prototype-ribbon">
-          <CheckCircle2 size={14} color="#0284c7" />
+          <CheckCircle2 size={14} color="#3d6b4f" />
           <span>
             <strong>Coordinator prototype:</strong> All records are illustrative data. Actions are simulated locally and follow RELIEFCORE operational standards.
           </span>

@@ -300,8 +300,8 @@ export const ReportsAnalyticsView = () => {
     return [
       { id: 'medical', label: 'Medical', count: med, pct: Math.round((med / total) * 100), color: '#ef4444', dotClass: 'dot-red', valClass: 'val-red' },
       { id: 'food', label: 'Food & Water', count: food, pct: Math.round((food / total) * 100), color: '#f59e0b', dotClass: 'dot-orange', valClass: 'val-orange' },
-      { id: 'shelter', label: 'Shelter', count: shelter, pct: Math.round((shelter / total) * 100), color: '#0e7490', dotClass: 'dot-teal', valClass: 'val-teal' },
-      { id: 'transport', label: 'Transport', count: trans, pct: Math.round((trans / total) * 100), color: '#0284c7', dotClass: 'dot-blue', valClass: 'val-blue' },
+      { id: 'shelter', label: 'Shelter', count: shelter, pct: Math.round((shelter / total) * 100), color: '#3d6b4f', dotClass: 'dot-teal', valClass: 'val-teal' },
+      { id: 'transport', label: 'Transport', count: trans, pct: Math.round((trans / total) * 100), color: '#3d6b4f', dotClass: 'dot-blue', valClass: 'val-blue' },
       { id: 'accessibility', label: 'Accessibility', count: acc, pct: Math.round((acc / total) * 100), color: '#8b5cf6', dotClass: 'dot-purple', valClass: 'val-purple' },
     ];
   }, [filteredLedger, selectedCrisis, selectedLocation, selectedOrg]);
@@ -910,8 +910,8 @@ export const ReportsAnalyticsView = () => {
                 <span>2 centers near capacity</span>
               </div>
               <svg className="rep-kpi-wave" viewBox="0 0 200 40" preserveAspectRatio="none">
-                <path d="M0,38 Q40,32 90,26 T150,15 T200,20 L200,40 L0,40 Z" fill="#e0f2fe" />
-                <path d="M0,38 Q40,32 90,26 T150,15 T200,20" fill="none" stroke="#0284c7" strokeWidth="2" />
+                <path d="M0,38 Q40,32 90,26 T150,15 T200,20 L200,40 L0,40 Z" fill="#edf2e6" />
+                <path d="M0,38 Q40,32 90,26 T150,15 T200,20" fill="none" stroke="#3d6b4f" strokeWidth="2" />
               </svg>
             </div>
 
@@ -1007,8 +1007,8 @@ export const ReportsAnalyticsView = () => {
                         <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
                       </linearGradient>
                       <linearGradient id="resolvedAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#0284c7" stopOpacity="0.18" />
-                        <stop offset="100%" stopColor="#0284c7" stopOpacity="0.0" />
+                        <stop offset="0%" stopColor="#3d6b4f" stopOpacity="0.18" />
+                        <stop offset="100%" stopColor="#3d6b4f" stopOpacity="0.0" />
                       </linearGradient>
                     </defs>
 
@@ -1033,7 +1033,7 @@ export const ReportsAnalyticsView = () => {
                       <path 
                         d={timeSeriesConfig.resLineD} 
                         fill="none" 
-                        stroke="#0284c7" 
+                        stroke="#3d6b4f" 
                         strokeWidth="2.5" 
                         strokeLinecap="round" 
                       />
@@ -1059,7 +1059,7 @@ export const ReportsAnalyticsView = () => {
                         cx={pt.x} 
                         cy={pt.y} 
                         r={hoveredPointIndex === idx ? 6 : 3.5} 
-                        fill="#0284c7" 
+                        fill="#3d6b4f" 
                         stroke="#ffffff" 
                         strokeWidth={hoveredPointIndex === idx ? 2.5 : 1.5} 
                         style={{ transition: 'r 0.15s ease' }}
@@ -1073,7 +1073,7 @@ export const ReportsAnalyticsView = () => {
                         y1={0} 
                         x2={activeHoverPoint.sub.x} 
                         y2={135} 
-                        stroke="#94a3b8" 
+                        stroke="#8a9480" 
                         strokeWidth="1.2" 
                         strokeDasharray="3 3" 
                       />

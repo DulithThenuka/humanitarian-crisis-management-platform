@@ -14,7 +14,7 @@ export const AssignmentActionModal = ({
       <div className="vol-modal-box" onClick={(e) => e.stopPropagation()}>
         <div className="vol-modal-header">
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#657367' }}>
               Assignment Action: {assignment.id}
             </div>
             <h3 className="vol-modal-title">{assignment.taskTitle}</h3>
@@ -40,11 +40,11 @@ export const AssignmentActionModal = ({
             <span className="vol-pill tag-neutral">Priority: {assignment.priority}</span>
           </div>
 
-          <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8e0', marginBottom: '16px' }}>
-            <div style={{ fontSize: '12.5px', color: '#1e293b', marginBottom: '8px' }}>
+          <div style={{ background: '#f4f6f2', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8e0', marginBottom: '16px' }}>
+            <div style={{ fontSize: '12.5px', color: '#1e3328', marginBottom: '8px' }}>
               <strong>Operational Details:</strong> {assignment.details}
             </div>
-            <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ fontSize: '12px', color: '#657367', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div>• <strong>Assigned Date:</strong> {assignment.assigned}</div>
               <div>• <strong>Reporting Deadline:</strong> {assignment.deadline}</div>
               <div>• <strong>Location:</strong> {assignment.location}</div>

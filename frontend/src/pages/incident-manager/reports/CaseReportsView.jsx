@@ -121,7 +121,7 @@ export const CaseReportsView = ({ showToast }) => {
                   onMouseLeave={() => setHoveredBar(null)}
                 >
                   {isHovered && (
-                    <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#0284c7' }}>
+                    <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#3d6b4f' }}>
                       {bar.count}
                     </span>
                   )}
@@ -136,7 +136,7 @@ export const CaseReportsView = ({ showToast }) => {
             })}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', fontSize: '11px', color: '#94a3b8' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', fontSize: '11px', color: '#8a9480' }}>
             <span>Shift hours (1 - 12)</span>
             <span>Average peak: Interval 8 (42 open cases)</span>
           </div>
@@ -168,7 +168,7 @@ export const CaseReportsView = ({ showToast }) => {
             ))}
           </div>
 
-          <div style={{ marginTop: '24px', padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11.5px', color: '#64748b', lineHeight: 1.4 }}>
+          <div style={{ marginTop: '24px', padding: '12px 14px', background: '#f4f6f2', borderRadius: '8px', border: '1px solid #dfe5d8', fontSize: '11.5px', color: '#657367', lineHeight: 1.4 }}>
             <strong>System Safeguard Note:</strong> Summaries reflect role-scoped incident records only. No private citizen credentials or redacted notes are exposed.
           </div>
         </div>

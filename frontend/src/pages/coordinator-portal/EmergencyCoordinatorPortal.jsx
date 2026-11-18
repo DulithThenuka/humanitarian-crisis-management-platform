@@ -784,7 +784,7 @@ export const EmergencyCoordinatorPortal = ({
       {/* Toast Alert HUD */}
       {toast && (
         <div className="ec-toast-hud">
-          <CheckCircle2 size={16} color="#38bdf8" />
+          <CheckCircle2 size={16} color="#7caa7e" />
           <span>{toast.message}</span>
         </div>
       )}

@@ -88,7 +88,7 @@ export const CoreCapabilitiesPage = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/coordinator/dashboard')}
-              className="px-4 py-1.5 rounded-lg bg-[#0e7490] hover:bg-[#085a70] text-white text-[12.5px] font-semibold transition cursor-pointer border-0 shadow-sm"
+              className="px-4 py-1.5 rounded-lg bg-[#3d6b4f] hover:bg-[#085a70] text-white text-[12.5px] font-semibold transition cursor-pointer border-0 shadow-sm"
             >
               Coordinator Command
             </button>

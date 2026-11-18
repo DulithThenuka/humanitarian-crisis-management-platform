@@ -197,7 +197,7 @@ export const AssistanceRequestDetailPage = ({
 
           <div className="req-top-right-group">
             <div className="req-search-box">
-              <Search size={14} color="#94a3b8" />
+              <Search size={14} color="#8a9480" />
               <input 
                 type="text" 
                 placeholder="Search requests, locations, resources..." 
@@ -216,7 +216,7 @@ export const AssistanceRequestDetailPage = ({
                 <div className="req-user-name">Sarah Johnson</div>
                 <div className="req-user-sub">Emergency Coordinator</div>
               </div>
-              <ChevronDown size={14} color="#64748b" />
+              <ChevronDown size={14} color="#657367" />
             </div>
           </div>
         </div>
@@ -236,25 +236,25 @@ export const AssistanceRequestDetailPage = ({
 
           <div className="req-actions-cluster">
             <button className="req-action-btn" onClick={handleShare}>
-              <Share2 size={14} color="#475569" />
+              <Share2 size={14} color="#4a5b4a" />
               <span>Share</span>
             </button>
             <button className="req-action-btn" onClick={handlePrint}>
-              <Printer size={14} color="#475569" />
+              <Printer size={14} color="#4a5b4a" />
               <span>Print</span>
             </button>
             <button className="req-action-btn" onClick={() => setShowNoteModal(true)}>
-              <FileEdit size={14} color="#475569" />
+              <FileEdit size={14} color="#4a5b4a" />
               <span>Add Note</span>
             </button>
             <button className="req-action-btn req-action-btn-more" title="More Options">
-              <MoreHorizontal size={15} color="#475569" />
+              <MoreHorizontal size={15} color="#4a5b4a" />
             </button>
           </div>
         </div>
 
         <div className="req-meta-row">
-          <User size={13} color="#94a3b8" />
+          <User size={13} color="#8a9480" />
           <span>Submitted on 15 Jun 2026, 10:24 AM</span>
           <span className="req-meta-sep">|</span>
           <span>Last updated: 2 min ago</span>
@@ -327,11 +327,11 @@ export const AssistanceRequestDetailPage = ({
                   </div>
                   <div className="req-requester-name">Nimal Perera</div>
                   <div className="req-contact-item">
-                    <Phone size={13} color="#64748b" />
+                    <Phone size={13} color="#657367" />
                     <span>+94 77 123 4567</span>
                   </div>
                   <div className="req-contact-item">
-                    <Mail size={13} color="#64748b" />
+                    <Mail size={13} color="#657367" />
                     <span>nimalp@example.com</span>
                   </div>
                   <div className="req-badge-vulnerable">
@@ -373,7 +373,7 @@ export const AssistanceRequestDetailPage = ({
 
               <div className="req-location-footer">
                 <div className="req-loc-text-col">
-                  <MapPin size={16} color="#475569" style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <MapPin size={16} color="#4a5b4a" style={{ marginTop: '2px', flexShrink: 0 }} />
                   <div>
                     <div className="req-loc-name">Colombo, Western Province</div>
                     <div className="req-loc-coords">6.9271° N, 79.8612° E</div>
@@ -418,7 +418,7 @@ export const AssistanceRequestDetailPage = ({
                 {/* 3. Number of People */}
                 <div className="req-detail-row">
                   <div className="req-detail-icon">
-                    <Users size={16} color="#0284c7" />
+                    <Users size={16} color="#3d6b4f" />
                   </div>
                   <span className="req-detail-label">Number of People</span>
                   <span className="req-detail-val">3</span>
@@ -427,7 +427,7 @@ export const AssistanceRequestDetailPage = ({
                 {/* 4. Location */}
                 <div className="req-detail-row">
                   <div className="req-detail-icon">
-                    <MapPin size={16} color="#0284c7" />
+                    <MapPin size={16} color="#3d6b4f" />
                   </div>
                   <span className="req-detail-label">Location</span>
                   <span className="req-detail-val">Colombo, Western Province</span>
@@ -436,7 +436,7 @@ export const AssistanceRequestDetailPage = ({
                 {/* 5. Description */}
                 <div className="req-detail-row">
                   <div className="req-detail-icon">
-                    <Home size={16} color="#0284c7" />
+                    <Home size={16} color="#3d6b4f" />
                   </div>
                   <span className="req-detail-label">Description</span>
                   <span className="req-detail-val desc">
@@ -447,7 +447,7 @@ export const AssistanceRequestDetailPage = ({
                 {/* 6. Special Requirements */}
                 <div className="req-detail-row">
                   <div className="req-detail-icon">
-                    <ShieldCheck size={16} color="#0284c7" />
+                    <ShieldCheck size={16} color="#3d6b4f" />
                   </div>
                   <span className="req-detail-label">Special Requirements</span>
                   <span className="req-detail-val">
@@ -488,7 +488,7 @@ export const AssistanceRequestDetailPage = ({
                     className="req-pdf-card"
                     onClick={() => showAlert("Opening document: Medical Report.pdf (1.2 MB)", "info")}
                   >
-                    <FileText size={24} color="#60a5fa" />
+                    <FileText size={24} color="#7caa7e" />
                     <span className="req-pdf-name">Medical Report.pdf</span>
                     <span className="req-pdf-size">1.2 MB</span>
                   </div>
@@ -503,7 +503,7 @@ export const AssistanceRequestDetailPage = ({
                   {/* Row 1: Crisis Event */}
                   <div className="req-related-row">
                     <div className="req-related-left">
-                      <Radio size={14} color="#0284c7" />
+                      <Radio size={14} color="#3d6b4f" />
                       <span className="req-related-label">Crisis Event</span>
                       <span className="req-related-val">Flood Response - Western Province</span>
                     </div>
@@ -518,7 +518,7 @@ export const AssistanceRequestDetailPage = ({
                   {/* Row 2: Operational Area */}
                   <div className="req-related-row">
                     <div className="req-related-left">
-                      <Compass size={14} color="#0284c7" />
+                      <Compass size={14} color="#3d6b4f" />
                       <span className="req-related-label">Operational Area</span>
                       <span className="req-related-val">Colombo District - Zone A</span>
                     </div>
@@ -533,7 +533,7 @@ export const AssistanceRequestDetailPage = ({
                   {/* Row 3: Assigned To */}
                   <div className="req-related-row">
                     <div className="req-related-left">
-                      <UserCheck size={14} color="#0284c7" />
+                      <UserCheck size={14} color="#3d6b4f" />
                       <span className="req-related-label">Assigned To</span>
                       <span className="req-related-val italic-unassigned">Not yet assigned</span>
                     </div>
@@ -762,23 +762,23 @@ export const AssistanceRequestDetailPage = ({
           {activeTab === 'ai-analysis' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
-                <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>NLP Model</div>
+                <div style={{ background: '#f4f6f2', padding: '14px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+                  <div style={{ fontSize: '11px', color: '#657367' }}>NLP Model</div>
                   <div style={{ fontWeight: 700, marginTop: '4px' }}>Bi-Encoder Transformer v4.2</div>
                   <div style={{ fontSize: '11px', color: '#10b981', marginTop: '2px' }}>Inference Latency: 42ms</div>
                 </div>
-                <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>Flood Hazard Overlay</div>
+                <div style={{ background: '#f4f6f2', padding: '14px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+                  <div style={{ fontSize: '11px', color: '#657367' }}>Flood Hazard Overlay</div>
                   <div style={{ fontWeight: 700, marginTop: '4px' }}>Zone 1 High Inundation (1.4m)</div>
                   <div style={{ fontSize: '11px', color: '#ef4444', marginTop: '2px' }}>Risk Factor: 0.94</div>
                 </div>
-                <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>Vulnerability Score</div>
+                <div style={{ background: '#f4f6f2', padding: '14px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+                  <div style={{ fontSize: '11px', color: '#657367' }}>Vulnerability Score</div>
                   <div style={{ fontWeight: 700, marginTop: '4px' }}>Composite Score: 9.2 / 10</div>
                   <div style={{ fontSize: '11px', color: '#f59e0b', marginTop: '2px' }}>Elderly resident + wheelchair</div>
                 </div>
               </div>
-              <p style={{ color: '#475569', lineHeight: 1.5, margin: 0 }}>
+              <p style={{ color: '#4a5b4a', lineHeight: 1.5, margin: 0 }}>
                 <strong>Semantic Extraction:</strong> Extracted emergency entities: <code>medical emergency</code>, <code>elderly wheelchair</code>, <code>inaccessible hospital</code>.
                 Proximity matching recommends dispatch from Western Regional Hospital Mobile Unit 2 (3.8 km away).
               </p>
@@ -786,7 +786,7 @@ export const AssistanceRequestDetailPage = ({
           )}
 
           {activeTab === 'assignments' && (
-            <div style={{ fontSize: '13px', color: '#475569' }}>
+            <div style={{ fontSize: '13px', color: '#4a5b4a' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <span style={{ fontWeight: 600 }}>Field Units & Dispatch Assignments</span>
                 <button 
@@ -796,14 +796,14 @@ export const AssistanceRequestDetailPage = ({
                   + Assign Unit
                 </button>
               </div>
-              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontStyle: 'italic', color: '#64748b' }}>No units assigned yet. Awaiting coordinator triage approval.</span>
+              <div style={{ background: '#f4f6f2', padding: '12px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+                <span style={{ fontStyle: 'italic', color: '#657367' }}>No units assigned yet. Awaiting coordinator triage approval.</span>
               </div>
             </div>
           )}
 
           {activeTab === 'communications' && (
-            <div style={{ fontSize: '13px', color: '#475569' }}>
+            <div style={{ fontSize: '13px', color: '#4a5b4a' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <span style={{ fontWeight: 600 }}>SMS & Dispatch Log with Requester</span>
                 <button 
@@ -813,10 +813,10 @@ export const AssistanceRequestDetailPage = ({
                   Send SMS Notification
                 </button>
               </div>
-              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '11.5px', color: '#64748b' }}>15 Jun 2026, 10:24 AM</div>
-                <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>SMS Sent to +94 77 123 4567</div>
-                <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
+              <div style={{ background: '#f4f6f2', padding: '12px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+                <div style={{ fontSize: '11.5px', color: '#657367' }}>15 Jun 2026, 10:24 AM</div>
+                <div style={{ fontWeight: 600, color: '#14291e', marginTop: '2px' }}>SMS Sent to +94 77 123 4567</div>
+                <div style={{ fontSize: '12px', color: '#4a5b4a', marginTop: '2px' }}>
                   "ReliefCore Alert: Your assistance request #REQ-2026-01842 has been received. Our coordination team is evaluating dispatch."
                 </div>
               </div>
@@ -824,9 +824,9 @@ export const AssistanceRequestDetailPage = ({
           )}
 
           {activeTab === 'audit' && (
-            <div style={{ fontSize: '13px', color: '#475569' }}>
+            <div style={{ fontSize: '13px', color: '#4a5b4a' }}>
               <div style={{ fontWeight: 600, marginBottom: '8px' }}>Cryptographic Governance Trail</div>
-              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontFamily: 'monospace', fontSize: '11.5px' }}>
+              <div style={{ background: '#f4f6f2', padding: '12px', borderRadius: '8px', border: '1px solid #dfe5d8', fontFamily: 'monospace', fontSize: '11.5px' }}>
                 <div>BLOCK_HASH: 0x8f2a49b21dc33e08...ba71</div>
                 <div>ENTITY: REQ-2026-01842 | AI_SUGGESTION: HIGH (91.0%) | ACTOR: Sarah Johnson</div>
                 <div>SIGNATURE: VERIFIED_ED25519_IMMUTABLE</div>
@@ -846,7 +846,7 @@ export const AssistanceRequestDetailPage = ({
                 style={{ background: 'none', border: 'none', cursor: 'pointer' }} 
                 onClick={() => setShowModifyModal(false)}
               >
-                <X size={18} color="#64748b" />
+                <X size={18} color="#657367" />
               </button>
             </div>
             <div className="req-modal-body">
@@ -857,7 +857,7 @@ export const AssistanceRequestDetailPage = ({
                 <select 
                   value={modifyPriority} 
                   onChange={e => setModifyPriority(e.target.value)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #c5ccbe', fontSize: '13px' }}
                 >
                   <option value="Critical">Critical Priority</option>
                   <option value="High">High Priority</option>
@@ -875,7 +875,7 @@ export const AssistanceRequestDetailPage = ({
                   placeholder="Provide operational reason for this override..."
                   value={modifyReason}
                   onChange={e => setModifyReason(e.target.value)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #c5ccbe', fontSize: '13px', boxSizing: 'border-box' }}
                 />
               </div>
             </div>
@@ -899,7 +899,7 @@ export const AssistanceRequestDetailPage = ({
                 style={{ background: 'none', border: 'none', cursor: 'pointer' }} 
                 onClick={() => setShowNoteModal(false)}
               >
-                <X size={18} color="#64748b" />
+                <X size={18} color="#657367" />
               </button>
             </div>
             <div className="req-modal-body">
@@ -908,7 +908,7 @@ export const AssistanceRequestDetailPage = ({
                 placeholder="Type your notes regarding this request, field verification, or dispatch directives..."
                 value={newNote}
                 onChange={e => setNewNote(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #c5ccbe', fontSize: '13px', boxSizing: 'border-box' }}
               />
             </div>
             <div className="req-modal-footer">
@@ -931,7 +931,7 @@ export const AssistanceRequestDetailPage = ({
                 style={{ background: 'none', border: 'none', cursor: 'pointer' }} 
                 onClick={() => setShowEvidenceModal(false)}
               >
-                <X size={18} color="#64748b" />
+                <X size={18} color="#657367" />
               </button>
             </div>
             <div className="req-modal-body" style={{ alignItems: 'center' }}>
@@ -947,12 +947,12 @@ export const AssistanceRequestDetailPage = ({
                   style={{ width: '48%', height: '180px', objectFit: 'cover', borderRadius: '8px' }} 
                 />
               </div>
-              <div style={{ marginTop: '12px', width: '100%', padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ marginTop: '12px', width: '100%', padding: '12px', background: '#f4f6f2', borderRadius: '8px', border: '1px solid #dfe5d8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <FileText size={28} color="#3b82f6" />
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '13px' }}>Medical Report.pdf</div>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>1.2 MB • Uploaded by Requester</div>
+                    <div style={{ fontSize: '11px', color: '#657367' }}>1.2 MB • Uploaded by Requester</div>
                   </div>
                 </div>
                 <button className="req-btn-view-map" onClick={() => showAlert("Downloading Medical Report.pdf...", "info")}>

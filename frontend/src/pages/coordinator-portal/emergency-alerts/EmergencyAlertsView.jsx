@@ -365,7 +365,7 @@ export const EmergencyAlertsView = ({
                     <div className="ec-alert-meta-item">
                       <span className="ec-meta-lbl">Publication</span>
                       <span className="ec-meta-val" style={{
-                        color: alert.publication === 'Published' ? '#059669' : alert.publication === 'Scheduled' ? '#0284c7' : alert.publication === 'Draft' ? '#64748b' : '#475569'
+                        color: alert.publication === 'Published' ? '#059669' : alert.publication === 'Scheduled' ? '#3d6b4f' : alert.publication === 'Draft' ? '#657367' : '#4a5b4a'
                       }}>
                         {alert.publication}
                       </span>
@@ -385,13 +385,13 @@ export const EmergencyAlertsView = ({
                   </div>
 
                   {alert.relatedIncident && (
-                    <div style={{ marginTop: '8px', fontSize: '11.5px', color: '#0284c7', background: '#f0f9ff', padding: '4px 8px', borderRadius: '4px', display: 'inline-block' }}>
+                    <div style={{ marginTop: '8px', fontSize: '11.5px', color: '#3d6b4f', background: '#f4f6f2', padding: '4px 8px', borderRadius: '4px', display: 'inline-block' }}>
                       Linked Incident: <strong>{alert.relatedIncident}</strong>
                     </div>
                   )}
 
                   {alert.resolutionNotes && (
-                    <div style={{ marginTop: '8px', fontSize: '11.5px', color: '#475569', background: '#f8fafc', padding: '6px 8px', borderRadius: '4px', borderLeft: '3px solid #94a3b8' }}>
+                    <div style={{ marginTop: '8px', fontSize: '11.5px', color: '#4a5b4a', background: '#f4f6f2', padding: '6px 8px', borderRadius: '4px', borderLeft: '3px solid #8a9480' }}>
                       <strong>Resolution:</strong> {alert.resolutionNotes}
                     </div>
                   )}
@@ -490,7 +490,7 @@ export const EmergencyAlertsView = ({
               <span
                 className="ec-rc-status-dot"
                 style={{
-                  backgroundColor: formData.publicationStatus === 'Published' ? '#10b981' : formData.publicationStatus === 'Scheduled' ? '#0284c7' : '#94a3b8'
+                  backgroundColor: formData.publicationStatus === 'Published' ? '#10b981' : formData.publicationStatus === 'Scheduled' ? '#3d6b4f' : '#8a9480'
                 }}
               ></span>
               <span>{formData.publicationStatus}</span>
@@ -655,7 +655,7 @@ export const EmergencyAlertsView = ({
                   <button
                     type="button"
                     className="ec-btn-save-draft"
-                    style={{ borderColor: '#0284c7', color: '#0284c7' }}
+                    style={{ borderColor: '#3d6b4f', color: '#3d6b4f' }}
                     disabled={isSubmitting}
                     onClick={() => handleSaveAlert('Scheduled')}
                   >
@@ -705,12 +705,12 @@ export const EmergencyAlertsView = ({
                   <div className="ec-csc-list">
                     {parsedInstructions.map((inst, idx) => (
                       <div key={idx} className="ec-csc-item">
-                        <CheckCircle2 size={16} color="#0284c7" className="ec-csc-check" />
+                        <CheckCircle2 size={16} color="#3d6b4f" className="ec-csc-check" />
                         <span>{inst}</span>
                       </div>
                     ))}
                     {parsedInstructions.length === 0 && (
-                      <div className="ec-csc-item" style={{ color: '#94a3b8' }}>
+                      <div className="ec-csc-item" style={{ color: '#8a9480' }}>
                         No specific instructions entered.
                       </div>
                     )}
@@ -747,16 +747,16 @@ export const EmergencyAlertsView = ({
               </div>
 
               {selectedAlertForModal.relatedIncident && (
-                <div style={{ marginTop: '12px', fontSize: '13px', color: '#0369a1', background: '#f0f9ff', padding: '6px 12px', borderRadius: '6px' }}>
+                <div style={{ marginTop: '12px', fontSize: '13px', color: '#2d5a3e', background: '#f4f6f2', padding: '6px 12px', borderRadius: '6px' }}>
                   Related Crisis Incident: <strong>{selectedAlertForModal.relatedIncident}</strong>
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '12px', fontSize: '12px', color: '#64748b', background: '#f8fafc', padding: '10px', borderRadius: '6px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '12px', fontSize: '12px', color: '#657367', background: '#f4f6f2', padding: '10px', borderRadius: '6px' }}>
                 <div>Created: <strong>{selectedAlertForModal.createdDate || selectedAlertForModal.startTime || 'Recorded'}</strong></div>
                 <div>Last Updated: <strong>{selectedAlertForModal.lastUpdated}</strong></div>
                 {selectedAlertForModal.scheduledDate && (
-                  <div style={{ gridColumn: '1 / -1', color: '#0284c7' }}>
+                  <div style={{ gridColumn: '1 / -1', color: '#3d6b4f' }}>
                     Scheduled Broadcast: <strong>{selectedAlertForModal.scheduledDate}</strong>
                   </div>
                 )}
@@ -767,7 +767,7 @@ export const EmergencyAlertsView = ({
                 )}
               </div>
 
-              <div style={{ margin: '16px 0', fontSize: '13.5px', color: '#1e293b', lineHeight: '1.55', background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ margin: '16px 0', fontSize: '13.5px', color: '#1e3328', lineHeight: '1.55', background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
                 <strong>Broadcast Message:</strong>
                 <p style={{ margin: '6px 0 0 0', whiteSpace: 'pre-line' }}>{selectedAlertForModal.message}</p>
               </div>
@@ -777,7 +777,7 @@ export const EmergencyAlertsView = ({
                 <div className="ec-csc-list">
                   {selectedAlertForModal.safetyInstructions && selectedAlertForModal.safetyInstructions.map((s, idx) => (
                     <div key={idx} className="ec-csc-item">
-                      <CheckCircle2 size={16} color="#0284c7" />
+                      <CheckCircle2 size={16} color="#3d6b4f" />
                       <span>{s}</span>
                     </div>
                   ))}
@@ -852,7 +852,7 @@ export const EmergencyAlertsView = ({
             </div>
 
             <div className="ec-modal-body-pad">
-              <p style={{ fontSize: '13.5px', color: '#334155', lineHeight: '1.5', margin: '0 0 12px 0' }}>
+              <p style={{ fontSize: '13.5px', color: '#2a4a35', lineHeight: '1.5', margin: '0 0 12px 0' }}>
                 Marking <strong>{resolvingAlert.title}</strong> as resolved will archive it to the <strong>Resolved</strong> tab and signal to emergency teams that this advisory is concluded.
               </p>
 
