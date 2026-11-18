@@ -16,8 +16,8 @@ import { AddSupplierModal } from './components/modals/AddSupplierModal';
 import { CheckCircle2 } from 'lucide-react';
 import './ResourceManagerStyles.css';
 
-export const ResourceManagerPortal = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
+  const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [onDuty, setOnDuty] = useState(true);
   const [toastMessage, setToastMessage] = useState(null);
 
