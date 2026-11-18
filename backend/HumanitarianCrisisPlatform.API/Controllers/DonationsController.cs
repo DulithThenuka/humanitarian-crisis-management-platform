@@ -146,5 +146,177 @@ public class DonationsController : BaseApiController
         }
         return Ok(result);
     }
+
+    // =========================================================================
+    // Donor & Funding Officer Portal Endpoints
+    // =========================================================================
+
+    /// <summary>
+    /// Gets the comprehensive Funding Officer dashboard metrics, attention list, and activity feed.
+    /// </summary>
+    [HttpGet("dashboard")]
+    public async Task<ActionResult<Result<FundingOfficerDashboardDto>>> GetDashboard(CancellationToken cancellationToken)
+    {
+        var result = await _donationService.GetFundingOfficerDashboardAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves donor directory records with filtering.
+    /// </summary>
+    [HttpGet("records")]
+    public async Task<ActionResult<Result<IReadOnlyList<DonorRecordDto>>>> GetDonorRecords(
+        [FromQuery] string? type,
+        [FromQuery] string? status,
+        [FromQuery] string? search,
+        CancellationToken cancellationToken)
+    {
+        var result = await _donationService.GetDonorRecordsAsync(type, status, search, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves a specific donor record by code.
+    /// </summary>
+    [HttpGet("records/{id}")]
+    public async Task<ActionResult<Result<DonorRecordDto>>> GetDonorRecordById(string id, CancellationToken cancellationToken)
+    {
+        var result = await _donationService.GetDonorRecordByIdAsync(id, cancellationToken);
+        if (!result.Succeeded)
+        {
+            return NotFound(result);
+        }
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Creates a new donor contribution / prototype record.
+    /// </summary>
+    [HttpPost("records")]
+    public async Task<ActionResult<Result<DonorRecordDto>>> CreateDonorRecord(
+        [FromBody] CreateDonorRecordDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(Result<DonorRecordDto>.Failure("Invalid donor record payload."));
+        }
+
+        var result = await _donationService.CreateDonorRecordAsync(dto, CurrentUserName, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Submits a review decision (submit-approval, request-clarification, or escalate) on a donor record.
+    /// </summary>
+    [HttpPost("records/{id}/decision")]
+    public async Task<ActionResult<Result<DonorRecordDto>>> ProcessDonorDecision(
+        string id,
+        [FromBody] DonorDecisionDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(Result<DonorRecordDto>.Failure("Invalid decision payload."));
+        }
+
+        var result = await _donationService.ProcessDonorDecisionAsync(id, dto, CurrentUserName, cancellationToken);
+        if (!result.Succeeded)
+        {
+            return NotFound(result);
+        }
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves the list of active and historic emergency funding campaigns.
+    /// </summary>
+    [HttpGet("campaigns")]
+    public async Task<ActionResult<Result<IReadOnlyList<FundingCampaignDto>>>> GetCampaigns(CancellationToken cancellationToken)
+    {
+        var result = await _donationService.GetCampaignsAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Creates a new emergency funding campaign.
+    /// </summary>
+    [HttpPost("campaigns")]
+    public async Task<ActionResult<Result<FundingCampaignDto>>> CreateCampaign(
+        [FromBody] CreateFundingCampaignDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(Result<FundingCampaignDto>.Failure("Invalid campaign payload."));
+        }
+
+        var result = await _donationService.CreateCampaignAsync(dto, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves emergency resource / financial allocations requiring dual approval.
+    /// </summary>
+    [HttpGet("allocations")]
+    public async Task<ActionResult<Result<IReadOnlyList<FundingAllocationDto>>>> GetAllocations(CancellationToken cancellationToken)
+    {
+        var result = await _donationService.GetAllocationsAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Approves and co-signs an emergency funding allocation.
+    /// </summary>
+    [HttpPost("allocations/{id}/approve")]
+    public async Task<ActionResult<Result<FundingAllocationDto>>> ApproveAllocation(
+        string id,
+        [FromBody] ApproveFundingAllocationDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(Result<FundingAllocationDto>.Failure("Invalid approval payload."));
+        }
+
+        var result = await _donationService.ApproveAllocationAsync(id, dto, CurrentUserName, cancellationToken);
+        if (!result.Succeeded)
+        {
+            return NotFound(result);
+        }
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves AI anomaly flags on suspicious donation records.
+    /// </summary>
+    [HttpGet("suspicious-flags")]
+    public async Task<ActionResult<Result<IReadOnlyList<SuspiciousFlagDto>>>> GetSuspiciousFlags(CancellationToken cancellationToken)
+    {
+        var result = await _donationService.GetSuspiciousFlagsAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Resolves an AI anomaly flag (clear or escalate).
+    /// </summary>
+    [HttpPost("suspicious-flags/{id}/resolve")]
+    public async Task<ActionResult<Result<SuspiciousFlagDto>>> ResolveSuspiciousFlag(
+        string id,
+        [FromBody] ResolveSuspiciousFlagDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(Result<SuspiciousFlagDto>.Failure("Invalid resolution payload."));
+        }
+
+        var result = await _donationService.ResolveSuspiciousFlagAsync(id, dto, CurrentUserName, cancellationToken);
+        if (!result.Succeeded)
+        {
+            return NotFound(result);
+        }
+        return Ok(result);
+    }
 }
 
