@@ -154,3 +154,123 @@ public class AssignPartnerZoneDto
     public string RoleSummary { get; set; } = string.Empty;
 }
 
+// =========================================================================
+// Partner Organisation Officer Portal DTOs
+// =========================================================================
+
+public class PartnerOfficerProfileDto
+{
+    public string FullName { get; set; } = "Ravindu Perera";
+    public string ShortName { get; set; } = "RP";
+    public string Role { get; set; } = "Partner Organisation Officer";
+    public string Organisation { get; set; } = "National Relief Unit";
+    public string OperationalArea { get; set; } = "Western Province Crisis Operations";
+}
+
+public class PartnerOfficerMetricItemDto
+{
+    public string Value { get; set; } = string.Empty;
+    public string Sub { get; set; } = string.Empty;
+}
+
+public class PartnerOfficerMetricsDto
+{
+    public PartnerOfficerMetricItemDto VerificationStatus { get; set; } = new() { Value = "Verified", Sub = "National Relief Unit" };
+    public PartnerOfficerMetricItemDto CollaborationRequests { get; set; } = new() { Value = "14", Sub = "5 awaiting review" };
+    public PartnerOfficerMetricItemDto ResourcesOffered { get; set; } = new() { Value = "2,480", Sub = "Demo units" };
+    public PartnerOfficerMetricItemDto ActiveCommitments { get; set; } = new() { Value = "18", Sub = "6 due today" };
+    public PartnerOfficerMetricItemDto PendingApprovals { get; set; } = new() { Value = "5", Sub = "Organisation scope" };
+    public PartnerOfficerMetricItemDto OnTimeDeliveries { get; set; } = new() { Value = "89%", Sub = "Demo summary" };
+}
+
+public class PartnerOfficerPriorityItemDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Desc { get; set; } = string.Empty;
+    public string Tag { get; set; } = "critical"; // critical, warning, success
+    public string RelatedTab { get; set; } = "profile";
+    public string Timestamp { get; set; } = string.Empty;
+}
+
+public class PartnerOfficerWorkflowStepDto
+{
+    public int Step { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Sub { get; set; } = string.Empty;
+    public string Status { get; set; } = "completed"; // completed, pending
+}
+
+public class PartnerOfficerActivityItemDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Time { get; set; } = string.Empty;
+    public string RecordId { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
+}
+
+public class PartnerOfficerDashboardDto
+{
+    public PartnerOfficerProfileDto Officer { get; set; } = new();
+    public PartnerOfficerMetricsDto Metrics { get; set; } = new();
+    public List<PartnerOfficerPriorityItemDto> PriorityAttention { get; set; } = new();
+    public List<PartnerOfficerWorkflowStepDto> WorkflowSteps { get; set; } = new();
+    public List<PartnerOfficerActivityItemDto> Activity { get; set; } = new();
+    public List<PartnerTimelineEntryDto> Timeline { get; set; } = new();
+}
+
+public class PartnerRecordDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string SharedIncident { get; set; } = string.Empty;
+    public string Contribution { get; set; } = string.Empty;
+    public string Quantity { get; set; } = string.Empty;
+    public string ResponsibleOrg { get; set; } = string.Empty;
+    public string Deadline { get; set; } = string.Empty;
+    public string Status { get; set; } = "Dispatched"; // Dispatched, Confirmed, Awaiting response, Delayed
+    public string StatusBadge { get; set; } = "dispatched";
+    public string OperationalArea { get; set; } = "Western Province";
+    public string Notes { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class CreatePartnerRecordDto
+{
+    public string SharedIncident { get; set; } = "CR-2026-014";
+    [Required]
+    public string Contribution { get; set; } = string.Empty;
+    [Required]
+    public string Quantity { get; set; } = string.Empty;
+    public string ResponsibleOrg { get; set; } = "National Relief Unit";
+    public string Deadline { get; set; } = "Today";
+    public string Status { get; set; } = "Confirmed";
+    public string OperationalArea { get; set; } = "Western Province";
+    public string Notes { get; set; } = string.Empty;
+}
+
+public class ProcessPartnerRecordActionDto
+{
+    [Required]
+    public string Action { get; set; } = "confirm"; // confirm, clarify, escalate
+    public string? Note { get; set; }
+}
+
+public class PartnerTimelineEntryDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Time { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Scope { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class CreatePartnerTimelineEntryDto
+{
+    [Required]
+    public string Title { get; set; } = string.Empty;
+    public string Scope { get; set; } = "HMR-1042 · authorised participants only";
+    public string Recipient { get; set; } = "Resource & Logistics Manager";
+    public string Message { get; set; } = string.Empty;
+}
+

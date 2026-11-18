@@ -34,6 +34,34 @@ export const partnerService = {
   },
   assignPartnerToZone: async (payload) => {
     return await apiClient.post('/partners/zones/assign', payload);
+  },
+
+  // Partner Organisation Officer Operations
+  getOfficerDashboard: async (organisation = '') => {
+    const params = organisation ? { organisation } : {};
+    return await apiClient.get('/partner-officer/officer/dashboard', { params });
+  },
+  getOfficerRecords: async (status = '', search = '', operationalArea = '') => {
+    const params = {};
+    if (status && status !== 'all') params.status = status;
+    if (search) params.search = search;
+    if (operationalArea && operationalArea !== 'all') params.operationalArea = operationalArea;
+    return await apiClient.get('/partner-officer/officer/records', { params });
+  },
+  getOfficerRecordById: async (id) => {
+    return await apiClient.get(`/partner-officer/officer/records/${id}`);
+  },
+  createOfficerRecord: async (payload) => {
+    return await apiClient.post('/partner-officer/officer/records', payload);
+  },
+  processRecordAction: async (id, payload) => {
+    return await apiClient.post(`/partner-officer/officer/records/${id}/action`, payload);
+  },
+  getTimeline: async () => {
+    return await apiClient.get('/partner-officer/officer/timeline');
+  },
+  addTimelineEntry: async (payload) => {
+    return await apiClient.post('/partner-officer/officer/timeline', payload);
   }
 };
 
