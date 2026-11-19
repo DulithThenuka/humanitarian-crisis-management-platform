@@ -35,6 +35,8 @@ public class PartnerCommitmentDto
     public string DestinationZone { get; set; } = string.Empty;
     public decimal EstimatedValueLkr { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public string? LastModifiedBy { get; set; }
 }
 
 public class SectorZoneDto
@@ -140,6 +142,57 @@ public class UpdateCommitmentStatusDto
 {
     [Required, StringLength(50)]
     public string Status { get; set; } = string.Empty;
+}
+
+public class UpdatePartnerOrganisationDto
+{
+    [Required, StringLength(200)]
+    public string Name { get; set; } = string.Empty;
+
+    [Required, StringLength(30)]
+    public string Acronym { get; set; } = string.Empty;
+
+    [Required, StringLength(150)]
+    public string Type { get; set; } = string.Empty;
+
+    [Required, StringLength(150)]
+    public string LeadContact { get; set; } = string.Empty;
+
+    [Required, StringLength(40)]
+    public string Phone { get; set; } = string.Empty;
+
+    [Required, EmailAddress, StringLength(150)]
+    public string Email { get; set; } = string.Empty;
+
+    [StringLength(60)]
+    public string? Status { get; set; }
+
+    [StringLength(120)]
+    public string? MouStatus { get; set; }
+
+    [Range(0, 10000)]
+    public int FieldTeamsCount { get; set; }
+
+    [Range(0, 10000)]
+    public int FleetCount { get; set; }
+}
+
+public class UpdatePartnerCommitmentDto
+{
+    [Required, StringLength(250, MinimumLength = 2)]
+    public string Item { get; set; } = string.Empty;
+
+    [Range(1, 10000000)]
+    public int Qty { get; set; }
+
+    [Required, StringLength(150)]
+    public string DestinationZone { get; set; } = string.Empty;
+
+    [Range(0, 10000000000)]
+    public decimal EstimatedValueLkr { get; set; }
+
+    [StringLength(50)]
+    public string? Status { get; set; }
 }
 
 public class AssignPartnerZoneDto

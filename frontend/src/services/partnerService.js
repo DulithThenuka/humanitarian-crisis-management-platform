@@ -16,6 +16,9 @@ export const partnerService = {
   createPartner: async (payload) => {
     return await apiClient.post('/partners', payload);
   },
+  updatePartner: async (id, payload) => {
+    return await apiClient.put(`/partners/${id}`, payload);
+  },
   updatePartnerStatus: async (id, payload) => {
     return await apiClient.patch(`/partners/${id}/status`, payload);
   },
@@ -25,6 +28,9 @@ export const partnerService = {
   },
   logCommitment: async (payload) => {
     return await apiClient.post('/partners/commitments', payload);
+  },
+  updateCommitment: async (commitmentId, payload) => {
+    return await apiClient.put(`/partners/commitments/${commitmentId}`, payload);
   },
   updateCommitmentStatus: async (commitmentId, status) => {
     return await apiClient.patch(`/partners/commitments/${commitmentId}/status`, { status });
