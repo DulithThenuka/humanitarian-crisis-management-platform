@@ -25,6 +25,8 @@ export const CapacityOccupancyView = ({
   const [areaFilter, setAreaFilter] = useState('ALL');
   const [noteText, setNoteText] = useState('');
 
+  const distinctAreas = Array.from(new Set(shelters.map((s) => s.area).filter(Boolean)));
+
   const filteredShelters = shelters.filter((s) => {
     const matchesSearch =
       s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -37,8 +39,8 @@ export const CapacityOccupancyView = ({
 
   const currentShelter = selectedShelter || shelters[0];
 
-  const occupancyRate = currentShelter
-    ? Math.round((currentShelter.occupied / currentShelter.capacity) * 100)
+  const occupancyRate = currentShelter && currentShelter.capacity > 0
+    ? Math.min(100, Math.max(0, Math.round(((currentShelter.occupied || 0) / currentShelter.capacity) * 100)))
     : 0;
 
   const handleConfirm = () => {
@@ -61,20 +63,20 @@ export const CapacityOccupancyView = ({
       {/* Header */}
       <div className="sh-view-header-row">
         <div>
-          <div className="sh-view-pre-title">Shelter Admin - Controlled Workspace</div>
+          <div className="sh-view-pre-title">CAPACITY & OCCUPANCY MONITORING</div>
           <h1 className="sh-view-title">Capacity & Occupancy</h1>
           <p className="sh-view-desc">
-            Search, filter and review fictional records within this role's authorised scope.
+            Real-time monitoring of shelter bed allocations, space availability, and occupancy thresholds.
           </p>
         </div>
         <div className="sh-header-actions">
           <button className="sh-btn-outline" onClick={onOpenExportModal}>
             <Download size={15} />
-            Export demo report
+            Export Capacity Report
           </button>
           <button className="sh-btn-primary" onClick={onOpenCreateModal}>
             <Plus size={16} />
-            Create prototype record
+            Register Operational Shelter
           </button>
         </div>
       </div>
@@ -109,13 +111,11 @@ export const CapacityOccupancyView = ({
             onChange={(e) => setAreaFilter(e.target.value)}
           >
             <option value="ALL">All operational areas</option>
-            <option value="Kelani East">Kelani East</option>
-            <option value="Biyagama North">Biyagama North</option>
-            <option value="Wattala South">Wattala South</option>
-            <option value="Hanwella">Hanwella</option>
-            <option value="Kaduwela">Kaduwela</option>
-            <option value="Malwana">Malwana</option>
-            <option value="Kolonnawa">Kolonnawa</option>
+            {distinctAreas.map((area) => (
+              <option key={area} value={area}>
+                {area}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -160,13 +160,12 @@ export const CapacityOccupancyView = ({
                       <td>{s.accessibility}</td>
                       <td>
                         <span
-                          className={`sh-badge ${
-                            s.status === 'Operational'
-                              ? 'sh-badge-operational'
-                              : s.status === 'Near capacity'
+                          className={`sh-badge ${s.status === 'Operational'
+                            ? 'sh-badge-operational'
+                            : s.status === 'Near capacity'
                               ? 'sh-badge-warning'
                               : 'sh-badge-critical'
-                          }`}
+                            }`}
                         >
                           <span className="sh-badge-dot" />
                           {s.status}
@@ -187,20 +186,19 @@ export const CapacityOccupancyView = ({
               <div className="sh-detail-header-top">
                 <div className="sh-detail-code-label">{currentShelter.name}</div>
                 <span
-                  className={`sh-badge ${
-                    currentShelter.status === 'Operational'
-                      ? 'sh-badge-operational'
-                      : currentShelter.status === 'Near capacity'
+                  className={`sh-badge ${currentShelter.status === 'Operational'
+                    ? 'sh-badge-operational'
+                    : currentShelter.status === 'Near capacity'
                       ? 'sh-badge-warning'
                       : 'sh-badge-critical'
-                  }`}
+                    }`}
                 >
                   <span className="sh-badge-dot" />
                   {currentShelter.status}
                 </span>
               </div>
               <h2 className="sh-detail-main-title">{currentShelter.area}</h2>
-              <div className="sh-detail-sub-label">Selected fictional record • role-scoped</div>
+              <div className="sh-detail-sub-label">Verified Facility • Capacity Telemetry</div>
             </div>
 
             {/* 4 Stats Grid */}

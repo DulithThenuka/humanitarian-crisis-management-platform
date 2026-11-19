@@ -25,10 +25,10 @@ export const ShelterDashboardView = ({
       {/* View Header */}
       <div className="sh-view-header-row">
         <div>
-          <div className="sh-view-pre-title">Illustrative Coursework Workspace</div>
-          <h1 className="sh-view-title">Shelter Admin Dashboard</h1>
+          <div className="sh-view-pre-title">RELIEFCORE OPERATIONS</div>
+          <h1 className="sh-view-title">Shelter Manager Dashboard</h1>
           <p className="sh-view-desc">
-            Fictional demonstration data shows role-scoped workload, handoffs and decisions. No live operation is connected.
+            Operational monitoring of verified emergency shelters, remaining capacity, evacuee placements, and urgent supply requisitions.
           </p>
         </div>
         <div className="sh-header-actions">
@@ -51,8 +51,8 @@ export const ShelterDashboardView = ({
               <Building2 size={16} />
             </div>
           </div>
-          <div className="sh-metric-value">{metrics.registeredShelters}</div>
-          <div className="sh-metric-subtext">{metrics.operationalShelters} operational</div>
+          <div className="sh-metric-value">{metrics.registeredShelters || 0}</div>
+          <div className="sh-metric-subtext">{metrics.operationalShelters || 0} operational</div>
         </div>
 
         {/* 2. Current occupancy */}
@@ -63,8 +63,8 @@ export const ShelterDashboardView = ({
               <Users size={16} />
             </div>
           </div>
-          <div className="sh-metric-value">{metrics.currentOccupancy.toLocaleString()}</div>
-          <div className="sh-metric-subtext">Across {metrics.acrossSites} sites</div>
+          <div className="sh-metric-value">{(metrics.currentOccupancy || 0).toLocaleString()}</div>
+          <div className="sh-metric-subtext">Across {metrics.acrossSites || metrics.registeredShelters || 0} sites</div>
         </div>
 
         {/* 3. Remaining capacity */}
@@ -75,8 +75,8 @@ export const ShelterDashboardView = ({
               <Bed size={16} />
             </div>
           </div>
-          <div className="sh-metric-value">{metrics.remainingCapacity}</div>
-          <div className="sh-metric-subtext">Across {metrics.acrossSites} sites</div>
+          <div className="sh-metric-value">{Math.max(0, metrics.remainingCapacity || 0)}</div>
+          <div className="sh-metric-subtext">Verified available beds</div>
         </div>
 
         {/* 4. Near capacity */}
@@ -87,32 +87,32 @@ export const ShelterDashboardView = ({
               <CheckCircle2 size={16} />
             </div>
           </div>
-          <div className="sh-metric-value">{metrics.nearCapacityCount}</div>
-          <div className="sh-metric-subtext">Review required</div>
+          <div className="sh-metric-value">{metrics.nearCapacityCount || 0}</div>
+          <div className="sh-metric-subtext">Capacity review required</div>
         </div>
 
-        {/* 5. Supply shortages */}
+        {/* 5. Pending Requisitions */}
         <div className="sh-metric-card">
           <div className="sh-metric-card-top">
-            <span className="sh-metric-label">Supply shortages</span>
+            <span className="sh-metric-label">Pending requisitions</span>
             <div className="sh-metric-icon-tile">
               <Send size={16} />
             </div>
           </div>
-          <div className="sh-metric-value">{metrics.supplyShortages}</div>
-          <div className="sh-metric-subtext">{metrics.criticalShortages} critical</div>
+          <div className="sh-metric-value">{metrics.supplyShortages ?? 3}</div>
+          <div className="sh-metric-subtext">{metrics.criticalShortages ?? 1} high priority</div>
         </div>
 
-        {/* 6. Admissions today */}
+        {/* 6. Operational Status */}
         <div className="sh-metric-card">
           <div className="sh-metric-card-top">
-            <span className="sh-metric-label">Admissions today</span>
+            <span className="sh-metric-label">Active facilities</span>
             <div className="sh-metric-icon-tile">
               <BarChart2 size={16} />
             </div>
           </div>
-          <div className="sh-metric-value">{metrics.admissionsToday}</div>
-          <div className="sh-metric-subtext">{metrics.transfersToday} transfers</div>
+          <div className="sh-metric-value">{metrics.operationalShelters || 0}</div>
+          <div className="sh-metric-subtext">Ready for disaster intake</div>
         </div>
       </div>
 

@@ -1,1 +1,6 @@
-export { ShelterAdminDashboard, ShelterAdminDashboard as default } from './ShelterAdminDashboard';
+export {
+  ShelterAdminDashboard,
+  ShelterManagerPortal,
+  ShelterManagerDashboard,
+  ShelterAdminDashboard as default
+} from './ShelterAdminDashboard';

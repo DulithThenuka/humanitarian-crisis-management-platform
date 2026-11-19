@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { shelterService } from '../../services/shelterService';
 import {
   LayoutGrid,
@@ -19,7 +20,7 @@ import {
 
 // Data
 import {
-  SHELTER_ADMIN_USER,
+  SHELTER_MANAGER_USER,
   INITIAL_METRICS,
   PRIORITY_ATTENTION_ITEMS,
   CONNECTED_ASSISTANCE_WORKFLOW,
@@ -42,6 +43,7 @@ import { ShelterReportsView } from './views/ShelterReportsView';
 import { CreateRecordModal } from './components/CreateRecordModal';
 import { ExportReportModal } from './components/ExportReportModal';
 import { ReviewActionModal } from './components/ReviewActionModal';
+import { CreateResourceRequestModal } from './components/CreateResourceRequestModal';
 
 // Styles
 import './ShelterManager.css';
@@ -49,6 +51,7 @@ import './ShelterManager.css';
 export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   // Navigation State
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -75,7 +78,18 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
   }, [initialTab, location.pathname]);
 
   // Core Data States
-  const [currentUser, setCurrentUser] = useState(SHELTER_ADMIN_USER);
+  const [currentUser, setCurrentUser] = useState(() => {
+    if (user?.name || user?.fullName) {
+      return {
+        ...SHELTER_MANAGER_USER,
+        name: user.fullName || user.name,
+        role: user.role === 6 || user.role === 'ShelterManager' ? 'Shelter Manager' : (user.role || 'Shelter Manager'),
+        shortRole: 'Shelter Manager',
+        avatar: user.initials || 'SM'
+      };
+    }
+    return SHELTER_MANAGER_USER;
+  });
   const [metrics, setMetrics] = useState(INITIAL_METRICS);
   const [shelters, setShelters] = useState(INITIAL_SHELTERS_DATA);
   const [selectedShelterId, setSelectedShelterId] = useState('SH-008');
@@ -186,6 +200,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
   const [reviewModalState, setReviewModalState] = useState({
     isOpen: false,
     actionType: 'allocation',
@@ -348,7 +363,37 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
       operationalShelters: prev.operationalShelters + 1,
       remainingCapacity: prev.remainingCapacity + newShelter.capacity
     }));
-    showToast(`New prototype record created: ${newShelter.name}`);
+    showToast(`Operational shelter registered: ${newShelter.name}`);
+  };
+
+  const handleSaveResourceRequest = async (requestData) => {
+    try {
+      const res = await shelterService.createResourceRequest({
+        shelterId: requestData.shelterId,
+        itemCategory: requestData.itemCategory,
+        quantity: requestData.quantity,
+        unit: requestData.unit,
+        priority: requestData.urgency === 'Critical' ? 3 : requestData.urgency === 'High' ? 2 : requestData.urgency === 'Medium' ? 1 : 0,
+        notes: requestData.notes
+      });
+      const createdItem = res?.data || {
+        id: `SRR-${Math.floor(200 + Math.random() * 800)}`,
+        shelterId: requestData.shelterId,
+        shelterName: shelters.find((s) => s.id === requestData.shelterId)?.name || 'Shelter Facility',
+        itemCategory: requestData.itemCategory,
+        requestedQuantity: `${requestData.quantity} ${requestData.unit}`,
+        urgency: requestData.urgency,
+        urgencyType: requestData.urgency === 'Critical' ? 'critical' : requestData.urgency === 'High' ? 'warning' : 'info',
+        status: 'Pending',
+        statusType: 'info',
+        requestedBy: currentUser.name,
+        eta: 'In Review with Central Logistics'
+      };
+      setResourceRequests((prev) => [createdItem, ...prev]);
+      showToast(`Requisition submitted for ${requestData.itemCategory} (${requestData.quantity} ${requestData.unit})`);
+    } catch (err) {
+      showToast(`Error submitting request: ${err?.message || 'Failed to submit'}`);
+    }
   };
 
   const handleSignOut = () => {
@@ -500,7 +545,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         <header className="sh-top-navbar">
           {/* Breadcrumbs */}
           <div className="sh-top-breadcrumbs">
-            <span className="sh-breadcrumb-portal">Shelter Administrator Portal</span>
+            <span className="sh-breadcrumb-portal">Shelter Manager Portal</span>
             <span className="sh-breadcrumb-current">{tabTitles[activeTab]}</span>
           </div>
 
@@ -542,14 +587,6 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
 
         {/* Workspace Body */}
         <main className="sh-content-body">
-          {/* Coursework Demonstration Banner */}
-          <div className="sh-demo-banner">
-            <ShieldCheck size={18} color="#3d6b4f" />
-            <span>
-              <span className="sh-demo-badge-bold">Coursework prototype</span>: All records, AI results and transactions are fictional demonstration data. Actions are local UI simulations.
-            </span>
-          </div>
-
           {/* Render Active View */}
           {activeTab === 'dashboard' && (
             <ShelterDashboardView
@@ -613,6 +650,10 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
               onConfirmAllocation={(id) => handleOpenReviewAction(id, 'allocation')}
               onRequestClarification={(id) => handleOpenReviewAction(id, 'clarification')}
               onEscalate={(id) => handleOpenReviewAction(id, 'escalation')}
+              onRequestSupplies={(shelter) => {
+                if (shelter?.id) setSelectedShelterId(shelter.id);
+                setIsResourceModalOpen(true);
+              }}
             />
           )}
 
@@ -634,7 +675,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         onConfirm={handleExecuteReviewedAction}
       />
 
-      {/* Prototype Record Creation Modal */}
+      {/* Operational Record Registration Modal */}
       <CreateRecordModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -646,6 +687,15 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         onExportComplete={(msg) => showToast(msg)}
+      />
+
+      {/* Shelter Resource Request Modal */}
+      <CreateResourceRequestModal
+        isOpen={isResourceModalOpen}
+        onClose={() => setIsResourceModalOpen(false)}
+        shelters={shelters}
+        currentShelterId={selectedShelterId}
+        onSave={handleSaveResourceRequest}
       />
 
       {/* Interactive Toast Notifications */}
@@ -661,4 +711,6 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
   );
 };
 
+export const ShelterManagerPortal = ShelterAdminDashboard;
+export const ShelterManagerDashboard = ShelterAdminDashboard;
 export default ShelterAdminDashboard;

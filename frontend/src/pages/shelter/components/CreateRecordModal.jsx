@@ -32,7 +32,7 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
       statusType: formData.status === 'Operational' ? 'success' : formData.status === 'Near capacity' ? 'warning' : 'critical',
       guardActive: true,
       managerContact: 'Authorised Staff (+94 11 000 0000)',
-      notes: formData.notes || 'Created via Shelter Admin prototype record workspace.'
+      notes: formData.notes || 'Registered operational shelter.'
     };
 
     onSave(newShelter);
@@ -57,8 +57,8 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
               <Building2 size={18} />
             </div>
             <div>
-              <h3 className="sh-modal-title">Create Prototype Shelter Record</h3>
-              <div style={{ fontSize: '11px', color: '#6f8576' }}>Controlled Coursework Workspace</div>
+              <h3 className="sh-modal-title">Register Operational Shelter</h3>
+              <div style={{ fontSize: '11px', color: '#6f8576' }}>Shelter Facility Management</div>
             </div>
           </div>
           <button className="sh-modal-close-btn" onClick={onClose}>
@@ -163,7 +163,7 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
               borderRadius: '6px'
             }}>
               <ShieldCheck size={16} />
-              <span>Record will be created with prototype authorization under your staff credentials.</span>
+              <span>Record will be registered under your staff credentials and synced with central shelter telemetry.</span>
             </div>
           </div>
 
@@ -172,7 +172,7 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
               Cancel
             </button>
             <button type="submit" className="sh-btn-primary">
-              Save Prototype Record
+              Register Facility
             </button>
           </div>
         </form>

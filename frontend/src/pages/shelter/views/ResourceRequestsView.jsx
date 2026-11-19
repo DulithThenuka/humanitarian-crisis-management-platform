@@ -29,6 +29,8 @@ export const ResourceRequestsView = ({
   const [noteText, setNoteText] = useState('');
   const [activeSubTab, setActiveSubTab] = useState('shelters'); // 'shelters' or 'requests'
 
+  const distinctAreas = Array.from(new Set(shelters.map((s) => s.area).filter(Boolean)));
+
   const filteredShelters = shelters.filter((s) => {
     const matchesSearch =
       s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -61,20 +63,20 @@ export const ResourceRequestsView = ({
       {/* Header */}
       <div className="sh-view-header-row">
         <div>
-          <div className="sh-view-pre-title">Shelter Admin - Controlled Workspace</div>
+          <div className="sh-view-pre-title">SHELTER SUPPLY & REQUISITIONS</div>
           <h1 className="sh-view-title">Resource Requests</h1>
           <p className="sh-view-desc">
-            Search, filter and review fictional records within this role's authorised scope.
+            Request relief supplies, medical kits, and bedding from Logistics, and monitor dispatch status.
           </p>
         </div>
         <div className="sh-header-actions">
           <button className="sh-btn-outline" onClick={onOpenExportModal}>
             <Download size={15} />
-            Export demo report
+            Export Requests Report
           </button>
-          <button className="sh-btn-primary" onClick={onOpenCreateModal}>
+          <button className="sh-btn-primary" onClick={() => onRequestSupplies ? onRequestSupplies() : onOpenCreateModal()}>
             <Plus size={16} />
-            Create prototype record
+            Request Supplies
           </button>
         </div>
       </div>
@@ -113,13 +115,6 @@ export const ResourceRequestsView = ({
           }}
         >
           <span>Active Resource Requisitions</span>
-          <span style={{
-            fontSize: '10px',
-            backgroundColor: '#fee2e2',
-            color: '#b91c1c',
-            padding: '1px 6px',
-            borderRadius: '10px'
-          }}>2 urgent</span>
         </button>
       </div>
 
@@ -153,13 +148,11 @@ export const ResourceRequestsView = ({
             onChange={(e) => setAreaFilter(e.target.value)}
           >
             <option value="ALL">All operational areas</option>
-            <option value="Kelani East">Kelani East</option>
-            <option value="Biyagama North">Biyagama North</option>
-            <option value="Wattala South">Wattala South</option>
-            <option value="Hanwella">Hanwella</option>
-            <option value="Kaduwela">Kaduwela</option>
-            <option value="Malwana">Malwana</option>
-            <option value="Kolonnawa">Kolonnawa</option>
+            {distinctAreas.map((area) => (
+              <option key={area} value={area}>
+                {area}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -205,13 +198,12 @@ export const ResourceRequestsView = ({
                         <td>{s.accessibility}</td>
                         <td>
                           <span
-                            className={`sh-badge ${
-                              s.status === 'Operational'
-                                ? 'sh-badge-operational'
-                                : s.status === 'Near capacity'
-                              ? 'sh-badge-warning'
-                              : 'sh-badge-critical'
-                            }`}
+                            className={`sh-badge ${s.status === 'Operational'
+                              ? 'sh-badge-operational'
+                              : s.status === 'Near capacity'
+                                ? 'sh-badge-warning'
+                                : 'sh-badge-critical'
+                              }`}
                           >
                             <span className="sh-badge-dot" />
                             {s.status}
@@ -232,20 +224,19 @@ export const ResourceRequestsView = ({
                 <div className="sh-detail-header-top">
                   <div className="sh-detail-code-label">{currentShelter.name}</div>
                   <span
-                    className={`sh-badge ${
-                      currentShelter.status === 'Operational'
-                        ? 'sh-badge-operational'
-                        : currentShelter.status === 'Near capacity'
+                    className={`sh-badge ${currentShelter.status === 'Operational'
+                      ? 'sh-badge-operational'
+                      : currentShelter.status === 'Near capacity'
                         ? 'sh-badge-warning'
                         : 'sh-badge-critical'
-                    }`}
+                      }`}
                   >
                     <span className="sh-badge-dot" />
                     {currentShelter.status}
                   </span>
                 </div>
                 <h2 className="sh-detail-main-title">{currentShelter.area}</h2>
-                <div className="sh-detail-sub-label">Selected fictional record • role-scoped</div>
+                <div className="sh-detail-sub-label">Verified Facility • Requisition Target</div>
               </div>
 
               {/* 4 Stats Grid */}
@@ -260,7 +251,7 @@ export const ResourceRequestsView = ({
                 </div>
                 <div className="sh-detail-stat-tile">
                   <div className="sh-detail-stat-label">Available</div>
-                  <div className="sh-detail-stat-val">{currentShelter.available}</div>
+                  <div className="sh-detail-stat-val">{Math.max(0, currentShelter.available)}</div>
                 </div>
                 <div className="sh-detail-stat-tile">
                   <div className="sh-detail-stat-label">Accessibility</div>
@@ -275,10 +266,10 @@ export const ResourceRequestsView = ({
 
               {/* Note & Reason */}
               <div className="sh-decision-note-box">
-                <label className="sh-note-label">Authorised Note / Decision Reason</label>
+                <label className="sh-note-label">Requisition Justification Note</label>
                 <textarea
                   className="sh-note-textarea"
-                  placeholder="Avoid unnecessary personal information..."
+                  placeholder="Operational details, priority context or warehouse routing..."
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
                 />
@@ -286,14 +277,17 @@ export const ResourceRequestsView = ({
 
               {/* Action Buttons */}
               <div className="sh-action-stack">
-                <button className="sh-btn-confirm-full" onClick={handleConfirm}>
-                  Confirm allocation
+                <button
+                  className="sh-btn-confirm-full"
+                  onClick={() => onRequestSupplies ? onRequestSupplies(currentShelter) : onOpenCreateModal()}
+                >
+                  Request Supplies for this Facility
                 </button>
                 <button className="sh-btn-secondary-full" onClick={handleClarify}>
-                  Request clarification
+                  Request Logistics Clarification
                 </button>
                 <button className="sh-btn-secondary-full" onClick={handleEscalateAction}>
-                  Escalate
+                  Escalate Supply Shortage
                 </button>
               </div>
             </div>

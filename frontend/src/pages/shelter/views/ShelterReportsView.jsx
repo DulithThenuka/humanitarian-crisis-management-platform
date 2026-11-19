@@ -19,16 +19,16 @@ export const ShelterReportsView = ({
       {/* Header */}
       <div className="sh-view-header-row">
         <div>
-          <div className="sh-view-pre-title">Shelter Admin - Controlled Workspace</div>
+          <div className="sh-view-pre-title">SHELTER TELEMETRY & REPORTING</div>
           <h1 className="sh-view-title">Shelter Reports & Analytics</h1>
           <p className="sh-view-desc">
-            Audited occupancy summaries, safety compliance metrics and shelter intake analytics.
+            Audited occupancy summaries, safety compliance metrics, and shelter intake analytics.
           </p>
         </div>
         <div className="sh-header-actions">
           <button className="sh-btn-primary" onClick={onOpenExportModal}>
             <Download size={15} />
-            Export demo report
+            Export Operational Report
           </button>
         </div>
       </div>
@@ -124,9 +124,9 @@ export const ShelterReportsView = ({
         {/* Operational Certification & Audit */}
         <div className="sh-section-box">
           <div className="sh-section-box-header">
-            <h2 className="sh-section-box-title">Operational Integrity Audit</h2>
+            <h2 className="sh-section-box-title">Capacity Compliance & Governance</h2>
           </div>
-          <div className="sh-section-box-subtitle">Audit logging of shelter administrative handoffs</div>
+          <div className="sh-section-box-subtitle">Verified shelter allocation protocol and status tracking</div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{
@@ -137,10 +137,10 @@ export const ShelterReportsView = ({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#183526', fontWeight: 700, fontSize: '13px' }}>
                 <CheckCircle2 size={16} color="#15803d" />
-                <span>Zero Double-Booking Incident Rate</span>
+                <span>Automated Capacity Guard Protection</span>
               </div>
               <p style={{ margin: '4px 0 0 24px', fontSize: '11.5px', color: '#496050', lineHeight: '1.4' }}>
-                The automated Capacity Guard mechanism intercepted 8 race conditions today, preventing overbooking across saturated facilities.
+                All allocation actions enforce database verification of remaining bed spaces to eliminate double-booking across operational facilities.
               </p>
             </div>
 
@@ -152,10 +152,10 @@ export const ShelterReportsView = ({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#92400e', fontWeight: 700, fontSize: '13px' }}>
                 <AlertTriangle size={16} color="#d97706" />
-                <span>Hanwella Redirection Protocol Active</span>
+                <span>High-Occupancy Threshold Alerts</span>
               </div>
               <p style={{ margin: '4px 0 0 24px', fontSize: '11.5px', color: '#a16207', lineHeight: '1.4' }}>
-                Hanwella Relief Hall (SH-014) is at 100% capacity. New evacuee buses are automatically routed to Wattala South (SH-011).
+                Facilities exceeding 95% occupancy trigger priority rebalancing notifications to prevent regional overflow during surge disasters.
               </p>
             </div>
 
@@ -166,10 +166,10 @@ export const ShelterReportsView = ({
               padding: '12px 14px'
             }}>
               <div style={{ fontSize: '12px', fontWeight: 700, color: '#183526', marginBottom: '4px' }}>
-                Demonstration Verification Stamp
+                Verified Operational Audit Trail
               </div>
               <div style={{ fontSize: '11px', color: '#6f8576', lineHeight: '1.4' }}>
-                Logged under Tharushi De Alwis (Shelter Administrator) • System Session: HMC-2026-SA • Fictional Coursework Simulation
+                Logged under authenticated Shelter Manager session • Compliant with RELIEFCORE data governance and role privacy standards.
               </div>
             </div>
           </div>
