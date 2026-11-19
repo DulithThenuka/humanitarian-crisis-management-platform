@@ -13,11 +13,6 @@ public class AssistanceRequestsController : BaseApiController
     private readonly IAssistanceRequestService _service;
     private readonly ICoordinatorService? _coordinatorService;
 
-    public AssistanceRequestsController(IAssistanceRequestService service)
-    {
-        _service = service;
-    }
-
     public AssistanceRequestsController(
         IAssistanceRequestService service,
         ICoordinatorService coordinatorService)

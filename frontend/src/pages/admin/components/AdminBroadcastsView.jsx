@@ -34,7 +34,7 @@ const SEVERITY_LEVELS = [
   { level: 'Info', badge: 'bg-slate-100 text-slate-700 border-slate-200' }
 ];
 
-export const AdminBroadcastsView = ({ showToast, currentUser }) => {
+export const AdminBroadcastsView = ({ showToast, currentUser, onRefresh }) => {
   const [broadcasts, setBroadcasts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isComposeOpen, setIsComposeOpen] = useState(false);
@@ -87,6 +87,7 @@ export const AdminBroadcastsView = ({ showToast, currentUser }) => {
       });
       if (res?.succeeded && res.data) {
         setBroadcasts(prev => [res.data, ...prev]);
+        if (typeof onRefresh === 'function') onRefresh();
         showToast(`Emergency alert #${res.data.id.substring(0, 8)} transmitted across telecom gateways.`);
         setIsComposeOpen(false);
         setComposeForm({
@@ -110,6 +111,7 @@ export const AdminBroadcastsView = ({ showToast, currentUser }) => {
       setBroadcasts(prev =>
         prev.map(b => (b.id === broadcastId ? { ...b, isActive: false, status: 'Archived / De-escalated' } : b))
       );
+      if (typeof onRefresh === 'function') onRefresh();
       showToast('Broadcast archived and de-escalated from public radar.');
     } catch {
       showToast('Failed to archive broadcast.', 'error');

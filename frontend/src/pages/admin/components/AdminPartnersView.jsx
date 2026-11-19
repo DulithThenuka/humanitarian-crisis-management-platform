@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { partnerService } from '../../../services/partnerService';
 
-export const AdminPartnersView = ({ showToast }) => {
+export const AdminPartnersView = ({ showToast, onRefresh }) => {
   const [partners, setPartners] = useState([]);
   const [sectorZones, setSectorZones] = useState([]);
   const [commitments, setCommitments] = useState([]);
@@ -137,6 +137,7 @@ export const AdminPartnersView = ({ showToast }) => {
           fleetCount: 8
         });
         loadPartnerData();
+        if (typeof onRefresh === 'function') onRefresh();
       } else {
         setRegisterError(res?.errors?.[0] || 'Unable to register organization.');
       }
@@ -162,6 +163,7 @@ export const AdminPartnersView = ({ showToast }) => {
         )
       );
       showToast(`${partner.acronym} verification status updated to ${newStatus}.`);
+      if (typeof onRefresh === 'function') onRefresh();
     } catch {
       showToast('Failed to update partner verification status.', 'error');
     }
@@ -183,6 +185,7 @@ export const AdminPartnersView = ({ showToast }) => {
         showToast('Relief commitment registered and queued for logistics dispatch.');
         setIsCommitmentModalOpen(false);
         loadPartnerData();
+        if (typeof onRefresh === 'function') onRefresh();
       } else {
         showToast(res?.errors?.[0] || 'Error recording commitment.', 'error');
       }
@@ -203,6 +206,7 @@ export const AdminPartnersView = ({ showToast }) => {
         showToast('Partner deployed and registered to operational sector zone.');
         setIsAssignZoneModalOpen(false);
         loadPartnerData();
+        if (typeof onRefresh === 'function') onRefresh();
       } else {
         showToast(res?.errors?.[0] || 'Failed to assign partner to zone.', 'error');
       }

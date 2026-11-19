@@ -178,6 +178,7 @@ export const AdminUsersView = ({
             updateUsersList((prev) =>
               (Array.isArray(prev) ? prev : []).map((u) => (u.id === user.id ? { ...u, isActive: !user.isActive } : u))
             );
+            if (typeof loadData === 'function') loadData();
             if (showToast) showToast(`Account for ${user.fullName} ${!user.isActive ? 'activated' : 'deactivated'}.`);
           } else {
             if (showToast) showToast(res?.errors?.[0] || 'Failed to update account status.', 'error');
@@ -207,6 +208,7 @@ export const AdminUsersView = ({
       });
       if (res?.succeeded && res.data) {
         updateUsersList((prev) => [res.data, ...(Array.isArray(prev) ? prev : [])]);
+        if (typeof loadData === 'function') loadData();
         if (typeof onUserCountChange === 'function') {
           onUserCountChange(1);
         }
@@ -251,6 +253,7 @@ export const AdminUsersView = ({
         updateUsersList((prev) =>
           (Array.isArray(prev) ? prev : []).map((u) => (u.id === selectedUser.id ? { ...u, ...res.data } : u))
         );
+        if (typeof loadData === 'function') loadData();
         if (showToast) showToast(`User ${editForm.fullName} updated successfully.`);
         setIsEditModalOpen(false);
         setSelectedUser(null);
@@ -270,6 +273,7 @@ export const AdminUsersView = ({
         updateUsersList((prev) =>
           (Array.isArray(prev) ? prev : []).map((u) => (u.id === roleModal.user.id ? { ...u, role: roleModal.newRole } : u))
         );
+        if (typeof loadData === 'function') loadData();
         if (showToast) showToast(`Role for ${roleModal.user.fullName} changed to ${roleModal.newRole}.`);
         setRoleModal({ isOpen: false, user: null, newRole: 'Coordinator' });
       } else {

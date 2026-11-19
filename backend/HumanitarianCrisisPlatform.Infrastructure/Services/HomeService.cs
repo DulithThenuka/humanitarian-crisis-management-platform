@@ -462,58 +462,90 @@ public class HomeService : IHomeService
 
     public async Task<Result<IReadOnlyList<HomeAlertDto>>> GetActiveAlertsAsync(CancellationToken cancellationToken = default)
     {
-        var dbCrises = await _context.CrisisEvents
-            .Where(c => c.IsActive)
-            .OrderByDescending(c => c.Severity)
-            .ThenByDescending(c => c.StartDate)
-            .ToListAsync(cancellationToken);
-
         var alerts = new List<HomeAlertDto>();
 
-        if (dbCrises.Count > 0)
+        // 1. Authoritative active live emergency broadcasts dispatched by Admin/Command
+        var activeBroadcasts = await _context.EmergencyBroadcasts
+            .Where(b => b.IsActive && b.Status == "Active Live")
+            .OrderByDescending(b => b.SentAt)
+            .ToListAsync(cancellationToken);
+
+        if (activeBroadcasts.Count > 0)
         {
-            foreach (var crisis in dbCrises)
+            foreach (var b in activeBroadcasts)
             {
-                var level = crisis.Severity >= 4 ? "CRITICAL" : crisis.Severity == 3 ? "WARNING" : "ADVISORY";
-                var id = $"ALT-{crisis.StartDate.Year}-{crisis.Id.ToString()[..5].ToUpper()}";
+                var level = b.Severity.Equals("Emergency", StringComparison.OrdinalIgnoreCase) || b.Severity.Equals("Critical", StringComparison.OrdinalIgnoreCase)
+                    ? "CRITICAL"
+                    : b.Severity.Equals("Warning", StringComparison.OrdinalIgnoreCase) || b.Severity.Equals("High", StringComparison.OrdinalIgnoreCase)
+                    ? "WARNING"
+                    : b.Severity.Equals("Advisory", StringComparison.OrdinalIgnoreCase)
+                    ? "ADVISORY"
+                    : b.Severity.ToUpperInvariant();
+
                 alerts.Add(new HomeAlertDto
                 {
-                    Id = id,
+                    Id = $"ALT-{b.SentAt.Year}-{b.Id.ToString()[..5].ToUpper()}",
                     Level = level,
-                    Title = $"{crisis.Title} (Level {crisis.Severity})",
-                    Message = !string.IsNullOrWhiteSpace(crisis.Description) 
-                        ? crisis.Description 
-                        : $"{crisis.DisasterType} warning active. Emergency response operations deployed.",
-                    Region = !string.IsNullOrWhiteSpace(crisis.Title) && crisis.Title.Contains("Western", StringComparison.OrdinalIgnoreCase)
-                        ? "Western Province Lowlands"
-                        : "Disaster Perimeter Zone",
-                    IssuedAt = crisis.StartDate
+                    Title = b.Title,
+                    Message = b.Message,
+                    Region = !string.IsNullOrWhiteSpace(b.TargetRegion) ? b.TargetRegion : "Western Province Lowlands",
+                    IssuedAt = b.SentAt
                 });
             }
         }
         else
         {
-            alerts.AddRange(new List<HomeAlertDto>
+            var dbCrises = await _context.CrisisEvents
+                .Where(c => c.IsActive)
+                .OrderByDescending(c => c.Severity)
+                .ThenByDescending(c => c.StartDate)
+                .ToListAsync(cancellationToken);
+
+            if (dbCrises.Count > 0)
             {
-                new()
+                foreach (var crisis in dbCrises)
                 {
-                    Id = "ALT-2026-001",
-                    Level = "CRITICAL",
-                    Title = "Kelani River Crest Warning - Sector 3",
-                    Message = "Water levels have exceeded minor flood thresholds. Residents in low-lying riverside areas are advised to relocate to designated high-ground shelters.",
-                    Region = "Colombo & Gampaha Lowlands",
-                    IssuedAt = DateTime.UtcNow.AddHours(-1)
-                },
-                new()
-                {
-                    Id = "ALT-2026-002",
-                    Level = "WARNING",
-                    Title = "A1 Highway Detour Near Gampaha",
-                    Message = "Mudslide debris has closed westbound lanes on the A1 corridor. Emergency convoys are being rerouted through alternative high ground corridors.",
-                    Region = "Gampaha District",
-                    IssuedAt = DateTime.UtcNow.AddHours(-3)
+                    var level = crisis.Severity >= 4 ? "CRITICAL" : crisis.Severity == 3 ? "WARNING" : "ADVISORY";
+                    var id = $"ALT-{crisis.StartDate.Year}-{crisis.Id.ToString()[..5].ToUpper()}";
+                    alerts.Add(new HomeAlertDto
+                    {
+                        Id = id,
+                        Level = level,
+                        Title = $"{crisis.Title} (Level {crisis.Severity})",
+                        Message = !string.IsNullOrWhiteSpace(crisis.Description) 
+                            ? crisis.Description 
+                            : $"{crisis.DisasterType} warning active. Emergency response operations deployed.",
+                        Region = !string.IsNullOrWhiteSpace(crisis.Title) && crisis.Title.Contains("Western", StringComparison.OrdinalIgnoreCase)
+                            ? "Western Province Lowlands"
+                            : "Disaster Perimeter Zone",
+                        IssuedAt = crisis.StartDate
+                    });
                 }
-            });
+            }
+            else
+            {
+                alerts.AddRange(new List<HomeAlertDto>
+                {
+                    new()
+                    {
+                        Id = "ALT-2026-001",
+                        Level = "CRITICAL",
+                        Title = "Kelani River Crest Warning - Sector 3",
+                        Message = "Water levels have exceeded minor flood thresholds. Residents in low-lying riverside areas are advised to relocate to designated high-ground shelters.",
+                        Region = "Colombo & Gampaha Lowlands",
+                        IssuedAt = DateTime.UtcNow.AddHours(-1)
+                    },
+                    new()
+                    {
+                        Id = "ALT-2026-002",
+                        Level = "WARNING",
+                        Title = "A1 Highway Detour Near Gampaha",
+                        Message = "Mudslide debris has closed westbound lanes on the A1 corridor. Emergency convoys are being rerouted through alternative high ground corridors.",
+                        Region = "Gampaha District",
+                        IssuedAt = DateTime.UtcNow.AddHours(-3)
+                    }
+                });
+            }
         }
 
         return Result<IReadOnlyList<HomeAlertDto>>.Success(alerts);

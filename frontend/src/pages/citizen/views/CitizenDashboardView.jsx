@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FileText,
   Clock,
@@ -14,6 +14,7 @@ import {
   Compass,
   MessageSquare
 } from 'lucide-react';
+import { adminService } from '../../../services/adminService';
 import {
   DASHBOARD_METRICS,
   RECENT_REQUESTS,
@@ -21,6 +22,22 @@ import {
 } from '../data/citizenPortalData';
 
 export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
+  const [activeAlert, setActiveAlert] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    adminService.getActiveBroadcasts()
+      .then(res => {
+        if (!isMounted) return;
+        const list = res?.succeeded && Array.isArray(res.data) ? res.data : Array.isArray(res) ? res : [];
+        if (list.length > 0) {
+          setActiveAlert(list[0]);
+        }
+      })
+      .catch(() => {});
+    return () => { isMounted = false; };
+  }, []);
+
   return (
     <div className="cp-view-container">
       {/* 1. Verified Flood Warning Red Alert Banner */}
@@ -28,9 +45,11 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
         <div className="cp-warning-left">
           <AlertTriangle size={18} className="cp-warning-icon" />
           <div>
-            <span className="cp-warning-bold">Verified flood warning · Kelani East</span>
+            <span className="cp-warning-bold">
+              {activeAlert ? `${activeAlert.title} · ${activeAlert.targetRegion || 'Western Province'}` : 'Verified flood warning · Kelani East'}
+            </span>
             <span className="cp-warning-text">
-              Avoid flooded roads and follow official evacuation guidance.
+              {activeAlert ? activeAlert.message : 'Avoid flooded roads and follow official evacuation guidance.'}
             </span>
           </div>
         </div>
@@ -41,11 +60,11 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
               borderRadius: '12px',
               fontSize: '11px',
               fontWeight: 700,
-              backgroundColor: '#fee2e2',
-              color: '#dc2626'
+              backgroundColor: (activeAlert?.severity || 'Critical').toLowerCase() === 'warning' ? '#fef3c7' : '#fee2e2',
+              color: (activeAlert?.severity || 'Critical').toLowerCase() === 'warning' ? '#b45309' : '#dc2626'
             }}
           >
-            ● Critical
+            ● {activeAlert?.severity || 'Critical'}
           </span>
           <button
             onClick={() => onSelectTab('alerts')}
