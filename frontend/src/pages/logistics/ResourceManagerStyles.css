@@ -71,6 +71,7 @@
 .rm-portal-container {
   display: flex;
   height: 100vh;
+  min-height: 100vh;
   max-height: 100vh;
   width: 100%;
   background-color: var(--rm-sidebar-bg);
@@ -90,8 +91,12 @@
   border-right: 1px solid var(--rm-sidebar-border);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;
+  min-height: 100vh;
   max-height: 100vh;
+  position: sticky;
+  top: 0;
+  left: 0;
   z-index: 50;
   overflow-y: auto;
   overflow-x: hidden;
@@ -252,7 +257,9 @@
 
 /* Nav Menu */
 .rm-nav-menu {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   padding: 4px 12px;
   display: flex;
   flex-direction: column;
@@ -306,6 +313,9 @@
 .rm-sidebar-footer {
   padding: 16px 14px;
   border-top: 1px solid var(--rm-sidebar-border);
+  margin-top: auto;
+  background-color: var(--rm-sidebar-bg);
+  flex-shrink: 0;
 }
 
 .rm-privacy-notice-box {
@@ -369,7 +379,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;
+  min-height: 100vh;
   max-height: 100vh;
   min-width: 0;
   overflow-y: auto;
@@ -893,6 +904,7 @@
 .rm-line-chart-container {
   position: relative;
   width: 100%;
+  min-height: 220px;
   margin-top: 14px;
   user-select: none;
 }
@@ -900,8 +912,78 @@
 .rm-line-chart-svg {
   width: 100%;
   height: auto;
+  aspect-ratio: 680 / 220;
   display: block;
   overflow: visible;
+}
+
+/* Fallback & Legacy Bar Chart styles */
+.rm-chart-placeholder {
+  display: flex;
+  align-items: flex-end;
+  height: 220px;
+  width: 100%;
+  gap: 12px;
+  padding: 10px 0;
+  box-sizing: border-box;
+}
+
+.rm-chart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 180px;
+  font-size: 11px;
+  color: #8d9a8f;
+  font-weight: 600;
+  padding-right: 8px;
+  border-right: 1px solid #e6ece3;
+}
+
+.rm-chart-bars-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex: 1;
+  height: 180px;
+  padding: 0 4px;
+}
+
+.rm-chart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.rm-chart-bar-track {
+  width: 18px;
+  height: 150px;
+  background-color: #f1f5f0;
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.rm-chart-bar-fill {
+  width: 100%;
+  background-color: #1e3d2c;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+}
+
+.rm-chart-bar-fill.rm-bar-active {
+  background-color: #2e6044;
+}
+
+.rm-chart-label {
+  font-size: 11px;
+  color: #657367;
+  font-weight: 500;
 }
 
 /* Floating Tooltip Bubble */
@@ -1376,16 +1458,19 @@
   .rm-portal-container {
     flex-direction: column;
     height: auto;
+    min-height: 100vh;
     max-height: none;
     overflow: visible;
-    background-color: var(--rm-body-bg);
+    background-color: var(--rm-sidebar-bg);
   }
   .rm-sidebar {
     width: 100%;
     min-width: 100%;
     height: auto;
+    min-height: auto;
     max-height: none;
     position: relative;
+    background-color: var(--rm-sidebar-bg);
   }
   .rm-main-content {
     height: auto;

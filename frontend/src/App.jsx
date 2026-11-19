@@ -7,7 +7,7 @@ import './assets/styles.css';
 
 function AppLayout() {
   return (
-    <main style={{ minHeight: '100vh', width: '100%', overflowX: 'clip' }}>
+    <main style={{ minHeight: '100vh', width: '100%', overflowX: 'clip', backgroundColor: '#14291e' }}>
       <AppRoutes />
     </main>
   );
