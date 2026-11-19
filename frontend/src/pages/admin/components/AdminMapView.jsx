@@ -115,8 +115,8 @@ export const AdminMapView = ({ showToast }) => {
   // Filter features with valid coordinates safely
   const safeCrises = Array.isArray(crises) ? crises : [];
   const safeShelters = Array.isArray(shelters) ? shelters : [];
-  const validCrises = safeCrises.filter(c => c && c.latitude && c.longitude);
-  const validShelters = safeShelters.filter(s => s && s.latitude && s.longitude);
+  const validCrises = safeCrises.filter(c => c && !isNaN(Number(c.latitude)) && !isNaN(Number(c.longitude)) && Number(c.latitude) !== 0);
+  const validShelters = safeShelters.filter(s => s && !isNaN(Number(s.latitude)) && !isNaN(Number(s.longitude)) && Number(s.latitude) !== 0);
 
   return (
     <div className="space-y-6">
@@ -214,7 +214,7 @@ export const AdminMapView = ({ showToast }) => {
               validCrises.map(crisis => (
                 <React.Fragment key={crisis.id}>
                   <Marker
-                    position={[crisis.latitude, crisis.longitude]}
+                    position={[Number(crisis.latitude), Number(crisis.longitude)]}
                     icon={createMarkerIcon('#e11d48', 'crisis')}
                     eventHandlers={{
                       click: () =>
@@ -245,8 +245,8 @@ export const AdminMapView = ({ showToast }) => {
                   {/* Hazard Radius */}
                   {layers.hazardRadius && crisis.affectedAreaRadius && (
                     <Circle
-                      center={[crisis.latitude, crisis.longitude]}
-                      radius={(crisis.affectedAreaRadius || 5) * 1000}
+                      center={[Number(crisis.latitude), Number(crisis.longitude)]}
+                      radius={(Number(crisis.affectedAreaRadius) || 5) * 1000}
                       pathOptions={{
                         color: '#e11d48',
                         fillColor: '#f43f5e',
@@ -264,7 +264,7 @@ export const AdminMapView = ({ showToast }) => {
               validShelters.map(shelter => (
                 <Marker
                   key={shelter.id}
-                  position={[shelter.latitude, shelter.longitude]}
+                  position={[Number(shelter.latitude), Number(shelter.longitude)]}
                   icon={createMarkerIcon('#059669', 'shelter')}
                   eventHandlers={{
                     click: () =>

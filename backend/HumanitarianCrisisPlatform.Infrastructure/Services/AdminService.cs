@@ -960,8 +960,8 @@ public class AdminService : IAdminService
             GeneratedBy = !string.IsNullOrWhiteSpace(generatedByName) ? generatedByName : "Operations Administrator",
             CasualtiesReported = 0,
             PeopleDisplaced = openRequests * 4,
-            SheltersActive = activeShelters > 0 ? activeShelters : 16,
-            TeamsDeployed = activeVolunteers > 0 ? activeVolunteers : 42,
+            SheltersActive = activeShelters,
+            TeamsDeployed = activeVolunteers,
             RoadPassabilityStatus = "Major arterial roads monitored; rescue dinghies operating in Kelani basin",
             ExecutiveSummary = !string.IsNullOrWhiteSpace(dto.ExecutiveSummary) 
                 ? dto.ExecutiveSummary 
@@ -1005,19 +1005,17 @@ public class AdminService : IAdminService
     public async Task<Result<AdminAiGovernanceStatsDto>> GetAiGovernanceStatsAsync(CancellationToken cancellationToken = default)
     {
         var rawAudits = await _context.AIDecisionAudits.ToListAsync(cancellationToken);
-        var total = rawAudits.Count > 0 ? rawAudits.Count : 24;
+        var total = rawAudits.Count;
         var overrides = rawAudits.Count(a => a.WasOverridden);
-        if (overrides == 0 && total > 0) overrides = 4;
-
         var autoApproved = total - overrides;
-        var autoRate = Math.Round((double)autoApproved / total * 100, 1);
-        var overrideRate = Math.Round((double)overrides / total * 100, 1);
+        var autoRate = total > 0 ? Math.Round((double)autoApproved / total * 100, 1) : 100.0;
+        var overrideRate = total > 0 ? Math.Round((double)overrides / total * 100, 1) : 0.0;
 
         var stats = new AdminAiGovernanceStatsDto
         {
             TotalDecisionsCount = total,
-            AutomaticApprovalRate = autoRate > 0 ? autoRate : 83.3,
-            HumanOverrideRate = overrideRate > 0 ? overrideRate : 16.7,
+            AutomaticApprovalRate = autoRate,
+            HumanOverrideRate = overrideRate,
             AverageConfidencePercent = 94.6,
             ConfidenceDistribution = new Dictionary<string, int>
             {

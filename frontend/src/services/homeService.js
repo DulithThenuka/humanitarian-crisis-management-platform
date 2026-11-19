@@ -31,6 +31,17 @@ export const homeService = {
   },
 
   /**
+   * Public live emergency broadcasts from national command.
+   */
+  getBroadcasts: async ({ activeOnly, severity } = {}) => {
+    const params = new URLSearchParams();
+    if (typeof activeOnly === 'boolean') params.append('activeOnly', activeOnly.toString());
+    if (severity) params.append('severity', severity);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return await apiClient.get(`/admin/broadcasts${query}`);
+  },
+
+  /**
    * Emergency hotline directory (DMC 117, Ambulance 1990, Police 119).
    */
   getHotlines: async () => {
