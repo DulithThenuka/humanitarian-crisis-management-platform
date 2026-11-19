@@ -114,11 +114,11 @@ export const NotificationDetailView = ({
       </div>
 
       {/* 4. Top Overview Card */}
-      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+      <div style={{ background: '#ffffff', border: '1px solid #dfe5d8', borderRadius: '10px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-              <span style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>{currentNotif.id}</span>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: '#14291e' }}>{currentNotif.id}</span>
               <span className={`status-pill-badge ${currentNotif.status.toLowerCase()}`}>
                 <span className="dot-status"></span>
                 <span>{currentNotif.status}</span>
@@ -130,28 +130,28 @@ export const NotificationDetailView = ({
             <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#0f766e' }}>
               {currentNotif.name}
             </h2>
-            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+            <div style={{ fontSize: '12px', color: '#657367', marginTop: '2px' }}>
               {currentNotif.subtitle}
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '16px', textAlign: 'right' }}>
             <div>
-              <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase' }}>Operational Area</div>
-              <strong style={{ fontSize: '12.5px', color: '#0f172a' }}>{currentNotif.operationalArea}</strong>
+              <div style={{ fontSize: '11px', color: '#657367', textTransform: 'uppercase' }}>Operational Area</div>
+              <strong style={{ fontSize: '12.5px', color: '#14291e' }}>{currentNotif.operationalArea}</strong>
             </div>
             <div>
-              <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase' }}>Responsible Auth</div>
-              <strong style={{ fontSize: '12.5px', color: '#0f172a' }}>{currentNotif.organisation}</strong>
+              <div style={{ fontSize: '11px', color: '#657367', textTransform: 'uppercase' }}>Responsible Auth</div>
+              <strong style={{ fontSize: '12.5px', color: '#14291e' }}>{currentNotif.organisation}</strong>
             </div>
           </div>
         </div>
 
         {/* 4 KPI Metric Pills */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', marginTop: '4px' }}>
-          <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-            <span style={{ fontSize: '11px', color: '#64748b' }}>Target Recipients</span>
-            <div style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>{currentNotif.recipientsCount}</div>
+          <div style={{ background: '#f4f6f2', padding: '10px 14px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+            <span style={{ fontSize: '11px', color: '#657367' }}>Target Recipients</span>
+            <div style={{ fontSize: '18px', fontWeight: 800, color: '#14291e' }}>{currentNotif.recipientsCount}</div>
           </div>
           <div style={{ background: '#f0fdf4', padding: '10px 14px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
             <span style={{ fontSize: '11px', color: '#166534' }}>Delivered Successfully</span>
@@ -161,8 +161,8 @@ export const NotificationDetailView = ({
             <span style={{ fontSize: '11px', color: '#991b1b' }}>Failed / Bounced</span>
             <div style={{ fontSize: '18px', fontWeight: 800, color: '#dc2626' }}>{currentNotif.failedCount}</div>
           </div>
-          <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-            <span style={{ fontSize: '11px', color: '#64748b' }}>Transit Latency</span>
+          <div style={{ background: '#f4f6f2', padding: '10px 14px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+            <span style={{ fontSize: '11px', color: '#657367' }}>Transit Latency</span>
             <div style={{ fontSize: '18px', fontWeight: 800, color: '#0f766e' }}>{currentNotif.deliveryTimeMs} ms</div>
           </div>
         </div>
@@ -171,14 +171,14 @@ export const NotificationDetailView = ({
       {/* 5. Multilingual Payload Viewer & Milestone Stepper */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px' }}>
         {/* Left: Multilingual Content Box */}
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #dfe5d8', borderRadius: '10px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Globe size={16} color="#0f766e" />
-              <h3 style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: '#0f172a' }}>Broadcast Message Payload</h3>
+              <h3 style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: '#14291e' }}>Broadcast Message Payload</h3>
             </div>
             {/* Language Switcher Tabs */}
-            <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '2px', borderRadius: '6px' }}>
+            <div style={{ display: 'flex', gap: '4px', background: '#eef1ea', padding: '2px', borderRadius: '6px' }}>
               {[
                 { id: 'en', label: 'English' },
                 { id: 'si', label: 'සිංහල' },
@@ -193,7 +193,7 @@ export const NotificationDetailView = ({
                     borderRadius: '4px',
                     border: 'none',
                     background: langTab === lang.id ? '#ffffff' : 'transparent',
-                    color: langTab === lang.id ? '#0f766e' : '#64748b',
+                    color: langTab === lang.id ? '#0f766e' : '#657367',
                     fontSize: '11px',
                     fontWeight: langTab === lang.id ? 700 : 500,
                     cursor: 'pointer',
@@ -206,11 +206,11 @@ export const NotificationDetailView = ({
             </div>
           </div>
 
-          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', fontSize: '13px', lineHeight: 1.6, color: '#334155' }}>
+          <div style={{ background: '#f4f6f2', border: '1px solid #dfe5d8', borderRadius: '8px', padding: '14px', fontSize: '13px', lineHeight: 1.6, color: '#2a4a35' }}>
             {currentNotif.translations[langTab]}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px', color: '#64748b' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px', color: '#657367' }}>
             <Radio size={13} color="#059669" />
             <span>Channels: <strong>{currentNotif.channels.join(' · ')}</strong></span>
             <span>· Geofence: <strong>{currentNotif.operationalArea}</strong></span>
@@ -218,10 +218,10 @@ export const NotificationDetailView = ({
         </div>
 
         {/* Right: Delivery Milestones Stepper */}
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #dfe5d8', borderRadius: '10px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Activity size={16} color="#0f766e" />
-            <h3 style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: '#0f172a' }}>Delivery Milestones</h3>
+            <h3 style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: '#14291e' }}>Delivery Milestones</h3>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -238,10 +238,10 @@ export const NotificationDetailView = ({
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <strong style={{ fontSize: '12px', color: '#0f172a' }}>{m.step}</strong>
-                    <span style={{ fontSize: '10.5px', color: '#94a3b8' }}>{m.time}</span>
+                    <strong style={{ fontSize: '12px', color: '#14291e' }}>{m.step}</strong>
+                    <span style={{ fontSize: '10.5px', color: '#8a9480' }}>{m.time}</span>
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>{m.desc}</div>
+                  <div style={{ fontSize: '11px', color: '#657367' }}>{m.desc}</div>
                 </div>
               </div>
             ))}
@@ -250,13 +250,13 @@ export const NotificationDetailView = ({
       </div>
 
       {/* 6. Cryptographic Proof & Ledger Audit */}
-      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+      <div style={{ background: '#ffffff', border: '1px solid #dfe5d8', borderRadius: '10px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ShieldCheck size={16} color="#059669" />
-            <strong style={{ fontSize: '12.5px', color: '#0f172a' }}>Cryptographic Proof of Delivery (SHA-256)</strong>
+            <strong style={{ fontSize: '12.5px', color: '#14291e' }}>Cryptographic Proof of Delivery (SHA-256)</strong>
           </div>
-          <code style={{ fontSize: '11px', color: '#64748b', marginTop: '2px', display: 'block', wordBreak: 'break-all' }}>
+          <code style={{ fontSize: '11px', color: '#657367', marginTop: '2px', display: 'block', wordBreak: 'break-all' }}>
             {currentNotif.sha256}
           </code>
         </div>

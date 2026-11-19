@@ -66,10 +66,10 @@ const ActionModal = ({
           {icon}
         </div>
 
-        <h3 style={{ margin: '0 0 6px 0', fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+        <h3 style={{ margin: '0 0 6px 0', fontSize: '16px', fontWeight: 800, color: '#14291e' }}>
           {title}
         </h3>
-        <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>
+        <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#657367', lineHeight: 1.5 }}>
           {subtitle}
         </p>
 
@@ -77,7 +77,7 @@ const ActionModal = ({
         <div style={{ marginBottom: '16px' }}>
           <label style={{
             display: 'block', fontSize: '11px', fontWeight: 700,
-            textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569', marginBottom: '8px'
+            textTransform: 'uppercase', letterSpacing: '0.05em', color: '#4a5b4a', marginBottom: '8px'
           }}>
             Required reason
           </label>
@@ -88,19 +88,19 @@ const ActionModal = ({
             onChange={(e) => setReason(e.target.value)}
             style={{
               width: '100%', boxSizing: 'border-box', padding: '10px 12px',
-              borderRadius: '8px', border: '1px solid #e2e8f0',
-              fontSize: '13px', color: '#0f172a', fontFamily: 'inherit',
-              resize: 'vertical', backgroundColor: '#f8fafc', outline: 'none'
+              borderRadius: '8px', border: '1px solid #dfe5d8',
+              fontSize: '13px', color: '#14291e', fontFamily: 'inherit',
+              resize: 'vertical', backgroundColor: '#f4f6f2', outline: 'none'
             }}
             onFocus={(e) => { e.target.style.borderColor = confirmBg; e.target.style.backgroundColor = '#fff'; }}
-            onBlur={(e) => { e.target.style.borderColor = '#e2e8f0'; e.target.style.backgroundColor = '#f8fafc'; }}
+            onBlur={(e) => { e.target.style.borderColor = '#dfe5d8'; e.target.style.backgroundColor = '#f4f6f2'; }}
           />
         </div>
 
         {/* Acknowledgement checkbox */}
         <label style={{
           display: 'flex', alignItems: 'center', gap: '10px',
-          fontSize: '13px', color: '#334155', cursor: 'pointer',
+          fontSize: '13px', color: '#2a4a35', cursor: 'pointer',
           marginBottom: '24px', userSelect: 'none'
         }}>
           <input
@@ -118,11 +118,11 @@ const ActionModal = ({
             onClick={handleCancel}
             style={{
               padding: '9px 20px', borderRadius: '8px',
-              border: '1px solid #e2e8f0', backgroundColor: '#ffffff',
-              color: '#475569', fontSize: '13px', fontWeight: 600,
+              border: '1px solid #dfe5d8', backgroundColor: '#ffffff',
+              color: '#4a5b4a', fontSize: '13px', fontWeight: 600,
               cursor: 'pointer', fontFamily: 'inherit'
             }}
-            onMouseEnter={(e) => { e.target.style.backgroundColor = '#f1f5f9'; }}
+            onMouseEnter={(e) => { e.target.style.backgroundColor = '#eef1ea'; }}
             onMouseLeave={(e) => { e.target.style.backgroundColor = '#ffffff'; }}
           >
             Cancel
@@ -132,7 +132,7 @@ const ActionModal = ({
             disabled={!reviewed}
             style={{
               padding: '9px 20px', borderRadius: '8px', border: 'none',
-              backgroundColor: reviewed ? confirmBg : '#94a3b8',
+              backgroundColor: reviewed ? confirmBg : '#8a9480',
               color: '#ffffff', fontSize: '13px', fontWeight: 700,
               cursor: reviewed ? 'pointer' : 'not-allowed', fontFamily: 'inherit'
             }}
@@ -224,7 +224,7 @@ export const VolunteerDirectoryView = ({
         title="Confirm this reviewed action?"
         subtitle="UI-only prototype action. No backend transaction occurs. Reviewer, reason and timestamp are represented in the local audit trail."
         confirmLabel="Confirm prototype action"
-        confirmBg="#0b1528"
+        confirmBg="#14291e"
         confirmHoverBg="#1e3a5f"
       />
 
@@ -292,7 +292,7 @@ export const VolunteerDirectoryView = ({
         <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
           <Search size={14} style={{
             position: 'absolute', left: 10, top: '50%',
-            transform: 'translateY(-50%)', color: '#94a3b8'
+            transform: 'translateY(-50%)', color: '#8a9480'
           }} />
           <input
             type="text"
@@ -337,7 +337,7 @@ export const VolunteerDirectoryView = ({
             <tbody>
               {filteredVolunteers.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '36px', color: '#64748b' }}>
+                  <td colSpan="7" style={{ textAlign: 'center', padding: '36px', color: '#657367' }}>
                     No volunteer records found matching your filters.
                   </td>
                 </tr>
@@ -352,7 +352,7 @@ export const VolunteerDirectoryView = ({
                     <td style={{ fontWeight: 600 }}>{vol.skills}</td>
                     <td>{vol.serviceArea}</td>
                     <td>{vol.availability}</td>
-                    <td style={{ color: vol.currentShift === 'None' ? '#94a3b8' : '#334155' }}>
+                    <td style={{ color: vol.currentShift === 'None' ? '#8a9480' : '#2a4a35' }}>
                       {vol.currentShift}
                     </td>
                     <td>
@@ -366,7 +366,7 @@ export const VolunteerDirectoryView = ({
                           width: 6, height: 6, borderRadius: '50%',
                           backgroundColor:
                             vol.statusType === 'eligible' ? '#22c55e'
-                            : vol.statusType === 'assigned' ? '#0284c7'
+                            : vol.statusType === 'assigned' ? '#3d6b4f'
                             : '#f59e0b'
                         }} />
                         {vol.status}
@@ -414,7 +414,7 @@ export const VolunteerDirectoryView = ({
               <label style={{
                 display: 'block', fontSize: '10.5px', fontWeight: 800,
                 textTransform: 'uppercase', letterSpacing: '0.05em',
-                color: '#64748b', marginBottom: '6px'
+                color: '#657367', marginBottom: '6px'
               }}>
                 Authorised note / decision reason
               </label>

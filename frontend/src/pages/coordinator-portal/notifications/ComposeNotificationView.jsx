@@ -247,7 +247,7 @@ export const ComposeNotificationView = ({
                 <label className="form-field-label">
                   Description <span className="req">*</span>
                 </label>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                <span style={{ fontSize: '11px', color: '#8a9480' }}>
                   {formData.description.length}/320 characters
                 </span>
               </div>
@@ -336,9 +336,9 @@ export const ComposeNotificationView = ({
                         padding: '6px 12px',
                         borderRadius: '20px',
                         border: '1px solid',
-                        borderColor: isChecked ? '#0f766e' : '#cbd5e1',
+                        borderColor: isChecked ? '#0f766e' : '#c5ccbe',
                         background: isChecked ? '#ecfdf5' : '#ffffff',
-                        color: isChecked ? '#065f46' : '#64748b',
+                        color: isChecked ? '#065f46' : '#657367',
                         fontSize: '12px',
                         fontWeight: isChecked ? 700 : 500,
                         cursor: 'pointer',
@@ -424,7 +424,7 @@ export const ComposeNotificationView = ({
                   onClick={() => setPreviewTab('sms')}
                   style={{
                     border: 'none',
-                    background: previewTab === 'sms' ? '#cbd5e1' : 'transparent',
+                    background: previewTab === 'sms' ? '#c5ccbe' : 'transparent',
                     borderRadius: '4px',
                     padding: '2px 6px',
                     fontSize: '10px',
@@ -439,7 +439,7 @@ export const ComposeNotificationView = ({
                   onClick={() => setPreviewTab('email')}
                   style={{
                     border: 'none',
-                    background: previewTab === 'email' ? '#cbd5e1' : 'transparent',
+                    background: previewTab === 'email' ? '#c5ccbe' : 'transparent',
                     borderRadius: '4px',
                     padding: '2px 6px',
                     fontSize: '10px',
@@ -454,15 +454,15 @@ export const ComposeNotificationView = ({
 
             <div className="mock-sms-bubble">
               <div style={{ fontSize: '10px', color: '#a7f3d0', fontWeight: 800, textTransform: 'uppercase', marginBottom: '2px' }}>
-                [RELIEFCORE DISPATCH · {formData.category || 'EMERGENCY'}]
+                [HUMANAID DISPATCH · {formData.category || 'EMERGENCY'}]
               </div>
               <strong style={{ color: '#ffffff' }}>
                 {formData.title || 'Untitled Notification Alert'}
               </strong>
-              <div style={{ marginTop: '4px', fontSize: '11px', color: '#e2e8f0', lineHeight: 1.4 }}>
+              <div style={{ marginTop: '4px', fontSize: '11px', color: '#dfe5d8', lineHeight: 1.4 }}>
                 {formData.description || 'Provide operational details in description field to preview outgoing message broadcast.'}
               </div>
-              <div style={{ marginTop: '6px', fontSize: '9.5px', color: '#94a3b8' }}>
+              <div style={{ marginTop: '6px', fontSize: '9.5px', color: '#8a9480' }}>
                 Area: {formData.operationalArea} · Auth: {formData.responsibleOrg}
               </div>
             </div>

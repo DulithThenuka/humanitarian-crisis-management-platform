@@ -108,56 +108,56 @@ export const SupplyRequisitionsView = ({ showToast }) => {
     <div className="logistics-subview-container" style={{ padding: '2rem' }}>
       {/* 1. Header Overview Cards */}
       <div className="logistics-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Pending Review</span>
+            <span style={{ fontSize: '0.8rem', color: '#8a9480', fontWeight: 600, textTransform: 'uppercase' }}>Pending Review</span>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b' }}>
               <Clock size={16} />
             </div>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>{pendingCount} Requisitions</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f4f6f2' }}>{pendingCount} Requisitions</div>
           <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.25rem' }}>Awaiting logistics depot allocation</div>
         </div>
 
-        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Critical Priority</span>
+            <span style={{ fontSize: '0.8rem', color: '#8a9480', fontWeight: 600, textTransform: 'uppercase' }}>Critical Priority</span>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
               <AlertTriangle size={16} />
             </div>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>{criticalCount} Urgent</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f4f6f2' }}>{criticalCount} Urgent</div>
           <div style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '0.25rem' }}>Infant formula & medical relief required</div>
         </div>
 
-        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Approved & Staged</span>
+            <span style={{ fontSize: '0.8rem', color: '#8a9480', fontWeight: 600, textTransform: 'uppercase' }}>Approved & Staged</span>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
               <CheckCircle2 size={16} />
             </div>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>{approvedCount} Queued</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f4f6f2' }}>{approvedCount} Queued</div>
           <div style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '0.25rem' }}>Allocated to loading docks</div>
         </div>
 
-        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Avg Fulfilment Time</span>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8' }}>
+            <span style={{ fontSize: '0.8rem', color: '#8a9480', fontWeight: 600, textTransform: 'uppercase' }}>Avg Fulfilment Time</span>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7caa7e' }}>
               <Truck size={16} />
             </div>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>42 Minutes</div>
-          <div style={{ fontSize: '0.75rem', color: '#38bdf8', marginTop: '0.25rem' }}>Rapid response warehouse standard</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f4f6f2' }}>42 Minutes</div>
+          <div style={{ fontSize: '0.75rem', color: '#7caa7e', marginTop: '0.25rem' }}>Rapid response warehouse standard</div>
         </div>
       </div>
 
       {/* 2. Filter & Search Toolbar */}
-      <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: '280px' }}>
           <div style={{ position: 'relative', width: '100%' }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#657367' }} />
             <input
               type="text"
               placeholder="Search by shelter name, requisition ID, items..."
@@ -166,10 +166,10 @@ export const SupplyRequisitionsView = ({ showToast }) => {
               style={{
                 width: '100%',
                 padding: '0.65rem 1rem 0.65rem 2.4rem',
-                background: '#0f172a',
-                border: '1px solid #334155',
+                background: '#14291e',
+                border: '1px solid #2a4a35',
                 borderRadius: '8px',
-                color: '#f8fafc',
+                color: '#f4f6f2',
                 fontSize: '0.875rem',
                 outline: 'none'
               }}
@@ -181,7 +181,7 @@ export const SupplyRequisitionsView = ({ showToast }) => {
           <select
             value={districtFilter}
             onChange={e => setDistrictFilter(e.target.value)}
-            style={{ background: '#0f172a', border: '1px solid #334155', color: '#f8fafc', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}
+            style={{ background: '#14291e', border: '1px solid #2a4a35', color: '#f4f6f2', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}
           >
             <option value="ALL">All Districts</option>
             <option value="Colombo">Colombo District</option>
@@ -192,7 +192,7 @@ export const SupplyRequisitionsView = ({ showToast }) => {
           <select
             value={urgencyFilter}
             onChange={e => setUrgencyFilter(e.target.value)}
-            style={{ background: '#0f172a', border: '1px solid #334155', color: '#f8fafc', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}
+            style={{ background: '#14291e', border: '1px solid #2a4a35', color: '#f4f6f2', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}
           >
             <option value="ALL">All Urgencies</option>
             <option value="Critical">Critical Urgency</option>
@@ -203,7 +203,7 @@ export const SupplyRequisitionsView = ({ showToast }) => {
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            style={{ background: '#0f172a', border: '1px solid #334155', color: '#f8fafc', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}
+            style={{ background: '#14291e', border: '1px solid #2a4a35', color: '#f4f6f2', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}
           >
             <option value="ALL">All Statuses</option>
             <option value="Pending Review">Pending Review</option>
@@ -213,7 +213,7 @@ export const SupplyRequisitionsView = ({ showToast }) => {
 
           <button
             onClick={() => { setSearchTerm(''); setDistrictFilter('ALL'); setStatusFilter('ALL'); setUrgencyFilter('ALL'); }}
-            style={{ background: '#334155', border: 'none', color: '#f8fafc', padding: '0.65rem 1rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
+            style={{ background: '#2a4a35', border: 'none', color: '#f4f6f2', padding: '0.65rem 1rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
           >
             <RefreshCw size={14} /> Reset
           </button>
@@ -221,17 +221,17 @@ export const SupplyRequisitionsView = ({ showToast }) => {
       </div>
 
       {/* 3. Requisitions Table */}
-      <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', overflow: 'hidden' }}>
-        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', overflow: 'hidden' }}>
+        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #2a4a35', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#f8fafc' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#f4f6f2' }}>
               Shelter & Field Supply Requisitions
             </h3>
-            <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+            <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: '#8a9480' }}>
               Showing {filteredList.length} emergency requests awaiting warehouse allocation and convoy dispatch
             </p>
           </div>
-          <span style={{ fontSize: '0.75rem', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.25)', padding: '0.25rem 0.65rem', borderRadius: '999px', fontWeight: 600 }}>
+          <span style={{ fontSize: '0.75rem', background: 'rgba(56, 189, 248, 0.1)', color: '#7caa7e', border: '1px solid rgba(56, 189, 248, 0.25)', padding: '0.25rem 0.65rem', borderRadius: '999px', fontWeight: 600 }}>
             Live Queue Active
           </span>
         </div>
@@ -239,7 +239,7 @@ export const SupplyRequisitionsView = ({ showToast }) => {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
             <thead>
-              <tr style={{ background: '#0f172a', borderBottom: '1px solid #334155', color: '#94a3b8', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <tr style={{ background: '#14291e', borderBottom: '1px solid #2a4a35', color: '#8a9480', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <th style={{ padding: '0.85rem 1.25rem' }}>Req ID</th>
                 <th style={{ padding: '0.85rem 1.25rem' }}>Shelter Destination</th>
                 <th style={{ padding: '0.85rem 1.25rem' }}>Requested Supplies</th>
@@ -254,30 +254,30 @@ export const SupplyRequisitionsView = ({ showToast }) => {
                 <tr
                   key={req.id}
                   style={{
-                    borderBottom: idx === filteredList.length - 1 ? 'none' : '1px solid #334155',
+                    borderBottom: idx === filteredList.length - 1 ? 'none' : '1px solid #2a4a35',
                     background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.4)'
                   }}
                 >
-                  <td style={{ padding: '1rem 1.25rem', fontFamily: 'monospace', fontWeight: 600, color: '#38bdf8' }}>
+                  <td style={{ padding: '1rem 1.25rem', fontFamily: 'monospace', fontWeight: 600, color: '#7caa7e' }}>
                     {req.id}
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal' }}>{req.requestedAt}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#657367', fontWeight: 'normal' }}>{req.requestedAt}</div>
                   </td>
                   <td style={{ padding: '1rem 1.25rem' }}>
-                    <div style={{ fontWeight: 600, color: '#f8fafc' }}>{req.shelterName}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.15rem' }}>
+                    <div style={{ fontWeight: 600, color: '#f4f6f2' }}>{req.shelterName}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#8a9480', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.15rem' }}>
                       <MapPin size={12} /> {req.zone}, {req.district}
                     </div>
                   </td>
                   <td style={{ padding: '1rem 1.25rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                       {req.items.map((it, iIdx) => (
-                        <span key={iIdx} style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
-                          • <strong style={{ color: '#f8fafc' }}>{it.qty} {it.unit}</strong> {it.name}
+                        <span key={iIdx} style={{ fontSize: '0.8rem', color: '#c5ccbe' }}>
+                          • <strong style={{ color: '#f4f6f2' }}>{it.qty} {it.unit}</strong> {it.name}
                         </span>
                       ))}
                     </div>
                     {req.notes && (
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic', marginTop: '0.3rem', maxWidth: '320px' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#8a9480', fontStyle: 'italic', marginTop: '0.3rem', maxWidth: '320px' }}>
                         "{req.notes}"
                       </div>
                     )}
@@ -301,7 +301,7 @@ export const SupplyRequisitionsView = ({ showToast }) => {
                             ? '#fca5a5'
                             : req.urgency === 'High'
                             ? '#fcd34d'
-                            : '#93c5fd',
+                            : '#b8ccaa',
                         border:
                           req.urgency === 'Critical'
                             ? '1px solid rgba(239, 68, 68, 0.4)'
@@ -314,8 +314,8 @@ export const SupplyRequisitionsView = ({ showToast }) => {
                     </span>
                   </td>
                   <td style={{ padding: '1rem 1.25rem' }}>
-                    <div style={{ fontWeight: 500, color: '#f8fafc' }}>{req.requester}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <div style={{ fontWeight: 500, color: '#f4f6f2' }}>{req.requester}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#7caa7e', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                       <PhoneCall size={11} /> {req.phone}
                     </div>
                   </td>
@@ -336,7 +336,7 @@ export const SupplyRequisitionsView = ({ showToast }) => {
                           req.status === 'Approved'
                             ? '#6ee7b7'
                             : req.status === 'Dispatched'
-                            ? '#7dd3fc'
+                            ? '#a4c4a0'
                             : '#fde68a',
                         border: '1px solid rgba(255, 255, 255, 0.1)'
                       }}
@@ -350,8 +350,8 @@ export const SupplyRequisitionsView = ({ showToast }) => {
                         <button
                           onClick={() => handleOpenFulfillModal(req)}
                           style={{
-                            background: '#0284c7',
-                            hover: { background: '#0369a1' },
+                            background: '#3d6b4f',
+                            hover: { background: '#2d5a3e' },
                             color: '#ffffff',
                             border: 'none',
                             padding: '0.45rem 0.85rem',
@@ -370,8 +370,8 @@ export const SupplyRequisitionsView = ({ showToast }) => {
                           onClick={() => handleRejectRequisition(req.id, req.shelterName)}
                           title="Clarify or decline"
                           style={{
-                            background: '#334155',
-                            color: '#94a3b8',
+                            background: '#2a4a35',
+                            color: '#8a9480',
                             border: 'none',
                             padding: '0.45rem 0.65rem',
                             borderRadius: '6px',
@@ -412,20 +412,20 @@ export const SupplyRequisitionsView = ({ showToast }) => {
         >
           <div
             style={{
-              background: '#1e293b',
-              border: '1px solid #334155',
+              background: '#1e3328',
+              border: '1px solid #2a4a35',
               borderRadius: '16px',
               maxWidth: '640px',
               width: '100%',
               padding: '2rem',
-              color: '#f8fafc',
+              color: '#f4f6f2',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
             }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #2a4a35', paddingBottom: '1rem' }}>
               <div>
-                <span style={{ fontSize: '0.75rem', color: '#38bdf8', fontWeight: 600, textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '0.75rem', color: '#7caa7e', fontWeight: 600, textTransform: 'uppercase' }}>
                   Emergency Allocation Action
                 </span>
                 <h3 style={{ margin: '0.2rem 0 0', fontSize: '1.25rem', fontWeight: 700 }}>
@@ -434,31 +434,31 @@ export const SupplyRequisitionsView = ({ showToast }) => {
               </div>
               <button
                 onClick={() => setSelectedReq(null)}
-                style={{ background: '#334155', border: 'none', borderRadius: '50%', width: '32px', height: '32px', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ background: '#2a4a35', border: 'none', borderRadius: '50%', width: '32px', height: '32px', color: '#8a9480', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <X size={16} />
               </button>
             </div>
 
             <form onSubmit={handleApproveFulfillment}>
-              <div style={{ marginBottom: '1.25rem', background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid #334155' }}>
-                <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: 600 }}>Requested Supplies:</div>
+              <div style={{ marginBottom: '1.25rem', background: '#14291e', padding: '1rem', borderRadius: '8px', border: '1px solid #2a4a35' }}>
+                <div style={{ fontSize: '0.8rem', color: '#8a9480', marginBottom: '0.5rem', fontWeight: 600 }}>Requested Supplies:</div>
                 {selectedReq.items.map((it, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.35rem 0', borderBottom: i === selectedReq.items.length - 1 ? 'none' : '1px solid #1e293b', fontSize: '0.875rem' }}>
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.35rem 0', borderBottom: i === selectedReq.items.length - 1 ? 'none' : '1px solid #1e3328', fontSize: '0.875rem' }}>
                     <span>{it.name}</span>
-                    <strong style={{ color: '#38bdf8' }}>{it.qty} {it.unit}</strong>
+                    <strong style={{ color: '#7caa7e' }}>{it.qty} {it.unit}</strong>
                   </div>
                 ))}
               </div>
 
               <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 500, marginBottom: '0.4rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: '#c5ccbe', fontWeight: 500, marginBottom: '0.4rem' }}>
                   Select Fulfilling Warehouse Depot
                 </label>
                 <select
                   value={selectedDepot}
                   onChange={e => setSelectedDepot(e.target.value)}
-                  style={{ width: '100%', padding: '0.75rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.9rem' }}
+                  style={{ width: '100%', padding: '0.75rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.9rem' }}
                 >
                   {INITIAL_DEPOTS.map(depot => (
                     <option key={depot.id} value={depot.id}>
@@ -469,13 +469,13 @@ export const SupplyRequisitionsView = ({ showToast }) => {
               </div>
 
               <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 500, marginBottom: '0.4rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: '#c5ccbe', fontWeight: 500, marginBottom: '0.4rem' }}>
                   Assign Transport / Fleet Mode
                 </label>
                 <select
                   value={transportMode}
                   onChange={e => setTransportMode(e.target.value)}
-                  style={{ width: '100%', padding: '0.75rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.9rem' }}
+                  style={{ width: '100%', padding: '0.75rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.9rem' }}
                 >
                   <option value="Heavy 10-Ton Relief Truck">Heavy 10-Ton Relief Truck (High Capacity)</option>
                   <option value="4WD All-Terrain Logistics Van">4WD All-Terrain Logistics Van (Inundated Zones)</option>
@@ -485,14 +485,14 @@ export const SupplyRequisitionsView = ({ showToast }) => {
               </div>
 
               <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 500, marginBottom: '0.4rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: '#c5ccbe', fontWeight: 500, marginBottom: '0.4rem' }}>
                   Internal Dispatch Instructions
                 </label>
                 <textarea
                   rows={3}
                   value={fulfillmentNote}
                   onChange={e => setFulfillmentNote(e.target.value)}
-                  style={{ width: '100%', padding: '0.75rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.85rem', resize: 'vertical' }}
+                  style={{ width: '100%', padding: '0.75rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.85rem', resize: 'vertical' }}
                 />
               </div>
 
@@ -500,7 +500,7 @@ export const SupplyRequisitionsView = ({ showToast }) => {
                 <button
                   type="button"
                   onClick={() => setSelectedReq(null)}
-                  style={{ padding: '0.65rem 1.25rem', background: '#334155', border: 'none', borderRadius: '8px', color: '#cbd5e1', cursor: 'pointer', fontWeight: 600 }}
+                  style={{ padding: '0.65rem 1.25rem', background: '#2a4a35', border: 'none', borderRadius: '8px', color: '#c5ccbe', cursor: 'pointer', fontWeight: 600 }}
                 >
                   Cancel
                 </button>

@@ -1,25 +1,25 @@
 /* ==========================================================================
    RELIEFCORE CITIZEN ASSISTANCE REQUEST FORM — ENHANCED VISUAL STYLES
-   Visual design system aligned with ReliefCore Platform (#082128 / #0e6f76)
+   Visual design system aligned with ReliefCore Platform (#14291e / #3d6b4f)
    ========================================================================== */
 
 :root {
-  --rc-petrol-dark: #082128;
+  --rc-petrol-dark: #14291e;
   --rc-petrol-deeper: #05161b;
-  --rc-teal-primary: #0e6f76;
+  --rc-teal-primary: #3d6b4f;
   --rc-teal-hover: #0b595e;
-  --rc-teal-gradient: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  --rc-teal-gradient: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   --rc-teal-glow: rgba(25, 130, 141, 0.4);
   --rc-mint-accent: #5eead4;
-  --rc-sky-accent: #38bdf8;
-  --rc-card-border: #e2e8f0;
+  --rc-sky-accent: #7caa7e;
+  --rc-card-border: #dfe5d8;
 }
 
 .assist-form-wrapper {
   max-width: 1240px;
   margin: 0 auto;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #0f172a;
+  color: #14291e;
 }
 
 /* =========================================================
@@ -39,8 +39,8 @@
   align-items: center;
   gap: 8px;
   background: #ffffff;
-  color: #0e6f76;
-  border: 1px solid #cbd5e1;
+  color: #3d6b4f;
+  border: 1px solid #c5ccbe;
   padding: 8px 16px;
   border-radius: 9px;
   font-size: 13px;
@@ -52,7 +52,7 @@
 
 .assist-back-btn:hover {
   background: #f0fdfa;
-  border-color: #0e6f76;
+  border-color: #3d6b4f;
   color: #0f766e;
   transform: translateX(-2px);
 }
@@ -110,7 +110,7 @@
    2. Cinematic Hero Header
    ========================================================= */
 .assist-hero-banner {
-  background: linear-gradient(135deg, #05161b 0%, #082128 50%, #0e6f76 100%);
+  background: linear-gradient(135deg, #05161b 0%, #14291e 50%, #3d6b4f 100%);
   border-radius: 16px;
   padding: 28px 34px;
   color: #ffffff;
@@ -145,7 +145,7 @@
 
 .hero-main-col p {
   font-size: 14px;
-  color: #cbd5e1;
+  color: #c5ccbe;
   margin: 0;
   max-width: 660px;
   line-height: 1.5;
@@ -177,7 +177,7 @@
    ========================================================= */
 .assist-stepper-tracker {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 14px;
   padding: 16px 24px;
   margin-bottom: 22px;
@@ -194,13 +194,13 @@
 .stepper-label-text {
   font-size: 13.5px;
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .stepper-pct-badge {
   font-size: 12px;
   font-weight: 700;
-  color: #0e6f76;
+  color: #3d6b4f;
   background: #f0fdfa;
   padding: 3px 10px;
   border-radius: 12px;
@@ -209,7 +209,7 @@
 
 .stepper-progress-track {
   height: 6px;
-  background: #e2e8f0;
+  background: #dfe5d8;
   border-radius: 6px;
   overflow: hidden;
   margin-bottom: 14px;
@@ -217,7 +217,7 @@
 
 .stepper-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #0e6f76 0%, #14b8a6 100%);
+  background: linear-gradient(90deg, #3d6b4f 0%, #14b8a6 100%);
   border-radius: 6px;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -240,7 +240,7 @@
   align-items: center;
   gap: 8px;
   font-size: 11.5px;
-  color: #64748b;
+  color: #657367;
   font-weight: 500;
 }
 
@@ -253,19 +253,19 @@
   justify-content: center;
   font-size: 11px;
   font-weight: 700;
-  background: #f1f5f9;
-  color: #64748b;
+  background: #eef1ea;
+  color: #657367;
   flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
 .stepper-milestone-node.completed .milestone-bubble {
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
 }
 
 .stepper-milestone-node.completed {
-  color: #0e6f76;
+  color: #3d6b4f;
   font-weight: 700;
 }
 
@@ -276,7 +276,7 @@
 }
 
 .stepper-milestone-node.active {
-  color: #0f172a;
+  color: #14291e;
   font-weight: 700;
 }
 
@@ -299,7 +299,7 @@
 /* Form Main Card */
 .assist-form-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 16px;
   padding: 30px 32px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
@@ -308,7 +308,7 @@
 .form-step-block {
   margin-bottom: 32px;
   padding-bottom: 28px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #eef1ea;
 }
 
 .form-step-block:last-of-type {
@@ -328,7 +328,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -341,13 +341,13 @@
 .step-badge-title {
   font-size: 17px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
 }
 
 .step-block-desc {
   font-size: 13px;
-  color: #64748b;
+  color: #657367;
   margin: 0 0 16px 40px;
   line-height: 1.4;
 }
@@ -357,8 +357,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 8px 14px;
   margin-bottom: 14px;
@@ -370,7 +370,7 @@
   width: 100%;
   font-size: 13px;
   outline: none;
-  color: #0f172a;
+  color: #14291e;
 }
 
 /* Category Grid Tiles */
@@ -382,7 +382,7 @@
 
 .category-select-card {
   background: #ffffff;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid #dfe5d8;
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -395,14 +395,14 @@
 }
 
 .category-select-card:hover {
-  border-color: #0e6f76;
+  border-color: #3d6b4f;
   background: #fafcfc;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(14, 111, 118, 0.08);
 }
 
 .category-select-card.selected {
-  border-color: #0e6f76;
+  border-color: #3d6b4f;
   background: #f0fdfa;
   box-shadow: 0 4px 14px rgba(14, 111, 118, 0.16);
   transform: translateY(-2px);
@@ -421,13 +421,13 @@
 .category-card-title {
   font-size: 14px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
 }
 
 .category-card-desc {
   font-size: 12px;
-  color: #64748b;
+  color: #657367;
   margin: 0;
   line-height: 1.35;
 }
@@ -436,7 +436,7 @@
   display: inline-block;
   font-size: 10.5px;
   font-weight: 600;
-  color: #0e6f76;
+  color: #3d6b4f;
   background: rgba(14, 111, 118, 0.08);
   padding: 2px 7px;
   border-radius: 6px;
@@ -451,7 +451,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -467,7 +467,7 @@
 }
 
 .urgency-choice-card {
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid #dfe5d8;
   border-radius: 12px;
   padding: 14px;
   cursor: pointer;
@@ -528,7 +528,7 @@
 
 .urgency-desc-text {
   font-size: 11.5px;
-  color: #64748b;
+  color: #657367;
   line-height: 1.35;
 }
 
@@ -555,7 +555,7 @@
 .form-field-group label {
   font-size: 13px;
   font-weight: 700;
-  color: #334155;
+  color: #2a4a35;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -570,7 +570,7 @@
 .input-icon-prefix {
   position: absolute;
   left: 12px;
-  color: #94a3b8;
+  color: #8a9480;
   pointer-events: none;
 }
 
@@ -584,10 +584,10 @@
 .form-field-group textarea {
   padding: 11px 14px;
   border-radius: 9px;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid #c5ccbe;
   font-size: 13.5px;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #f4f6f2;
+  color: #14291e;
   outline: none;
   font-family: inherit;
   transition: all 0.15s ease;
@@ -596,7 +596,7 @@
 .form-field-group input:focus,
 .form-field-group select:focus,
 .form-field-group textarea:focus {
-  border-color: #0e6f76;
+  border-color: #3d6b4f;
   background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(14, 111, 118, 0.12);
 }
@@ -606,10 +606,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #f8fafc;
+  background: #f4f6f2;
   padding: 6px 12px;
   border-radius: 9px;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid #c5ccbe;
   width: fit-content;
 }
 
@@ -617,9 +617,9 @@
   width: 32px;
   height: 32px;
   border-radius: 7px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   background: #ffffff;
-  color: #0f172a;
+  color: #14291e;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -630,9 +630,9 @@
 }
 
 .stepper-btn:hover {
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
-  border-color: #0e6f76;
+  border-color: #3d6b4f;
 }
 
 .stepper-num-val {
@@ -640,7 +640,7 @@
   text-align: center;
   font-size: 17px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .vuln-tags-row {
@@ -653,9 +653,9 @@
 .vuln-pill-btn {
   padding: 7px 14px;
   border-radius: 20px;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid #dfe5d8;
   background: #ffffff;
-  color: #475569;
+  color: #4a5b4a;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -666,21 +666,21 @@
 }
 
 .vuln-pill-btn:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
+  border-color: #c5ccbe;
+  background: #f4f6f2;
 }
 
 .vuln-pill-btn.active {
-  border-color: #0e6f76;
+  border-color: #3d6b4f;
   background: #f0fdfa;
-  color: #0e6f76;
+  color: #3d6b4f;
   font-weight: 700;
 }
 
 /* Location Box & Interactive Map */
 .location-control-panel {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 12px;
   padding: 16px;
   margin-top: 10px;
@@ -696,9 +696,9 @@
 .preset-chip {
   padding: 5px 12px;
   border-radius: 16px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   background: #ffffff;
-  color: #475569;
+  color: #4a5b4a;
   font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
@@ -707,20 +707,20 @@
 
 .preset-chip:hover,
 .preset-chip.active {
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
-  border-color: #0e6f76;
+  border-color: #3d6b4f;
 }
 
 .interactive-map-preview-frame {
   height: 220px;
   width: 100%;
   border-radius: 10px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   overflow: hidden;
   position: relative;
   margin-bottom: 14px;
-  background: #e2e8f0;
+  background: #dfe5d8;
 }
 
 .map-pin-overlay-hint {
@@ -753,7 +753,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
   border: none;
   padding: 8px 16px;
@@ -772,7 +772,7 @@
 .coords-indicator {
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: #657367;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -793,8 +793,8 @@
 }
 
 .media-action-box {
-  background: #f8fafc;
-  border: 1.5px dashed #cbd5e1;
+  background: #f4f6f2;
+  border: 1.5px dashed #c5ccbe;
   border-radius: 10px;
   padding: 14px;
   display: flex;
@@ -805,7 +805,7 @@
 }
 
 .media-action-box:hover {
-  border-color: #0e6f76;
+  border-color: #3d6b4f;
   background: #f0fdfa;
 }
 
@@ -814,23 +814,23 @@
   height: 36px;
   border-radius: 8px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #0e6f76;
+  color: #3d6b4f;
   flex-shrink: 0;
 }
 
 .media-title-text {
   font-size: 12.5px;
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .media-sub-text {
   font-size: 11px;
-  color: #64748b;
+  color: #657367;
 }
 
 /* Footer Submit Action */
@@ -846,7 +846,7 @@
   padding: 16px 28px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(135deg, #0e6f76 0%, #083344 100%);
+  background: linear-gradient(135deg, #3d6b4f 0%, #083344 100%);
   color: #ffffff;
   font-size: 16px;
   font-weight: 800;
@@ -875,7 +875,7 @@
 .security-lock-disclaimer {
   text-align: center;
   font-size: 12px;
-  color: #64748b;
+  color: #657367;
   margin: 0;
   display: flex;
   align-items: center;
@@ -896,7 +896,7 @@
 
 .ai-live-triage-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 14px;
   padding: 20px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
@@ -908,14 +908,14 @@
   justify-content: space-between;
   margin-bottom: 14px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #eef1ea;
 }
 
 .ai-title-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #0e6f76;
+  color: #3d6b4f;
   font-size: 14px;
   font-weight: 800;
 }
@@ -946,17 +946,17 @@
 }
 
 .metric-strip-item span {
-  color: #64748b;
+  color: #657367;
 }
 
 .metric-strip-item strong {
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .gauge-progress-bar {
   height: 6px;
-  background: #e2e8f0;
+  background: #dfe5d8;
   border-radius: 6px;
   overflow: hidden;
   margin-top: 4px;
@@ -970,8 +970,8 @@
 
 /* Operations Readiness Card */
 .readiness-info-card {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f4f6f2 0%, #eef1ea 100%);
+  border: 1px solid #dfe5d8;
   border-radius: 14px;
   padding: 18px;
 }
@@ -979,7 +979,7 @@
 .readiness-title {
   font-size: 13px;
   font-weight: 700;
-  color: #334155;
+  color: #2a4a35;
   display: flex;
   align-items: center;
   gap: 7px;
@@ -997,11 +997,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #475569;
+  color: #4a5b4a;
 }
 
 .readiness-stat-item strong {
-  color: #0f172a;
+  color: #14291e;
   font-weight: 700;
 }
 
@@ -1010,7 +1010,7 @@
    ========================================================= */
 .assist-cert-success {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 16px;
   padding: 40px 36px;
   text-align: center;
@@ -1035,7 +1035,7 @@
 .cert-title-strong {
   font-size: 24px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0 0 10px 0;
   letter-spacing: -0.02em;
 }
@@ -1045,7 +1045,7 @@
   align-items: center;
   gap: 8px;
   background: #f0fdfa;
-  color: #0e6f76;
+  color: #3d6b4f;
   border: 1.5px solid #99f6e4;
   padding: 8px 22px;
   border-radius: 30px;
@@ -1057,15 +1057,15 @@
 
 .cert-summary-p {
   font-size: 14.5px;
-  color: #475569;
+  color: #4a5b4a;
   line-height: 1.6;
   max-width: 560px;
   margin: 0 auto 26px auto;
 }
 
 .cert-triage-panel {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 12px;
   padding: 22px;
   text-align: left;
@@ -1076,7 +1076,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #0e6f76;
+  color: #3d6b4f;
   font-size: 14px;
   font-weight: 800;
   margin-bottom: 14px;
@@ -1096,7 +1096,7 @@
 
 .cert-metric-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 12px 14px;
   display: flex;
@@ -1106,13 +1106,13 @@
 
 .cert-metric-card span {
   font-size: 11px;
-  color: #64748b;
+  color: #657367;
   font-weight: 500;
 }
 
 .cert-metric-card strong {
   font-size: 14px;
-  color: #0f172a;
+  color: #14291e;
   font-weight: 800;
 }
 
@@ -1127,7 +1127,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
   padding: 13px 24px;
   border-radius: 9px;
@@ -1148,8 +1148,8 @@
 .cert-btn-secondary {
   padding: 13px 22px;
   background: #ffffff;
-  color: #334155;
-  border: 1px solid #cbd5e1;
+  color: #2a4a35;
+  border: 1px solid #c5ccbe;
   border-radius: 9px;
   font-size: 14px;
   font-weight: 600;
@@ -1158,6 +1158,6 @@
 }
 
 .cert-btn-secondary:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
+  background: #f4f6f2;
+  border-color: #8a9480;
 }

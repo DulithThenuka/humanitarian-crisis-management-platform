@@ -226,7 +226,7 @@ export const AIDecisionSupportView = ({
 
       {/* 3. Mandatory Human Review Mandate Banner */}
       <div className="ec-ai-mandate-card">
-        <ShieldCheck size={20} color="#0284c7" className="ec-mandate-icon" />
+        <ShieldCheck size={20} color="#3d6b4f" className="ec-mandate-icon" />
         <div className="ec-mandate-content">
           <strong>Mandatory Human Approval:</strong> AI priority scores and duplicate flags provide automated triage guidance only. Operational dispatch priority must be confirmed or adjusted by an authorised Emergency Coordinator.
         </div>
@@ -240,7 +240,7 @@ export const AIDecisionSupportView = ({
           <div className="ec-ai-priority-card">
             <div className="ec-ai-priority-main">
               <div className="ec-ai-card-tag">
-                <Sparkles size={15} color="#0284c7" />
+                <Sparkles size={15} color="#3d6b4f" />
                 <span>AI TRIAGE RECOMMENDATION</span>
               </div>
               <div className={`ec-recommended-priority-val ec-priority-text-${(recommendedPriority || 'high').toLowerCase()}`}>
@@ -270,7 +270,7 @@ export const AIDecisionSupportView = ({
           {/* AI Recommendation Rationale Callout */}
           <div className="ec-ai-rationale-box">
             <div className="ec-rationale-head">
-              <Sparkles size={14} color="#0284c7" />
+              <Sparkles size={14} color="#3d6b4f" />
               <strong>AI Recommendation Rationale</strong>
             </div>
             <p className="ec-rationale-text">{aiRationale}</p>
@@ -290,7 +290,7 @@ export const AIDecisionSupportView = ({
               {factors.map(fac => (
                 <div key={fac.id} className="ec-factor-item-row">
                   <div className="ec-factor-left">
-                    <CheckCircle2 size={16} color="#0284c7" className="ec-factor-icon" />
+                    <CheckCircle2 size={16} color="#3d6b4f" className="ec-factor-icon" />
                     <div>
                       <div className="ec-factor-head-row">
                         <span className="ec-factor-title">{fac.title}</span>
@@ -365,7 +365,7 @@ export const AIDecisionSupportView = ({
             <div className="ec-linked-case-meta">
               <div className="ec-linked-meta-row">
                 <span className="ec-linked-meta-label">ID:</span>
-                <strong className="ec-linked-meta-val" style={{ color: '#0284c7' }}>{activeCaseId}</strong>
+                <strong className="ec-linked-meta-val" style={{ color: '#3d6b4f' }}>{activeCaseId}</strong>
               </div>
               <div className="ec-linked-meta-row">
                 <span className="ec-linked-meta-label">Category:</span>

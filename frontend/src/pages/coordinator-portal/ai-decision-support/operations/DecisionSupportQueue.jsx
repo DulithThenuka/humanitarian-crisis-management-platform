@@ -323,7 +323,7 @@ export const DecisionSupportQueue = ({
                         <span className="gauge-pct-text">{row.confidence}%</span>
                       </div>
                     ) : (
-                      <span style={{ color: '#64748b', fontSize: '12px', fontWeight: 500 }}>N/A</span>
+                      <span style={{ color: '#657367', fontSize: '12px', fontWeight: 500 }}>N/A</span>
                     )}
                   </td>
 

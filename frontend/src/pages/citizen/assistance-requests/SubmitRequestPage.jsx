@@ -1,10 +1,8 @@
 import React from 'react';
-import { CitizenAssistanceRequestForm } from './CitizenAssistanceRequestForm';
+import { CitizenPortalPage } from '../CitizenPortalPage';
 
 export const SubmitRequestPage = () => {
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f1f5f9', padding: '24px 16px' }}>
-      <CitizenAssistanceRequestForm />
-    </div>
-  );
+  return <CitizenPortalPage initialTab="submit" />;
 };
+
+export default SubmitRequestPage;

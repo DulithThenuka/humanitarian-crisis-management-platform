@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { donorService } from '../../services/donorService';
 
 // Data
 import {
@@ -78,6 +79,58 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
     }, 3800);
   };
 
+  // Load live data from Donor Backend API
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchDonorBackendData() {
+      try {
+        const [dashRes, recordsRes, campRes, allocRes, flagsRes] = await Promise.allSettled([
+          donorService.getDashboard(),
+          donorService.getDonorRecords(),
+          donorService.getCampaigns(),
+          donorService.getAllocations(),
+          donorService.getSuspiciousFlags()
+        ]);
+
+        if (!isMounted) return;
+
+        if (dashRes.status === 'fulfilled' && dashRes.value?.succeeded && dashRes.value.data) {
+          const d = dashRes.value.data;
+          if (d.metrics) setMetrics(d.metrics);
+          if (d.priorityAttentionItems?.length) setPriorityItems(d.priorityAttentionItems);
+          if (d.connectedWorkflowSteps?.length) setWorkflowSteps(d.connectedWorkflowSteps);
+          if (d.recentActivity?.length) setRecentActivity(d.recentActivity);
+        }
+
+        if (recordsRes.status === 'fulfilled' && recordsRes.value?.succeeded && recordsRes.value.data?.length) {
+          setRecords(recordsRes.value.data);
+          setSelectedRecordId(recordsRes.value.data[0].id);
+        }
+
+        if (campRes.status === 'fulfilled' && campRes.value?.succeeded && campRes.value.data?.length) {
+          setCampaigns(campRes.value.data);
+        }
+
+        if (allocRes.status === 'fulfilled' && allocRes.value?.succeeded && allocRes.value.data?.length) {
+          setAllocations(allocRes.value.data);
+        }
+
+        if (flagsRes.status === 'fulfilled' && flagsRes.value?.succeeded && flagsRes.value.data?.length) {
+          setFlags(flagsRes.value.data);
+        }
+      } catch (err) {
+        console.warn('Donor backend fetch note: Running in resilient demo mode', err);
+      }
+    }
+
+    fetchDonorBackendData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Sign out handler
   const handleSignOut = () => {
     triggerToast('Signing out of Funding Officer session...', 'info');
@@ -87,7 +140,26 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
   };
 
   // Create new record handler
-  const handleCreateRecord = (newRecord) => {
+  const handleCreateRecord = async (newRecord) => {
+    try {
+      await donorService.createRecord({
+        donorOrg: newRecord.donorOrg || newRecord.source,
+        source: newRecord.source,
+        contactPerson: newRecord.contactPerson,
+        email: newRecord.email,
+        phone: newRecord.phone,
+        type: newRecord.type,
+        amount: newRecord.rawValue || 0,
+        currency: newRecord.currency || 'LKR',
+        category: newRecord.category || 'General Relief',
+        operationalArea: newRecord.operationalArea || 'Western Province',
+        notes: newRecord.notes || '',
+        allocationTarget: newRecord.allocationTarget || 'Unallocated'
+      });
+    } catch (e) {
+      console.warn('Backend sync note: Record saved locally', e);
+    }
+
     setRecords([newRecord, ...records]);
     setSelectedRecordId(newRecord.id);
 
@@ -96,7 +168,7 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
       ...prev,
       registeredDonors: {
         ...prev.registeredDonors,
-        value: prev.registeredDonors.value + 1
+        value: (prev.registeredDonors?.value || 0) + 1
       }
     }));
 
@@ -116,15 +188,24 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
   };
 
   // Dual Approval Co-signature Handler
-  const handleConfirmApproval = ({ recordId, coSignatory, authorizerNote }) => {
+  const handleConfirmApproval = async ({ recordId, coSignatory, authorizerNote }) => {
+    try {
+      await donorService.approveAllocation(recordId, {
+        authorizedNote: authorizerNote,
+        secondarySignature: coSignatory
+      });
+    } catch (e) {
+      console.warn('Backend sync note: Approval recorded locally', e);
+    }
+
     // Update matching record
     setRecords(records.map(r => {
       if (r.id === recordId) {
         return {
           ...r,
           status: 'Allocated',
-          statusColor: '#3b82f6',
-          statusBg: 'rgba(59, 130, 246, 0.15)',
+          statusColor: '#3d6b4f',
+          statusBg: '#edf2e6',
           notes: `${r.notes ? r.notes + ' ' : ''}[Dual Approved by ${officer.fullName} & ${coSignatory}]: ${authorizerNote}`
         };
       }
@@ -164,7 +245,16 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
   };
 
   // Save Memo Note Handler
-  const handleSaveNote = (id, noteText) => {
+  const handleSaveNote = async (id, noteText) => {
+    try {
+      await donorService.processDecision(id, {
+        action: 'memo-note',
+        decisionReason: noteText,
+        note: noteText
+      });
+    } catch (e) {
+      console.warn('Backend sync note:', e);
+    }
     setRecords(records.map(r => r.id === id ? { ...r, notes: noteText } : r));
     setCampaigns(campaigns.map(c => c.id === id ? { ...c, description: noteText } : c));
     setAllocations(allocations.map(a => a.id === id ? { ...a, auditReference: noteText } : a));
@@ -172,12 +262,30 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
   };
 
   // Request Clarification Handler
-  const handleClarifyRecord = (rec) => {
+  const handleClarifyRecord = async (rec) => {
+    try {
+      await donorService.processDecision(rec.id, {
+        action: 'request-clarification',
+        decisionReason: 'Secondary audit verification requested',
+        note: 'Awaiting secondary batch certificate / storage temperature logs'
+      });
+    } catch (e) {
+      console.warn('Backend sync note:', e);
+    }
     triggerToast(`Clarification request dispatched to ${rec.source || rec.id} contact point.`, 'info');
   };
 
   // Escalate Record Handler
-  const handleEscalateRecord = (rec) => {
+  const handleEscalateRecord = async (rec) => {
+    try {
+      await donorService.processDecision(rec.id, {
+        action: 'escalate',
+        decisionReason: 'Anomaly flag escalated to National Command',
+        note: 'Escalated by Funding Officer'
+      });
+    } catch (e) {
+      console.warn('Backend sync note:', e);
+    }
     triggerToast(`Record ${rec.id || rec.code} escalated to Emergency Coordinator (Amara Chen).`, 'warning');
   };
 
@@ -206,7 +314,15 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
   };
 
   // Resolve Suspicious Flag
-  const handleResolveFlag = (flagId, note) => {
+  const handleResolveFlag = async (flagId, note) => {
+    try {
+      await donorService.resolveFlag(flagId, {
+        action: 'clear',
+        resolutionNotes: note || 'Resolved by Funding Officer verification'
+      });
+    } catch (e) {
+      console.warn('Backend sync note:', e);
+    }
     setFlags(flags.filter(f => f.id !== flagId));
     setPriorityItems(priorityItems.filter(p => p.id !== 'DON-2047'));
     triggerToast(`Flag ${flagId} cleared and resolved. Record verified.`, 'success');
@@ -222,7 +338,7 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `ReliefCore_Funding_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", `HumanAid_Funding_Report_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

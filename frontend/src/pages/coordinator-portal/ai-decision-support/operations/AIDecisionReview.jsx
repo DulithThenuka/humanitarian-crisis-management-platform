@@ -369,7 +369,7 @@ export const AIDecisionReview = ({
                   value={modifiedPriority}
                   onChange={(e) => setModifiedPriority(e.target.value)}
                   className="queue-filter-select"
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #c5ccbe' }}
                 >
                   <option value="Critical">Critical</option>
                   <option value="High">High</option>

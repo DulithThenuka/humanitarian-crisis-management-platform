@@ -509,7 +509,7 @@ export const DecisionTraceAudit = ({
           <div className="trace-meta-col">
             <span className="meta-small-label">Request Owner</span>
             <div className="meta-user-row">
-              <User size={15} color="#475569" />
+              <User size={15} color="#4a5b4a" />
               <span className="meta-user-name">Amara Perera</span>
             </div>
             <span className="meta-tiny-sub">Field Coordinator · Colombo District</span>
@@ -841,27 +841,27 @@ export const DecisionTraceAudit = ({
                     <Cpu size={15} />
                   </div>
                   <div>
-                    <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>AI Proposal</h4>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>ReliefCore-BERT v4.2 · 10:17 AM</span>
+                    <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#1e3328' }}>AI Proposal</h4>
+                    <span style={{ fontSize: '11px', color: '#657367' }}>ReliefCore-BERT v4.2 · 10:17 AM</span>
                   </div>
                 </div>
                 <span className="badge-priority critical">Critical (92)</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12.5px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                  <span style={{ color: '#64748b' }}>Assigned Category</span>
-                  <strong style={{ color: '#0f172a' }}>Medical Emergency (Urgent)</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eef1ea', paddingBottom: '6px' }}>
+                  <span style={{ color: '#657367' }}>Assigned Category</span>
+                  <strong style={{ color: '#14291e' }}>Medical Emergency (Urgent)</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                  <span style={{ color: '#64748b' }}>Primary Resource</span>
-                  <strong style={{ color: '#0f172a' }}>MMU-04 (Trauma Van)</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eef1ea', paddingBottom: '6px' }}>
+                  <span style={{ color: '#657367' }}>Primary Resource</span>
+                  <strong style={{ color: '#14291e' }}>MMU-04 (Trauma Van)</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                  <span style={{ color: '#64748b' }}>Model Confidence</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eef1ea', paddingBottom: '6px' }}>
+                  <span style={{ color: '#657367' }}>Model Confidence</span>
                   <strong style={{ color: '#7c3aed' }}>92.4% Probability</strong>
                 </div>
-                <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', color: '#475569', fontSize: '12px', lineHeight: 1.5 }}>
-                  <strong style={{ color: '#1e293b' }}>Inference Rationale:</strong> Multi-term symptom detection indicates trapped residents with medical dependency requiring urgent oxygen replenishment.
+                <div style={{ background: '#f4f6f2', padding: '10px', borderRadius: '8px', color: '#4a5b4a', fontSize: '12px', lineHeight: 1.5 }}>
+                  <strong style={{ color: '#1e3328' }}>Inference Rationale:</strong> Multi-term symptom detection indicates trapped residents with medical dependency requiring urgent oxygen replenishment.
                 </div>
               </div>
             </div>
@@ -874,8 +874,8 @@ export const DecisionTraceAudit = ({
                     <User size={15} />
                   </div>
                   <div>
-                    <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>Coordinator Override</h4>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>Amara Perera · 10:24 AM</span>
+                    <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#1e3328' }}>Coordinator Override</h4>
+                    <span style={{ fontSize: '11px', color: '#657367' }}>Amara Perera · 10:24 AM</span>
                   </div>
                 </div>
                 <span style={{ background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>
@@ -883,17 +883,17 @@ export const DecisionTraceAudit = ({
                 </span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12.5px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                  <span style={{ color: '#64748b' }}>Swapped Resource</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eef1ea', paddingBottom: '6px' }}>
+                  <span style={{ color: '#657367' }}>Swapped Resource</span>
                   <strong style={{ color: '#d97706' }}>MMU-02 (4WD High-Axle Unit)</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                  <span style={{ color: '#64748b' }}>Auxiliary Support</span>
-                  <strong style={{ color: '#0f172a' }}>Zodiac Flood Boat BR-05</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eef1ea', paddingBottom: '6px' }}>
+                  <span style={{ color: '#657367' }}>Auxiliary Support</span>
+                  <strong style={{ color: '#14291e' }}>Zodiac Flood Boat BR-05</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                  <span style={{ color: '#64748b' }}>Transit Route</span>
-                  <strong style={{ color: '#0f172a' }}>Via Cambridge Place Bypass</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eef1ea', paddingBottom: '6px' }}>
+                  <span style={{ color: '#657367' }}>Transit Route</span>
+                  <strong style={{ color: '#14291e' }}>Via Cambridge Place Bypass</strong>
                 </div>
                 <div style={{ background: '#fffbeb', padding: '10px', borderRadius: '8px', color: '#92400e', fontSize: '12px', lineHeight: 1.5, border: '1px solid #fef3c7' }}>
                   <strong style={{ color: '#b45309' }}>Coordinator Note:</strong> Ward Place flooded &gt; 0.85m. 2WD trauma van cannot enter. Dispatched 4WD unit with boat escort to traverse standing water.
@@ -909,8 +909,8 @@ export const DecisionTraceAudit = ({
                     <ShieldCheck size={15} />
                   </div>
                   <div>
-                    <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>Authorized Decision</h4>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>Dr. Nimal Fernando · 10:28 AM</span>
+                    <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#1e3328' }}>Authorized Decision</h4>
+                    <span style={{ fontSize: '11px', color: '#657367' }}>Dr. Nimal Fernando · 10:28 AM</span>
                   </div>
                 </div>
                 <span style={{ background: '#dcfce7', color: '#15803d', padding: '3px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700 }}>
@@ -918,19 +918,19 @@ export const DecisionTraceAudit = ({
                 </span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12.5px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                  <span style={{ color: '#64748b' }}>Approval Protocol</span>
-                  <strong style={{ color: '#0f172a' }}>Emergency Directive E-04</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eef1ea', paddingBottom: '6px' }}>
+                  <span style={{ color: '#657367' }}>Approval Protocol</span>
+                  <strong style={{ color: '#14291e' }}>Emergency Directive E-04</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                  <span style={{ color: '#64748b' }}>Digital Signature</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eef1ea', paddingBottom: '6px' }}>
+                  <span style={{ color: '#657367' }}>Digital Signature</span>
                   <span style={{ fontFamily: 'monospace', fontSize: '11px', color: '#059669', background: '#ecfdf5', padding: '2px 6px', borderRadius: '4px' }}>
                     SIG-NIMAL-FD-9014
                   </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                  <span style={{ color: '#64748b' }}>Hospital Receiving</span>
-                  <strong style={{ color: '#0f172a' }}>Colombo National Hospital EOC</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eef1ea', paddingBottom: '6px' }}>
+                  <span style={{ color: '#657367' }}>Hospital Receiving</span>
+                  <strong style={{ color: '#14291e' }}>Colombo National Hospital EOC</strong>
                 </div>
                 <div style={{ background: '#ecfdf5', padding: '10px', borderRadius: '8px', color: '#065f46', fontSize: '12px', lineHeight: 1.5, border: '1px solid #a7f3d0' }}>
                   <strong style={{ color: '#047857' }}>Director Confirmation:</strong> Full resource allocation approved with immediate siren dispatch. Secondary power generators prepped at depot.
@@ -998,21 +998,21 @@ export const DecisionTraceAudit = ({
                 <MessageSquare size={16} color="#059669" />
                 <h3 className="card-section-title" style={{ margin: 0 }}>Incident Coordinator Notes &amp; Rationale</h3>
               </div>
-              <span style={{ fontSize: '11.5px', color: '#64748b' }}>{incidentNotes.length} recorded entries</span>
+              <span style={{ fontSize: '11.5px', color: '#657367' }}>{incidentNotes.length} recorded entries</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
               {incidentNotes.map(n => (
-                <div key={n.id} style={{ display: 'flex', gap: '12px', background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontWeight: 700, fontSize: '12px', flexShrink: 0 }}>
+                <div key={n.id} style={{ display: 'flex', gap: '12px', background: '#f4f6f2', padding: '12px 14px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#dfe5d8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4a5b4a', fontWeight: 700, fontSize: '12px', flexShrink: 0 }}>
                     {n.author.charAt(0)}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                      <strong style={{ fontSize: '12.5px', color: '#0f172a' }}>{n.author} <span style={{ fontWeight: 500, color: '#64748b', fontSize: '11px' }}>({n.role})</span></strong>
-                      <span style={{ fontSize: '11px', color: '#94a3b8' }}>{n.time}</span>
+                      <strong style={{ fontSize: '12.5px', color: '#14291e' }}>{n.author} <span style={{ fontWeight: 500, color: '#657367', fontSize: '11px' }}>({n.role})</span></strong>
+                      <span style={{ fontSize: '11px', color: '#8a9480' }}>{n.time}</span>
                     </div>
-                    <p style={{ margin: 0, fontSize: '12.5px', color: '#334155', lineHeight: 1.5 }}>{n.text}</p>
+                    <p style={{ margin: 0, fontSize: '12.5px', color: '#2a4a35', lineHeight: 1.5 }}>{n.text}</p>
                   </div>
                 </div>
               ))}
@@ -1029,7 +1029,7 @@ export const DecisionTraceAudit = ({
                   flex: 1,
                   padding: '10px 14px',
                   borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid #c5ccbe',
                   fontSize: '12.5px',
                   outline: 'none'
                 }}
@@ -1051,32 +1051,32 @@ export const DecisionTraceAudit = ({
       {activeTab === 'AI Analysis Data' && (
         <div className="trace-subtab-container" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           {/* Telemetry Bar */}
-          <div className="ai-white-card" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff' }}>
+          <div className="ai-white-card" style={{ background: 'linear-gradient(135deg, #14291e 0%, #1e3328 100%)', color: '#ffffff' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <Sparkles size={16} color="#38bdf8" />
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#38bdf8' }}>NEURAL INFERENCE TELEMETRY HUD</span>
-                  <span style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', fontSize: '10.5px', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                  <Sparkles size={16} color="#7caa7e" />
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#7caa7e' }}>NEURAL INFERENCE TELEMETRY HUD</span>
+                  <span style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#7caa7e', fontSize: '10.5px', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
                     FP16 TensorRT
                   </span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                <div style={{ fontSize: '12px', color: '#8a9480' }}>
                   Model: <span style={{ color: '#ffffff', fontWeight: 600 }}>ReliefCore-BERT-Triage-v4.2.0-prod</span> · Checkpoint: <code style={{ color: '#a78bfa' }}>hf/reliefcore-bert-large-colombo-monsoon</code>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '20px' }}>
                 <div>
-                  <div style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase' }}>Latency</div>
+                  <div style={{ fontSize: '10px', color: '#8a9480', textTransform: 'uppercase' }}>Latency</div>
                   <div style={{ fontSize: '16px', fontWeight: 700, color: '#4ade80' }}>24.2 ms</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase' }}>Attention Heads</div>
+                  <div style={{ fontSize: '10px', color: '#8a9480', textTransform: 'uppercase' }}>Attention Heads</div>
                   <div style={{ fontSize: '16px', fontWeight: 700, color: '#ffffff' }}>16 Heads</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase' }}>Classification Conf</div>
-                  <div style={{ fontSize: '16px', fontWeight: 700, color: '#38bdf8' }}>92.4%</div>
+                  <div style={{ fontSize: '10px', color: '#8a9480', textTransform: 'uppercase' }}>Classification Conf</div>
+                  <div style={{ fontSize: '16px', fontWeight: 700, color: '#7caa7e' }}>92.4%</div>
                 </div>
               </div>
             </div>
@@ -1102,10 +1102,10 @@ export const DecisionTraceAudit = ({
                 ].map(item => (
                   <div key={item.label}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                      <span style={{ fontWeight: 600, color: '#1e293b' }}>{item.label}</span>
-                      <span style={{ color: '#64748b' }}>{item.count}</span>
+                      <span style={{ fontWeight: 600, color: '#1e3328' }}>{item.label}</span>
+                      <span style={{ color: '#657367' }}>{item.count}</span>
                     </div>
-                    <div style={{ width: '100%', height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '8px', background: '#eef1ea', borderRadius: '4px', overflow: 'hidden' }}>
                       <div style={{ width: `${item.pct}%`, height: '100%', background: item.color, borderRadius: '4px' }}></div>
                     </div>
                   </div>
@@ -1137,19 +1137,19 @@ export const DecisionTraceAudit = ({
                   </div>
                   <strong style={{ color: '#d97706' }}>25 / 25 pts</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '8px 12px', borderRadius: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f4f6f2', padding: '8px 12px', borderRadius: '6px' }}>
                   <div>
-                    <strong style={{ color: '#1e293b' }}>Hazard Severity</strong>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>Basement inundated, backup generator drowned</div>
+                    <strong style={{ color: '#1e3328' }}>Hazard Severity</strong>
+                    <div style={{ fontSize: '11px', color: '#657367' }}>Basement inundated, backup generator drowned</div>
                   </div>
-                  <strong style={{ color: '#475569' }}>18 / 20 pts</strong>
+                  <strong style={{ color: '#4a5b4a' }}>18 / 20 pts</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '8px 12px', borderRadius: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f4f6f2', padding: '8px 12px', borderRadius: '6px' }}>
                   <div>
-                    <strong style={{ color: '#1e293b' }}>Temporal Escalation Decay</strong>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>Elapsed time without power: 15 mins</div>
+                    <strong style={{ color: '#1e3328' }}>Temporal Escalation Decay</strong>
+                    <div style={{ fontSize: '11px', color: '#657367' }}>Elapsed time without power: 15 mins</div>
                   </div>
-                  <strong style={{ color: '#475569' }}>9 / 15 pts</strong>
+                  <strong style={{ color: '#4a5b4a' }}>9 / 15 pts</strong>
                 </div>
               </div>
             </div>
@@ -1162,14 +1162,14 @@ export const DecisionTraceAudit = ({
                 <Eye size={16} color="#059669" />
                 <h3 className="card-section-title" style={{ margin: 0 }}>NLP Attention &amp; Key Token Saliency</h3>
               </div>
-              <span style={{ fontSize: '11.5px', color: '#64748b' }}>Click highlighted token to inspect activation weight</span>
+              <span style={{ fontSize: '11.5px', color: '#657367' }}>Click highlighted token to inspect activation weight</span>
             </div>
 
-            <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>
+            <p style={{ fontSize: '12px', color: '#657367', marginBottom: '12px' }}>
               ReliefCore BERT transformer multi-head attention weights computed over caller transcript:
             </p>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', lineHeight: 2, fontSize: '13.5px', color: '#334155' }}>
+            <div style={{ background: '#f4f6f2', border: '1px solid #dfe5d8', borderRadius: '8px', padding: '16px', lineHeight: 2, fontSize: '13.5px', color: '#2a4a35' }}>
               "Caller states that in Cinnamon Gardens elder care home there are{' '}
               <button
                 type="button"
@@ -1275,12 +1275,12 @@ export const DecisionTraceAudit = ({
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Truck size={15} color="#2563eb" />
-                        <h4 style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: '#0f172a' }}>{unit.id} · {unit.name}</h4>
+                        <h4 style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: '#14291e' }}>{unit.id} · {unit.name}</h4>
                       </div>
-                      <span style={{ fontSize: '11.5px', color: '#64748b' }}>{unit.type}</span>
+                      <span style={{ fontSize: '11.5px', color: '#657367' }}>{unit.type}</span>
                     </div>
                     <span style={{
-                      background: unit.status.includes('Scene') ? '#dcfce7' : '#dbeafe',
+                      background: unit.status.includes('Scene') ? '#dcfce7' : '#dbe4c6',
                       color: unit.status.includes('Scene') ? '#15803d' : '#1e40af',
                       padding: '3px 8px',
                       borderRadius: '12px',
@@ -1294,21 +1294,21 @@ export const DecisionTraceAudit = ({
                   {/* Route Progress Bar */}
                   <div style={{ marginBottom: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', marginBottom: '4px' }}>
-                      <span style={{ color: '#64748b' }}>Route Progress</span>
-                      <strong style={{ color: '#0f172a' }}>{unit.progress}% (ETA: {unit.eta})</strong>
+                      <span style={{ color: '#657367' }}>Route Progress</span>
+                      <strong style={{ color: '#14291e' }}>{unit.progress}% (ETA: {unit.eta})</strong>
                     </div>
-                    <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '6px', background: '#dfe5d8', borderRadius: '3px', overflow: 'hidden' }}>
                       <div style={{ width: `${unit.progress}%`, height: '100%', background: unit.status.includes('Scene') ? '#10b981' : '#2563eb', transition: 'width 0.3s ease' }}></div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#475569' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#4a5b4a' }}>
                     <div><strong>Assigned Crew:</strong> {unit.personnel}</div>
                     <div><strong>Live GPS Telemetry:</strong> <code style={{ color: '#059669' }}>{unit.gps}</code> ({unit.speed})</div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px', marginTop: '14px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '14px', paddingTop: '10px', borderTop: '1px solid #eef1ea' }}>
                   <button 
                     type="button" 
                     className="btn-outline-white sm"
@@ -1347,15 +1347,15 @@ export const DecisionTraceAudit = ({
                 { title: 'Depot Dispatch', time: '10:20 AM', status: 'Passed', color: '#16a34a' },
                 { title: 'Cambridge Place Turn', time: '10:25 AM', status: 'Passed', color: '#16a34a' },
                 { title: 'Flood Barrier Bypass', time: '10:29 AM', status: 'In Transit (Current)', color: '#2563eb' },
-                { title: 'Ward Place Gate Arrival', time: '10:35 AM (Est)', status: 'Pending', color: '#94a3b8' }
+                { title: 'Ward Place Gate Arrival', time: '10:35 AM (Est)', status: 'Pending', color: '#8a9480' }
               ].map((step, i) => (
-                <div key={i} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+                <div key={i} style={{ background: '#f4f6f2', border: '1px solid #dfe5d8', borderRadius: '8px', padding: '12px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>Checkpoint {i + 1}</span>
+                    <span style={{ fontSize: '11px', color: '#657367' }}>Checkpoint {i + 1}</span>
                     <span style={{ fontSize: '10.5px', fontWeight: 700, color: step.color }}>{step.status}</span>
                   </div>
-                  <strong style={{ fontSize: '12.5px', color: '#0f172a' }}>{step.title}</strong>
-                  <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>{step.time}</div>
+                  <strong style={{ fontSize: '12.5px', color: '#14291e' }}>{step.title}</strong>
+                  <div style={{ fontSize: '11px', color: '#8a9480', marginTop: '2px' }}>{step.time}</div>
                 </div>
               ))}
             </div>
@@ -1393,9 +1393,9 @@ export const DecisionTraceAudit = ({
                       padding: '5px 12px',
                       borderRadius: '16px',
                       border: '1px solid',
-                      borderColor: clusterRadius === r ? '#059669' : '#e2e8f0',
+                      borderColor: clusterRadius === r ? '#059669' : '#dfe5d8',
                       background: clusterRadius === r ? '#ecfdf5' : '#ffffff',
-                      color: clusterRadius === r ? '#059669' : '#64748b',
+                      color: clusterRadius === r ? '#059669' : '#657367',
                       fontSize: '11.5px',
                       fontWeight: clusterRadius === r ? 700 : 500,
                       cursor: 'pointer'
@@ -1414,16 +1414,16 @@ export const DecisionTraceAudit = ({
               <div key={c.id} className="ai-white-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ flex: 1, minWidth: '280px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <strong style={{ fontSize: '13.5px', color: '#0f172a' }}>{c.id}</strong>
+                    <strong style={{ fontSize: '13.5px', color: '#14291e' }}>{c.id}</strong>
                     <span className={`badge-priority ${c.urgency.toLowerCase()}`}>{c.urgency}</span>
-                    <span style={{ background: '#f1f5f9', color: '#475569', fontSize: '11px', padding: '2px 8px', borderRadius: '10px' }}>
+                    <span style={{ background: '#eef1ea', color: '#4a5b4a', fontSize: '11px', padding: '2px 8px', borderRadius: '10px' }}>
                       {c.distance} away
                     </span>
                     <span style={{ background: '#ede9fe', color: '#7c3aed', fontSize: '11px', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
                       {c.similarity} Semantic Match
                     </span>
                   </div>
-                  <p style={{ margin: '4px 0', fontSize: '12.5px', color: '#334155' }}>{c.summary}</p>
+                  <p style={{ margin: '4px 0', fontSize: '12.5px', color: '#2a4a35' }}>{c.summary}</p>
                   <div style={{ fontSize: '11.5px', color: '#059669', fontWeight: 600 }}>
                     Correlation: {c.relationship}
                   </div>
@@ -1467,10 +1467,10 @@ export const DecisionTraceAudit = ({
               Every automated recommendation and human modification is mathematically sealed with a SHA-256 block hash for legal and international compliance.
             </p>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 16px', marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ background: '#f4f6f2', border: '1px solid #dfe5d8', borderRadius: '8px', padding: '12px 16px', marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
               <div>
-                <div style={{ fontSize: '10.5px', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Immutable Block Hash (SHA-256)</div>
-                <code style={{ fontSize: '12px', color: '#0f172a', fontWeight: 700, wordBreak: 'break-all' }}>
+                <div style={{ fontSize: '10.5px', color: '#657367', textTransform: 'uppercase', fontWeight: 600 }}>Immutable Block Hash (SHA-256)</div>
+                <code style={{ fontSize: '12px', color: '#14291e', fontWeight: 700, wordBreak: 'break-all' }}>
                   0x7b2a991b5c43d7890e1fa67290bc91823746a598c39de1a88b2094892c90e
                 </code>
               </div>
@@ -1488,7 +1488,7 @@ export const DecisionTraceAudit = ({
 
           {/* Checklist of Humanitarian Principles */}
           <div className="ai-white-card">
-            <h4 style={{ margin: '0 0 12px 0', fontSize: '13.5px', color: '#0f172a' }}>Humanitarian Compliance Verification Checklist</h4>
+            <h4 style={{ margin: '0 0 12px 0', fontSize: '13.5px', color: '#14291e' }}>Humanitarian Compliance Verification Checklist</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {complianceItems.map(item => (
                 <div 
@@ -1499,17 +1499,17 @@ export const DecisionTraceAudit = ({
                     alignItems: 'center',
                     gap: '10px',
                     padding: '10px 14px',
-                    background: item.checked ? '#f0fdf4' : '#f8fafc',
+                    background: item.checked ? '#f0fdf4' : '#f4f6f2',
                     border: '1px solid',
-                    borderColor: item.checked ? '#bbf7d0' : '#e2e8f0',
+                    borderColor: item.checked ? '#bbf7d0' : '#dfe5d8',
                     borderRadius: '6px',
                     cursor: 'pointer',
                     fontSize: '12.5px',
-                    color: item.checked ? '#166534' : '#64748b',
+                    color: item.checked ? '#166534' : '#657367',
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  {item.checked ? <CheckSquare size={16} color="#16a34a" /> : <Square size={16} color="#94a3b8" />}
+                  {item.checked ? <CheckSquare size={16} color="#16a34a" /> : <Square size={16} color="#8a9480" />}
                   <span style={{ fontWeight: item.checked ? 600 : 400 }}>{item.label}</span>
                 </div>
               ))}
@@ -1549,7 +1549,7 @@ export const DecisionTraceAudit = ({
               <div style={{
                 height: '180px',
                 borderRadius: '8px',
-                background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                background: 'linear-gradient(135deg, #1e3328 0%, #2a4a35 100%)',
                 position: 'relative',
                 overflow: 'hidden',
                 display: 'flex',
@@ -1558,16 +1558,16 @@ export const DecisionTraceAudit = ({
                 color: '#ffffff'
               }}>
                 <div style={{ textAlign: 'center', padding: '16px' }}>
-                  <MapPin size={28} color="#38bdf8" style={{ margin: '0 auto 8px auto' }} />
+                  <MapPin size={28} color="#7caa7e" style={{ margin: '0 auto 8px auto' }} />
                   <div style={{ fontWeight: 700, fontSize: '13px' }}>Ward Place Entrance Waterlogging</div>
-                  <div style={{ fontSize: '11px', color: '#94a3b8' }}>Visual Flood Depth: 0.85m standing water</div>
+                  <div style={{ fontSize: '11px', color: '#8a9480' }}>Visual Flood Depth: 0.85m standing water</div>
                 </div>
                 <div style={{ position: 'absolute', bottom: '8px', left: '10px', background: 'rgba(0,0,0,0.6)', padding: '3px 8px', borderRadius: '4px', fontSize: '10px' }}>
                   GPS: 6.9147° N, 79.8732° E · 10:14 AM
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: '#64748b', marginTop: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: '#657367', marginTop: '12px' }}>
                 <div><strong>Camera Device:</strong> Samsung Galaxy S23 Ultra · f/1.8 · ISO 50</div>
                 <div><strong>C2PA Authenticity:</strong> Verified original sensor capture (0.0% deepfake/tamper)</div>
               </div>
@@ -1580,13 +1580,13 @@ export const DecisionTraceAudit = ({
                   <Volume2 size={16} color="#059669" />
                   <h3 className="card-section-title" style={{ margin: 0 }}>911 Emergency Audio Recording</h3>
                 </div>
-                <span style={{ fontSize: '11px', background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '10px' }}>
+                <span style={{ fontSize: '11px', background: '#eef1ea', color: '#4a5b4a', padding: '2px 8px', borderRadius: '10px' }}>
                   Duration: 0:48s
                 </span>
               </div>
 
               {/* Player UI */}
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', marginBottom: '14px' }}>
+              <div style={{ background: '#f4f6f2', border: '1px solid #dfe5d8', borderRadius: '8px', padding: '14px', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
                   <button
                     type="button"
@@ -1616,7 +1616,7 @@ export const DecisionTraceAudit = ({
                         style={{
                           flex: 1,
                           height: `${isPlayingAudio ? Math.min(36, h * (0.8 + Math.random() * 0.4)) : h}px`,
-                          background: i < (audioCurrentTime / 48) * 25 ? '#059669' : '#cbd5e1',
+                          background: i < (audioCurrentTime / 48) * 25 ? '#059669' : '#c5ccbe',
                           borderRadius: '2px',
                           transition: 'height 0.1s ease, background 0.2s ease'
                         }}
@@ -1624,19 +1624,19 @@ export const DecisionTraceAudit = ({
                     ))}
                   </div>
 
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#334155', minWidth: '40px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#2a4a35', minWidth: '40px' }}>
                     0:{audioCurrentTime < 10 ? `0${audioCurrentTime}` : audioCurrentTime}
                   </span>
                 </div>
 
                 {/* Speech to text transcript */}
-                <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#475569', lineHeight: 1.5 }}>
-                  <strong style={{ color: '#0f172a' }}>Caller Transcript: </strong>
+                <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #dfe5d8', fontSize: '12px', color: '#4a5b4a', lineHeight: 1.5 }}>
+                  <strong style={{ color: '#14291e' }}>Caller Transcript: </strong>
                   "Please help, we have 6 bedridden elderly patients at Cinnamon Gardens facility. The basement generator is submerged in floodwater, and their oxygen concentrators only have 40 minutes of battery life remaining!"
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#64748b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#657367' }}>
                 <span>Audio Sampling: 44.1 kHz, 16-bit PCM</span>
                 <button 
                   type="button" 
@@ -1670,11 +1670,11 @@ export const DecisionTraceAudit = ({
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f4f6f2', border: '1px solid #dfe5d8', borderRadius: '8px', padding: '12px' }}>
                 <FileText size={24} color="#dc2626" />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}>Paramedic_Field_Triage_Note.pdf</div>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>1.4 MB · Uploaded by Dr. K. Wickramasinghe</div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#14291e' }}>Paramedic_Field_Triage_Note.pdf</div>
+                  <div style={{ fontSize: '11px', color: '#657367' }}>1.4 MB · Uploaded by Dr. K. Wickramasinghe</div>
                 </div>
                 <button 
                   type="button" 
@@ -1685,11 +1685,11 @@ export const DecisionTraceAudit = ({
                 </button>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f4f6f2', border: '1px solid #dfe5d8', borderRadius: '8px', padding: '12px' }}>
                 <FileSpreadsheet size={24} color="#059669" />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}>Oxygen_Depletion_Telemetry_Log.csv</div>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>340 KB · Real-time Medical Sensor Stream</div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#14291e' }}>Oxygen_Depletion_Telemetry_Log.csv</div>
+                  <div style={{ fontSize: '11px', color: '#657367' }}>340 KB · Real-time Medical Sensor Stream</div>
                 </div>
                 <button 
                   type="button" 

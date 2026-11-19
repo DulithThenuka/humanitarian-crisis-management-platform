@@ -96,7 +96,7 @@ export const AIVolunteerMatchingView = ({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 paddingBottom: '12px',
-                borderBottom: '1px solid #f1f5f9',
+                borderBottom: '1px solid #eef1ea',
                 marginBottom: '14px'
               }}
             >
@@ -116,13 +116,13 @@ export const AIVolunteerMatchingView = ({
                   <Sparkles size={14} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748b', fontWeight: 600 }}>
+                  <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#657367', fontWeight: 600 }}>
                     SIMULATED AI RECOMMENDATION
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#14291e' }}>
                     {AI_MATCHING_TASK.taskId} - {AI_MATCHING_TASK.title}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>
+                  <div style={{ fontSize: '11px', color: '#657367' }}>
                     {AI_MATCHING_TASK.refCode}
                   </div>
                 </div>
@@ -136,8 +136,8 @@ export const AIVolunteerMatchingView = ({
                   borderRadius: '12px',
                   fontSize: '11px',
                   fontWeight: 600,
-                  backgroundColor: '#f1f5f9',
-                  color: '#475569'
+                  backgroundColor: '#eef1ea',
+                  color: '#4a5b4a'
                 }}
               >
                 ● REVIEW
@@ -146,19 +146,19 @@ export const AIVolunteerMatchingView = ({
 
             <div
               style={{
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                backgroundColor: '#f4f6f2',
+                border: '1px solid #dfe5d8',
                 borderRadius: '8px',
                 padding: '16px'
               }}
             >
-              <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+              <div style={{ fontSize: '11px', color: '#657367', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
                 Suggested actions
               </div>
-              <div style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: '#14291e', marginBottom: '4px' }}>
                 {AI_MATCHING_TASK.suggestedAction}
               </div>
-              <div style={{ fontSize: '12px', color: '#64748b' }}>
+              <div style={{ fontSize: '12px', color: '#657367' }}>
                 {AI_MATCHING_TASK.confidence}
               </div>
             </div>
@@ -170,10 +170,10 @@ export const AIVolunteerMatchingView = ({
               style={{
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#0f172a',
+                color: '#14291e',
                 marginBottom: '14px',
                 paddingBottom: '8px',
-                borderBottom: '1px solid #f1f5f9'
+                borderBottom: '1px solid #eef1ea'
               }}
             >
               Factors, limits and possible conflicts
@@ -190,20 +190,20 @@ export const AIVolunteerMatchingView = ({
                     padding: '10px 12px',
                     borderRadius: '6px',
                     backgroundColor: '#fafbfc',
-                    border: '1px solid #f1f5f9'
+                    border: '1px solid #eef1ea'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     {factor.icon === 'alert' ? (
                       <AlertTriangle size={15} style={{ color: '#d97706', flexShrink: 0 }} />
                     ) : (
-                      <CheckCircle2 size={15} style={{ color: '#64748b', flexShrink: 0 }} />
+                      <CheckCircle2 size={15} style={{ color: '#657367', flexShrink: 0 }} />
                     )}
                     <div>
-                      <div style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: '#14291e' }}>
                         {factor.name}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>
+                      <div style={{ fontSize: '11px', color: '#657367' }}>
                         {factor.description}
                       </div>
                     </div>
@@ -219,13 +219,13 @@ export const AIVolunteerMatchingView = ({
                           ? '#fef3c7'
                           : factor.badge === 'Required'
                           ? '#fee2e2'
-                          : '#e2e8f0',
+                          : '#dfe5d8',
                       color:
                         factor.badge === 'Review'
                           ? '#92400e'
                           : factor.badge === 'Required'
                           ? '#991b1b'
-                          : '#334155'
+                          : '#2a4a35'
                     }}
                   >
                     {factor.badge}
@@ -241,7 +241,7 @@ export const AIVolunteerMatchingView = ({
               style={{
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#0f172a',
+                color: '#14291e',
                 marginBottom: '12px'
               }}
             >
@@ -253,13 +253,13 @@ export const AIVolunteerMatchingView = ({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '12px 14px',
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                backgroundColor: '#f4f6f2',
+                border: '1px solid #dfe5d8',
                 borderRadius: '8px'
               }}
             >
-              <div style={{ fontSize: '12px', color: '#334155' }}>
-                <strong style={{ color: '#0f172a' }}>{AI_MATCHING_TASK.possibleDuplicate.ref}</strong>{' '}
+              <div style={{ fontSize: '12px', color: '#2a4a35' }}>
+                <strong style={{ color: '#14291e' }}>{AI_MATCHING_TASK.possibleDuplicate.ref}</strong>{' '}
                 {AI_MATCHING_TASK.possibleDuplicate.skills} · {AI_MATCHING_TASK.possibleDuplicate.note}
               </div>
               <button
@@ -280,10 +280,10 @@ export const AIVolunteerMatchingView = ({
               style={{
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#0f172a',
+                color: '#14291e',
                 marginBottom: '14px',
                 paddingBottom: '8px',
-                borderBottom: '1px solid #f1f5f9'
+                borderBottom: '1px solid #eef1ea'
               }}
             >
               Record human decision
@@ -297,7 +297,7 @@ export const AIVolunteerMatchingView = ({
                     fontSize: '11px',
                     fontWeight: 700,
                     textTransform: 'uppercase',
-                    color: '#64748b',
+                    color: '#657367',
                     marginBottom: '6px'
                   }}
                 >
@@ -324,7 +324,7 @@ export const AIVolunteerMatchingView = ({
                     fontSize: '11px',
                     fontWeight: 700,
                     textTransform: 'uppercase',
-                    color: '#64748b',
+                    color: '#657367',
                     marginBottom: '6px'
                   }}
                 >
@@ -374,8 +374,8 @@ export const AIVolunteerMatchingView = ({
 
             {/* Decision Log if any */}
             {decisionHistory.length > 0 && (
-              <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #eef1ea' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#657367', textTransform: 'uppercase', marginBottom: '8px' }}>
                   Decisions recorded this session
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -385,14 +385,14 @@ export const AIVolunteerMatchingView = ({
                       style={{
                         padding: '8px',
                         borderRadius: '6px',
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
+                        backgroundColor: '#f4f6f2',
+                        border: '1px solid #dfe5d8',
                         fontSize: '11px'
                       }}
                     >
-                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{h.decision}</div>
-                      <div style={{ color: '#475569', margin: '2px 0' }}>{h.reason}</div>
-                      <div style={{ color: '#94a3b8', fontSize: '10px' }}>{h.timestamp} · {h.reviewer}</div>
+                      <div style={{ fontWeight: 600, color: '#14291e' }}>{h.decision}</div>
+                      <div style={{ color: '#4a5b4a', margin: '2px 0' }}>{h.reason}</div>
+                      <div style={{ color: '#8a9480', fontSize: '10px' }}>{h.timestamp} · {h.reviewer}</div>
                     </div>
                   ))}
                 </div>

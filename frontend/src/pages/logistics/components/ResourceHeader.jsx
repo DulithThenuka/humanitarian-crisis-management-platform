@@ -20,71 +20,74 @@ export const ResourceHeader = ({ activeTab, onSelectTab, showToast }) => {
   return (
     <header className="rm-header-container">
       {/* Top Bar */}
-      <div className="rm-header-top">
+      <div className="rm-header">
         {/* Left: Breadcrumbs */}
         <div className="rm-header-left">
-          <span className="rm-header-pretitle">RESOURCE MANAGER PORTAL</span>
-          <span className="rm-header-current-title">{currentTitle}</span>
-        </div>
+          <div className="rm-breadcrumb">
+            <span className="rm-breadcrumb-root">RESOURCE MANAGER PORTAL</span>
+            <span className="rm-breadcrumb-current">{currentTitle}</span>
+          </div>
 
-        {/* Center: Global Search */}
-        <div className="rm-header-search-wrap">
-          <Search size={15} className="rm-header-search-icon" />
-          <input
-            type="text"
-            className="rm-header-search-input"
-            placeholder="Search inventory, allocations, dispatches..."
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && showToast) {
-                showToast(`Searching for "${e.target.value}" across resource records`);
-              }
-            }}
-          />
-          <kbd className="rm-header-search-kbd">⌘ K</kbd>
+          {/* Center: Global Search */}
+          <div className="rm-search-wrapper">
+            <Search size={15} className="rm-search-icon" />
+            <input
+              type="text"
+              className="rm-search-input"
+              placeholder="Search inventory, allocations, dispatches..."
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && showToast) {
+                  showToast(`Searching for "${e.target.value}" across resource records`);
+                }
+              }}
+            />
+            <kbd className="rm-search-kbd">⌘ K</kbd>
+          </div>
         </div>
 
         {/* Right: Active Operation, Notification Bell, User Avatar */}
         <div className="rm-header-right">
           {/* Active Operation Selector */}
-          <div className="rm-active-op-card">
-            <span className="rm-active-op-label">Active operation</span>
-            <div className="rm-active-op-row">
-              <span className="rm-active-op-name">Western Province Flood</span>
-              <ChevronDown size={14} style={{ color: '#657367' }} />
+          <div className="rm-operation-box">
+            <div className="rm-op-info">
+              <span className="rm-op-label">ACTIVE OPERATION</span>
+              <span className="rm-op-value">Western Province Flood</span>
+            </div>
+            <ChevronDown size={14} style={{ color: '#657367' }} />
+
+            {/* Bell with red badge inside operation box */}
+            <div
+              className="rm-op-bell"
+              onClick={() => onSelectTab('notifications')}
+              title="5 unread notifications"
+              style={{ cursor: 'pointer', marginLeft: '6px' }}
+            >
+              <Bell size={16} />
+              <span className="rm-bell-badge">5</span>
             </div>
           </div>
 
-          {/* Bell with red badge */}
-          <button
-            onClick={() => onSelectTab('notifications')}
-            className="rm-header-bell-btn"
-            title="5 unread notifications"
-            aria-label="Notifications"
-          >
-            <Bell size={18} />
-            <span className="rm-header-bell-badge">5</span>
-          </button>
-
           {/* User Profile Pill */}
-          <button
+          <div
+            className="rm-header-user"
             onClick={() => onSelectTab('profile')}
-            className="rm-header-user-btn"
             title="Profile & Settings"
+            style={{ cursor: 'pointer' }}
           >
-            <div className="rm-header-user-avatar">DP</div>
-            <div className="rm-header-user-meta">
-              <span className="rm-header-user-name">Dilan Perera</span>
-              <span className="rm-header-user-role">Resource Manager</span>
+            <div className="rm-officer-avatar">DP</div>
+            <div className="rm-user-text">
+              <span className="rm-user-name">Dilan Perera</span>
+              <span className="rm-user-role">Resource Manager</span>
             </div>
-          </button>
+          </div>
         </div>
       </div>
 
       {/* Coursework Prototype Banner */}
       <div className="rm-prototype-banner">
-        <ShieldAlert size={15} className="rm-prototype-banner-icon" />
-        <span className="rm-prototype-banner-tag">Resource prototype</span>
-        <span className="rm-prototype-banner-text">
+        <ShieldAlert size={14} className="rm-banner-shield" />
+        <strong style={{ fontWeight: 700 }}>Resource prototype</strong>
+        <span>
           Illustrative records only. Prototype actions do not update a database or confirm physical delivery.
         </span>
       </div>

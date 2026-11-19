@@ -71,9 +71,9 @@ export const RequestTriagePage = () => {
 
   return (
     <div style={{ padding: '24px' }}>
-      <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#f8fafc', marginBottom: '6px' }}>Incident Triage & Deduplication</h2>
-      <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '24px' }}>Review incoming citizen requests categorized and prioritized by AI scoring models.</p>
-      <div style={{ backgroundColor: '#1e293b', borderRadius: '12px', border: '1px solid #334155', padding: '16px' }}>
+      <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#f4f6f2', marginBottom: '6px' }}>Incident Triage & Deduplication</h2>
+      <p style={{ color: '#8a9480', fontSize: '13px', marginBottom: '24px' }}>Review incoming citizen requests categorized and prioritized by AI scoring models.</p>
+      <div style={{ backgroundColor: '#1e3328', borderRadius: '12px', border: '1px solid #2a4a35', padding: '16px' }}>
         <DataTable columns={columns} data={requests} emptyMessage="No requests waiting in triage." />
       </div>
     </div>

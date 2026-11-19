@@ -52,7 +52,7 @@ export const PLATFORM_PAGES = [
     description: 'Central self-service hub for flood-affected families, immediate relief assistance, and verified shelter discovery.',
     badge: 'Module 01',
     icon: Users,
-    color: '#38bdf8',
+    color: '#7caa7e',
     highlight: 'SOS Requests & Status'
   },
   {
@@ -166,7 +166,7 @@ export const PLATFORM_PAGES = [
     description: 'Situational awareness command map, regional active incidents, critical resource allocations, and live priority feed.',
     badge: 'Module 02',
     icon: LayoutDashboard,
-    color: '#38bdf8',
+    color: '#7caa7e',
     highlight: 'Sector Incident Radar'
   },
   {
@@ -280,7 +280,7 @@ export const PLATFORM_PAGES = [
     description: 'Multi-channel victim communication log including direct call-backs, SMS alerts, and responder notes.',
     badge: 'Module 03',
     icon: PhoneCall,
-    color: '#38bdf8',
+    color: '#7caa7e',
     highlight: 'Victim Outreach Logs'
   },
 
@@ -317,7 +317,7 @@ export const PLATFORM_PAGES = [
     description: 'Review and allocate incoming emergency supply requests from shelters and hospital relief camps.',
     badge: 'Module 04',
     icon: ClipboardList,
-    color: '#38bdf8',
+    color: '#7caa7e',
     highlight: 'Shelter Requisition Orders'
   },
   {
@@ -365,7 +365,7 @@ export const PLATFORM_PAGES = [
     description: 'Administrative catalog of all designated emergency evacuation centers, school gyms, and temples.',
     badge: 'Module 05',
     icon: Building,
-    color: '#38bdf8',
+    color: '#7caa7e',
     highlight: 'Verified Capacity Lists'
   },
   {
@@ -476,7 +476,7 @@ export const PLATFORM_PAGES = [
     description: 'Joint humanitarian response platform linking Disaster Management, Red Cross, UN agencies, and accredited NGOs.',
     badge: 'Module 08',
     icon: Building2,
-    color: '#38bdf8',
+    color: '#7caa7e',
     highlight: 'Inter-Agency Command'
   },
   {
@@ -579,7 +579,7 @@ export const PLATFORM_PAGES = [
     description: 'High-resolution Western Province satellite cartography with interactive disaster polygons, flood gauges, and shelters.',
     badge: 'Module 09',
     icon: MapPin,
-    color: '#0284c7',
+    color: '#3d6b4f',
     highlight: 'Sentinel-2 Geospatial HUD'
   },
   {
@@ -601,7 +601,7 @@ export const PLATFORM_PAGES = [
     description: 'Secure JWT authenticated portal sign-in with role-based access for coordinators, logistics, and volunteers.',
     badge: 'Module 09',
     icon: Lock,
-    color: '#94a3b8',
+    color: '#8a9480',
     highlight: 'Role-Based Access'
   },
   {
@@ -612,7 +612,7 @@ export const PLATFORM_PAGES = [
     description: 'Register as an emergency responder, humanitarian NGO operator, or community volunteer.',
     badge: 'Module 09',
     icon: UserPlus,
-    color: '#38bdf8',
+    color: '#7caa7e',
     highlight: 'Join Crisis Response'
   }
 ];

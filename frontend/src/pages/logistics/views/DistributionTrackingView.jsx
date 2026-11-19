@@ -201,7 +201,7 @@ export const DistributionTrackingView = ({
 
             {/* Distribution History */}
             <div style={{ marginBottom: '24px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#475569', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '14px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#4a5b4a', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '14px' }}>
                 DISTRIBUTION HISTORY
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>

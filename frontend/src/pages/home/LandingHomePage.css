@@ -4,19 +4,19 @@
    ========================================================================== */
 
 :root {
-  --rc-petrol-dark: #082128;
+  --rc-petrol-dark: #14291e;
   --rc-petrol-deeper: #05161b;
-  --rc-teal-primary: #0e6f76;
+  --rc-teal-primary: #3d6b4f;
   --rc-teal-hover: #0b595e;
-  --rc-teal-gradient: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  --rc-teal-gradient: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   --rc-teal-glow: rgba(25, 130, 141, 0.4);
   --rc-mint-accent: #5eead4;
-  --rc-sky-accent: #38bdf8;
-  --rc-body-bg: #f1f5f9;
-  --rc-card-border: #e2e8f0;
+  --rc-sky-accent: #7caa7e;
+  --rc-body-bg: #eef1ea;
+  --rc-card-border: #dfe5d8;
   --rc-text-white: #ffffff;
-  --rc-text-muted: #94a3b8;
-  --rc-text-dark: #0f172a;
+  --rc-text-muted: #8a9480;
+  --rc-text-dark: #14291e;
 }
 
 .lnd-page-wrapper {
@@ -24,7 +24,7 @@
   width: 100%;
   background-color: var(--rc-petrol-deeper);
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #f8fafc;
+  color: #f4f6f2;
   display: flex;
   flex-direction: column;
   overflow-x: clip;
@@ -39,7 +39,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   padding: 8px 24px;
   font-size: 11.5px;
-  color: #94a3b8;
+  color: #8a9480;
   z-index: 100;
   position: relative;
 }
@@ -58,7 +58,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #cbd5e1;
+  color: #c5ccbe;
 }
 
 .lnd-live-pulse-amber {
@@ -127,10 +127,10 @@
 }
 
 /* ==========================================================================
-   2. Main Navigation Bar (Styled to match Website #082128)
+   2. Main Navigation Bar (Styled to match Website #14291e)
    ========================================================================== */
 .lnd-navbar {
-  background-color: #082128;
+  background-color: #14291e;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   position: sticky;
   top: 0;
@@ -182,7 +182,7 @@
   border: none;
   font-size: 13.5px;
   font-weight: 500;
-  color: #94a3b8;
+  color: #8a9480;
   text-decoration: none;
   cursor: pointer;
   padding: 8px 6px;
@@ -199,7 +199,7 @@
 }
 
 .lnd-nav-icon {
-  color: #94a3b8;
+  color: #8a9480;
   transition: color 0.15s ease;
 }
 
@@ -221,11 +221,11 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #38bdf8;
+  background-color: #7caa7e;
 }
 
 .lnd-nav-demo-btn {
-  color: #cbd5e1;
+  color: #c5ccbe;
   font-weight: 600;
 }
 
@@ -243,7 +243,7 @@
 }
 
 .lnd-nav-command-btn:hover {
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
 }
 
@@ -286,7 +286,7 @@
 
 /* Auth & Signup Links in Navbar */
 .lnd-nav-auth-link {
-  color: #94a3b8;
+  color: #8a9480;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -316,7 +316,7 @@
 }
 
 .lnd-nav-signup-link:hover {
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
   border-color: #5eead4;
 }
@@ -324,7 +324,7 @@
 .lnd-hero-auth-hint {
   margin-top: 14px;
   font-size: 12.5px;
-  color: #94a3b8;
+  color: #8a9480;
   line-height: 1.5;
 }
 
@@ -344,16 +344,16 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  background: #f4f6f2;
+  border-top: 1px solid #dfe5d8;
   border-radius: 0 0 16px 16px;
   font-size: 13px;
-  color: #64748b;
+  color: #657367;
   margin-top: 12px;
 }
 
 .lnd-btn-modal-signup {
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
   border: none;
   padding: 7px 16px;
@@ -370,7 +370,7 @@
 
 /* Button matching website primary style */
 .lnd-btn-request-nav {
-  background: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  background: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   color: #ffffff;
   text-decoration: none;
   padding: 9px 20px;
@@ -403,7 +403,7 @@
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
-  background-color: #082128;
+  background-color: #14291e;
 }
 
 .lnd-hero-overlay {
@@ -501,7 +501,7 @@
 
 .lnd-hero-subtitle {
   font-size: 15px;
-  color: #cbd5e1;
+  color: #c5ccbe;
   line-height: 1.6;
   max-width: 520px;
   margin: 0 0 22px 0;
@@ -529,7 +529,7 @@
 }
 
 .lnd-hero-search-icon {
-  color: #94a3b8;
+  color: #8a9480;
   flex-shrink: 0;
 }
 
@@ -537,17 +537,17 @@
   border: none;
   outline: none;
   font-size: 13.5px;
-  color: #0f172a;
+  color: #14291e;
   width: 100%;
   font-family: inherit;
 }
 
 .lnd-hero-search-input::placeholder {
-  color: #94a3b8;
+  color: #8a9480;
 }
 
 .lnd-hero-search-btn {
-  background: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  background: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   color: #ffffff;
   border: none;
   border-radius: 7px;
@@ -577,7 +577,7 @@
 }
 
 .lnd-hero-btn-primary {
-  background: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  background: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   color: #ffffff;
   text-decoration: none;
   padding: 13px 24px;
@@ -624,7 +624,7 @@
 .lnd-hero-btn-tertiary {
   background: transparent;
   border: none;
-  color: #cbd5e1;
+  color: #c5ccbe;
   font-size: 13.5px;
   font-weight: 600;
   display: inline-flex;
@@ -648,12 +648,12 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #94a3b8;
+  color: #8a9480;
   position: relative;
 }
 
 .lnd-lang-globe {
-  color: #94a3b8;
+  color: #8a9480;
 }
 
 .lnd-lang-switch-btn {
@@ -682,7 +682,7 @@
   top: 100%;
   left: 0;
   margin-top: 8px;
-  background: #082128;
+  background: #14291e;
   border: 1px solid rgba(94, 234, 212, 0.3);
   border-radius: 10px;
   padding: 6px;
@@ -697,7 +697,7 @@
 .lnd-lang-dropdown button {
   background: transparent;
   border: none;
-  color: #cbd5e1;
+  color: #c5ccbe;
   text-align: left;
   padding: 8px 12px;
   font-size: 12.5px;
@@ -713,7 +713,7 @@
 }
 
 .lnd-lang-dropdown button.active {
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
   font-weight: 700;
 }
@@ -768,7 +768,7 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  background: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -780,7 +780,7 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  background: linear-gradient(135deg, #5a8c6a 0%, #3d6b4f 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -804,7 +804,7 @@
 
 .lnd-card-label {
   font-size: 11px;
-  color: #94a3b8;
+  color: #8a9480;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -819,7 +819,7 @@
 
 .lnd-card-extra {
   font-size: 11px;
-  color: #cbd5e1;
+  color: #c5ccbe;
   margin-top: 3px;
   line-height: 1.25;
 }
@@ -848,7 +848,7 @@
 
 .lnd-card-badge-pulse {
   background-color: rgba(14, 165, 233, 0.2);
-  color: #38bdf8;
+  color: #7caa7e;
   border: 1px solid rgba(56, 189, 248, 0.35);
   font-size: 10px;
   font-weight: 700;
@@ -865,8 +865,8 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #38bdf8;
-  box-shadow: 0 0 8px #38bdf8;
+  background-color: #7caa7e;
+  box-shadow: 0 0 8px #7caa7e;
 }
 
 .lnd-capacity-bar-wrap {
@@ -885,7 +885,7 @@
 }
 
 .lnd-card-chevron {
-  color: #64748b;
+  color: #657367;
   flex-shrink: 0;
   transition: transform 0.15s ease;
 }
@@ -956,8 +956,8 @@
 .lnd-pulse-kalutara {
   left: 28px;
   top: 74px;
-  background-color: #38bdf8;
-  box-shadow: 0 0 10px #38bdf8;
+  background-color: #7caa7e;
+  box-shadow: 0 0 10px #7caa7e;
   animation-delay: 1.2s;
 }
 
@@ -988,7 +988,7 @@
 
 .lnd-map-sub {
   font-size: 11.5px;
-  color: #cbd5e1;
+  color: #c5ccbe;
   margin: 3px 0 10px 0;
   line-height: 1.35;
 }
@@ -1001,7 +1001,7 @@
 }
 
 .lnd-btn-map-action {
-  background: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  background: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   color: #ffffff;
   border: none;
   border-radius: 9999px;
@@ -1024,7 +1024,7 @@
 
 .lnd-map-coords {
   font-size: 10px;
-  color: #64748b;
+  color: #657367;
   font-family: monospace;
 }
 
@@ -1102,22 +1102,22 @@
 .lnd-stat-label {
   font-size: 12px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: #dfe5d8;
   margin-top: 2px;
 }
 
 .lnd-stat-demo {
   font-size: 10.5px;
-  color: #64748b;
+  color: #657367;
 }
 
 /* ==========================================================================
    5. Immediate Assistance Quick Category Tray (Matching CitizenPortal Style)
    ========================================================================== */
 .lnd-assistance-tray-section {
-  background-color: #f1f5f9;
+  background-color: #eef1ea;
   padding: 40px 28px 50px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #dfe5d8;
   position: relative;
   z-index: 5;
 }
@@ -1140,7 +1140,7 @@
 .lnd-tray-eyebrow {
   font-size: 11px;
   font-weight: 800;
-  color: #0e6f76;
+  color: #3d6b4f;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 4px;
@@ -1149,21 +1149,21 @@
 .lnd-tray-heading {
   font-size: 24px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   letter-spacing: -0.02em;
   margin: 0;
 }
 
 .lnd-tray-sub {
   font-size: 13.5px;
-  color: #64748b;
+  color: #657367;
   margin: 4px 0 0 0;
 }
 
 .lnd-tray-all-btn {
   font-size: 12.5px;
   font-weight: 700;
-  color: #0e6f76;
+  color: #3d6b4f;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -1171,14 +1171,14 @@
   padding: 8px 16px;
   border-radius: 8px;
   background: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #c5ccbe;
   transition: all 0.15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .lnd-tray-all-btn:hover {
-  background: #f8fafc;
-  border-color: #0e6f76;
+  background: #f4f6f2;
+  border-color: #3d6b4f;
   transform: translateX(2px);
 }
 
@@ -1208,7 +1208,7 @@
 .lnd-assist-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-  border-color: #cbd5e1;
+  border-color: #c5ccbe;
 }
 
 .lnd-assist-card-left {
@@ -1239,7 +1239,7 @@
 }
 
 .lnd-assist-title {
-  color: #0f172a;
+  color: #14291e;
   font-size: 13.5px;
   font-weight: 700;
   margin: 0;
@@ -1247,7 +1247,7 @@
 }
 
 .lnd-assist-desc {
-  color: #64748b;
+  color: #657367;
   font-size: 11.5px;
   margin: 3px 0 0 0;
   line-height: 1.35;
@@ -1275,8 +1275,8 @@
 .lnd-capabilities-section {
   background-color: #ffffff;
   padding: 64px 28px;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  border-top: 1px solid #dfe5d8;
+  border-bottom: 1px solid #dfe5d8;
 }
 
 .lnd-section-container {
@@ -1293,7 +1293,7 @@
 .lnd-section-eyebrow {
   font-size: 11.5px;
   font-weight: 800;
-  color: #0e6f76;
+  color: #3d6b4f;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 8px;
@@ -1303,7 +1303,7 @@
 .lnd-section-title {
   font-size: 28px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   letter-spacing: -0.025em;
   line-height: 1.2;
   margin: 0 0 12px 0;
@@ -1311,7 +1311,7 @@
 
 .lnd-section-desc {
   font-size: 14px;
-  color: #64748b;
+  color: #657367;
   line-height: 1.6;
   margin: 0;
 }
@@ -1323,8 +1323,8 @@
 }
 
 .lnd-cap-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 14px;
   padding: 24px 20px;
   display: flex;
@@ -1334,7 +1334,7 @@
 
 .lnd-cap-card:hover {
   background: #ffffff;
-  border-color: #cbd5e1;
+  border-color: #c5ccbe;
   transform: translateY(-4px);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
 }
@@ -1353,14 +1353,14 @@
 .lnd-cap-title {
   font-size: 15.5px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0 0 10px 0;
   line-height: 1.3;
 }
 
 .lnd-cap-desc {
   font-size: 12.5px;
-  color: #64748b;
+  color: #657367;
   line-height: 1.55;
   margin: 0 0 16px 0;
   flex: 1;
@@ -1377,7 +1377,7 @@
 
 .lnd-cap-list li {
   font-size: 12px;
-  color: #334155;
+  color: #2a4a35;
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -1385,16 +1385,16 @@
 }
 
 .lnd-cap-list li svg {
-  color: #0e6f76;
+  color: #3d6b4f;
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 /* ==========================================================================
-   7. Stakeholder Command Portals (#082128 Petrol Slate)
+   7. Stakeholder Command Portals (#14291e Petrol Slate)
    ========================================================================== */
 .lnd-portals-section {
-  background-color: #082128;
+  background-color: #14291e;
   padding: 72px 28px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -1404,7 +1404,7 @@
 }
 
 .lnd-portals-section .lnd-section-desc {
-  color: #94a3b8;
+  color: #8a9480;
 }
 
 .lnd-portals-section .lnd-section-eyebrow {
@@ -1470,7 +1470,7 @@
 
 .lnd-portal-desc {
   font-size: 12.5px;
-  color: #94a3b8;
+  color: #8a9480;
   line-height: 1.5;
   margin: 0 0 16px 0;
   flex: 1;
@@ -1481,7 +1481,7 @@
   align-items: center;
   gap: 7px;
   font-size: 11.5px;
-  color: #cbd5e1;
+  color: #c5ccbe;
   background: rgba(255, 255, 255, 0.04);
   padding: 6px 10px;
   border-radius: 8px;
@@ -1503,7 +1503,7 @@
 }
 
 .lnd-portal-arrow {
-  color: #64748b;
+  color: #657367;
   transition: all 0.15s ease;
 }
 
@@ -1521,7 +1521,7 @@
 }
 
 .lnd-emergency-box {
-  background: #082128;
+  background: #14291e;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
   padding: 24px 32px;
@@ -1561,7 +1561,7 @@
 
 .lnd-emergency-desc {
   font-size: 12.5px;
-  color: #94a3b8;
+  color: #8a9480;
   margin: 0;
   line-height: 1.45;
 }
@@ -1599,13 +1599,13 @@
 
 .lnd-hotline-name {
   font-size: 10px;
-  color: #cbd5e1;
+  color: #c5ccbe;
   font-weight: 500;
   margin-top: 2px;
 }
 
 .lnd-safety-btn {
-  background: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  background: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 10px;
@@ -1627,13 +1627,13 @@
 }
 
 /* ==========================================================================
-   9. Footer (Matching Website Petrol Theme #05161b / #082128)
+   9. Footer (Matching Website Petrol Theme #05161b / #14291e)
    ========================================================================== */
 .lnd-footer {
   background-color: #041217;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: 60px 28px 30px;
-  color: #94a3b8;
+  color: #8a9480;
   font-size: 13px;
 }
 
@@ -1664,7 +1664,7 @@
 .lnd-footer-mission {
   font-size: 12.5px;
   line-height: 1.6;
-  color: #94a3b8;
+  color: #8a9480;
   margin-bottom: 18px;
   max-width: 380px;
 }
@@ -1701,7 +1701,7 @@
 
 .lnd-footer-links a,
 .lnd-footer-link-btn {
-  color: #94a3b8;
+  color: #8a9480;
   text-decoration: none;
   font-size: 13px;
   transition: color 0.15s ease;
@@ -1736,7 +1736,7 @@
 }
 
 .lnd-ft-tag {
-  color: #64748b;
+  color: #657367;
 }
 
 .lnd-footer-hotlines-list a {
@@ -1768,7 +1768,7 @@
 }
 
 .lnd-footer-demo-btn:hover {
-  background: #0e6f76;
+  background: #3d6b4f;
   color: #ffffff;
 }
 
@@ -1780,7 +1780,7 @@
   flex-wrap: wrap;
   gap: 16px;
   font-size: 12px;
-  color: #64748b;
+  color: #657367;
 }
 
 .lnd-footer-bottom-links {
@@ -1793,7 +1793,7 @@
 .lnd-footer-bottom-links a {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #8a9480;
   font-size: 12px;
   text-decoration: none;
   cursor: pointer;
@@ -1832,7 +1832,7 @@
   overflow-y: auto;
   padding: 30px;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-  color: #0f172a;
+  color: #14291e;
 }
 
 .lnd-modal-header {
@@ -1840,14 +1840,14 @@
   justify-content: space-between;
   align-items: flex-start;
   padding-bottom: 18px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #dfe5d8;
 }
 
 .lnd-modal-pill {
   font-size: 10.5px;
   font-weight: 700;
-  background: #f1f5f9;
-  color: #0e6f76;
+  background: #eef1ea;
+  color: #3d6b4f;
   padding: 3px 8px;
   border-radius: 4px;
   display: inline-block;
@@ -1859,20 +1859,20 @@
 .lnd-modal-title {
   font-size: 20px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0;
   letter-spacing: -0.02em;
 }
 
 .lnd-modal-desc {
   font-size: 13.5px;
-  color: #64748b;
+  color: #657367;
   margin: 6px 0 0 0;
   line-height: 1.45;
 }
 
 .lnd-modal-close {
-  background: #f1f5f9;
+  background: #eef1ea;
   border: none;
   border-radius: 50%;
   width: 34px;
@@ -1880,14 +1880,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: #657367;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .lnd-modal-close:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #dfe5d8;
+  color: #14291e;
 }
 
 /* Role Demo Grid */
@@ -1899,7 +1899,7 @@
 }
 
 .lnd-role-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -1911,8 +1911,8 @@
 }
 
 .lnd-role-card:hover {
-  border-color: #0e6f76;
-  background-color: #f8fafc;
+  border-color: #3d6b4f;
+  background-color: #f4f6f2;
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
@@ -1943,21 +1943,21 @@
 .lnd-role-name {
   font-size: 13.5px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .lnd-role-pill {
   font-size: 10px;
   font-weight: 700;
-  background: #f1f5f9;
-  color: #475569;
+  background: #eef1ea;
+  color: #4a5b4a;
   padding: 2px 7px;
   border-radius: 4px;
 }
 
 .lnd-role-desc {
   font-size: 11.5px;
-  color: #64748b;
+  color: #657367;
   margin: 3px 0 6px 0;
   line-height: 1.35;
 }
@@ -1965,17 +1965,17 @@
 .lnd-role-highlight {
   font-size: 10.5px;
   font-weight: 600;
-  color: #0e6f76;
+  color: #3d6b4f;
 }
 
 .lnd-role-arrow {
-  color: #cbd5e1;
+  color: #c5ccbe;
   flex-shrink: 0;
   transition: transform 0.15s ease;
 }
 
 .lnd-role-card:hover .lnd-role-arrow {
-  color: #0e6f76;
+  color: #3d6b4f;
   transform: translateX(3px);
 }
 
@@ -1994,10 +1994,10 @@
 }
 
 .lnd-safety-hotline-card {
-  background: #f8fafc;
+  background: #f4f6f2;
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   text-align: center;
 }
 
@@ -2010,13 +2010,13 @@
 .lnd-sh-name {
   font-size: 12.5px;
   font-weight: 700;
-  color: #0f172a;
+  color: #14291e;
   margin-top: 6px;
 }
 
 .lnd-sh-desc {
   font-size: 11px;
-  color: #64748b;
+  color: #657367;
   margin-top: 2px;
 }
 
@@ -2055,7 +2055,7 @@
 }
 
 .lnd-modal-btn-confirm {
-  background: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  background: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -2080,8 +2080,8 @@
 }
 
 .lnd-hiw-step {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 12px;
   padding: 18px;
   display: flex;
@@ -2103,13 +2103,13 @@
 .lnd-hiw-step-title {
   font-size: 14px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0 0 6px 0;
 }
 
 .lnd-hiw-step-desc {
   font-size: 12px;
-  color: #64748b;
+  color: #657367;
   line-height: 1.45;
   margin: 0;
 }
@@ -2120,7 +2120,7 @@
 }
 
 .lnd-btn-study {
-  background: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  background: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   color: #ffffff;
   border: none;
   border-radius: 10px;
@@ -2249,8 +2249,8 @@
 }
 
 .lnd-ticket-top-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 12px;
   padding: 14px 18px;
   display: flex;
@@ -2267,7 +2267,7 @@
 .lnd-tt-category {
   font-size: 11px;
   font-weight: 700;
-  color: #0e6f76;
+  color: #3d6b4f;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -2275,7 +2275,7 @@
 .lnd-tt-id {
   font-size: 17px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
 }
 
 .lnd-tt-status-badge {
@@ -2298,8 +2298,8 @@
 }
 
 .lnd-td-item {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 10px 14px;
   display: flex;
@@ -2308,27 +2308,27 @@
 
 .lnd-td-label {
   font-size: 11px;
-  color: #64748b;
+  color: #657367;
   font-weight: 600;
   margin-bottom: 2px;
 }
 
 .lnd-td-val {
   font-size: 13.5px;
-  color: #0f172a;
+  color: #14291e;
   font-weight: 600;
 }
 
 .lnd-td-desc-box {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f4f6f2;
+  border: 1px solid #dfe5d8;
   border-radius: 10px;
   padding: 14px;
 }
 
 .lnd-td-desc-text {
   font-size: 13px;
-  color: #334155;
+  color: #2a4a35;
   line-height: 1.5;
   margin: 6px 0 10px 0;
 }
@@ -2339,7 +2339,7 @@
   gap: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: #0e6f76;
+  color: #3d6b4f;
 }
 
 .lnd-ticket-modal-actions {
@@ -2351,9 +2351,9 @@
 }
 
 .lnd-btn-ticket-secondary {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  color: #475569;
+  background: #eef1ea;
+  border: 1px solid #c5ccbe;
+  color: #4a5b4a;
   border-radius: 8px;
   padding: 9px 16px;
   font-size: 13px;
@@ -2364,12 +2364,12 @@
 }
 
 .lnd-btn-ticket-secondary:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #dfe5d8;
+  color: #14291e;
 }
 
 .lnd-btn-ticket-primary {
-  background: linear-gradient(135deg, #19828d 0%, #0e6f76 100%);
+  background: linear-gradient(135deg, #19828d 0%, #3d6b4f 100%);
   color: #ffffff;
   border: none;
   border-radius: 8px;

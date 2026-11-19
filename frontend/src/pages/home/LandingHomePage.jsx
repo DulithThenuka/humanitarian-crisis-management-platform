@@ -158,7 +158,7 @@ export const LandingHomePage = () => {
       title: 'Emergency Food & Rations',
       desc: 'Pre-packed family ration hampers, baby nutrition & clean meal packs.',
       icon: UtensilsCrossed,
-      color: '#38bdf8',
+      color: '#7caa7e',
       link: '/services?category=food'
     },
     {
@@ -194,7 +194,7 @@ export const LandingHomePage = () => {
       title: 'Potable Clean Water',
       desc: 'Purified water bowsers, portable filtration & sanitary hydration packs.',
       icon: Droplets,
-      color: '#60a5fa',
+      color: '#7caa7e',
       link: '/services?category=water'
     },
     {
@@ -217,7 +217,7 @@ export const LandingHomePage = () => {
       path: '/citizen',
       badge: 'Public Portal',
       icon: Users,
-      color: '#38bdf8',
+      color: '#7caa7e',
       featured: 'Instant SOS intake, tracking & open shelter locator',
       sublinks: [
         { label: 'Submit SOS', path: '/citizen/submit' },
@@ -419,10 +419,10 @@ export const LandingHomePage = () => {
       )}
 
       {/* =========================================================
-         2. HumanAid / RELIEFCORE Crisis Hero Section
+         2. HumanAid Crisis Hero Section
          ========================================================= */}
       <Hero
-        brandName="HumanAid / RELIEFCORE"
+        brandName="HumanAid"
         brandLogo={
           <div className="flex items-center gap-2.5">
             <img 
@@ -533,7 +533,7 @@ export const LandingHomePage = () => {
                           className="flex-1 rounded-[0.5px] animate-bar-grow origin-bottom"
                           style={{
                             height: `${heightPercent}%`,
-                            backgroundColor: isProjected ? 'rgba(56, 189, 248, 0.35)' : '#38bdf8',
+                            backgroundColor: isProjected ? 'rgba(56, 189, 248, 0.35)' : '#7caa7e',
                             animationDelay: `${1100 + i * 30}ms`,
                           }}
                           title={`Sector dispatch load: ${h}%`}
@@ -1215,7 +1215,7 @@ export const LandingHomePage = () => {
               <div className="flex items-center gap-2.5 mb-4">
                 <img 
                   src={reliefcoreLogoWhite} 
-                  alt="RELIEFCORE" 
+                  alt="HumanAid" 
                   className="h-[28px] w-auto object-contain"
                 />
               </div>
@@ -1291,7 +1291,7 @@ export const LandingHomePage = () => {
           </div>
 
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-white/50">
-            <span>© 2026 RELIEFCORE Crisis Operations System. Western Province, Sri Lanka.</span>
+            <span>© 2026 HumanAid Crisis Operations System. Western Province, Sri Lanka.</span>
             <span>Humanitarian AI Architecture · Rapid Disaster Response · Open Data Protocols</span>
           </div>
         </div>

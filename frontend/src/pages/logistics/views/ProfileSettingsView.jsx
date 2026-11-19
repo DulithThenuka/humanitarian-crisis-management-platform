@@ -30,7 +30,7 @@ export const ProfileSettingsView = ({ showToast }) => {
           </p>
         </div>
         <div className="rm-view-actions">
-          <button onClick={handleSave} className="rm-btn-primary">
+          <button onClick={handleSave} className="rm-btn rm-btn-primary">
             Save changes
           </button>
         </div>

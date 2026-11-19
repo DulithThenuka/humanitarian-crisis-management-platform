@@ -92,7 +92,6 @@ import {
 import { LoginPage } from '../pages/auth/LoginPage';
 import { RegisterPage } from '../pages/auth/RegisterPage';
 import { UnauthorizedPage } from '../pages/auth/UnauthorizedPage';
-import Hero from '../components/Hero';
 
 // Partner Organisation Officer Pages
 import { PartnerOrganisationOfficerPage } from '../pages/partner-organisation-officer/PartnerOrganisationOfficerPage';
@@ -124,28 +123,32 @@ export const AppRoutes = () => {
       <Route path="/citizen" element={<CitizenPortalPage />} />
       <Route path="/citizen/portal" element={<CitizenPortalPage />} />
       <Route path="/citizen/home" element={<CitizenPortalPage />} />
-      <Route path="/citizen/shelters" element={<CitizenPortalPage initialTab="shelters" />} />
-      <Route path="/citizen/requests" element={<CitizenPortalPage initialTab="requests" />} />
+      <Route path="/citizen/shelters" element={<FindShelterPage />} />
+      <Route path="/citizen/requests" element={<TrackRequestsPage />} />
       <Route path="/citizen/requests/new" element={<SubmitRequestPage />} />
-      <Route path="/citizen/submit" element={<CitizenPortalPage initialTab="request" />} />
-      <Route path="/citizen/track" element={<CitizenPortalPage initialTab="requests" />} />
-      <Route path="/citizen/alerts" element={<CitizenPortalPage initialTab="alerts" />} />
-      <Route path="/citizen/safety" element={<CitizenPortalPage initialTab="safety" />} />
-      <Route path="/citizen/safety-guide" element={<CitizenPortalPage initialTab="safety" />} />
-      <Route path="/citizen/support" element={<CitizenPortalPage initialTab="support" />} />
-      <Route path="/citizen/help" element={<CitizenPortalPage initialTab="support" />} />
-      <Route path="/citizen/profile" element={<CitizenPortalPage initialTab="profile" />} />
+      <Route path="/citizen/submit" element={<SubmitRequestPage />} />
+      <Route path="/citizen/track" element={<TrackRequestsPage />} />
+      <Route path="/citizen/my-requests" element={<TrackRequestsPage />} />
+      <Route path="/citizen/alerts" element={<EmergencyAlertsPage />} />
+      <Route path="/citizen/safety" element={<SafetyGuidePage />} />
+      <Route path="/citizen/safety-guide" element={<SafetyGuidePage />} />
+      <Route path="/citizen/support" element={<CitizenSupportPage />} />
+      <Route path="/citizen/help" element={<CitizenSupportPage />} />
+      <Route path="/citizen/ai" element={<CitizenPortalPage initialTab="ai-assistance" />} />
+      <Route path="/citizen/ai-assistance" element={<CitizenPortalPage initialTab="ai-assistance" />} />
+      <Route path="/citizen/profile" element={<CitizenProfilePage />} />
 
       {/* Legacy / Direct Citizen Aliases */}
-      <Route path="/shelters" element={<CitizenPortalPage initialTab="shelters" />} />
-      <Route path="/track" element={<CitizenPortalPage initialTab="requests" />} />
-      <Route path="/alerts" element={<CitizenPortalPage initialTab="alerts" />} />
-      <Route path="/emergency-alerts" element={<CitizenPortalPage initialTab="alerts" />} />
-      <Route path="/safety" element={<CitizenPortalPage initialTab="safety" />} />
-      <Route path="/safety-guide" element={<CitizenPortalPage initialTab="safety" />} />
-      <Route path="/support" element={<CitizenPortalPage initialTab="support" />} />
-      <Route path="/help" element={<CitizenPortalPage initialTab="support" />} />
-      <Route path="/profile" element={<CitizenPortalPage initialTab="profile" />} />
+      <Route path="/shelters" element={<FindShelterPage />} />
+      <Route path="/track" element={<TrackRequestsPage />} />
+      <Route path="/my-requests" element={<TrackRequestsPage />} />
+      <Route path="/alerts" element={<EmergencyAlertsPage />} />
+      <Route path="/emergency-alerts" element={<EmergencyAlertsPage />} />
+      <Route path="/safety" element={<SafetyGuidePage />} />
+      <Route path="/safety-guide" element={<SafetyGuidePage />} />
+      <Route path="/support" element={<CitizenSupportPage />} />
+      <Route path="/help" element={<CitizenSupportPage />} />
+      <Route path="/profile" element={<CitizenProfilePage />} />
       <Route path="/requests/new" element={<SubmitRequestPage />} />
       <Route path="/assistance-request" element={<SubmitRequestPage />} />
 
@@ -180,10 +183,10 @@ export const AppRoutes = () => {
       <Route path="/dashboard" element={<DashboardOverviewPage />} />
       <Route path="/emergency-coordinator" element={<EmergencyCoordinatorPortal />} />
       <Route path="/emergency-coordinator/:tab" element={<EmergencyCoordinatorPortal />} />
-      <Route path="/coordinator/requests" element={<DashboardOverviewPage />} />
-      <Route path="/coordinator/requests/:id" element={<DashboardOverviewPage />} />
-      <Route path="/requests/:id" element={<DashboardOverviewPage />} />
-      <Route path="/request-detail" element={<DashboardOverviewPage />} />
+      <Route path="/coordinator/requests" element={<AssistanceRequestsListView />} />
+      <Route path="/coordinator/requests/:id" element={<AssistanceRequestDetailPage />} />
+      <Route path="/requests/:id" element={<AssistanceRequestDetailPage />} />
+      <Route path="/request-detail" element={<AssistanceRequestDetailPage />} />
       <Route path="/analytics" element={<DashboardOverviewPage />} />
       <Route path="/reports" element={<DashboardOverviewPage initialTab="reports" />} />
       <Route path="/notifications" element={<DashboardOverviewPage initialTab="notifications" />} />
@@ -224,9 +227,9 @@ export const AppRoutes = () => {
       {/* ========================================================= */}
       <Route path="/logistics" element={<LogisticsPortalPage initialTab="inventory" />} />
       <Route path="/logistics/dashboard" element={<LogisticsPortalPage initialTab="inventory" />} />
-      <Route path="/logistics/inventory" element={<LogisticsPortalPage initialTab="inventory" />} />
-      <Route path="/logistics/dispatch" element={<LogisticsPortalPage initialTab="dispatch" />} />
-      <Route path="/logistics/allocations" element={<LogisticsPortalPage initialTab="dispatch" />} />
+      <Route path="/logistics/inventory" element={<ResourceInventoryPage />} />
+      <Route path="/logistics/dispatch" element={<AllocationDispatchPage />} />
+      <Route path="/logistics/allocations" element={<AllocationDispatchPage />} />
       <Route path="/logistics/requests" element={<LogisticsPortalPage initialTab="requests" />} />
       <Route path="/logistics/requisitions" element={<LogisticsPortalPage initialTab="requests" />} />
       <Route path="/logistics/depots" element={<LogisticsPortalPage initialTab="depots" />} />
@@ -243,10 +246,10 @@ export const AppRoutes = () => {
       <Route path="/shelter" element={<ShelterAdminDashboard initialTab="dashboard" />} />
       <Route path="/shelter/portal" element={<ShelterAdminDashboard initialTab="dashboard" />} />
       <Route path="/shelter/dashboard" element={<ShelterAdminDashboard initialTab="dashboard" />} />
-      <Route path="/shelter/directory" element={<ShelterAdminDashboard initialTab="directory" />} />
+      <Route path="/shelter/directory" element={<ShelterDirectoryPage />} />
       <Route path="/shelter/capacity" element={<ShelterAdminDashboard initialTab="capacity" />} />
-      <Route path="/shelter/allocations" element={<ShelterAdminDashboard initialTab="placements" />} />
-      <Route path="/shelter/placements" element={<ShelterAdminDashboard initialTab="placements" />} />
+      <Route path="/shelter/allocations" element={<EvacueeAllocationPage />} />
+      <Route path="/shelter/placements" element={<EvacueeAllocationPage />} />
       <Route path="/shelter/resources" element={<ShelterAdminDashboard initialTab="resources" />} />
       <Route path="/shelter/reports" element={<ShelterAdminDashboard initialTab="reports" />} />
 
@@ -274,14 +277,14 @@ export const AppRoutes = () => {
       <Route path="/volunteer/dashboard" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteer/overview" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteer/opportunities" element={<VolunteerPortal initialTab="opportunities" />} />
-      <Route path="/volunteer/assignments" element={<VolunteerPortal initialTab="assignments" />} />
+      <Route path="/volunteer/assignments" element={<TaskAssignmentPage />} />
       <Route path="/volunteer/progress" element={<VolunteerPortal initialTab="progress" />} />
-      <Route path="/volunteer/schedule" element={<VolunteerPortal initialTab="schedule" />} />
-      <Route path="/volunteer/availability" element={<VolunteerPortal initialTab="schedule" />} />
+      <Route path="/volunteer/schedule" element={<VolunteerRosterPage />} />
+      <Route path="/volunteer/availability" element={<VolunteerRosterPage />} />
       <Route path="/volunteer/notifications" element={<VolunteerPortal initialTab="notifications" />} />
       <Route path="/volunteer/profile" element={<VolunteerPortal initialTab="profile" />} />
       <Route path="/volunteer/help" element={<VolunteerPortal initialTab="help" />} />
-      <Route path="/volunteer/roster" element={<VolunteerPortal initialTab="schedule" />} />
+      <Route path="/volunteer/roster" element={<VolunteerRosterPage />} />
 
       {/* Volunteer Backward-Compatible Aliases */}
       <Route path="/volunteer-admin" element={<VolunteerPortal initialTab="overview" />} />

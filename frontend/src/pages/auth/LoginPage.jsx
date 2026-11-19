@@ -15,6 +15,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 import { authService } from '../../services/authService';
 import reliefcoreIcon from '../../assets/reliefcore-icon.png';
+import './LoginPage.css';
 
 const resolvePostLoginRoute = (role, redirectParam) => {
   if (redirectParam && typeof redirectParam === 'string' && redirectParam.startsWith('/') && !redirectParam.startsWith('/login')) {
@@ -166,12 +167,12 @@ export const LoginPage = () => {
             <Link to="/" className="flex items-center gap-3 no-underline group" title="Return to Homepage">
               <img 
                 src={reliefcoreIcon} 
-                alt="RELIEFCORE Crisis Command" 
+                alt="HumanAid Response Coordination" 
                 className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform" 
               />
-              <span className="font-semibold text-xl tracking-tight text-white uppercase">RELIEFCORE</span>
+              <span className="font-semibold text-xl tracking-tight text-white">HumanAid</span>
               <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white/60 ml-1">
-                Operations
+                Response
               </span>
             </Link>
 
@@ -189,7 +190,7 @@ export const LoginPage = () => {
             <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform">
               <img 
                 src={reliefcoreIcon} 
-                alt="RELIEFCORE Emblem" 
+                alt="HumanAid Emblem" 
                 className="w-13 h-13 object-contain"
               />
             </div>
@@ -228,7 +229,7 @@ export const LoginPage = () => {
             </blockquote>
             <div className="flex items-center gap-3 text-[11px] tracking-wider uppercase text-white/50 mt-3 w-full max-w-xs justify-center">
               <div className="flex-1 h-px bg-white/10" />
-              <span>RELIEF OPERATIONS COMMAND</span>
+              <span>HUMANAID RESPONSE COORDINATION</span>
               <div className="flex-1 h-px bg-white/10" />
             </div>
           </footer>
@@ -307,7 +308,7 @@ export const LoginPage = () => {
                     id="email-input"
                     className="w-full bg-transparent border-none outline-none text-white placeholder-white/30 text-sm font-display focus:ring-0"
                     type="email"
-                    placeholder="coordinator@reliefcore.org"
+                    placeholder="coordinator@humanaid.org"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required

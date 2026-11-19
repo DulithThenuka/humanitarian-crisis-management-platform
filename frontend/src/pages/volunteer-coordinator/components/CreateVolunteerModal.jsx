@@ -37,7 +37,7 @@ export const CreateVolunteerModal = ({ isOpen, onClose, onCreateVolunteer }) => 
         <div className="vc-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <UserPlus size={18} style={{ color: '#233831' }} />
-            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#14291e' }}>
               Create Prototype Volunteer Record
             </h3>
           </div>
@@ -54,7 +54,7 @@ export const CreateVolunteerModal = ({ isOpen, onClose, onCreateVolunteer }) => 
                 <input
                   type="text"
                   className="vc-filter-input"
-                  style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#f1f5f9' }}
+                  style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#eef1ea' }}
                   value={formData.id}
                   readOnly
                 />
@@ -161,11 +161,11 @@ export const CreateVolunteerModal = ({ isOpen, onClose, onCreateVolunteer }) => 
             <div
               style={{
                 padding: '8px 12px',
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#f4f6f2',
                 borderRadius: '6px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid #dfe5d8',
                 fontSize: '11px',
-                color: '#64748b'
+                color: '#657367'
               }}
             >
               Simulated coursework record. Retained in local session state.

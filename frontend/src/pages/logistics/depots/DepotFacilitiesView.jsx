@@ -122,56 +122,56 @@ export const DepotFacilitiesView = ({ showToast }) => {
     <div className="logistics-subview-container" style={{ padding: '2rem' }}>
       {/* 1. Header Metrics Row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Active Warehouses</span>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8' }}>
+            <span style={{ fontSize: '0.8rem', color: '#8a9480', fontWeight: 600, textTransform: 'uppercase' }}>Active Warehouses</span>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7caa7e' }}>
               <Building2 size={16} />
             </div>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>{depots.length} Regional Depots</div>
-          <div style={{ fontSize: '0.75rem', color: '#38bdf8', marginTop: '0.25rem' }}>Western Province strategic grid</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f4f6f2' }}>{depots.length} Regional Depots</div>
+          <div style={{ fontSize: '0.75rem', color: '#7caa7e', marginTop: '0.25rem' }}>Western Province strategic grid</div>
         </div>
 
-        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Total Storage Volume</span>
+            <span style={{ fontSize: '0.8rem', color: '#8a9480', fontWeight: 600, textTransform: 'uppercase' }}>Total Storage Volume</span>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
               <Layers size={16} />
             </div>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>{(totalCapacity / 1000).toFixed(0)}k sq ft</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f4f6f2' }}>{(totalCapacity / 1000).toFixed(0)}k sq ft</div>
           <div style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '0.25rem' }}>Average 78% occupancy across facilities</div>
         </div>
 
-        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Operational Dock Bays</span>
+            <span style={{ fontSize: '0.8rem', color: '#8a9480', fontWeight: 600, textTransform: 'uppercase' }}>Operational Dock Bays</span>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b' }}>
               <Truck size={16} />
             </div>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>{activeBaysTotal} Active Bays</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f4f6f2' }}>{activeBaysTotal} Active Bays</div>
           <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.25rem' }}>Continuous intake and dispatch</div>
         </div>
 
-        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Cold Chain Storage</span>
+            <span style={{ fontSize: '0.8rem', color: '#8a9480', fontWeight: 600, textTransform: 'uppercase' }}>Cold Chain Storage</span>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c084fc' }}>
               <Thermometer size={16} />
             </div>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>{coldChainCount} Certified Facilities</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f4f6f2' }}>{coldChainCount} Certified Facilities</div>
           <div style={{ fontSize: '0.75rem', color: '#c084fc', marginTop: '0.25rem' }}>Insulin, vaccines, and maternal milk</div>
         </div>
       </div>
 
       {/* 2. Actions & Toolbar */}
-      <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ background: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: '260px' }}>
           <div style={{ position: 'relative', width: '100%' }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#657367' }} />
             <input
               type="text"
               placeholder="Search depot name, manager, code..."
@@ -180,10 +180,10 @@ export const DepotFacilitiesView = ({ showToast }) => {
               style={{
                 width: '100%',
                 padding: '0.65rem 1rem 0.65rem 2.4rem',
-                background: '#0f172a',
-                border: '1px solid #334155',
+                background: '#14291e',
+                border: '1px solid #2a4a35',
                 borderRadius: '8px',
-                color: '#f8fafc',
+                color: '#f4f6f2',
                 fontSize: '0.875rem',
                 outline: 'none'
               }}
@@ -195,7 +195,7 @@ export const DepotFacilitiesView = ({ showToast }) => {
           <select
             value={districtFilter}
             onChange={e => setDistrictFilter(e.target.value)}
-            style={{ background: '#0f172a', border: '1px solid #334155', color: '#f8fafc', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}
+            style={{ background: '#14291e', border: '1px solid #2a4a35', color: '#f4f6f2', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}
           >
             <option value="ALL">All Sectors</option>
             <option value="Colombo">Colombo</option>
@@ -207,7 +207,7 @@ export const DepotFacilitiesView = ({ showToast }) => {
           <select
             value={coldChainFilter}
             onChange={e => setColdChainFilter(e.target.value)}
-            style={{ background: '#0f172a', border: '1px solid #334155', color: '#f8fafc', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}
+            style={{ background: '#14291e', border: '1px solid #2a4a35', color: '#f4f6f2', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}
           >
             <option value="ALL">All Storage Types</option>
             <option value="YES">Cold-Chain Equipped</option>
@@ -216,14 +216,14 @@ export const DepotFacilitiesView = ({ showToast }) => {
 
           <button
             onClick={() => setShowTransferModal(true)}
-            style={{ background: '#334155', border: '1px solid #475569', color: '#f8fafc', padding: '0.65rem 1rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600 }}
+            style={{ background: '#2a4a35', border: '1px solid #4a5b4a', color: '#f4f6f2', padding: '0.65rem 1rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600 }}
           >
             <ArrowRightLeft size={14} /> Transfer Stock
           </button>
 
           <button
             onClick={() => setShowAddModal(true)}
-            style={{ background: '#0284c7', border: 'none', color: '#ffffff', padding: '0.65rem 1.1rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600 }}
+            style={{ background: '#3d6b4f', border: 'none', color: '#ffffff', padding: '0.65rem 1.1rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600 }}
           >
             <Plus size={15} /> Add Depot Facility
           </button>
@@ -236,8 +236,8 @@ export const DepotFacilitiesView = ({ showToast }) => {
           <div
             key={depot.id}
             style={{
-              background: '#1e293b',
-              border: '1px solid #334155',
+              background: '#1e3328',
+              border: '1px solid #2a4a35',
               borderRadius: '16px',
               padding: '1.5rem',
               display: 'flex',
@@ -250,10 +250,10 @@ export const DepotFacilitiesView = ({ showToast }) => {
               {/* Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                 <div>
-                  <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', background: 'rgba(56, 189, 248, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#7caa7e', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', background: 'rgba(56, 189, 248, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
                     {depot.code}
                   </span>
-                  <h3 style={{ margin: '0.4rem 0 0', fontSize: '1.15rem', fontWeight: 700, color: '#f8fafc' }}>
+                  <h3 style={{ margin: '0.4rem 0 0', fontSize: '1.15rem', fontWeight: 700, color: '#f4f6f2' }}>
                     {depot.name}
                   </h3>
                 </div>
@@ -272,17 +272,17 @@ export const DepotFacilitiesView = ({ showToast }) => {
                 </span>
               </div>
 
-              <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '0.8rem', color: '#8a9480', display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '1rem' }}>
                 <MapPin size={13} style={{ flexShrink: 0 }} /> {depot.address}
               </div>
 
               {/* Capacity Bar */}
               <div style={{ marginBottom: '1.25rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.3rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#8a9480', marginBottom: '0.3rem' }}>
                   <span>Floor Occupancy ({depot.capacitySqFt.toLocaleString()} sq ft)</span>
-                  <strong style={{ color: '#f8fafc' }}>{depot.occupiedPercent}%</strong>
+                  <strong style={{ color: '#f4f6f2' }}>{depot.occupiedPercent}%</strong>
                 </div>
-                <div style={{ width: '100%', height: '8px', background: '#0f172a', borderRadius: '999px', overflow: 'hidden' }}>
+                <div style={{ width: '100%', height: '8px', background: '#14291e', borderRadius: '999px', overflow: 'hidden' }}>
                   <div
                     style={{
                       height: '100%',
@@ -295,18 +295,18 @@ export const DepotFacilitiesView = ({ showToast }) => {
               </div>
 
               {/* Facility Features */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem', background: '#0f172a', padding: '0.85rem', borderRadius: '8px', border: '1px solid #334155' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem', background: '#14291e', padding: '0.85rem', borderRadius: '8px', border: '1px solid #2a4a35' }}>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Loading Bays</div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.15rem' }}>
+                  <div style={{ fontSize: '0.7rem', color: '#8a9480', textTransform: 'uppercase' }}>Loading Bays</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f4f6f2', display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.15rem' }}>
                     <Truck size={14} color="#f59e0b" /> {depot.activeBays} / {depot.loadingBays} Active
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase' }}>Cold Storage</div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: depot.coldChainAvailable ? '#6ee7b7' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.15rem' }}>
-                    <Thermometer size={14} color={depot.coldChainAvailable ? '#10b981' : '#64748b'} />
+                  <div style={{ fontSize: '0.7rem', color: '#8a9480', textTransform: 'uppercase' }}>Cold Storage</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: depot.coldChainAvailable ? '#6ee7b7' : '#8a9480', display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.15rem' }}>
+                    <Thermometer size={14} color={depot.coldChainAvailable ? '#10b981' : '#657367'} />
                     {depot.coldChainAvailable ? 'Available' : 'Ambient'}
                   </div>
                 </div>
@@ -314,7 +314,7 @@ export const DepotFacilitiesView = ({ showToast }) => {
 
               {/* Primary Stock List */}
               <div style={{ marginBottom: '1rem' }}>
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.35rem', fontWeight: 600 }}>Staged Critical Stocks:</div>
+                <div style={{ fontSize: '0.75rem', color: '#8a9480', marginBottom: '0.35rem', fontWeight: 600 }}>Staged Critical Stocks:</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
                   {depot.primaryItems.map((item, iIdx) => (
                     <span
@@ -322,8 +322,8 @@ export const DepotFacilitiesView = ({ showToast }) => {
                       style={{
                         fontSize: '0.75rem',
                         background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid #334155',
-                        color: '#cbd5e1',
+                        border: '1px solid #2a4a35',
+                        color: '#c5ccbe',
                         padding: '0.2rem 0.5rem',
                         borderRadius: '4px'
                       }}
@@ -336,10 +336,10 @@ export const DepotFacilitiesView = ({ showToast }) => {
             </div>
 
             {/* Bottom Contact & Action */}
-            <div style={{ borderTop: '1px solid #334155', paddingTop: '1rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ borderTop: '1px solid #2a4a35', paddingTop: '1rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#f8fafc' }}>{depot.manager}</div>
-                <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#f4f6f2' }}>{depot.manager}</div>
+                <div style={{ fontSize: '0.75rem', color: '#7caa7e', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   <PhoneCall size={11} /> {depot.phone}
                 </div>
               </div>
@@ -352,7 +352,7 @@ export const DepotFacilitiesView = ({ showToast }) => {
                 style={{
                   background: 'rgba(56, 189, 248, 0.1)',
                   border: '1px solid rgba(56, 189, 248, 0.3)',
-                  color: '#38bdf8',
+                  color: '#7caa7e',
                   padding: '0.45rem 0.85rem',
                   borderRadius: '6px',
                   fontSize: '0.8rem',
@@ -388,21 +388,21 @@ export const DepotFacilitiesView = ({ showToast }) => {
         >
           <div
             style={{
-              background: '#1e293b',
-              border: '1px solid #334155',
+              background: '#1e3328',
+              border: '1px solid #2a4a35',
               borderRadius: '16px',
               maxWidth: '560px',
               width: '100%',
               padding: '2rem',
-              color: '#f8fafc'
+              color: '#f4f6f2'
             }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #2a4a35', paddingBottom: '1rem' }}>
               <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Register New Logistics Depot</h3>
               <button
                 onClick={() => setShowAddModal(false)}
-                style={{ background: '#334155', border: 'none', borderRadius: '50%', width: '32px', height: '32px', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ background: '#2a4a35', border: 'none', borderRadius: '50%', width: '32px', height: '32px', color: '#8a9480', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <X size={16} />
               </button>
@@ -411,36 +411,36 @@ export const DepotFacilitiesView = ({ showToast }) => {
             <form onSubmit={handleCreateDepot}>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Facility Name</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Facility Name</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Moratuwa Forward Aid Depot"
                     value={newDepotForm.name}
                     onChange={e => setNewDepotForm({ ...newDepotForm, name: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.875rem' }}
+                    style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.875rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Code</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Code</label>
                   <input
                     type="text"
                     required
                     placeholder="MFD-06"
                     value={newDepotForm.code}
                     onChange={e => setNewDepotForm({ ...newDepotForm, code: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.875rem' }}
+                    style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.875rem' }}
                   />
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>District Sector</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>District Sector</label>
                   <select
                     value={newDepotForm.district}
                     onChange={e => setNewDepotForm({ ...newDepotForm, district: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.875rem' }}
+                    style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.875rem' }}
                   >
                     <option value="Colombo">Colombo</option>
                     <option value="Gampaha">Gampaha</option>
@@ -448,46 +448,46 @@ export const DepotFacilitiesView = ({ showToast }) => {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Storage Capacity (Sq Ft)</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Storage Capacity (Sq Ft)</label>
                   <input
                     type="number"
                     value={newDepotForm.capacitySqFt}
                     onChange={e => setNewDepotForm({ ...newDepotForm, capacitySqFt: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.875rem' }}
+                    style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.875rem' }}
                   />
                 </div>
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Street Address / Location</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Street Address / Location</label>
                 <input
                   type="text"
                   placeholder="e.g. 104 Wharf Road, Moratuwa"
                   value={newDepotForm.address}
                   onChange={e => setNewDepotForm({ ...newDepotForm, address: e.target.value })}
-                  style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.875rem' }}
+                  style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.875rem' }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Depot Officer In-Charge</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Depot Officer In-Charge</label>
                   <input
                     type="text"
                     placeholder="Officer Name"
                     value={newDepotForm.manager}
                     onChange={e => setNewDepotForm({ ...newDepotForm, manager: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.875rem' }}
+                    style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.875rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Emergency Contact Phone</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Emergency Contact Phone</label>
                   <input
                     type="text"
                     placeholder="+94 77 000 0000"
                     value={newDepotForm.phone}
                     onChange={e => setNewDepotForm({ ...newDepotForm, phone: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.875rem' }}
+                    style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.875rem' }}
                   />
                 </div>
               </div>
@@ -500,7 +500,7 @@ export const DepotFacilitiesView = ({ showToast }) => {
                   onChange={e => setNewDepotForm({ ...newDepotForm, coldChainAvailable: e.target.checked })}
                   style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                 />
-                <label htmlFor="coldChainCheck" style={{ fontSize: '0.85rem', color: '#cbd5e1', cursor: 'pointer' }}>
+                <label htmlFor="coldChainCheck" style={{ fontSize: '0.85rem', color: '#c5ccbe', cursor: 'pointer' }}>
                   Equipped with Certified Cold-Chain Medical Refrigerator (2°C - 8°C)
                 </label>
               </div>
@@ -509,13 +509,13 @@ export const DepotFacilitiesView = ({ showToast }) => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  style={{ padding: '0.65rem 1.25rem', background: '#334155', border: 'none', borderRadius: '8px', color: '#cbd5e1', cursor: 'pointer', fontWeight: 600 }}
+                  style={{ padding: '0.65rem 1.25rem', background: '#2a4a35', border: 'none', borderRadius: '8px', color: '#c5ccbe', cursor: 'pointer', fontWeight: 600 }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  style={{ padding: '0.65rem 1.5rem', background: '#0284c7', border: 'none', borderRadius: '8px', color: '#ffffff', cursor: 'pointer', fontWeight: 600 }}
+                  style={{ padding: '0.65rem 1.5rem', background: '#3d6b4f', border: 'none', borderRadius: '8px', color: '#ffffff', cursor: 'pointer', fontWeight: 600 }}
                 >
                   Save &amp; Commission Depot
                 </button>
@@ -543,21 +543,21 @@ export const DepotFacilitiesView = ({ showToast }) => {
         >
           <div
             style={{
-              background: '#1e293b',
-              border: '1px solid #334155',
+              background: '#1e3328',
+              border: '1px solid #2a4a35',
               borderRadius: '16px',
               maxWidth: '540px',
               width: '100%',
               padding: '2rem',
-              color: '#f8fafc'
+              color: '#f4f6f2'
             }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #2a4a35', paddingBottom: '1rem' }}>
               <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Inter-Depot Stock Transfer</h3>
               <button
                 onClick={() => setShowTransferModal(false)}
-                style={{ background: '#334155', border: 'none', borderRadius: '50%', width: '32px', height: '32px', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ background: '#2a4a35', border: 'none', borderRadius: '50%', width: '32px', height: '32px', color: '#8a9480', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <X size={16} />
               </button>
@@ -566,11 +566,11 @@ export const DepotFacilitiesView = ({ showToast }) => {
             <form onSubmit={handleExecuteTransfer}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Origin Facility</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Origin Facility</label>
                   <select
                     value={transferState.fromDepot}
                     onChange={e => setTransferState({ ...transferState, fromDepot: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.85rem' }}
+                    style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.85rem' }}
                   >
                     {depots.map(d => (
                       <option key={d.id} value={d.id}>{d.name}</option>
@@ -578,11 +578,11 @@ export const DepotFacilitiesView = ({ showToast }) => {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Destination Facility</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Destination Facility</label>
                   <select
                     value={transferState.toDepot}
                     onChange={e => setTransferState({ ...transferState, toDepot: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.85rem' }}
+                    style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.85rem' }}
                   >
                     {depots.filter(d => d.id !== transferState.fromDepot).map(d => (
                       <option key={d.id} value={d.id}>{d.name}</option>
@@ -593,11 +593,11 @@ export const DepotFacilitiesView = ({ showToast }) => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Supply Item</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Supply Item</label>
                   <select
                     value={transferState.item}
                     onChange={e => setTransferState({ ...transferState, item: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.85rem' }}
+                    style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.85rem' }}
                   >
                     <option value="Family Food Ration Packs">Family Food Ration Packs</option>
                     <option value="Clean Drinking Water (1L)">Clean Drinking Water (1L)</option>
@@ -607,22 +607,22 @@ export const DepotFacilitiesView = ({ showToast }) => {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Quantity</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Quantity</label>
                   <input
                     type="number"
                     value={transferState.quantity}
                     onChange={e => setTransferState({ ...transferState, quantity: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.85rem' }}
+                    style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.85rem' }}
                   />
                 </div>
               </div>
 
               <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '0.3rem' }}>Logistics Fleet Carrier</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#c5ccbe', marginBottom: '0.3rem' }}>Logistics Fleet Carrier</label>
                 <select
                   value={transferState.transportMode}
                   onChange={e => setTransferState({ ...transferState, transportMode: e.target.value })}
-                  style={{ width: '100%', padding: '0.65rem', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#f8fafc', fontSize: '0.85rem' }}
+                  style={{ width: '100%', padding: '0.65rem', background: '#14291e', border: '1px solid #2a4a35', borderRadius: '8px', color: '#f4f6f2', fontSize: '0.85rem' }}
                 >
                   <option value="10-Ton Container Truck">10-Ton Container Truck (Dry Cargo)</option>
                   <option value="5-Ton Refrigerated Box Truck">5-Ton Refrigerated Box Truck (Cold-Chain)</option>
@@ -634,7 +634,7 @@ export const DepotFacilitiesView = ({ showToast }) => {
                 <button
                   type="button"
                   onClick={() => setShowTransferModal(false)}
-                  style={{ padding: '0.65rem 1.25rem', background: '#334155', border: 'none', borderRadius: '8px', color: '#cbd5e1', cursor: 'pointer', fontWeight: 600 }}
+                  style={{ padding: '0.65rem 1.25rem', background: '#2a4a35', border: 'none', borderRadius: '8px', color: '#c5ccbe', cursor: 'pointer', fontWeight: 600 }}
                 >
                   Cancel
                 </button>

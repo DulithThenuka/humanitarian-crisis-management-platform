@@ -49,7 +49,7 @@ export const BloomLandingPage = () => {
                 alt="RELIEFCORE Logo" 
                 className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform" 
               />
-              <span className="font-semibold text-2xl tracking-tighter text-white uppercase">RELIEFCORE</span>
+              <span className="font-semibold text-2xl tracking-tighter text-white uppercase">HumanAid</span>
               <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white/60 ml-1">
                 Ops
               </span>
@@ -70,7 +70,7 @@ export const BloomLandingPage = () => {
             <div className="w-20 h-20 mb-8 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform">
               <img 
                 src={reliefcoreIcon} 
-                alt="RELIEFCORE Crisis Command" 
+                alt="HumanAid Crisis Command" 
                 className="w-14 h-14 object-contain"
               />
             </div>
@@ -226,7 +226,7 @@ export const BloomLandingPage = () => {
           >
             <div>
               <div className="flex items-center justify-between mb-8">
-                <span className="font-semibold text-xl tracking-tight uppercase">RELIEFCORE</span>
+                <span className="font-semibold text-xl tracking-tight uppercase">HumanAid</span>
                 <button 
                   type="button" 
                   onClick={() => setMenuOpen(false)}
@@ -246,7 +246,7 @@ export const BloomLandingPage = () => {
             </div>
 
             <div className="text-xs text-white/50">
-              © 2026 RELIEFCORE Humanitarian Operations
+              © 2026 HumanAid Humanitarian Operations
             </div>
           </div>
         </div>

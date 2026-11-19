@@ -299,7 +299,7 @@ export const ResourceCoordinationView = ({
       {/* Role Boundary Notice Banner */}
       <div className="ec-rc-role-notice">
         <div className="ec-rc-role-notice-icon">
-          <ShieldCheck size={18} color="#0284c7" />
+          <ShieldCheck size={18} color="#3d6b4f" />
         </div>
         <div className="ec-rc-role-notice-text">
           <strong>Coordinator Scope:</strong> Identify field requirements, flag warehouse shortages, and submit allocation requests to Resource Managers. Warehouse stock maintenance, physical delivery dispatch, depot transfers, and inventory adjustments are managed exclusively in the <em>Resource Manager portal</em>.
@@ -431,7 +431,7 @@ export const ResourceCoordinationView = ({
           <div className="ec-rc-toolbar-container">
             <div className="ec-rc-filter-bar">
               <div className="ec-rc-search-box">
-                <Search size={15} color="#94a3b8" />
+                <Search size={15} color="#8a9480" />
                 <input
                   type="text"
                   placeholder="Search requirement by category, item, destination, or case reference..."
@@ -598,7 +598,7 @@ export const ResourceCoordinationView = ({
                 </div>
 
                 <div className="ec-rc-shortage-loc">
-                  <MapPin size={13} color="#0284c7" />
+                  <MapPin size={13} color="#3d6b4f" />
                   <span>Affected Locations: <strong>{sht.location}</strong></span>
                 </div>
 
@@ -651,7 +651,7 @@ export const ResourceCoordinationView = ({
           <div className="ec-rc-toolbar-container">
             <div className="ec-rc-filter-bar">
               <div className="ec-rc-search-box">
-                <Search size={15} color="#94a3b8" />
+                <Search size={15} color="#8a9480" />
                 <input
                   type="text"
                   placeholder="Search allocation requests by number, resource, destination..."
@@ -760,7 +760,7 @@ export const ResourceCoordinationView = ({
               <div key={rec.id} className="ec-rc-recommendation-card">
                 <div className="ec-rc-rec-card-top">
                   <div className="ec-rc-rec-cat-wrap">
-                    <Droplet size={16} color="#0284c7" />
+                    <Droplet size={16} color="#3d6b4f" />
                     <span className="ec-rc-rec-cat">{rec.category}</span>
                   </div>
                   <span className={`ec-rc-badge ${getUrgencyBadgeClass(rec.urgency)}`}>
@@ -814,7 +814,7 @@ export const ResourceCoordinationView = ({
 
             {recommendations.length === 0 && (
               <div className="ec-rc-empty-card">
-                <Info size={32} color="#0284c7" />
+                <Info size={32} color="#3d6b4f" />
                 <h3>No Recommendations Available</h3>
                 <p>Recommendations appear based on crisis severity and evacuation numbers.</p>
               </div>
@@ -890,7 +890,7 @@ export const ResourceCoordinationView = ({
 
             <form onSubmit={handleSubmitAllocation} className="ec-modal-form">
               <div className="ec-rc-modal-notice">
-                <Info size={15} color="#0284c7" />
+                <Info size={15} color="#3d6b4f" />
                 <span>
                   This request will be sent directly to <strong>Resource Managers</strong> for warehouse verification and dispatch scheduling.
                 </span>

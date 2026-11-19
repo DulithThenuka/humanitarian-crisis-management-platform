@@ -1,25 +1,24 @@
 import React from 'react';
-import { Search, HelpCircle, Bell, Globe, ChevronDown } from 'lucide-react';
+import { Search, HelpCircle, Bell, Globe, ChevronDown, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import reliefcoreIcon from '../../assets/reliefcore-icon.png';
 import './DashboardHeader.css';
 
 export const DashboardHeader = () => {
   const { user } = useAuth();
   const initials = user?.fullName
     ? user.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-    : 'AC';
+    : 'NS';
 
   return (
     <header className="dashboard-top-header">
       <div className="header-left">
         <div className="header-breadcrumbs">
-          <img src={reliefcoreIcon} alt="RELIEFCORE" className="breadcrumb-logo-icon" />
-          <span className="breadcrumb-org">RELIEFCORE</span>
+          <Shield size={16} className="breadcrumb-logo-shield" />
+          <span className="breadcrumb-org">HumanAid</span>
           <span className="breadcrumb-sep">/</span>
-          <span className="breadcrumb-curr">Dashboard</span>
+          <span className="breadcrumb-curr">Response Coordination</span>
         </div>
-        <h1 className="header-page-title">Crisis Command Center</h1>
+        <h1 className="header-page-title">Operations Dashboard</h1>
       </div>
 
       <div className="header-right">
@@ -55,3 +54,5 @@ export const DashboardHeader = () => {
     </header>
   );
 };
+
+export default DashboardHeader;

@@ -18,7 +18,7 @@ export const AttachmentPreviewModal = ({
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FileText size={16} color="#0284c7" />
+            <FileText size={16} color="#3d6b4f" />
             <strong style={{ fontSize: '13px' }}>{attachment?.fileName}</strong>
           </div>
           <button
@@ -28,7 +28,7 @@ export const AttachmentPreviewModal = ({
             <X size={16} />
           </button>
         </div>
-        <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1', backgroundColor: '#0f172a' }}>
+        <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #c5ccbe', backgroundColor: '#14291e' }}>
           <img
             src={previewImageSrc}
             alt="Uploaded evidence"
@@ -39,7 +39,7 @@ export const AttachmentPreviewModal = ({
             }}
           />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748b', marginTop: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#657367', marginTop: '8px' }}>
           <span>Uploaded: 18 Feb 2026 09:34</span>
           <span>Metadata: GPS (6.9271° N, 79.8612° E) · Verifiable</span>
         </div>

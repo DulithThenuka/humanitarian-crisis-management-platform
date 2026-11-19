@@ -353,7 +353,7 @@ export const CaseManagementView = ({
                         {row.priority}
                       </span>
                     </td>
-                    <td style={{ color: '#475569' }}>{row.verification}</td>
+                    <td style={{ color: '#4a5b4a' }}>{row.verification}</td>
                     <td style={{ fontWeight: 500 }}>{row.assignedStaff}</td>
                     <td>
                       <span className={`cm-status-pill ${row.statusType}`}>

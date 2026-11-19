@@ -279,7 +279,7 @@ export const CrisisManagementDashboardView = ({ onOpenFullMap, onDeclareCrisis, 
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-      `, '#0284c7')
+      `, '#3d6b4f')
     });
     const hosp2 = L.marker([6.910, 79.880], {
       icon: makePin(`
@@ -287,7 +287,7 @@ export const CrisisManagementDashboardView = ({ onOpenFullMap, onDeclareCrisis, 
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-      `, '#0284c7')
+      `, '#3d6b4f')
     });
     groups.hospitals.addLayer(hosp1);
     groups.hospitals.addLayer(hosp2);
@@ -339,7 +339,7 @@ export const CrisisManagementDashboardView = ({ onOpenFullMap, onDeclareCrisis, 
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
           <circle cx="9" cy="7" r="4"/>
         </svg>
-      `, '#0e7490')
+      `, '#3d6b4f')
     });
     groups.responseTeams.addLayer(team1);
 
@@ -835,7 +835,7 @@ export const CrisisManagementDashboardView = ({ onOpenFullMap, onDeclareCrisis, 
                 <circle 
                   cx="80" cy="80" r="58"
                   fill="none" 
-                  stroke="#0ea5e9" 
+                  stroke="#5a8c6a" 
                   strokeWidth="20"
                   strokeDasharray="127.5 364.4"
                   strokeDashoffset="-182.2"
@@ -868,7 +868,7 @@ export const CrisisManagementDashboardView = ({ onOpenFullMap, onDeclareCrisis, 
             {/* Donut Legend */}
             <div className="cm-donut-legend">
               <div className="cm-legend-row">
-                <span className="cm-dot" style={{ backgroundColor: '#0ea5e9' }}></span>
+                <span className="cm-dot" style={{ backgroundColor: '#5a8c6a' }}></span>
                 <span className="cm-legend-text">Children (0-17)</span>
                 <span className="cm-legend-pct">35%</span>
               </div>
@@ -1059,17 +1059,17 @@ export const CrisisManagementDashboardView = ({ onOpenFullMap, onDeclareCrisis, 
 
             <div className="cm-modal-body">
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
-                <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Total Estimated Impact</span>
-                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>{currentCrisis.affectedCount} Persons</span>
+                <div style={{ background: '#f4f6f2', padding: '12px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+                  <span style={{ fontSize: '11px', color: '#657367', display: 'block' }}>Total Estimated Impact</span>
+                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#14291e' }}>{currentCrisis.affectedCount} Persons</span>
                 </div>
-                <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Declared Severity</span>
+                <div style={{ background: '#f4f6f2', padding: '12px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
+                  <span style={{ fontSize: '11px', color: '#657367', display: 'block' }}>Declared Severity</span>
                   <span style={{ fontSize: '16px', fontWeight: 800, color: '#ef4444' }}>{currentCrisis.severity} Priority</span>
                 </div>
               </div>
 
-              <div style={{ fontSize: '13px', color: '#334155', lineHeight: '1.6' }}>
+              <div style={{ fontSize: '13px', color: '#2a4a35', lineHeight: '1.6' }}>
                 <p>{currentCrisis.description}</p>
                 <p style={{ marginTop: '10px' }}>
                   <strong>Irrigation Department Telemetry:</strong> Water levels along the primary drainage corridors are currently exceeding minor flood stage by +0.35m. Emergency shelters within a 4km radius are 84% filled.

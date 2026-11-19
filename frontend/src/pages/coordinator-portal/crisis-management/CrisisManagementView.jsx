@@ -43,7 +43,7 @@ export const CrisisManagementView = ({
       <div className="ec-req-toolbar-card" style={{ padding: '8px 14px' }}>
         <div className="ec-req-toolbar-row">
           <div className="ec-req-search-box" style={{ maxWidth: '360px' }}>
-            <Search size={14} color="#94a3b8" />
+            <Search size={14} color="#8a9480" />
             <input
               type="text"
               placeholder="Search incidents or locations..."
@@ -80,11 +80,11 @@ export const CrisisManagementView = ({
                   ● {inc.severity || 'High'}
                 </span>
               </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#14291e', marginBottom: '4px' }}>
                 {inc.title}
               </div>
-              <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
-                <MapPin size={12} color="#0284c7" />
+              <div style={{ fontSize: '11.5px', color: '#657367', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+                <MapPin size={12} color="#3d6b4f" />
                 <span>{inc.area}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -109,7 +109,7 @@ export const CrisisManagementView = ({
               <path
                 d="M -20 200 Q 150 170 300 220 T 620 190"
                 fill="none"
-                stroke="#93c5fd"
+                stroke="#b8ccaa"
                 strokeWidth="28"
                 opacity="0.8"
               />
@@ -128,7 +128,7 @@ export const CrisisManagementView = ({
 
               {/* Resource Depot Marker */}
               <g transform="translate(370, 110)">
-                <rect width="84" height="20" rx="4" fill="#0284c7" />
+                <rect width="84" height="20" rx="4" fill="#3d6b4f" />
                 <text x="42" y="14" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
                   RES-021 · 240
                 </text>
@@ -168,7 +168,7 @@ export const CrisisManagementView = ({
                 <span>Verified shelters</span>
               </div>
               <div className="ec-layer-item">
-                <span style={{ color: '#0284c7' }}>●</span>
+                <span style={{ color: '#3d6b4f' }}>●</span>
                 <span>Resource depots</span>
               </div>
             </div>
@@ -181,10 +181,10 @@ export const CrisisManagementView = ({
         <div className="ec-incident-detail-panel">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
             <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 2px 0' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#14291e', margin: '0 0 2px 0' }}>
                 {activeIncident.title || 'Incident Event'}
               </h3>
-              <div style={{ fontSize: '12px', color: '#64748b' }}>
+              <div style={{ fontSize: '12px', color: '#657367' }}>
                 {activeIncident.id} · Lead team: {activeIncident.leadTeam || 'National Relief Unit'}
               </div>
             </div>
@@ -201,7 +201,7 @@ export const CrisisManagementView = ({
               <span className="ec-meta-label-tiny">RELATED REQUESTS</span>
               <span
                 className="ec-meta-val-text"
-                style={{ color: '#0284c7', cursor: 'pointer', textDecoration: 'underline' }}
+                style={{ color: '#3d6b4f', cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => onNavigateTab('requests')}
               >
                 {activeIncident.relatedRequests || 'Open'}
@@ -246,7 +246,7 @@ export const CrisisManagementView = ({
                     </div>
                   ))
                 ) : (
-                  <div style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic', padding: '8px 0' }}>
+                  <div style={{ fontSize: '12px', color: '#657367', fontStyle: 'italic', padding: '8px 0' }}>
                     No critical unresolved issues currently flagged.
                   </div>
                 )}
@@ -280,7 +280,7 @@ export const CrisisManagementView = ({
           </div>
 
           {/* Bottom Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #eef1ea' }}>
             <button
               className="ec-btn-hero-outline"
               onClick={() => showToast('Update log form opened')}

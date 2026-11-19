@@ -55,14 +55,14 @@ export const HelpSupportView = ({ showToast }) => {
               </div>
             </div>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8e0', padding: '12px 14px', borderRadius: '8px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+            <div style={{ background: '#f4f6f2', border: '1px solid #e2e8e0', padding: '12px 14px', borderRadius: '8px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#4a5b4a', textTransform: 'uppercase' }}>
                 Volunteer Operations Helpdesk
               </div>
               <div style={{ fontSize: '15px', fontWeight: 700, color: '#183526', margin: '2px 0' }}>
                 +94 77 999 4433
               </div>
-              <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+              <div style={{ fontSize: '11.5px', color: '#657367' }}>
                 Assignment queries, check-in issues, or schedule changes.
               </div>
             </div>
@@ -71,7 +71,7 @@ export const HelpSupportView = ({ showToast }) => {
           <h3 className="vol-card-title" style={{ marginBottom: '10px' }}>
             Volunteer Standard Operating Guidelines
           </h3>
-          <ul style={{ fontSize: '12.5px', color: '#334155', paddingLeft: '20px', lineHeight: 1.6, margin: 0 }}>
+          <ul style={{ fontSize: '12.5px', color: '#2a4a35', paddingLeft: '20px', lineHeight: 1.6, margin: 0 }}>
             <li>Always display your official HumanAid volunteer credential badge when on site.</li>
             <li>Wear high-visibility reflective gear in active distribution or transport zones.</li>
             <li>Do not accept cash donations or unmanifested medical supplies in the field.</li>
@@ -88,7 +88,7 @@ export const HelpSupportView = ({ showToast }) => {
 
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4a5b4a', marginBottom: '6px' }}>
                 Category
               </label>
               <select
@@ -105,7 +105,7 @@ export const HelpSupportView = ({ showToast }) => {
             </div>
 
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4a5b4a', marginBottom: '6px' }}>
                 Incident Description & Exact Location
               </label>
               <textarea

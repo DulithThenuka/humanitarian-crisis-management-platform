@@ -167,7 +167,7 @@ export const AIAssistedReviewView = ({
                     {f.tagType === 'review' ? (
                       <AlertTriangle size={16} color="#dc2626" />
                     ) : (
-                      <CheckCircle2 size={16} color="#0284c7" />
+                      <CheckCircle2 size={16} color="#3d6b4f" />
                     )}
                     <div>
                       <div className="cm-factor-title">{f.title}</div>
@@ -188,7 +188,7 @@ export const AIAssistedReviewView = ({
               <strong style={{ display: 'block', fontSize: '13.5px', marginBottom: '3px' }}>
                 Possible duplicate / related record
               </strong>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>
+              <span style={{ fontSize: '12px', color: '#657367' }}>
                 {primaryCandidate.candidateCaseNumber} · {primaryCandidate.category} - compare separately, never auto-merge
               </span>
             </div>
@@ -233,8 +233,8 @@ export const AIAssistedReviewView = ({
               />
             </div>
 
-            <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px', color: '#64748b', display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <ShieldCheck size={16} color="#0284c7" style={{ flexShrink: 0 }} />
+            <div style={{ background: '#f4f6f2', padding: '10px 12px', borderRadius: '8px', border: '1px solid #dfe5d8', fontSize: '11px', color: '#657367', display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <ShieldCheck size={16} color="#3d6b4f" style={{ flexShrink: 0 }} />
               <span>Original recommendation, reviewer, decision, reason and timestamp are retained in immutable audit history.</span>
             </div>
 
@@ -253,7 +253,7 @@ export const AIAssistedReviewView = ({
       {showCompareModal && (
         <div className="cm-modal-backdrop" onClick={() => setShowCompareModal(false)}>
           <div className="cm-modal-card" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #dfe5d8', paddingBottom: '10px' }}>
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Compare Potential Duplicate Pair</h3>
               <button onClick={() => setShowCompareModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
                 <X size={16} />
@@ -261,20 +261,20 @@ export const AIAssistedReviewView = ({
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '10px' }}>
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px' }}>
+              <div style={{ background: '#f4f6f2', border: '1px solid #dfe5d8', borderRadius: '8px', padding: '14px' }}>
                 <span className="cm-pill-tag critical" style={{ marginBottom: '8px' }}>{caseId}</span>
                 <h4 style={{ margin: '4px 0', fontSize: '13px' }}>{aiReviewData?.recommendedCategory || 'Emergency Shelter'}</h4>
-                <p style={{ fontSize: '11.5px', color: '#64748b', margin: '4px 0 8px 0' }}>Kelani East - Zone 03</p>
-                <p style={{ fontSize: '11.5px', color: '#334155', fontStyle: 'italic', background: '#ffffff', padding: '8px', borderRadius: '6px' }}>
+                <p style={{ fontSize: '11.5px', color: '#657367', margin: '4px 0 8px 0' }}>Kelani East - Zone 03</p>
+                <p style={{ fontSize: '11.5px', color: '#2a4a35', fontStyle: 'italic', background: '#ffffff', padding: '8px', borderRadius: '6px' }}>
                   "Flood water entered our home overnight. We have two children and my mother cannot walk far."
                 </p>
               </div>
 
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px' }}>
+              <div style={{ background: '#f4f6f2', border: '1px solid #dfe5d8', borderRadius: '8px', padding: '14px' }}>
                 <span className="cm-pill-tag warning" style={{ marginBottom: '8px' }}>{primaryCandidate.candidateCaseNumber}</span>
                 <h4 style={{ margin: '4px 0', fontSize: '13px' }}>{primaryCandidate.category}</h4>
-                <p style={{ fontSize: '11.5px', color: '#64748b', margin: '4px 0 8px 0' }}>{primaryCandidate.operationalArea}</p>
-                <p style={{ fontSize: '11.5px', color: '#334155', fontStyle: 'italic', background: '#ffffff', padding: '8px', borderRadius: '6px' }}>
+                <p style={{ fontSize: '11.5px', color: '#657367', margin: '4px 0 8px 0' }}>{primaryCandidate.operationalArea}</p>
+                <p style={{ fontSize: '11.5px', color: '#2a4a35', fontStyle: 'italic', background: '#ffffff', padding: '8px', borderRadius: '6px' }}>
                   "{primaryCandidate.citizenQuote}"
                 </p>
               </div>

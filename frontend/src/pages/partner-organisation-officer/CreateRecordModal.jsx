@@ -43,21 +43,21 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
         maxWidth: '520px',
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.25)',
         overflow: 'hidden',
-        border: '1px solid #e2e8f0'
+        border: '1px solid #dfe5d8'
       }}>
         <div style={{
           padding: '16px 22px',
-          borderBottom: '1px solid #e2e8f0',
+          borderBottom: '1px solid #dfe5d8',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          backgroundColor: '#f8fafc'
+          backgroundColor: '#f4f6f2'
         }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: 0 }}>Create Prototype Record</h3>
+          <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#14291e', margin: 0 }}>Create Prototype Record</h3>
           <button
             type="button"
             onClick={onClose}
-            style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
+            style={{ background: 'none', border: 'none', color: '#657367', cursor: 'pointer', padding: '4px' }}
           >
             <X size={18} />
           </button>
@@ -164,12 +164,12 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
 
           <div style={{
             padding: '14px 22px',
-            borderTop: '1px solid #e2e8f0',
+            borderTop: '1px solid #dfe5d8',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
             gap: '10px',
-            backgroundColor: '#f8fafc'
+            backgroundColor: '#f4f6f2'
           }}>
             <button
               type="button"

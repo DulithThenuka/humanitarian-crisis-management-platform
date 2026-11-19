@@ -28,20 +28,20 @@ export const CreateAlertModal = ({
         style={{ maxWidth: '640px', width: '92%', maxHeight: '90vh', overflowY: 'auto' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #dfe5d8', paddingBottom: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Megaphone size={18} color="#dc2626" />
             </div>
             <div>
               <h3 className="ec-modal-title" style={{ margin: 0, fontSize: '17px' }}>Create Emergency Alert</h3>
-              <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
+              <p style={{ margin: 0, fontSize: '12px', color: '#657367' }}>
                 Broadcast live warnings to Citizen Portal, SMS Gateway, and regional operational teams.
               </p>
             </div>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-            <X size={18} color="#64748b" />
+            <X size={18} color="#657367" />
           </button>
         </div>
 
@@ -160,7 +160,7 @@ export const CreateAlertModal = ({
           </div>
 
           {/* Publication Action Selector */}
-          <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <div style={{ background: '#f4f6f2', padding: '12px', borderRadius: '8px', border: '1px solid #dfe5d8' }}>
             <label className="ec-field-label-tiny" style={{ marginBottom: '8px', display: 'block' }}>PUBLICATION ACTION</label>
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', cursor: 'pointer', fontWeight: publicationAction === 'publish' ? 600 : 400 }}>
@@ -181,7 +181,7 @@ export const CreateAlertModal = ({
                   checked={publicationAction === 'draft'}
                   onChange={() => setPublicationAction('draft')}
                 />
-                <FileText size={14} color="#64748b" />
+                <FileText size={14} color="#657367" />
                 <span>Save as Draft</span>
               </label>
 
@@ -192,7 +192,7 @@ export const CreateAlertModal = ({
                   checked={publicationAction === 'schedule'}
                   onChange={() => setPublicationAction('schedule')}
                 />
-                <Clock size={14} color="#0284c7" />
+                <Clock size={14} color="#3d6b4f" />
                 <span>Schedule for Later</span>
               </label>
             </div>
@@ -222,7 +222,7 @@ export const CreateAlertModal = ({
               <button
                 type="button"
                 className="ec-btn-hero-primary"
-                style={{ width: 'auto', padding: '8px 18px', background: '#475569' }}
+                style={{ width: 'auto', padding: '8px 18px', background: '#4a5b4a' }}
                 onClick={() => handleSubmit('draft')}
                 disabled={isSubmitting || !newAlertForm.title.trim()}
               >
@@ -232,7 +232,7 @@ export const CreateAlertModal = ({
               <button
                 type="submit"
                 className="ec-btn-hero-primary"
-                style={{ width: 'auto', padding: '8px 18px', background: '#0284c7' }}
+                style={{ width: 'auto', padding: '8px 18px', background: '#3d6b4f' }}
                 disabled={isSubmitting || !newAlertForm.title.trim()}
               >
                 {isSubmitting ? 'Scheduling...' : 'Schedule Broadcast Alert'}

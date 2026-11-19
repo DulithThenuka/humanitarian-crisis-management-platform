@@ -33,7 +33,7 @@ export const FundingHeader = ({
           </span>
         </div>
         <div className="fo-banner-right">
-          <span>ReliefCore Humanitarian Aid Platform</span>
+          <span>HumanAid Response Coordination Platform</span>
           <span>•</span>
           <span>Western Province Ops</span>
         </div>

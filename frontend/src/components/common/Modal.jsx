@@ -15,8 +15,8 @@ export const Modal = ({ isOpen, onClose, title, children }) => {
       padding: '16px'
     }}>
       <div style={{
-        backgroundColor: '#1e293b',
-        border: '1px solid #334155',
+        backgroundColor: '#1e3328',
+        border: '1px solid #2a4a35',
         borderRadius: '12px',
         width: '100%',
         maxWidth: '540px',
@@ -28,12 +28,12 @@ export const Modal = ({ isOpen, onClose, title, children }) => {
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '16px 24px',
-          borderBottom: '1px solid #334155'
+          borderBottom: '1px solid #2a4a35'
         }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', margin: 0 }}>{title}</h3>
+          <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f4f6f2', margin: 0 }}>{title}</h3>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '20px', cursor: 'pointer' }}
+            style={{ background: 'none', border: 'none', color: '#8a9480', fontSize: '20px', cursor: 'pointer' }}
           >
             &times;
           </button>

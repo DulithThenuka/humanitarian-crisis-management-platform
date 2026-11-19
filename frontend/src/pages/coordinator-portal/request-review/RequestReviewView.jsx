@@ -446,7 +446,7 @@ export const RequestReviewView = ({
           <div className="ec-queue-cards-scroll">
             {filteredAndSortedCases.length === 0 ? (
               <div className="ec-queue-empty-state">
-                <AlertTriangle size={24} color="#94a3b8" />
+                <AlertTriangle size={24} color="#8a9480" />
                 <p className="ec-queue-empty-title">No requests match filters</p>
                 <p className="ec-queue-empty-sub">Adjust your search query or reset filters to view all queue items.</p>
                 {isFilterActive && (
@@ -536,8 +536,8 @@ export const RequestReviewView = ({
         {/* Right Panel: Selected Request Operational Workspace */}
         <main className="ec-review-workspace-panel">
           {!activeCase ? (
-            <div className="ec-panel-card" style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
-              <Layers size={36} color="#94a3b8" style={{ marginBottom: '12px' }} />
+            <div className="ec-panel-card" style={{ padding: '40px', textAlign: 'center', color: '#657367' }}>
+              <Layers size={36} color="#8a9480" style={{ marginBottom: '12px' }} />
               <h3>No Request Selected</h3>
               <p>Please select an assistance request from the review queue on the left.</p>
             </div>
@@ -652,7 +652,7 @@ export const RequestReviewView = ({
                     </div>
                     <div className="ec-meta-quad-item">
                       <span className="ec-meta-label-tiny">CONTACT VERIFIED</span>
-                      <span className="ec-meta-val-text" style={{ color: activeCase.callerPhone || activeCase.contactNumber ? '#0284c7' : '#d97706' }}>
+                      <span className="ec-meta-val-text" style={{ color: activeCase.callerPhone || activeCase.contactNumber ? '#3d6b4f' : '#d97706' }}>
                         {activeCase.contactStatus || (activeCase.callerPhone ? `Verified (${activeCase.callerPhone})` : activeCase.contactNumber ? `Verified (${activeCase.contactNumber})` : 'Pending contact verification')}
                       </span>
                     </div>
@@ -666,7 +666,7 @@ export const RequestReviewView = ({
                   {(activeCase.attachment || activeCase.attachmentUrl) ? (
                     <div className="ec-attachment-item-card">
                       <div className="ec-attachment-left">
-                        <FileText size={18} color="#0284c7" />
+                        <FileText size={18} color="#3d6b4f" />
                         <div>
                           <div className="ec-attachment-name">{activeCase.attachment?.fileName || 'Incident_Report_Attachment.pdf'}</div>
                           <div className="ec-attachment-meta">
@@ -685,7 +685,7 @@ export const RequestReviewView = ({
                     </div>
                   ) : (
                     <div className="ec-attachment-empty-note">
-                      <FileText size={14} color="#94a3b8" />
+                      <FileText size={14} color="#8a9480" />
                       <span>No citizen files or image attachments submitted for this request.</span>
                     </div>
                   )}
@@ -758,7 +758,7 @@ export const RequestReviewView = ({
                     }}
                   >
                     <div className="ec-accordion-title-wrap">
-                      <ShieldCheck size={16} color="#0284c7" />
+                      <ShieldCheck size={16} color="#3d6b4f" />
                       <div>
                         <h3 className="ec-panel-title-text" style={{ fontSize: '13px', margin: 0 }}>
                           Verification Checklist &amp; Evidence ({checklistCheckedCount}/{checklistTotalCount} confirmed)
@@ -788,7 +788,7 @@ export const RequestReviewView = ({
                                 type="checkbox"
                                 checked={Boolean(item.checked)}
                                 onChange={() => {}}
-                                style={{ cursor: 'pointer', accentColor: '#0284c7' }}
+                                style={{ cursor: 'pointer', accentColor: '#3d6b4f' }}
                               />
                               <span>{item.label}</span>
                             </div>

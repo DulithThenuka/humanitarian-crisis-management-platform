@@ -88,8 +88,8 @@ export const VolunteerReportsView = ({ onOpenExportModal }) => {
 
       {/* 2. Filter Bar */}
       <div className="vc-filter-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#475569' }}>
-          <Calendar size={15} style={{ color: '#64748b' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#4a5b4a' }}>
+          <Calendar size={15} style={{ color: '#657367' }} />
           <span>Report Period:</span>
           <select
             className="vc-filter-select"
@@ -129,7 +129,7 @@ export const VolunteerReportsView = ({ onOpenExportModal }) => {
                     width: '28px',
                     height: '28px',
                     borderRadius: '6px',
-                    backgroundColor: '#f1f5f9',
+                    backgroundColor: '#eef1ea',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -154,10 +154,10 @@ export const VolunteerReportsView = ({ onOpenExportModal }) => {
             style={{
               fontSize: '13px',
               fontWeight: 700,
-              color: '#0f172a',
+              color: '#14291e',
               marginBottom: '14px',
               paddingBottom: '8px',
-              borderBottom: '1px solid #f1f5f9'
+              borderBottom: '1px solid #eef1ea'
             }}
           >
             Deployment Distribution by Operational Sector
@@ -167,15 +167,15 @@ export const VolunteerReportsView = ({ onOpenExportModal }) => {
             {areaBreakdown.map((item, idx) => (
               <div key={idx}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</span>
-                  <span style={{ color: '#64748b' }}>
+                  <span style={{ fontWeight: 600, color: '#14291e' }}>{item.name}</span>
+                  <span style={{ color: '#657367' }}>
                     {item.count} volunteers ({item.percent}%) · {item.status}
                   </span>
                 </div>
                 <div
                   style={{
                     height: '8px',
-                    backgroundColor: '#f1f5f9',
+                    backgroundColor: '#eef1ea',
                     borderRadius: '4px',
                     overflow: 'hidden'
                   }}
@@ -200,10 +200,10 @@ export const VolunteerReportsView = ({ onOpenExportModal }) => {
             style={{
               fontSize: '13px',
               fontWeight: 700,
-              color: '#0f172a',
+              color: '#14291e',
               marginBottom: '14px',
               paddingBottom: '8px',
-              borderBottom: '1px solid #f1f5f9'
+              borderBottom: '1px solid #eef1ea'
             }}
           >
             Skill Set Capacity & Utilization
@@ -213,15 +213,15 @@ export const VolunteerReportsView = ({ onOpenExportModal }) => {
             {skillDistribution.map((skill, idx) => (
               <div key={idx}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{skill.skill}</span>
-                  <span style={{ color: '#64748b' }}>
+                  <span style={{ fontWeight: 600, color: '#14291e' }}>{skill.skill}</span>
+                  <span style={{ color: '#657367' }}>
                     {skill.count} ({skill.percent}%)
                   </span>
                 </div>
                 <div
                   style={{
                     height: '8px',
-                    backgroundColor: '#f1f5f9',
+                    backgroundColor: '#eef1ea',
                     borderRadius: '4px',
                     overflow: 'hidden'
                   }}

@@ -61,7 +61,7 @@ export const CoordinatorSidebar = ({
             <div>
               <span className="ec-user-tag-tiny">SIGNED IN AS</span>
               <div className="ec-user-name-bold">{role}</div>
-              <div style={{ fontSize: '11px', color: '#94a3b8' }}>{fullName}</div>
+              <div style={{ fontSize: '11px', color: '#8a9480' }}>{fullName}</div>
             </div>
           </div>
           <div
@@ -218,7 +218,7 @@ export const CoordinatorSidebar = ({
       <div className="ec-sidebar-bottom-block">
         <div className="ec-access-notice-box">
           <div className="ec-access-title">
-            <ShieldCheck size={14} color="#38bdf8" />
+            <ShieldCheck size={14} color="#7caa7e" />
             <span>Coordinator access</span>
           </div>
           <div>Operational actions only. System administration is restricted.</div>

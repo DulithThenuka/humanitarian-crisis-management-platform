@@ -1145,7 +1145,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           title: 'Crisis Command Center',
           subtitle: 'Real-time overview of humanitarian operations and emergency coordination',
           icon: Home,
-          iconBg: 'bg-[#0e7490]'
+          iconBg: 'bg-[#3d6b4f]'
         };
       case 'users':
         return {
@@ -1258,7 +1258,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           title: 'Platform Administration & System Settings',
           subtitle: 'System security parameters, notification gateways, and global preferences',
           icon: Settings,
-          iconBg: 'bg-[#0e7490]'
+          iconBg: 'bg-[#3d6b4f]'
         };
     }
   };
@@ -1275,9 +1275,9 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
         <div className="adm-ss-sidebar-top">
           {/* Brand Header */}
           <div className="adm-ss-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <img src={reliefcoreIcon} alt="RELIEFCORE" className="adm-ss-brand-logo" />
+            <img src={reliefcoreIcon} alt="HumanAid" className="adm-ss-brand-logo" />
             <div>
-              <h2 className="adm-ss-brand-title">RELIEFCORE</h2>
+              <h2 className="adm-ss-brand-title">HumanAid</h2>
               <span className="adm-ss-brand-sub">Humanitarian Operations</span>
             </div>
           </div>
@@ -2286,7 +2286,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
               <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
                 <button
                   className={`px-4 py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-0 transition-colors ${
-                    settingsSubTab === 'users' || settingsSubTab === 'overview' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'
+                    settingsSubTab === 'users' || settingsSubTab === 'overview' ? 'bg-[#3d6b4f] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'
                   }`}
                   onClick={() => setSettingsSubTab('users')}
                 >
@@ -2294,7 +2294,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                 </button>
                 <button
                   className={`px-4 py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-0 transition-colors ${
-                    settingsSubTab === 'system' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'
+                    settingsSubTab === 'system' ? 'bg-[#3d6b4f] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'
                   }`}
                   onClick={() => setSettingsSubTab('system')}
                 >
@@ -2302,7 +2302,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                 </button>
                 <button
                   className={`px-4 py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-0 transition-colors ${
-                    settingsSubTab === 'preferences' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'
+                    settingsSubTab === 'preferences' ? 'bg-[#3d6b4f] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'
                   }`}
                   onClick={() => setSettingsSubTab('preferences')}
                 >
@@ -2695,7 +2695,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                       {(loading || crisesLoading) && crises.length === 0 ? (
                         <tr>
                           <td colSpan={9} className="py-8 text-center text-slate-500">
-                            <RefreshCw size={18} className="animate-spin inline mr-2 text-[#0e7490]" />
+                            <RefreshCw size={18} className="animate-spin inline mr-2 text-[#3d6b4f]" />
                             Loading crisis incident records from HumanitarianCrisisDb...
                           </td>
                         </tr>
@@ -2723,7 +2723,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                           })
                           .map((c) => (
                             <tr key={c.id}>
-                              <td className="font-mono text-[11.5px] font-semibold text-[#0e7490]">
+                              <td className="font-mono text-[11.5px] font-semibold text-[#3d6b4f]">
                                 {c.code || (typeof c.id === 'string' && c.id.length > 8 ? c.id.substring(0, 8) : c.id)}
                               </td>
                               <td>
@@ -2752,7 +2752,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                               </td>
                               <td>
                                 <div className="flex items-center gap-1.5">
-                                  <span className="font-bold text-[#0e7490]">{c.teamsDeployed || 2}</span>
+                                  <span className="font-bold text-[#3d6b4f]">{c.teamsDeployed || 2}</span>
                                   <span className="text-[11px] text-slate-500">teams</span>
                                 </div>
                               </td>
@@ -2782,7 +2782,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                                     <RefreshCw size={13} />
                                   </button>
                                   <button
-                                    className="adm-ss-icon-btn text-[#0e7490]"
+                                    className="adm-ss-icon-btn text-[#3d6b4f]"
                                     title="Dispatch Reinforcement Units (+2)"
                                     onClick={() => handleDispatchRescueTeams(c.id)}
                                   >
@@ -2874,13 +2874,13 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
-                          <Droplets size={16} className="text-[#0e7490]" />
+                          <Droplets size={16} className="text-[#3d6b4f]" />
                           <span className="text-[13px] font-bold text-slate-900">Attanagalu Oya (Dunamale Gauge)</span>
                         </div>
                         <span className="adm-ss-pill pill-green font-mono">1.45m / Max 1.80m</span>
                       </div>
                       <div className="adm-ss-progress-track mb-1.5">
-                        <div className="adm-ss-progress-fill bg-[#0e7490]" style={{ width: '64%' }}></div>
+                        <div className="adm-ss-progress-fill bg-[#3d6b4f]" style={{ width: '64%' }}></div>
                       </div>
                       <div className="flex justify-between text-[11px] text-slate-500">
                         <span>Threshold: Alert Level Active</span>
@@ -3044,10 +3044,10 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     <div>
                       <div className="flex justify-between text-[12.5px] font-semibold text-slate-800 mb-1">
                         <span>Food & Clean Drinking Water</span>
-                        <span className="text-[#0e7490]">Rs. 9,443,000 (38%)</span>
+                        <span className="text-[#3d6b4f]">Rs. 9,443,000 (38%)</span>
                       </div>
                       <div className="adm-ss-progress-track">
-                        <div className="adm-ss-progress-fill bg-[#0e7490]" style={{ width: '38%' }}></div>
+                        <div className="adm-ss-progress-fill bg-[#3d6b4f]" style={{ width: '38%' }}></div>
                       </div>
                     </div>
 
@@ -3105,7 +3105,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                       </div>
                       <div className="flex justify-between text-[12px]">
                         <span className="text-slate-500">Tax Exemption Certs:</span>
-                        <span className="font-semibold text-[#0e7490]">38 Issued of 38 Eligible</span>
+                        <span className="font-semibold text-[#3d6b4f]">38 Issued of 38 Eligible</span>
                       </div>
                       <div className="flex justify-between text-[12px]">
                         <span className="text-slate-500">Ledger Root Hash:</span>
@@ -3220,7 +3220,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                         })
                         .map((d) => (
                           <tr key={d.id}>
-                            <td className="font-mono text-[11.5px] font-semibold text-[#0e7490]">{d.id}</td>
+                            <td className="font-mono text-[11.5px] font-semibold text-[#3d6b4f]">{d.id}</td>
                             <td>
                               <div className="font-semibold text-slate-900">{d.donorName}</div>
                               <div className="text-[11px] text-slate-500">Date: {d.date} · Verified by {d.verifiedBy}</div>
@@ -3515,7 +3515,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                         })
                         .map((item) => (
                           <tr key={item.id}>
-                            <td className="font-mono text-[11.5px] font-semibold text-[#0e7490]">{item.id}</td>
+                            <td className="font-mono text-[11.5px] font-semibold text-[#3d6b4f]">{item.id}</td>
                             <td>
                               <div className="font-semibold text-slate-900">{item.requester}</div>
                               <div className="text-[11px] text-slate-500">{item.phone} · {item.timestamp}</div>
@@ -3965,7 +3965,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[12px] font-semibold text-[#0e7490]">{selectedCrisis.code || selectedCrisis.id}</span>
+                  <span className="font-mono text-[12px] font-semibold text-[#3d6b4f]">{selectedCrisis.code || selectedCrisis.id}</span>
                   <span className={`adm-ss-pill ${
                     selectedCrisis.severity === 'Critical' || selectedCrisis.severityNum >= 4 ? 'pill-red' :
                     selectedCrisis.severity === 'High' || selectedCrisis.severityNum === 3 ? 'pill-orange' : 'pill-green'
@@ -4015,12 +4015,12 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
               </div>
 
               <div className="flex items-center justify-between p-3 rounded-lg bg-cyan-50 border border-cyan-200">
-                <div className="flex items-center gap-2 text-[#0e7490]">
+                <div className="flex items-center gap-2 text-[#3d6b4f]">
                   <Truck size={16} />
                   <span className="font-bold">Deployed Multi-Agency Units: {selectedCrisis.teamsDeployed || 2} Teams</span>
                 </div>
                 <button
-                  className="px-3 py-1.5 rounded-lg bg-[#0e7490] text-white text-[11.5px] font-bold border-0 cursor-pointer shadow-sm"
+                  className="px-3 py-1.5 rounded-lg bg-[#3d6b4f] text-white text-[11.5px] font-bold border-0 cursor-pointer shadow-sm"
                   onClick={() => {
                     handleDispatchRescueTeams(selectedCrisis.id);
                     setSelectedCrisis(prev => ({ ...prev, teamsDeployed: (prev.teamsDeployed || 2) + 2 }));
@@ -4065,7 +4065,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           <div className="adm-ss-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <Gift size={20} className="text-[#0e7490]" />
+                <Gift size={20} className="text-[#3d6b4f]" />
                 <h3 className="text-[18px] font-bold text-slate-900 m-0">Record Relief Contribution / Grant</h3>
               </div>
               <button
@@ -4173,7 +4173,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           <div className="adm-ss-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <div>
-                <span className="font-mono text-[11.5px] font-semibold text-[#0e7490]">{selectedDonation.id}</span>
+                <span className="font-mono text-[11.5px] font-semibold text-[#3d6b4f]">{selectedDonation.id}</span>
                 <h3 className="text-[17px] font-bold text-slate-900 m-0">Donation Audit Certificate</h3>
               </div>
               <button
@@ -4195,7 +4195,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Contribution Value:</span>
-                <span className="font-bold text-[#0e7490]">{selectedDonation.amountFormatted}</span>
+                <span className="font-bold text-[#3d6b4f]">{selectedDonation.amountFormatted}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Allocated Sector:</span>
@@ -4237,7 +4237,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[12px] font-semibold text-[#0e7490]">{selectedAiLog.id}</span>
+                  <span className="font-mono text-[12px] font-semibold text-[#3d6b4f]">{selectedAiLog.id}</span>
                   <span className={`adm-ss-pill ${
                     selectedAiLog.priority === 'Critical' ? 'pill-red' :
                     selectedAiLog.priority === 'High' ? 'pill-orange' : 'pill-green'

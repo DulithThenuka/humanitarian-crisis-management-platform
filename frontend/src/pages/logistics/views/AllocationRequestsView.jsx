@@ -150,7 +150,7 @@ export const AllocationRequestsView = ({
 
             {/* Approved Quantity Input */}
             <div style={{ marginBottom: '18px' }}>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#4a5b4a', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '8px' }}>
                 APPROVED QUANTITY *
               </label>
               <input
@@ -163,7 +163,7 @@ export const AllocationRequestsView = ({
 
             {/* Resource Manager Note */}
             <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#4a5b4a', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '8px' }}>
                 RESOURCE MANAGER NOTE
               </label>
               <textarea

@@ -229,7 +229,7 @@ export const AuditCenterPage = () => {
             <Link to="/coordinator/dashboard">
               <img
                 src={reliefcoreLogoWhite}
-                alt="RELIEFCORE Humanitarian Operations"
+                alt="HumanAid Humanitarian Operations"
                 className="audit-brand-logo"
               />
             </Link>
@@ -251,7 +251,7 @@ export const AuditCenterPage = () => {
                     <span>{item.label}</span>
                   </div>
                   {item.badge && <span className="audit-nav-badge">{item.badge}</span>}
-                  {item.hasSub && <ChevronRight size={13} color="#64748b" />}
+                  {item.hasSub && <ChevronRight size={13} color="#657367" />}
                 </Link>
               );
             })}

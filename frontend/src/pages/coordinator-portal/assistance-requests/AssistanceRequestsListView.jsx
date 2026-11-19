@@ -307,10 +307,10 @@ export const AssistanceRequestsListView = ({
           <div className="arl-header-left">
             <div className="arl-header-icon-box">
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <circle cx="16" cy="16" r="14" stroke="#0e6f76" strokeWidth="2.5" />
+                <circle cx="16" cy="16" r="14" stroke="#3d6b4f" strokeWidth="2.5" />
                 <path d="M12 12C12 9.79 13.79 8 16 8C18.21 8 20 9.79 20 12" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
-                <circle cx="16" cy="16" r="3" fill="#0284c7" />
-                <path d="M10 22C11 19 13.5 18 16 18C18.5 18 21 19 22 22" stroke="#0e6f76" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="16" cy="16" r="3" fill="#3d6b4f" />
+                <path d="M10 22C11 19 13.5 18 16 18C18.5 18 21 19 22 22" stroke="#3d6b4f" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
             </div>
             <div>
@@ -320,7 +320,7 @@ export const AssistanceRequestsListView = ({
           </div>
 
           <div className="arl-header-search-wrap">
-            <Search size={14} color="#94a3b8" />
+            <Search size={14} color="#8a9480" />
             <input 
               type="text" 
               placeholder="Search requests by ID, location, category..." 
@@ -396,7 +396,7 @@ export const AssistanceRequestsListView = ({
 
             {/* Pending Review */}
             <div className="arl-kpi-card">
-              <div className="arl-kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#0284c7' }}>
+              <div className="arl-kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#3d6b4f' }}>
                 <Clock size={18} />
               </div>
               <div className="arl-kpi-content">
@@ -435,7 +435,7 @@ export const AssistanceRequestsListView = ({
         {/* Filter Toolbar */}
         <div className="arl-filter-bar">
           <div className="arl-filter-search-box">
-            <Search size={13} color="#94a3b8" />
+            <Search size={13} color="#8a9480" />
             <input 
               type="text" 
               placeholder="Search requests..." 
@@ -483,7 +483,7 @@ export const AssistanceRequestsListView = ({
           </select>
 
           <div className="arl-filter-date-box">
-            <Calendar size={13} color="#64748b" />
+            <Calendar size={13} color="#657367" />
             <span>01/06/2026 - 30/06/2026</span>
           </div>
 
@@ -506,7 +506,7 @@ export const AssistanceRequestsListView = ({
                         type="checkbox" 
                         checked={checkedIds.length === MOCK_REQUESTS.length}
                         onChange={handleSelectAll}
-                        style={{ accentColor: '#0e6f76' }}
+                        style={{ accentColor: '#3d6b4f' }}
                       />
                     </th>
                     <th>Request ID</th>
@@ -534,7 +534,7 @@ export const AssistanceRequestsListView = ({
                             type="checkbox" 
                             checked={checkedIds.includes(req.id)}
                             onChange={(e) => handleToggleRow(req.id, e)}
-                            style={{ accentColor: '#0e6f76' }}
+                            style={{ accentColor: '#3d6b4f' }}
                           />
                         </td>
                         <td className="arl-req-id">{req.id}</td>
@@ -552,7 +552,7 @@ export const AssistanceRequestsListView = ({
                             {req.status}
                           </span>
                         </td>
-                        <td style={{ color: '#64748b' }}>{req.created}</td>
+                        <td style={{ color: '#657367' }}>{req.created}</td>
                         <td onClick={e => e.stopPropagation()}>
                           <div className="arl-actions-cell">
                             <button 
@@ -596,7 +596,7 @@ export const AssistanceRequestsListView = ({
                 <button className="arl-page-btn">3</button>
                 <button className="arl-page-btn">4</button>
                 <button className="arl-page-btn">5</button>
-                <span style={{ padding: '0 4px', color: '#94a3b8' }}>...</span>
+                <span style={{ padding: '0 4px', color: '#8a9480' }}>...</span>
                 <button className="arl-page-btn">19</button>
                 <button className="arl-page-btn" title="Next Page">
                   <ChevronRight size={13} />
@@ -706,7 +706,7 @@ export const AssistanceRequestsListView = ({
                           <span className="arl-drawer-dt-val">{selectedRequest.specialRequirements}</span>
                         </div>
                         <div className="arl-drawer-desc-block">
-                          <strong style={{ color: '#0f172a' }}>Description: </strong>
+                          <strong style={{ color: '#14291e' }}>Description: </strong>
                           {selectedRequest.description}
                         </div>
                       </div>
@@ -768,7 +768,7 @@ export const AssistanceRequestsListView = ({
 
                       <div className="arl-drawer-gauge-box">
                         <svg className="arl-drawer-gauge-svg" viewBox="0 0 36 36">
-                          <circle cx="18" cy="18" r="14" fill="none" stroke="#e2e8f0" strokeWidth="3" />
+                          <circle cx="18" cy="18" r="14" fill="none" stroke="#dfe5d8" strokeWidth="3" />
                           <circle 
                             cx="18" 
                             cy="18" 
@@ -787,7 +787,7 @@ export const AssistanceRequestsListView = ({
 
                     {/* Reasoning Factors */}
                     <div className="arl-drawer-factors-wrap">
-                      <div style={{ fontWeight: 700, color: '#334155', marginBottom: '2px' }}>Reasoning Factors</div>
+                      <div style={{ fontWeight: 700, color: '#2a4a35', marginBottom: '2px' }}>Reasoning Factors</div>
                       <div className="arl-drawer-factor-item">
                         <span className="arl-dot-green"></span>
                         <span>Medical emergency detected</span>
@@ -808,7 +808,7 @@ export const AssistanceRequestsListView = ({
 
                     {/* Suggested Actions */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div style={{ fontWeight: 700, color: '#334155', fontSize: '10.5px' }}>Suggested Actions</div>
+                      <div style={{ fontWeight: 700, color: '#2a4a35', fontSize: '10.5px' }}>Suggested Actions</div>
                       <div className="arl-drawer-actions-chips">
                         <span className="arl-chip-action arl-chip-blue">
                           <Stethoscope size={10} />
@@ -858,7 +858,7 @@ export const AssistanceRequestsListView = ({
 
               {/* Drawer Tab: History */}
               {drawerTab === 'history' && (
-                <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ fontSize: '12px', color: '#657367', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div>• 10:24 AM - Request logged by {selectedRequest.fullName}</div>
                   <div>• 10:25 AM - AI prioritized as {selectedRequest.priority} ({selectedRequest.aiScore})</div>
                   <div>• 10:27 AM - Awaiting triage coordinator approval</div>
@@ -867,7 +867,7 @@ export const AssistanceRequestsListView = ({
 
               {/* Drawer Tab: Attachments */}
               {drawerTab === 'attachments' && (
-                <div style={{ fontSize: '12px', color: '#64748b' }}>
+                <div style={{ fontSize: '12px', color: '#657367' }}>
                   <div>Medical Report.pdf (1.2 MB)</div>
                   <div>Field_Photo_01.jpg (240 KB)</div>
                 </div>

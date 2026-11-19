@@ -71,7 +71,7 @@ export const AvailableOpportunitiesView = ({
               left: 10,
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#94a3b8'
+              color: '#8a9480'
             }}
           />
           <input
@@ -156,7 +156,7 @@ export const AvailableOpportunitiesView = ({
               border: '1px solid #e2e8e0'
             }}
           >
-            <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>
+            <p style={{ color: '#657367', fontSize: '14px', margin: 0 }}>
               No available opportunities match the selected criteria. Try adjusting your filters.
             </p>
           </div>
@@ -179,19 +179,19 @@ export const AvailableOpportunitiesView = ({
                 {/* Meta details grid */}
                 <div className="vol-opp-meta-grid">
                   <div className="vol-meta-item">
-                    <Clock size={14} style={{ color: '#64748b' }} />
+                    <Clock size={14} style={{ color: '#657367' }} />
                     <span>{opp.duration}</span>
                   </div>
                   <div className="vol-meta-item">
-                    <Calendar size={14} style={{ color: '#64748b' }} />
+                    <Calendar size={14} style={{ color: '#657367' }} />
                     <span>{opp.date}</span>
                   </div>
                   <div className="vol-meta-item">
-                    <Users size={14} style={{ color: '#64748b' }} />
+                    <Users size={14} style={{ color: '#657367' }} />
                     <span>{opp.volunteersNeeded}</span>
                   </div>
                   <div className="vol-meta-item">
-                    <MapPin size={14} style={{ color: '#64748b' }} />
+                    <MapPin size={14} style={{ color: '#657367' }} />
                     <span>{opp.location}</span>
                   </div>
                 </div>

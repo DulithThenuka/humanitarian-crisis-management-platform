@@ -26,12 +26,12 @@ export const DuplicateInspectModal = ({
       <div className="ec-verify-modal-card" style={{ width: '700px' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Sparkles size={18} color="#0284c7" />
+            <Sparkles size={18} color="#3d6b4f" />
             <h3 className="ec-modal-title">Duplicate Inspection: {caseId} vs {duplicateId}</h3>
           </div>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#64748b' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#657367' }}
             title="Close"
           >
             <X size={16} />
@@ -44,11 +44,11 @@ export const DuplicateInspectModal = ({
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
           <div style={{ padding: '14px', borderRadius: '8px', border: '1px solid #bfdbfe', backgroundColor: '#eff6ff' }}>
-            <span className="ec-meta-label-tiny" style={{ color: '#0284c7', display: 'block', marginBottom: '4px' }}>
+            <span className="ec-meta-label-tiny" style={{ color: '#3d6b4f', display: 'block', marginBottom: '4px' }}>
               CURRENT REQUEST (ACTIVE)
             </span>
-            <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>{caseId} · {category}</div>
-            <div style={{ fontSize: '11.5px', color: '#475569', marginTop: '6px', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#14291e' }}>{caseId} · {category}</div>
+            <div style={{ fontSize: '11.5px', color: '#4a5b4a', marginTop: '6px', lineHeight: 1.5 }}>
               <strong>Location:</strong> {location}<br />
               <strong>Household:</strong> {people}<br />
               <strong>Submitted:</strong> {submittedAt}
@@ -59,8 +59,8 @@ export const DuplicateInspectModal = ({
             <span className="ec-meta-label-tiny" style={{ color: '#c2410c', display: 'block', marginBottom: '4px' }}>
               POTENTIAL DUPLICATE CANDIDATE
             </span>
-            <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>{duplicateId} · {duplicateCategory}</div>
-            <div style={{ fontSize: '11.5px', color: '#475569', marginTop: '6px', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#14291e' }}>{duplicateId} · {duplicateCategory}</div>
+            <div style={{ fontSize: '11.5px', color: '#4a5b4a', marginTop: '6px', lineHeight: 1.5 }}>
               <strong>Location:</strong> {duplicateLocation}<br />
               <strong>Household:</strong> {duplicatePeople}<br />
               <strong>Submitted:</strong> {duplicateTime}
@@ -70,17 +70,17 @@ export const DuplicateInspectModal = ({
 
         <div style={{
           fontSize: '12px',
-          color: '#334155',
-          backgroundColor: '#f8fafc',
+          color: '#2a4a35',
+          backgroundColor: '#f4f6f2',
           padding: '12px 14px',
           borderRadius: '8px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid #dfe5d8',
           marginBottom: '16px',
           display: 'flex',
           alignItems: 'flex-start',
           gap: '8px'
         }}>
-          <ShieldCheck size={16} color="#0284c7" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <ShieldCheck size={16} color="#3d6b4f" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div>
             <strong>Coordinator Verification Finding:</strong> Distinct households identified in adjacent sectors. Both cases require independent dispatch and tracking.
           </div>

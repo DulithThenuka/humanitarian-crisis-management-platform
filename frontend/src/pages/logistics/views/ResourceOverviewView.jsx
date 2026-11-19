@@ -14,8 +14,13 @@ import {
 export const ResourceOverviewView = ({
   metrics,
   onNavigateTab,
-  onOpenAddModal
+  onSelectTab,
+  onOpenAddModal,
+  onAddInventory,
+  showToast
 }) => {
+  const handleNav = onNavigateTab || onSelectTab || (() => {});
+  const handleAdd = onOpenAddModal || onAddInventory || (() => {});
   const chartBars = [
     { label: '06', height: 20 },
     { label: '08', height: 35 },
@@ -32,7 +37,7 @@ export const ResourceOverviewView = ({
   ];
 
   return (
-    <div className="rm-workspace">
+    <div className="rm-view-container">
       {/* Title & Action Block (Screenshot 1) */}
       <div className="rm-title-block">
         <div>
@@ -48,14 +53,14 @@ export const ResourceOverviewView = ({
         <div className="rm-title-actions">
           <button 
             className="rm-btn rm-btn-secondary"
-            onClick={onOpenAddModal}
+            onClick={handleAdd}
           >
             <Plus size={14} />
             <span>Add inventory</span>
           </button>
           <button 
             className="rm-btn rm-btn-primary"
-            onClick={() => onNavigateTab('allocations')}
+            onClick={() => handleNav('allocations')}
           >
             <span>Review allocations</span>
           </button>
@@ -65,7 +70,7 @@ export const ResourceOverviewView = ({
       {/* 6 Metrics KPI Row */}
       <div className="rm-metrics-grid">
         {/* Metric 1 */}
-        <div className="rm-metric-card" onClick={() => onNavigateTab('inventory')} style={{ cursor: 'pointer' }}>
+        <div className="rm-metric-card" onClick={() => handleNav('inventory')} style={{ cursor: 'pointer' }}>
           <div className="rm-metric-top">
             <span className="rm-metric-label">Total resources</span>
             <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#ecfdf5', color: '#047857' }}>
@@ -77,7 +82,7 @@ export const ResourceOverviewView = ({
         </div>
 
         {/* Metric 2 */}
-        <div className="rm-metric-card" onClick={() => onNavigateTab('inventory')} style={{ cursor: 'pointer' }}>
+        <div className="rm-metric-card" onClick={() => handleNav('inventory')} style={{ cursor: 'pointer' }}>
           <div className="rm-metric-top">
             <span className="rm-metric-label">Available stock</span>
             <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
@@ -89,7 +94,7 @@ export const ResourceOverviewView = ({
         </div>
 
         {/* Metric 3 */}
-        <div className="rm-metric-card" onClick={() => onNavigateTab('stock-alerts')} style={{ cursor: 'pointer' }}>
+        <div className="rm-metric-card" onClick={() => handleNav('stock-alerts')} style={{ cursor: 'pointer' }}>
           <div className="rm-metric-top">
             <span className="rm-metric-label">Low-stock warnings</span>
             <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}>
@@ -101,7 +106,7 @@ export const ResourceOverviewView = ({
         </div>
 
         {/* Metric 4 */}
-        <div className="rm-metric-card" onClick={() => onNavigateTab('allocations')} style={{ cursor: 'pointer' }}>
+        <div className="rm-metric-card" onClick={() => handleNav('allocations')} style={{ cursor: 'pointer' }}>
           <div className="rm-metric-top">
             <span className="rm-metric-label">Pending allocations</span>
             <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#fffbeb', color: '#b45309' }}>
@@ -113,10 +118,10 @@ export const ResourceOverviewView = ({
         </div>
 
         {/* Metric 5 */}
-        <div className="rm-metric-card" onClick={() => onNavigateTab('allocations')} style={{ cursor: 'pointer' }}>
+        <div className="rm-metric-card" onClick={() => handleNav('allocations')} style={{ cursor: 'pointer' }}>
           <div className="rm-metric-top">
             <span className="rm-metric-label">Approved allocations</span>
-            <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#f1f5f9', color: '#475569' }}>
+            <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#eef1ea', color: '#4a5b4a' }}>
               <FileText size={15} />
             </div>
           </div>
@@ -125,7 +130,7 @@ export const ResourceOverviewView = ({
         </div>
 
         {/* Metric 6 */}
-        <div className="rm-metric-card" onClick={() => onNavigateTab('tracking')} style={{ cursor: 'pointer' }}>
+        <div className="rm-metric-card" onClick={() => handleNav('tracking')} style={{ cursor: 'pointer' }}>
           <div className="rm-metric-top">
             <span className="rm-metric-label">Dispatched / delivered</span>
             <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
@@ -152,7 +157,7 @@ export const ResourceOverviewView = ({
             </div>
 
             <button
-              onClick={() => onNavigateTab('reports')}
+              onClick={() => handleNav('reports')}
               style={{
                 background: 'none',
                 border: 'none',

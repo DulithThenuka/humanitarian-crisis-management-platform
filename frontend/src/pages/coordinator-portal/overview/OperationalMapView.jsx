@@ -81,14 +81,14 @@ const createDroppedPinIcon = () => {
 };
 
 const ICONS = {
-  service: createCustomIcon('#0284c7', '★', 30),
+  service: createCustomIcon('#3d6b4f', '★', 30),
   resource: createCustomIcon('#f59e0b', '▲', 28),
   requestHigh: createCustomIcon('#ea580c', '!', 28),
   requestCritical: createCustomIcon('#ef4444', '!', 32),
   shelter: createCustomIcon('#10b981', 'S', 30),
   volunteer: createCustomIcon('#8b5cf6', 'V', 26),
   userPin: createDroppedPinIcon(),
-  myLocPin: createCustomIcon('#0e6f76', '📍', 34)
+  myLocPin: createCustomIcon('#3d6b4f', '📍', 34)
 };
 
 const MAP_STYLES = {
@@ -707,7 +707,7 @@ export const OperationalMapView = () => {
             zoom={12}
             scrollWheelZoom={true}
             className="leaflet-light-container"
-            style={{ width: '100%', height: '100%', background: '#f1f5f9' }}
+            style={{ width: '100%', height: '100%', background: '#eef1ea' }}
           >
             {/* Clean Light Tiles */}
             <TileLayer
@@ -753,7 +753,7 @@ export const OperationalMapView = () => {
             {/* Road Routing Line */}
             <Polyline
               positions={ROUTE_LINE}
-              pathOptions={{ color: '#0284c7', weight: 4.5, opacity: 0.88, dashArray: '6, 6' }}
+              pathOptions={{ color: '#3d6b4f', weight: 4.5, opacity: 0.88, dashArray: '6, 6' }}
             />
 
             {/* Service Centres */}

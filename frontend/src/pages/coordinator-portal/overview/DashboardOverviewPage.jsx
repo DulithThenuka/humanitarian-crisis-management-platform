@@ -232,8 +232,8 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
       category: 'Transport Assistance',
       priority: 'Medium',
       time: '12 min ago',
-      iconBg: '#e0f2fe',
-      iconColor: '#0284c7'
+      iconBg: '#edf2e6',
+      iconColor: '#3d6b4f'
     },
     {
       id: 'REQ-2026-01821',
@@ -241,8 +241,8 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
       category: 'Evacuation Support',
       priority: 'Medium',
       time: '15 min ago',
-      iconBg: '#e0f2fe',
-      iconColor: '#0284c7'
+      iconBg: '#edf2e6',
+      iconColor: '#3d6b4f'
     }
   ];
 
@@ -402,7 +402,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
             <Link to="/coordinator/dashboard" onClick={() => setActiveNav('dashboard')}>
               <img
                 src={reliefcoreLogoWhite}
-                alt="RELIEFCORE Humanitarian Operations"
+                alt="HumanAid Humanitarian Operations"
                 className="coord-brand-logo"
               />
             </Link>
@@ -423,7 +423,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
                     <span>{item.label}</span>
                   </div>
                   {item.badge && <span className="coord-nav-badge">{item.badge}</span>}
-                  {item.hasSub && !isActive && <ChevronRight size={13} color="#64748b" />}
+                  {item.hasSub && !isActive && <ChevronRight size={13} color="#657367" />}
                 </button>
               );
             })}
@@ -451,22 +451,22 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
                   <Inbox size={15} />
                 </span>
                 <span 
-                  style={{ color: '#64748b', fontWeight: 500, cursor: 'pointer' }}
+                  style={{ color: '#657367', fontWeight: 500, cursor: 'pointer' }}
                   onClick={() => setRequestViewMode('list')}
                 >
                   Assistance Requests
                 </span>
-                <span style={{ color: '#94a3b8', fontSize: '11px' }}>&gt;</span>
-                <span style={{ color: '#475569', fontWeight: 600 }}>{selectedRequestId}</span>
+                <span style={{ color: '#8a9480', fontSize: '11px' }}>&gt;</span>
+                <span style={{ color: '#4a5b4a', fontWeight: 600 }}>{selectedRequestId}</span>
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-                    <circle cx="16" cy="16" r="13" stroke="#0e6f76" strokeWidth="2.5" />
+                    <circle cx="16" cy="16" r="13" stroke="#3d6b4f" strokeWidth="2.5" />
                     <path d="M12 12C12 9.79 13.79 8 16 8C18.21 8 20 9.79 20 12" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
-                    <circle cx="16" cy="16" r="3" fill="#0284c7" />
-                    <path d="M10 22C11 19 13.5 18 16 18C18.5 18 21 19 22 22" stroke="#0e6f76" strokeWidth="2.5" strokeLinecap="round" />
+                    <circle cx="16" cy="16" r="3" fill="#3d6b4f" />
+                    <path d="M10 22C11 19 13.5 18 16 18C18.5 18 21 19 22 22" stroke="#3d6b4f" strokeWidth="2.5" strokeLinecap="round" />
                   </svg>
                 </div>
                 <div>
@@ -615,17 +615,17 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
               }}
             />
           ) : activeNav === 'settings' ? (
-            <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '16px' }}>Platform Operations & Dispatch Settings</h2>
+            <div style={{ backgroundColor: '#1e3328', border: '1px solid #2a4a35', borderRadius: '12px', padding: '24px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#f4f6f2', marginBottom: '16px' }}>Platform Operations & Dispatch Settings</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '600px' }}>
-                <div style={{ background: '#0f172a', padding: '14px', borderRadius: '8px', border: '1px solid #334155' }}>
-                  <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '13px' }}>AI Auto-Triage Threshold</div>
-                  <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>Requests scoring above 90% confidence automatically flag for priority dispatch.</div>
-                  <input type="range" min="70" max="95" defaultValue="90" style={{ width: '100%', marginTop: '10px', accentColor: '#0e6f76' }} />
+                <div style={{ background: '#14291e', padding: '14px', borderRadius: '8px', border: '1px solid #2a4a35' }}>
+                  <div style={{ color: '#f4f6f2', fontWeight: 600, fontSize: '13px' }}>AI Auto-Triage Threshold</div>
+                  <div style={{ color: '#8a9480', fontSize: '12px', marginTop: '2px' }}>Requests scoring above 90% confidence automatically flag for priority dispatch.</div>
+                  <input type="range" min="70" max="95" defaultValue="90" style={{ width: '100%', marginTop: '10px', accentColor: '#3d6b4f' }} />
                 </div>
-                <div style={{ background: '#0f172a', padding: '14px', borderRadius: '8px', border: '1px solid #334155' }}>
-                  <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '13px' }}>Cryptographic Governance Logging</div>
-                  <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>SHA-256 block auditing enabled for all triage and override decisions.</div>
+                <div style={{ background: '#14291e', padding: '14px', borderRadius: '8px', border: '1px solid #2a4a35' }}>
+                  <div style={{ color: '#f4f6f2', fontWeight: 600, fontSize: '13px' }}>Cryptographic Governance Logging</div>
+                  <div style={{ color: '#8a9480', fontSize: '12px', marginTop: '2px' }}>SHA-256 block auditing enabled for all triage and override decisions.</div>
                   <div style={{ color: '#10b981', fontWeight: 700, fontSize: '12px', marginTop: '6px' }}>Status: ACTIVE & VERIFIED</div>
                 </div>
               </div>
@@ -1022,7 +1022,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
                   <div className="activity-top-row">
                     <div>
                       <h4 className="card-heading-text">Request Activity</h4>
-                      <span style={{ fontSize: '10.5px', color: '#94a3b8' }}>Last 7 days</span>
+                      <span style={{ fontSize: '10.5px', color: '#8a9480' }}>Last 7 days</span>
                     </div>
                     <span className="activity-badge-green">+12%</span>
                   </div>
@@ -1035,20 +1035,20 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
                   <svg className="chart-svg-container" viewBox="0 0 260 90" fill="none">
                     <defs>
                       <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
-                        <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.0" />
+                        <stop offset="0%" stopColor="#7caa7e" stopOpacity="0.4" />
+                        <stop offset="100%" stopColor="#7caa7e" stopOpacity="0.0" />
                       </linearGradient>
                     </defs>
-                    <line x1="25" y1="15" x2="255" y2="15" stroke="#f1f5f9" strokeDasharray="3 3" />
-                    <line x1="25" y1="40" x2="255" y2="40" stroke="#f1f5f9" strokeDasharray="3 3" />
-                    <line x1="25" y1="65" x2="255" y2="65" stroke="#f1f5f9" strokeDasharray="3 3" />
+                    <line x1="25" y1="15" x2="255" y2="15" stroke="#eef1ea" strokeDasharray="3 3" />
+                    <line x1="25" y1="40" x2="255" y2="40" stroke="#eef1ea" strokeDasharray="3 3" />
+                    <line x1="25" y1="65" x2="255" y2="65" stroke="#eef1ea" strokeDasharray="3 3" />
                     <path
                       d="M 35 65 L 65 52 L 100 48 L 135 40 L 170 38 L 205 24 L 240 18 L 240 75 L 35 75 Z"
                       fill="url(#chartGradient)"
                     />
                     <path
                       d="M 35 65 L 65 52 L 100 48 L 135 40 L 170 38 L 205 24 L 240 18"
-                      stroke="#0ea5e9"
+                      stroke="#5a8c6a"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     />
@@ -1195,7 +1195,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
                           </td>
                           <td 
                             className="req-table-id"
-                            style={{ cursor: 'pointer', color: '#0284c7' }}
+                            style={{ cursor: 'pointer', color: '#3d6b4f' }}
                             onClick={() => {
                               setSelectedRequestId(row.id);
                               setRequestViewMode('detail');
@@ -1232,7 +1232,7 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
                             </span>
                           </td>
                           <td>{row.assignedTo}</td>
-                          <td style={{ color: '#94a3b8' }}>{row.created}</td>
+                          <td style={{ color: '#8a9480' }}>{row.created}</td>
                           <td>
                             <div className="table-actions-cell">
                               <button 

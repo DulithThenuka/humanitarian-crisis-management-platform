@@ -63,7 +63,7 @@
   --po-danger-border: #fecaca;
 
   --po-info: #1d4ed8;
-  --po-info-bg: #dbeafe;
+  --po-info-bg: #dbe4c6;
   --po-info-border: #bfdbfe;
 }
 
@@ -1137,7 +1137,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #475569;
+  color: #4a5b4a;
   margin-bottom: 6px;
 }
 

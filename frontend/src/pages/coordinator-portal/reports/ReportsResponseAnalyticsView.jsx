@@ -327,7 +327,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
             value={customStartDate}
             onChange={(e) => setCustomStartDate(e.target.value)}
           />
-          <span style={{ fontSize: '12px', color: '#64748b' }}>to</span>
+          <span style={{ fontSize: '12px', color: '#657367' }}>to</span>
           <input
             type="date"
             className="ec-date-input"
@@ -345,7 +345,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
         <div className="ec-analytics-error-box">
           <AlertCircle size={28} color="#ef4444" />
           <h4 style={{ margin: 0, color: '#b91c1c' }}>Error Fetching Database Analytics</h4>
-          <p style={{ margin: 0, color: '#4b5563', fontSize: '13px' }}>{error}</p>
+          <p style={{ margin: 0, color: '#4a5b4a', fontSize: '13px' }}>{error}</p>
           <button
             className="ec-btn-action-primary"
             onClick={() => fetchAnalytics(period, customStartDate, customEndDate, true)}
@@ -358,8 +358,8 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
       {/* Loading Skeleton if no data yet */}
       {loading && !data && (
         <div className="ec-analytics-loading-box">
-          <RefreshCw size={28} className="ec-spinning" color="#0284c7" />
-          <p style={{ margin: 0, color: '#475569', fontSize: '13px', fontWeight: 600 }}>
+          <RefreshCw size={28} className="ec-spinning" color="#3d6b4f" />
+          <p style={{ margin: 0, color: '#4a5b4a', fontSize: '13px', fontWeight: 600 }}>
             Querying HumanitarianCrisisDb for verified request &amp; resource metrics...
           </p>
         </div>
@@ -371,7 +371,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
         <div className="ec-akpi-card">
           <div className="ec-akpi-head">
             <span className="ec-akpi-title">Incoming requests</span>
-            <div className="ec-akpi-icon-wrap" style={{ background: '#eff6ff', color: '#0284c7' }}>
+            <div className="ec-akpi-icon-wrap" style={{ background: '#eff6ff', color: '#3d6b4f' }}>
               <FileText size={16} />
             </div>
           </div>
@@ -422,7 +422,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
         <div className="ec-akpi-card">
           <div className="ec-akpi-head">
             <span className="ec-akpi-title">Open vs resolved</span>
-            <div className="ec-akpi-icon-wrap" style={{ background: '#f8fafc', color: '#64748b' }}>
+            <div className="ec-akpi-icon-wrap" style={{ background: '#f4f6f2', color: '#657367' }}>
               <BarChart2 size={16} />
             </div>
           </div>
@@ -477,7 +477,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
             {/* Bars Area */}
             <div className="ec-barchart-bars-area">
               {requestsOverTime.length === 0 ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '160px', color: '#94a3b8', fontSize: '13px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '160px', color: '#8a9480', fontSize: '13px' }}>
                   No incident records found for this period
                 </div>
               ) : (
@@ -495,7 +495,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
                       {isHovered && (
                         <div className="ec-bar-tooltip">
                           <strong>{item.count}</strong> requests
-                          <div style={{ fontSize: '10px', color: '#94a3b8' }}>{item.time}</div>
+                          <div style={{ fontSize: '10px', color: '#8a9480' }}>{item.time}</div>
                         </div>
                       )}
                       <div className="ec-bar-track-vertical">
@@ -532,7 +532,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
                   cy="80"
                   r="60"
                   fill="transparent"
-                  stroke="#f1f5f9"
+                  stroke="#eef1ea"
                   strokeWidth="20"
                 />
                 {donutSlices.map((slice, i) => (
@@ -564,7 +564,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
             {/* Legend List */}
             <div className="ec-donut-legend-list">
               {donutSlices.length === 0 ? (
-                <span style={{ fontSize: '12px', color: '#94a3b8' }}>No priority data</span>
+                <span style={{ fontSize: '12px', color: '#8a9480' }}>No priority data</span>
               ) : (
                 donutSlices.map((slice) => (
                   <div key={slice.name} className="ec-donut-legend-item">
@@ -592,7 +592,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
 
           <div className="ec-category-progress-list">
             {requestsByCategory.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+              <div style={{ padding: '20px', textAlign: 'center', color: '#8a9480', fontSize: '13px' }}>
                 No category data recorded in this period.
               </div>
             ) : (
@@ -623,7 +623,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
 
           <div className="ec-op-progress-list">
             {operationalProgress.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+              <div style={{ padding: '20px', textAlign: 'center', color: '#8a9480', fontSize: '13px' }}>
                 No operational progress indicators available.
               </div>
             ) : (
@@ -671,7 +671,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
             </div>
             <div className="ec-coord-stat-row">
               <span className="ec-coord-stat-lbl">Dispatched / In-Transit</span>
-              <span className="ec-coord-stat-val" style={{ color: '#0284c7' }}>
+              <span className="ec-coord-stat-val" style={{ color: '#3d6b4f' }}>
                 {resourceCoordination.dispatchedCount ?? 0}
               </span>
             </div>
@@ -727,7 +727,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
             </div>
             <div className="ec-coord-stat-row">
               <span className="ec-coord-stat-lbl">Total Capacity Available</span>
-              <span className="ec-coord-stat-val" style={{ color: '#0284c7' }}>
+              <span className="ec-coord-stat-val" style={{ color: '#3d6b4f' }}>
                 {shelterCoordination.totalCapacityAvailable ?? 0} beds
               </span>
             </div>
@@ -738,7 +738,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
         <div className="ec-coord-card">
           <div className="ec-coord-head">
             <div className="ec-coord-title-wrap">
-              <div className="ec-coord-icon-badge" style={{ background: '#eff6ff', color: '#0284c7' }}>
+              <div className="ec-coord-icon-badge" style={{ background: '#eff6ff', color: '#3d6b4f' }}>
                 <Users size={16} />
               </div>
               <div>
@@ -771,7 +771,7 @@ export const ReportsResponseAnalyticsView = ({ showToast }) => {
             </div>
             <div className="ec-coord-stat-row">
               <span className="ec-coord-stat-lbl">Active Volunteer Pool</span>
-              <span className="ec-coord-stat-val" style={{ color: '#0284c7' }}>
+              <span className="ec-coord-stat-val" style={{ color: '#3d6b4f' }}>
                 {volunteerCoordination.availableVolunteersCount ?? 0} registered
               </span>
             </div>

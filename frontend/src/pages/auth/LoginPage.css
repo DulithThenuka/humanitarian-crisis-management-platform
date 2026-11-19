@@ -1,46 +1,23 @@
-const handleSubmit=async (e)=> {
-  e.preventDefault();
-  setLoading(true);
-
-  try {
-    const response=await authService.login(formData);
-
-    if (response?.succeeded && response?.data?.token) {
-      const userData=response.data;
-
-      login(userData);
-      showAlert("Login successful", "success");
-
-      const roleRoutes= {
-        Admin: "/admin",
-          Coordinator: "/coordinator",
-          Citizen: "/citizen",
-          Volunteer: "/volunteer",
-          "Logistics Manager": "/logistics",
-          "Incident/Case Manager": "/case-manager"
-      }
-
-      ;
-
-      navigate(roleRoutes[userData.role] || "/unauthorized");
-    }
-
-    else {
-      showAlert(response?.errors?.[0] || "Invalid email or password",
-        "error"
-      );
-    }
-  }
-
-  catch (err) {
-    showAlert(err?.message || "Login failed. Please check your credentials.",
-      "error"
-    );
-  }
-
-  finally {
-    setLoading(false);
-  }
+/* HumanAid Authentication Styling */
+.login-page-container {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  background-color: #14291e;
+  overflow-x: clip;
 }
 
-;
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.liquid-glass-strong {
+  background: rgba(20, 41, 30, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(219, 228, 198, 0.15);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}

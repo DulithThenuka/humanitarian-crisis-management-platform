@@ -36,7 +36,7 @@ export const ExportReportModal = ({ isOpen, onClose }) => {
         <div className="vc-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Download size={18} style={{ color: '#233831' }} />
-            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#14291e' }}>
               Export Demo Report
             </h3>
           </div>
@@ -70,9 +70,9 @@ export const ExportReportModal = ({ isOpen, onClose }) => {
                 style={{
                   justifyContent: 'center',
                   padding: '10px',
-                  borderColor: format === 'csv' ? '#233831' : '#e2e8f0',
+                  borderColor: format === 'csv' ? '#233831' : '#dfe5d8',
                   backgroundColor: format === 'csv' ? '#f0fdf4' : '#ffffff',
-                  color: format === 'csv' ? '#166534' : '#475569'
+                  color: format === 'csv' ? '#166534' : '#4a5b4a'
                 }}
                 onClick={() => setFormat('csv')}
               >
@@ -86,9 +86,9 @@ export const ExportReportModal = ({ isOpen, onClose }) => {
                 style={{
                   justifyContent: 'center',
                   padding: '10px',
-                  borderColor: format === 'pdf' ? '#233831' : '#e2e8f0',
+                  borderColor: format === 'pdf' ? '#233831' : '#dfe5d8',
                   backgroundColor: format === 'pdf' ? '#f0fdf4' : '#ffffff',
-                  color: format === 'pdf' ? '#166534' : '#475569'
+                  color: format === 'pdf' ? '#166534' : '#4a5b4a'
                 }}
                 onClick={() => setFormat('pdf')}
               >
@@ -99,7 +99,7 @@ export const ExportReportModal = ({ isOpen, onClose }) => {
           </div>
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#334155' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#2a4a35' }}>
               <input
                 type="checkbox"
                 checked={includeAudit}
