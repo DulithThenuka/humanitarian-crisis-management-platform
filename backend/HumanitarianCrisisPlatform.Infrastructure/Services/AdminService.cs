@@ -221,8 +221,7 @@ public class AdminService : IAdminService
             query = query.Where(u => 
                 u.FullName.ToLower().Contains(q) || 
                 u.Email.ToLower().Contains(q) || 
-                (u.PhoneNumber != null && u.PhoneNumber.Contains(q)) ||
-                (u.AssignedDistrict != null && u.AssignedDistrict.ToLower().Contains(q)));
+                (u.PhoneNumber != null && u.PhoneNumber.Contains(q)));
         }
 
         var users = await query

@@ -26,10 +26,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(50)
             .IsRequired(false);
 
-        // Explicit configuration for AssignedDistrict
-        builder.Property(x => x.AssignedDistrict)
-            .HasMaxLength(100)
-            .IsRequired(false);
+        // Ignore AssignedDistrict because the SQL Server Users table does not have an AssignedDistrict column
+        builder.Ignore(x => x.AssignedDistrict);
 
         builder.HasIndex(x => x.Email)
             .IsUnique();
