@@ -70,7 +70,7 @@ public class SheltersController : BaseApiController
     }
 
     /// <summary>
-    /// Gets the comprehensive operational dashboard telemetry for Shelter Administrators.
+    /// Gets the comprehensive operational dashboard telemetry for Shelter Managers.
     /// </summary>
     [HttpGet("dashboard")]
     public async Task<ActionResult<Result<ShelterDashboardDto>>> GetDashboard(CancellationToken cancellationToken = default)
@@ -118,7 +118,7 @@ public class SheltersController : BaseApiController
         CancellationToken cancellationToken = default)
     {
         var userId = CurrentUserId != Guid.Empty ? CurrentUserId : Guid.Parse("77777777-7777-7777-7777-777777777777");
-        var userName = User.FindFirst(ClaimTypes.Name)?.Value ?? "Shelter Administrator";
+        var userName = User.FindFirst(ClaimTypes.Name)?.Value ?? "Shelter Manager";
         var result = await _shelterService.ExecuteShelterActionAsync(id, dto, userId, userName, cancellationToken);
         if (!result.Succeeded) return BadRequest(result);
         return Ok(result);
@@ -180,7 +180,7 @@ public class SheltersController : BaseApiController
     }
 
     /// <summary>
-    /// Gets urgent resource and supply requests filed by shelter administrators.
+    /// Gets urgent resource and supply requests filed by shelter managers.
     /// </summary>
     [HttpGet("resource-requests")]
     public async Task<ActionResult<Result<IReadOnlyList<ShelterResourceRequestDto>>>> GetResourceRequests(

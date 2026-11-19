@@ -271,7 +271,7 @@ public class ShelterService : IShelterService
         var workflowSteps = new List<ShelterWorkflowStepDto>
         {
             new() { Step = 1, Title = "Citizen request recorded", Description = "Only relevant roles receive this handoff", Status = "completed" },
-            new() { Step = 2, Title = "Human/Case review", Description = "Shelter Admin action creates an audit history", Status = "completed" },
+            new() { Step = 2, Title = "Human/Case review", Description = "Shelter Manager action creates a verified audit record", Status = "completed" },
             new() { Step = 3, Title = "Resource / shelter decision", Description = "Only relevant roles receive this handoff", Status = "active" },
             new() { Step = 4, Title = "Volunteer or partner handoff", Description = "Only relevant roles receive this handoff", Status = "pending" },
             new() { Step = 5, Title = "Citizen status notification", Description = "Only relevant roles receive this handoff", Status = "pending" }
