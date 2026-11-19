@@ -1,34 +1,48 @@
 import React, { useState } from 'react';
-import { X, UserPlus, CheckCircle2 } from 'lucide-react';
+import { X, UserPlus, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { OPERATIONAL_AREAS } from '../data/coordinatorData';
 
 export const CreateVolunteerModal = ({ isOpen, onClose, onCreateVolunteer }) => {
   const [formData, setFormData] = useState({
     id: `VOL-0${Math.floor(100 + Math.random() * 900)}`,
     name: '',
+    email: '',
+    phone: '+94 77 000 0000',
     skills: 'Logistics, First Aid',
     serviceArea: 'Kelani East',
     availability: 'Available',
     currentShift: 'None',
     verification: 'Verified',
     status: 'Eligible',
-    phone: '+94 77 000 0000',
     notes: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      alert('Please enter volunteer name.');
+      setErrorMsg('Please enter volunteer full name.');
       return;
     }
-    onCreateVolunteer({
-      ...formData,
-      statusType: formData.status.toLowerCase()
-    });
-    onClose();
+
+    setIsSubmitting(true);
+    setErrorMsg(null);
+
+    try {
+      await onCreateVolunteer({
+        ...formData,
+        email: formData.email.trim() || `${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'vol'}${Math.floor(100 + Math.random() * 900)}@reliefcore.local`,
+        statusType: formData.status.toLowerCase()
+      });
+      onClose();
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to register volunteer. Please check required fields.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -38,16 +52,36 @@ export const CreateVolunteerModal = ({ isOpen, onClose, onCreateVolunteer }) => 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <UserPlus size={18} style={{ color: '#233831' }} />
             <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#14291e' }}>
-              Create Prototype Volunteer Record
+              Register Field Volunteer
             </h3>
           </div>
-          <button className="vc-modal-close" onClick={onClose}>
+          <button className="vc-modal-close" onClick={onClose} disabled={isSubmitting}>
             <X size={16} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="vc-modal-body">
+            {errorMsg && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 12px',
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '6px',
+                  color: '#b91c1c',
+                  fontSize: '12px',
+                  marginBottom: '12px'
+                }}
+              >
+                <AlertCircle size={15} style={{ flexShrink: 0 }} />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', marginBottom: '12px' }}>
               <div>
                 <label className="vc-form-label">Volunteer Ref</label>
@@ -69,6 +103,31 @@ export const CreateVolunteerModal = ({ isOpen, onClose, onCreateVolunteer }) => 
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <label className="vc-form-label">Email (Optional)</label>
+                <input
+                  type="email"
+                  className="vc-filter-input"
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                  placeholder="volunteer@domain.lk"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="vc-form-label">Phone Number</label>
+                <input
+                  type="text"
+                  className="vc-filter-input"
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                  placeholder="+94 77 000 0000"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
             </div>
@@ -168,16 +227,23 @@ export const CreateVolunteerModal = ({ isOpen, onClose, onCreateVolunteer }) => 
                 color: '#657367'
               }}
             >
-              Simulated coursework record. Retained in local session state.
+              Operational record is validated and saved directly to SQL Server database.
             </div>
           </div>
 
           <div className="vc-modal-footer">
-            <button type="button" className="vc-btn-secondary" onClick={onClose}>
+            <button type="button" className="vc-btn-secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>
-            <button type="submit" className="vc-btn-primary">
-              Create Prototype Record
+            <button type="submit" className="vc-btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={14} className="vc-spin" style={{ marginRight: '6px' }} />
+                  Saving...
+                </>
+              ) : (
+                'Register Volunteer'
+              )}
             </button>
           </div>
         </form>
@@ -185,4 +251,3 @@ export const CreateVolunteerModal = ({ isOpen, onClose, onCreateVolunteer }) => 
     </div>
   );
 };
-
