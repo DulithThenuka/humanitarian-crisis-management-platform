@@ -44,6 +44,8 @@ import { ResourceReportsView } from './views/ResourceReportsView';
 import { ResourceNotificationsView } from './views/ResourceNotificationsView';
 import { ResourceProfileSettingsView } from './views/ResourceProfileSettingsView';
 
+import { resourceService } from '../../services/resourceService';
+
 export const ResourceManagerDashboard = ({ initialTab = 'overview' }) => {
   const navigate = useNavigate();
 
@@ -60,6 +62,68 @@ export const ResourceManagerDashboard = ({ initialTab = 'overview' }) => {
   const [dutyStatus, setDutyStatus] = useState(RESOURCE_MANAGER_USER.dutyStatus);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(1);
   const [globalSearch, setGlobalSearch] = useState('');
+
+  // Fetch live backend data if online
+  React.useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const invRes = await resourceService.getInventory().catch(() => null);
+        if (isMounted && invRes?.data?.succeeded && Array.isArray(invRes.data.data) && invRes.data.data.length > 0) {
+          setInventoryItems(invRes.data.data.map(i => ({
+            id: i.code || `RES-${i.id.substring(0, 6).toUpperCase()}`,
+            rawId: i.id,
+            name: i.name,
+            category: i.category,
+            quantity: i.availableQuantity !== undefined ? i.availableQuantity : i.totalQuantity,
+            unit: i.unit,
+            storageLocation: i.storageLocation || 'Central Depot',
+            stockStatus: i.stockStatus || 'Available',
+            statusBadge: i.statusBadge || 'available',
+            lastUpdated: i.lastUpdated || 'Just now'
+          })));
+        }
+
+        const allocRes = await resourceService.getAllocations().catch(() => null);
+        if (isMounted && allocRes?.data?.succeeded && Array.isArray(allocRes.data.data) && allocRes.data.data.length > 0) {
+          setAllocationRequests(allocRes.data.data.map(a => ({
+            id: a.code || `RAR-${a.id.substring(0, 6).toUpperCase()}`,
+            rawId: a.id,
+            itemName: a.item,
+            category: a.category,
+            requestedQuantity: a.requestedQty,
+            unit: 'units',
+            priority: a.priority,
+            destination: a.destination,
+            relatedIncidentId: a.relatedRecord,
+            requestedBy: a.coordinator,
+            status: a.dispatchStatus === 0 ? 'Pending Review' : 'Processed'
+          })));
+        }
+
+        const supRes = await resourceService.getSuppliers().catch(() => null);
+        if (isMounted && supRes?.data?.succeeded && Array.isArray(supRes.data.data) && supRes.data.data.length > 0) {
+          setSuppliers(supRes.data.data.map(s => ({
+            id: s.code || `SUP-${s.id.substring(0, 6).toUpperCase()}`,
+            rawId: s.id,
+            name: s.name,
+            categories: s.categories,
+            contactPerson: s.contactRef,
+            status: s.status,
+            lastDelivery: s.lastDelivery
+          })));
+        }
+
+        const dutyRes = await resourceService.getDutyStatus().catch(() => null);
+        if (isMounted && dutyRes?.data?.succeeded && dutyRes.data.data) {
+          setDutyStatus(dutyRes.data.data.isOnDuty);
+        }
+      } catch {
+        // Fallback to static prototype data
+      }
+    })();
+    return () => { isMounted = false; };
+  }, []);
 
   // Modals State
   const [reviewModalState, setReviewModalState] = useState({
