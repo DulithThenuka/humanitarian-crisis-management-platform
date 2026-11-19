@@ -6,23 +6,51 @@ import {
   CheckCircle,
   AlertTriangle,
   Download,
-  ChevronDown
+  ChevronDown,
+  TrendingUp
 } from 'lucide-react';
 
-const CONSUMPTION_BARS = [
-  { label: '06', height: 24 },
-  { label: '08', height: 38 },
-  { label: '10', height: 28 },
-  { label: '12', height: 50 },
-  { label: '14', height: 42 },
-  { label: '16', height: 65 },
-  { label: '18', height: 55 },
-  { label: '20', height: 78 },
-  { label: '22', height: 68 },
-  { label: '00', height: 92, active: true },
-  { label: '02', height: 72 },
-  { label: '04', height: 80 }
-];
+const CONSUMPTION_TRENDS = {
+  'Last 7 days': [
+    { label: '13 Nov', value: 38, target: 50 },
+    { label: '14 Nov', value: 45, target: 50 },
+    { label: '15 Nov', value: 42, target: 50 },
+    { label: '16 Nov', value: 68, target: 50 },
+    { label: '17 Nov', value: 74, target: 50 },
+    { label: '18 Nov', value: 55, target: 50 },
+    { label: '19 Nov', value: 82, target: 50 }
+  ],
+  'Last 30 days': [
+    { label: '21 Oct', value: 28, target: 50 },
+    { label: '24 Oct', value: 42, target: 50 },
+    { label: '27 Oct', value: 34, target: 50 },
+    { label: '30 Oct', value: 56, target: 50 },
+    { label: '02 Nov', value: 48, target: 50 },
+    { label: '05 Nov', value: 72, target: 50 },
+    { label: '08 Nov', value: 60, target: 50 },
+    { label: '11 Nov', value: 84, target: 50 },
+    { label: '14 Nov', value: 66, target: 50 },
+    { label: '17 Nov', value: 92, target: 50 },
+    { label: '19 Nov', value: 78, target: 50 }
+  ],
+  'Last 90 days': [
+    { label: '01 Sep', value: 32, target: 50 },
+    { label: '15 Sep', value: 48, target: 50 },
+    { label: '01 Oct', value: 54, target: 50 },
+    { label: '15 Oct', value: 68, target: 50 },
+    { label: '01 Nov', value: 76, target: 50 },
+    { label: '15 Nov', value: 88, target: 50 },
+    { label: '19 Nov', value: 74, target: 50 }
+  ],
+  'Year to date': [
+    { label: 'Jan', value: 28, target: 50 },
+    { label: 'Mar', value: 42, target: 50 },
+    { label: 'May', value: 55, target: 50 },
+    { label: 'Jul', value: 48, target: 50 },
+    { label: 'Sep', value: 66, target: 50 },
+    { label: 'Nov', value: 85, target: 50 }
+  ]
+};
 
 const CATEGORY_STOCK = [
   { name: 'Food', count: 320, pct: 25 },
@@ -38,14 +66,64 @@ const INCIDENT_ALLOCATIONS = [
   { name: 'Other active requests', count: '54 units', pct: 16 }
 ];
 
+// Helper to compute Catmull-Rom spline converted to cubic Bézier
+function getSmoothSplinePath(pts) {
+  if (!pts || pts.length === 0) return '';
+  if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+  let path = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    path += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  return path;
+}
+
 export const ReportsAnalyticsView = ({ showToast }) => {
   const [timeRange, setTimeRange] = useState('Last 30 days');
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const handleExport = () => {
     if (showToast) {
       showToast('Resource analytics report exported as PDF/CSV');
     }
   };
+
+  // Chart data calculations
+  const trendData = CONSUMPTION_TRENDS[timeRange] || CONSUMPTION_TRENDS['Last 30 days'];
+  const peakValue = Math.max(...trendData.map((d) => d.value));
+
+  // Geometry dimensions
+  const svgWidth = 680;
+  const svgHeight = 220;
+  const padLeft = 40;
+  const padRight = 20;
+  const padTop = 18;
+  const padBottom = 32;
+  const plotWidth = svgWidth - padLeft - padRight;
+  const plotHeight = svgHeight - padTop - padBottom;
+  const bottomY = padTop + plotHeight;
+
+  // Map data to SVG points
+  const points = trendData.map((d, i) => {
+    const x = padLeft + (i / (trendData.length - 1)) * plotWidth;
+    const y = padTop + ((100 - d.value) / 100) * plotHeight;
+    return { ...d, x, y };
+  });
+
+  const linePath = getSmoothSplinePath(points);
+  const areaPath = points.length > 0
+    ? `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${bottomY} L ${points[0].x.toFixed(1)} ${bottomY} Z`
+    : '';
+
+  const yTicks = [100, 80, 60, 40, 20, 0];
+  const targetY = padTop + ((100 - 50) / 100) * plotHeight;
 
   return (
     <div className="rm-view-container">
@@ -166,30 +244,205 @@ export const ReportsAnalyticsView = ({ showToast }) => {
           <div className="rm-card-header-flex">
             <div>
               <h2 className="rm-card-title">Resource consumption trend</h2>
-              <p className="rm-card-subtitle">Measured stock movements · Last 30 days</p>
+              <p className="rm-card-subtitle">Measured stock movements · {timeRange}</p>
+            </div>
+            <div className="rm-chart-legend">
+              <div className="rm-legend-item">
+                <span className="rm-legend-dot" style={{ backgroundColor: '#1e3d2c' }} />
+                <span>Daily consumption</span>
+              </div>
+              <div className="rm-legend-item">
+                <span className="rm-legend-dash" />
+                <span>Daily baseline (50)</span>
+              </div>
+              <div className="rm-legend-stat">
+                <TrendingUp size={13} style={{ color: '#15803d' }} />
+                <span>Peak:</span>
+                <strong>{peakValue} units</strong>
+              </div>
             </div>
           </div>
 
-          <div className="rm-chart-body" style={{ marginTop: '20px' }}>
-            <div className="rm-chart-y-axis">
-              <span>60</span>
-              <span>40</span>
-              <span>20</span>
-              <span>0</span>
-            </div>
-            <div className="rm-chart-bars-wrap">
-              {CONSUMPTION_BARS.map((bar, idx) => (
-                <div key={idx} className="rm-chart-col">
-                  <div className="rm-chart-bar-track">
-                    <div
-                      className={`rm-chart-bar-fill ${bar.active ? 'rm-bar-active' : ''}`}
-                      style={{ height: `${bar.height}%` }}
+          <div
+            className="rm-line-chart-container"
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            <svg
+              className="rm-line-chart-svg"
+              viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+              preserveAspectRatio="xMidYMid meet"
+            >
+              <defs>
+                <linearGradient id="rmConsumptionArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#1e3d2c" stopOpacity="0.25" />
+                  <stop offset="80%" stopColor="#1e3d2c" stopOpacity="0.03" />
+                  <stop offset="100%" stopColor="#1e3d2c" stopOpacity="0" />
+                </linearGradient>
+                <filter id="rmLineGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#1e3d2c" floodOpacity="0.18" />
+                </filter>
+              </defs>
+
+              {/* Horizontal Gridlines & Y-Axis Labels */}
+              {yTicks.map((tick) => {
+                const y = padTop + ((100 - tick) / 100) * plotHeight;
+                return (
+                  <g key={`ytick-${tick}`}>
+                    <line
+                      x1={padLeft}
+                      y1={y}
+                      x2={svgWidth - padRight}
+                      y2={y}
+                      stroke="#e6ece3"
+                      strokeDasharray={tick === 0 ? undefined : '4 4'}
+                      strokeWidth={tick === 0 ? 1.5 : 1}
                     />
-                  </div>
-                  <span className="rm-chart-label">{bar.label}</span>
-                </div>
+                    <text
+                      x={padLeft - 10}
+                      y={y + 4}
+                      textAnchor="end"
+                      fill="#8d9a8f"
+                      fontSize="10.5"
+                      fontWeight="600"
+                    >
+                      {tick}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* Target Baseline Reference Line (50 units) */}
+              <line
+                x1={padLeft}
+                y1={targetY}
+                x2={svgWidth - padRight}
+                y2={targetY}
+                stroke="#d97706"
+                strokeDasharray="5 4"
+                strokeWidth="1.5"
+                opacity="0.85"
+              />
+
+              {/* Filled Area Gradient */}
+              {areaPath && (
+                <path d={areaPath} fill="url(#rmConsumptionArea)" />
+              )}
+
+              {/* Main Trend Line Spline */}
+              {linePath && (
+                <path
+                  d={linePath}
+                  fill="none"
+                  stroke="#1e3d2c"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#rmLineGlow)"
+                />
+              )}
+
+              {/* Point Nodes */}
+              {points.map((pt, i) => (
+                <circle
+                  key={`pt-${i}`}
+                  cx={pt.x}
+                  cy={pt.y}
+                  r="3.5"
+                  fill="#ffffff"
+                  stroke="#1e3d2c"
+                  strokeWidth="2"
+                />
               ))}
-            </div>
+
+              {/* X-Axis Date Labels */}
+              {points.map((pt, i) => (
+                <text
+                  key={`xlabel-${i}`}
+                  x={pt.x}
+                  y={svgHeight - 10}
+                  textAnchor="middle"
+                  fill="#657367"
+                  fontSize="11"
+                  fontWeight="500"
+                >
+                  {pt.label}
+                </text>
+              ))}
+
+              {/* Active Hover Scrubber & Highlight Indicator */}
+              {hoveredIndex !== null && points[hoveredIndex] && (
+                <g>
+                  <line
+                    x1={points[hoveredIndex].x}
+                    y1={padTop}
+                    x2={points[hoveredIndex].x}
+                    y2={bottomY}
+                    stroke="#1e3d2c"
+                    strokeDasharray="3 3"
+                    strokeWidth="1.5"
+                  />
+                  <circle
+                    cx={points[hoveredIndex].x}
+                    cy={points[hoveredIndex].y}
+                    r="8"
+                    fill="#1e3d2c"
+                    fillOpacity="0.2"
+                  />
+                  <circle
+                    cx={points[hoveredIndex].x}
+                    cy={points[hoveredIndex].y}
+                    r="5"
+                    fill="#1e3d2c"
+                    stroke="#ffffff"
+                    strokeWidth="2.5"
+                  />
+                </g>
+              )}
+
+              {/* Transparent Hit-test Columns for Smooth Hover */}
+              {points.map((pt, i) => {
+                const colW = plotWidth / (points.length - 1);
+                const xLeft = i === 0 ? padLeft : pt.x - colW / 2;
+                const width = i === 0 || i === points.length - 1 ? colW / 2 : colW;
+                return (
+                  <rect
+                    key={`hit-${i}`}
+                    x={xLeft}
+                    y={padTop}
+                    width={width}
+                    height={plotHeight}
+                    fill="transparent"
+                    style={{ cursor: 'pointer' }}
+                    onMouseEnter={() => setHoveredIndex(i)}
+                  />
+                );
+              })}
+            </svg>
+
+            {/* Floating Tooltip Bubble */}
+            {hoveredIndex !== null && points[hoveredIndex] && (
+              <div
+                className="rm-chart-tooltip"
+                style={{
+                  left: `${(points[hoveredIndex].x / svgWidth) * 100}%`,
+                  top: `${(points[hoveredIndex].y / svgHeight) * 100}%`
+                }}
+              >
+                <div className="rm-chart-tooltip-date">
+                  {points[hoveredIndex].label} · Stock Movement
+                </div>
+                <div className="rm-chart-tooltip-row">
+                  <span className="rm-chart-tooltip-dot" style={{ backgroundColor: '#1e3d2c' }} />
+                  <span>Consumption:</span>
+                  <strong>{points[hoveredIndex].value} units</strong>
+                </div>
+                <div className="rm-chart-tooltip-row">
+                  <span className="rm-chart-tooltip-dot" style={{ backgroundColor: '#d97706' }} />
+                  <span>Daily Target:</span>
+                  <strong>{points[hoveredIndex].target} units</strong>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
