@@ -360,7 +360,10 @@ export const AppRoutes = () => {
       <Route path="/admin" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="dashboard" /></ProtectedRoute>} />
       <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="dashboard" /></ProtectedRoute>} />
       <Route path="/admin/overview" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="dashboard" /></ProtectedRoute>} />
-      <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="settings" /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="users" /></ProtectedRoute>} />
+      <Route path="/admin/partners" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="partners" /></ProtectedRoute>} />
+      <Route path="/admin/broadcasts" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="broadcasts" /></ProtectedRoute>} />
+      <Route path="/admin/health" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="health" /></ProtectedRoute>} />
       <Route path="/admin/crisis" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="crisis" /></ProtectedRoute>} />
       <Route path="/admin/requests" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="requests" /></ProtectedRoute>} />
       <Route path="/admin/resources" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="resources" /></ProtectedRoute>} />
@@ -369,7 +372,7 @@ export const AppRoutes = () => {
       <Route path="/admin/donations" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="donations" /></ProtectedRoute>} />
       <Route path="/admin/ai-ops" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="ai-ops" /></ProtectedRoute>} />
       <Route path="/admin/maps" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="maps" /></ProtectedRoute>} />
-      <Route path="/admin/notifications" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="notifications" /></ProtectedRoute>} />
+      <Route path="/admin/notifications" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="broadcasts" /></ProtectedRoute>} />
       <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="reports" /></ProtectedRoute>} />
       <Route path="/admin/audit" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="audit" /></ProtectedRoute>} />
       <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboardPage initialTab="settings" /></ProtectedRoute>} />

@@ -38,6 +38,7 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
+    c.CustomSchemaIds(type => type.FullName ?? type.Name);
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "RELIEFCORE Humanitarian Operations API",
@@ -94,6 +95,7 @@ using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await DatabaseSeeder.SeedAsync(context);
+        await PartnerSeeder.SeedAsync(context);
     }
     catch (Exception ex)
     {

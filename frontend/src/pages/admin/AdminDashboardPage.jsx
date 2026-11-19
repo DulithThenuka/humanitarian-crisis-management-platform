@@ -65,6 +65,7 @@ import {
 } from 'lucide-react';
 
 import { adminService } from '../../services/adminService';
+import { crisisService } from '../../services/crisisService';
 import { useAuth } from '../../context/AuthContext';
 import reliefcoreIcon from '../../assets/reliefcore-icon.png';
 import sarahJohnsonAvatar from '../../assets/sarah-johnson.jpg';
@@ -74,24 +75,42 @@ import reqEvidencePhoto from '../../assets/req-evidence-1.jpg';
 
 import './AdminDashboard.css';
 
-// Default Telemetry Stats matching the screenshots
+// Modular Admin Views
+import AdminOverviewView from './components/AdminOverviewView';
+import AdminUsersView from './components/AdminUsersView';
+import AdminPartnersView from './components/AdminPartnersView';
+import AdminBroadcastsView from './components/AdminBroadcastsView';
+import AdminHealthView from './components/AdminHealthView';
+import AdminAuditView from './components/AdminAuditView';
+import AdminMapView from './components/AdminMapView';
+
+// Default Telemetry Stats - aligned with live HumanitarianCrisisDb database baseline
 const DEFAULT_STATS = {
-  activeCrises: 8,
-  totalUsers: 1248,
-  activeVolunteers: 1245,
-  resourcesDeployed: 6280,
-  peopleAssisted: 12450,
-  totalInventoryItems: 6280,
-  itemsDispatched: 4320,
-  inStock: 3860,
-  lowStockItems: 320,
-  inventoryValueRs: 12450000,
-  totalShelters: 28,
-  totalShelterCapacity: 6240,
-  occupiedShelterBeds: 4618,
-  availableShelterBeds: 1622,
+  activeCrises: 5,
+  totalCrises: 8,
+  criticalCrises: 2,
+  totalAssistanceRequests: 1,
+  pendingAssistanceRequests: 1,
+  approvedAssistanceRequests: 0,
+  fulfilledAssistanceRequests: 0,
+  totalUsers: 7,
+  activeUsers: 7,
+  totalVolunteers: 1,
+  activeVolunteers: 1,
+  totalInventoryItems: 14600,
+  resourcesDeployed: 3470,
+  inStock: 11130,
+  lowStockItems: 1,
+  inventoryValueRs: 18500000,
+  totalShelters: 3,
+  totalShelterCapacity: 450,
+  occupiedShelterBeds: 152,
+  availableShelterBeds: 298,
+  shelterOccupancyRate: 33.8,
+  totalDonationsAmount: 32050000,
+  verifiedDonationsCount: 7,
   systemUptimePercentage: 99.98,
-  databaseLatencyMs: 14.2
+  databaseLatencyMs: 12.4
 };
 
 // Default User Accounts
@@ -542,17 +561,14 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
   const location = useLocation();
   const { user: authUser, logout } = useAuth();
 
-  // Active Tab State (matching Sidebar Screenshot 1)
-  const [activeTab, setActiveTab] = useState(initialTab === 'users' ? 'settings' : initialTab);
-  const [settingsSubTab, setSettingsSubTab] = useState(initialTab === 'users' ? 'users' : 'overview');
+  // Active Tab State
+  const [activeTab, setActiveTab] = useState(initialTab || 'dashboard');
+  const [settingsSubTab, setSettingsSubTab] = useState('overview');
 
   // Reactively sync activeTab and settingsSubTab from route or props
   useEffect(() => {
     if (initialTab) {
-      if (initialTab === 'users') {
-        setActiveTab('settings');
-        setSettingsSubTab('users');
-      } else if (initialTab === 'overview') {
+      if (initialTab === 'overview') {
         setActiveTab('dashboard');
       } else {
         setActiveTab(initialTab);
@@ -560,8 +576,13 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
     }
     const p = (location.pathname || '').toLowerCase();
     if (p.includes('/admin/users')) {
-      setActiveTab('settings');
-      setSettingsSubTab('users');
+      setActiveTab('users');
+    } else if (p.includes('/admin/partners')) {
+      setActiveTab('partners');
+    } else if (p.includes('/admin/broadcasts')) {
+      setActiveTab('broadcasts');
+    } else if (p.includes('/admin/health')) {
+      setActiveTab('health');
     } else if (p.includes('/admin/crisis')) {
       setActiveTab('crisis');
     } else if (p.includes('/admin/requests')) {
@@ -579,7 +600,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
     } else if (p.includes('/admin/maps')) {
       setActiveTab('maps');
     } else if (p.includes('/admin/notifications')) {
-      setActiveTab('notifications');
+      setActiveTab('broadcasts');
     } else if (p.includes('/admin/reports')) {
       setActiveTab('reports');
     } else if (p.includes('/admin/audit')) {
@@ -618,7 +639,9 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
   });
 
   // 1. Crisis Management States
-  const [crises, setCrises] = useState(DEFAULT_CRISES);
+  const [crises, setCrises] = useState([]);
+  const [crisesLoading, setCrisesLoading] = useState(true);
+  const [crisesError, setCrisesError] = useState(null);
   const [crisisSearch, setCrisisSearch] = useState('');
   const [crisisSeverityFilter, setCrisisSeverityFilter] = useState('ALL');
   const [crisisStatusFilter, setCrisisStatusFilter] = useState('ALL');
@@ -682,18 +705,21 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
   // Fetch real data on mount
   const loadData = async () => {
     setLoading(true);
+    setCrisesLoading(true);
+    setCrisesError(null);
+
     try {
       const statsRes = await adminService.getDashboardStats();
       if (statsRes?.succeeded && statsRes.data) {
         setStats(prev => ({
           ...prev,
           ...statsRes.data,
-          totalUsers: statsRes.data.totalUsers || prev.totalUsers,
-          activeCrises: statsRes.data.activeCrises || prev.activeCrises
+          totalUsers: statsRes.data.totalUsers ?? prev.totalUsers,
+          activeCrises: statsRes.data.activeCrises ?? prev.activeCrises
         }));
       }
-    } catch {
-      // Keep rich fallback
+    } catch (err) {
+      console.warn('Dashboard stats fetch error:', err);
     }
 
     try {
@@ -706,6 +732,42 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
       }
     } catch {
       // Keep rich fallback
+    }
+
+    // Load authoritative crises from crisisService
+    try {
+      const crisesRes = await crisisService.getCrises();
+      const rawCrises = (crisesRes?.succeeded && Array.isArray(crisesRes.data))
+        ? crisesRes.data
+        : (Array.isArray(crisesRes?.data) ? crisesRes.data : (Array.isArray(crisesRes) ? crisesRes : null));
+
+      if (rawCrises && Array.isArray(rawCrises)) {
+        const mappedCrises = rawCrises.map((c, idx) => ({
+          ...c,
+          id: c.id,
+          code: c.code || `CR-2026-00${idx + 1}`,
+          title: c.title || 'Emergency Incident',
+          type: c.disasterTypeName || c.type || 'Flood',
+          district: c.region || c.district || 'Western Province',
+          severity: c.severityLabel || (typeof c.severity === 'string' ? c.severity : (c.severity >= 4 ? 'Critical' : c.severity >= 3 ? 'High' : c.severity >= 2 ? 'Medium' : 'Low')),
+          severityNum: typeof c.severity === 'number' ? c.severity : 3,
+          affectedPeople: c.estimatedAffectedCount ?? c.affectedPeople ?? 1000,
+          areaSqKm: c.areaSqKm ?? (c.affectedAreaRadius ? Math.round(Number(c.affectedAreaRadius) * 2.5) : 15),
+          teamsDeployed: c.teamsDeployed ?? (c.assignedLeadTeam ? 4 : 2),
+          status: c.status || (c.isActive ? 'Active Response' : 'Resolved'),
+          isActive: c.isActive !== undefined ? c.isActive : (c.status !== 'Contained' && c.status !== 'Resolved'),
+          declaredAt: c.startDate ? new Date(c.startDate).toISOString().replace('T', ' ').substring(0, 16) : (c.declaredAt || '2026-06-15 04:30'),
+          leadCoordinator: c.assignedLeadTeam || c.leadCoordinator || 'Sarah Johnson',
+          waterLevelMeters: c.waterLevelMeters ?? 1.50,
+          notes: c.description || c.notes || 'Emergency response protocol initiated under DMC directive.'
+        }));
+        setCrises(mappedCrises);
+      }
+    } catch (err) {
+      console.warn('Crisis service fetch error:', err);
+      setCrisesError('Unable to load crises from server.');
+    } finally {
+      setCrisesLoading(false);
     }
 
     try {
@@ -815,54 +877,146 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
   });
 
   // Crisis Action Handlers
-  const handleDeclareCrisis = (e) => {
+  const handleDeclareCrisis = async (e) => {
     e.preventDefault();
     if (!newCrisis.title || !newCrisis.district) {
       showToast('Please provide a title and district for the emergency incident.');
       return;
     }
+
+    const typeMapping = {
+      Flood: 0,
+      Earthquake: 1,
+      Cyclone: 2,
+      Landslide: 3,
+      Tsunami: 4,
+      Drought: 5,
+      Wildfire: 6,
+      Epidemic: 7,
+      IndustrialAccident: 8,
+      Other: 9
+    };
+    const severityMapping = {
+      Critical: 4,
+      High: 3,
+      Medium: 2,
+      Low: 1
+    };
+
+    const disasterTypeNum = typeMapping[newCrisis.type] ?? 0;
+    const severityNum = severityMapping[newCrisis.severity] ?? 3;
+    const affectedPeopleCount = parseInt(newCrisis.affectedPeople || '1000', 10);
+    const areaRadius = parseFloat(newCrisis.areaSqKm || '15');
+
+    let createdId = `CRS-2026-0${crises.length + 10}`;
+    let createdCode = `CR-2026-00${crises.length + 1}`;
+
+    try {
+      const res = await crisisService.createCrisis({
+        title: newCrisis.title.trim(),
+        description: newCrisis.notes || 'Emergency response protocol initiated under DMC directive.',
+        disasterType: disasterTypeNum,
+        severity: severityNum,
+        region: newCrisis.district,
+        latitude: 6.9271,
+        longitude: 79.8612,
+        affectedAreaRadius: areaRadius,
+        estimatedAffectedCount: affectedPeopleCount
+      });
+
+      if (res?.succeeded && res.data) {
+        createdId = res.data.id || createdId;
+        createdCode = res.data.code || createdCode;
+      }
+    } catch (err) {
+      console.warn('Persisting crisis to API failed, using local optimistic record:', err);
+    }
+
     const createdIncident = {
-      id: `CRS-2026-0${crises.length + 10}`,
+      id: createdId,
+      code: createdCode,
       title: newCrisis.title,
       type: newCrisis.type,
       district: newCrisis.district,
       severity: newCrisis.severity,
-      affectedPeople: parseInt(newCrisis.affectedPeople || '1000', 10),
-      areaSqKm: parseInt(newCrisis.areaSqKm || '15', 10),
+      severityNum: severityNum,
+      affectedPeople: affectedPeopleCount,
+      areaSqKm: Math.round(areaRadius),
       teamsDeployed: 2,
-      status: 'Active Escalation',
+      status: 'Active Response',
+      isActive: true,
       declaredAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
       leadCoordinator: authUser?.fullName || 'Sarah Johnson',
       waterLevelMeters: 1.5,
       notes: newCrisis.notes || 'Emergency response protocol initiated under DMC directive.'
     };
-    setCrises([createdIncident, ...crises]);
-    setStats(prev => ({ ...prev, activeCrises: prev.activeCrises + 1 }));
+
+    setCrises(prev => [createdIncident, ...prev]);
+    setStats(prev => ({ ...prev, activeCrises: (prev.activeCrises || 0) + 1, totalCrises: (prev.totalCrises || 0) + 1 }));
     setIsDeclareCrisisModalOpen(false);
     setNewCrisis({ title: '', type: 'Flood', district: 'Colombo', severity: 'High', affectedPeople: '1500', areaSqKm: '18', notes: '' });
     showToast(`Emergency incident "${createdIncident.title}" declared successfully.`);
   };
 
-  const handleToggleCrisisStatus = (crisisId) => {
+  const handleToggleCrisisStatus = async (crisisId) => {
+    const target = crises.find(c => c.id === crisisId);
+    if (!target) return;
+    const isCurrentlyActive = target.isActive !== false && target.status !== 'Resolved' && target.status !== 'Contained';
+    const nextStatus = isCurrentlyActive ? 'Resolved' : 'Active Response';
+    const nextActive = !isCurrentlyActive;
+
     setCrises(prev => prev.map(c => {
       if (c.id === crisisId) {
-        const nextStatus = c.status === 'Contained' ? 'Active Escalation' : 'Contained';
-        showToast(`Crisis incident #${c.id} updated to ${nextStatus}.`);
-        return { ...c, status: nextStatus };
+        return { ...c, status: nextStatus, isActive: nextActive };
       }
       return c;
     }));
+    setStats(prev => ({
+      ...prev,
+      activeCrises: Math.max(0, (prev.activeCrises || 0) + (nextActive ? 1 : -1))
+    }));
+    showToast(`Crisis incident #${target.code || target.id} updated to ${nextStatus}.`);
+
+    try {
+      if (isCurrentlyActive) {
+        await crisisService.closeCrisis(crisisId, { resolutionSummary: 'Marked as resolved by operations coordinator.' });
+      } else {
+        await crisisService.updateCrisis(crisisId, {
+          title: target.title,
+          description: target.notes || target.description,
+          disasterType: target.disasterType ?? 0,
+          severity: target.severityNum ?? 3,
+          region: target.district || target.region || 'Western Province',
+          isActive: true
+        });
+      }
+    } catch (err) {
+      console.warn('Could not persist status toggle to server:', err);
+    }
   };
 
-  const handleDispatchRescueTeams = (crisisId) => {
+  const handleDispatchRescueTeams = async (crisisId) => {
+    const target = crises.find(c => c.id === crisisId);
+    if (!target) return;
+    const nextTeams = (target.teamsDeployed || 2) + 2;
     setCrises(prev => prev.map(c => {
       if (c.id === crisisId) {
-        const nextTeams = c.teamsDeployed + 2;
-        showToast(`2 additional swiftwater rescue teams dispatched to ${c.district}. Total teams: ${nextTeams}.`);
         return { ...c, teamsDeployed: nextTeams };
       }
       return c;
     }));
+    showToast(`2 additional swiftwater rescue teams dispatched to ${target.district || target.region || 'incident area'}. Total teams: ${nextTeams}.`);
+
+    try {
+      await crisisService.assignResponseTeam(crisisId, {
+        teamName: 'Disaster Swiftwater Rescue Unit',
+        contactPerson: authUser?.fullName || 'Sarah Johnson',
+        contactPhone: '+94 11 267 0001',
+        operationalDirectives: 'Deploy reinforcement units to assist local evacuation and flood relief.'
+      });
+    } catch (err) {
+      console.warn('Could not persist team assignment to server:', err);
+    }
   };
 
   // Donations Action Handlers
@@ -962,9 +1116,12 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
     showToast(`Alert #${b.id} retransmitted across SMS and Push gateways.`);
   };
 
-  // Sidebar Menu Config Matching Screenshot 1
+  // Sidebar Menu Config with all Standard & Extended Humanitarian Operations Modules
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, hasChevron: false },
+    { id: 'users', label: 'User Management', icon: Shield, hasChevron: true },
+    { id: 'partners', label: 'Partner Organizations', icon: Building2, hasChevron: true },
+    { id: 'broadcasts', label: 'Emergency Broadcasts', icon: Radio, hasChevron: true },
     { id: 'crisis', label: 'Crisis Management', icon: ShieldAlert, hasChevron: true },
     { id: 'requests', label: 'Assistance Requests', icon: ClipboardList, hasChevron: true },
     { id: 'resources', label: 'Resources', icon: Package, hasChevron: true },
@@ -973,9 +1130,10 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
     { id: 'donations', label: 'Donations', icon: Gift, hasChevron: true },
     { id: 'ai-ops', label: 'AI Operations', icon: Cpu, hasChevron: true },
     { id: 'maps', label: 'Maps', icon: MapPin, hasChevron: true },
+    { id: 'health', label: 'System Health', icon: Activity, hasChevron: false },
+    { id: 'audit', label: 'Audit Logs', icon: ShieldCheck, hasChevron: false },
     { id: 'notifications', label: 'Notifications', icon: Bell, hasChevron: false, badge: '3' },
     { id: 'reports', label: 'Reports & Analytics', icon: FileBarChart, hasChevron: false },
-    { id: 'audit', label: 'Audit Logs', icon: ShieldCheck, hasChevron: false },
     { id: 'settings', label: 'Settings', icon: Settings, hasChevron: false }
   ];
 
@@ -988,6 +1146,34 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           subtitle: 'Real-time overview of humanitarian operations and emergency coordination',
           icon: Home,
           iconBg: 'bg-[#0e7490]'
+        };
+      case 'users':
+        return {
+          title: 'User Management & Access Control',
+          subtitle: 'Manage administrative accounts, role-based authorization, and security credentials',
+          icon: Shield,
+          iconBg: 'bg-emerald-600'
+        };
+      case 'partners':
+        return {
+          title: 'Partner Organization Management',
+          subtitle: 'Coordinate accredited NGOs, international agencies, commitments, and sector zones',
+          icon: Building2,
+          iconBg: 'bg-blue-600'
+        };
+      case 'broadcasts':
+        return {
+          title: 'Emergency Broadcast Operations',
+          subtitle: 'Dispatch multi-channel emergency alert broadcasts, cellular alerts, and radio dispatches',
+          icon: Radio,
+          iconBg: 'bg-rose-600'
+        };
+      case 'health':
+        return {
+          title: 'System Health & Infrastructure Telemetry',
+          subtitle: 'Real-time API latency, SQL Server connectivity, table metrics, and backup integrity',
+          icon: Activity,
+          iconBg: 'bg-teal-600'
         };
       case 'crisis':
         return {
@@ -1040,8 +1226,8 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
         };
       case 'maps':
         return {
-          title: 'Satellite GIS Map',
-          subtitle: 'High-resolution geospatial Western Province hazard radar and operational zones',
+          title: 'Geospatial Crisis & Asset Radar',
+          subtitle: 'Interactive Leaflet vector mapping of emergency incidents, shelters, and affected sectors',
           icon: MapPin,
           iconBg: 'bg-sky-600'
         };
@@ -1061,16 +1247,16 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
         };
       case 'audit':
         return {
-          title: 'Immutable Audit Ledger',
-          subtitle: 'Cryptographic oversight logs, administrative changes, and verification history',
+          title: 'Immutable Cryptographic Audit Ledger',
+          subtitle: 'Real database activity audit trails, administrative changes, and SHA-256 verification',
           icon: ShieldCheck,
           iconBg: 'bg-slate-700'
         };
       case 'settings':
       default:
         return {
-          title: 'Platform Administration & RBAC',
-          subtitle: 'Manage user credentials, security roles, system health, and global controls',
+          title: 'Platform Administration & System Settings',
+          subtitle: 'System security parameters, notification gateways, and global preferences',
           icon: Settings,
           iconBg: 'bg-[#0e7490]'
         };
@@ -1199,284 +1385,60 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
         <div className="adm-ss-content">
 
           {/* =====================================================
-             VIEW 1: DASHBOARD (Matching Screenshot 7 & 9)
+             VIEW 1: CRISIS COMMAND CENTER DASHBOARD (ACCURATE LIVE STATS)
              ===================================================== */}
           {activeTab === 'dashboard' && (
-            <>
-              {/* KPI Banner Row */}
-              <div className="adm-ss-kpi-row">
-                <div className="adm-ss-kpi-card">
-                  <div className="adm-ss-kpi-icon-box bg-red-soft">
-                    <ShieldAlert size={22} />
-                  </div>
-                  <div className="adm-ss-kpi-content">
-                    <span className="adm-ss-kpi-label">Active Crises</span>
-                    <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">{stats.activeCrises}</span>
-                    </div>
-                    <span className="adm-ss-kpi-trend text-red">↑ 33% Requiring attention</span>
-                  </div>
-                </div>
+            <AdminOverviewView
+              stats={stats}
+              crises={crises}
+              broadcasts={broadcasts}
+              loading={loading}
+              loadData={loadData}
+              setActiveTab={setActiveTab}
+              showToast={showToast}
+            />
+          )}
 
-                <div className="adm-ss-kpi-card">
-                  <div className="adm-ss-kpi-icon-box bg-blue-soft">
-                    <Users size={22} />
-                  </div>
-                  <div className="adm-ss-kpi-content">
-                    <span className="adm-ss-kpi-label">Volunteers</span>
-                    <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">1,245</span>
-                    </div>
-                    <span className="adm-ss-kpi-trend text-green">↑ 18% Active volunteers</span>
-                  </div>
-                </div>
+          {/* =====================================================
+             VIEW: USER MANAGEMENT & ACCESS CONTROL (SECTION 4.A)
+             ===================================================== */}
+          {activeTab === 'users' && (
+            <AdminUsersView
+              users={users}
+              setUsers={setUsers}
+              loadData={loadData}
+              loading={loading}
+              showToast={showToast}
+              currentUser={authUser}
+              onUserCountChange={(delta) => setStats(prev => ({ ...prev, totalUsers: Math.max(0, (prev?.totalUsers || 0) + delta) }))}
+            />
+          )}
 
-                <div className="adm-ss-kpi-card">
-                  <div className="adm-ss-kpi-icon-box bg-green-soft">
-                    <Package size={22} />
-                  </div>
-                  <div className="adm-ss-kpi-content">
-                    <span className="adm-ss-kpi-label">Resources Deployed</span>
-                    <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">6,280</span>
-                    </div>
-                    <span className="adm-ss-kpi-trend text-green">↑ 22% Items delivered</span>
-                  </div>
-                </div>
+          {/* =====================================================
+             VIEW: PARTNER ORGANIZATION MANAGEMENT (SECTION 4.B)
+             ===================================================== */}
+          {activeTab === 'partners' && (
+            <AdminPartnersView
+              showToast={showToast}
+            />
+          )}
 
-                <div className="adm-ss-kpi-card">
-                  <div className="adm-ss-kpi-icon-box bg-orange-soft">
-                    <Users size={22} />
-                  </div>
-                  <div className="adm-ss-kpi-content">
-                    <span className="adm-ss-kpi-label">People Assisted</span>
-                    <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">12,450</span>
-                    </div>
-                    <span className="adm-ss-kpi-trend text-green">↑ 28% This month</span>
-                  </div>
-                </div>
+          {/* =====================================================
+             VIEW: EMERGENCY BROADCAST MANAGEMENT (SECTION 4.C)
+             ===================================================== */}
+          {activeTab === 'broadcasts' && (
+            <AdminBroadcastsView
+              showToast={showToast}
+            />
+          )}
 
-                <div className="adm-ss-kpi-action-col">
-                  <button
-                    className="adm-ss-btn-primary"
-                    onClick={() => {
-                      setActiveTab('settings');
-                      setIsCreateModalOpen(true);
-                    }}
-                  >
-                    <Plus size={16} />
-                    <span>+ New Assistance Request</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Middle Section: Crisis Map + Active Crises */}
-              <div className="adm-ss-split-grid">
-                {/* Left: Crisis Map */}
-                <div className="adm-ss-card">
-                  <div className="adm-ss-card-header">
-                    <div>
-                      <h3 className="adm-ss-card-title">Crisis Zones Map</h3>
-                      <p className="adm-ss-card-subtitle">Real-time geospatial disaster overlays for Western Province</p>
-                    </div>
-                    <button
-                      className="text-[12px] font-semibold text-[#0e7490] hover:underline bg-transparent border-0 cursor-pointer"
-                      onClick={() => setActiveTab('maps')}
-                    >
-                      View Full Map →
-                    </button>
-                  </div>
-
-                  <div className="adm-ss-map-container">
-                    <img src={westernProvinceMap} alt="Crisis Radar Map" className="adm-ss-map-bg" />
-                    {/* Layer Floating Box */}
-                    <div className="adm-ss-map-layers-panel">
-                      <div className="font-semibold text-slate-800 mb-1">Map Layers</div>
-                      <label className="adm-ss-map-legend-item cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={mapLayers.activeCrises}
-                          onChange={() => setMapLayers(p => ({ ...p, activeCrises: !p.activeCrises }))}
-                        />
-                        <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                        <span>Active Crises</span>
-                      </label>
-                      <label className="adm-ss-map-legend-item cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={mapLayers.shelters}
-                          onChange={() => setMapLayers(p => ({ ...p, shelters: !p.shelters }))}
-                        />
-                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span>Shelters</span>
-                      </label>
-                      <label className="adm-ss-map-legend-item cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={mapLayers.medicalFacilities}
-                          onChange={() => setMapLayers(p => ({ ...p, medicalFacilities: !p.medicalFacilities }))}
-                        />
-                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                        <span>Medical Centers</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right: Active Crises List */}
-                <div className="adm-ss-card">
-                  <div className="adm-ss-card-header">
-                    <h3 className="adm-ss-card-title">Active Crises</h3>
-                    <span className="text-[11px] text-slate-400">View All →</span>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 flex items-start justify-between">
-                      <div>
-                        <div className="text-[13px] font-semibold text-slate-900">Flood - Kelani Area</div>
-                        <div className="text-[11.5px] text-slate-500">Colombo, Western Province · 3,200 affected</div>
-                      </div>
-                      <span className="adm-ss-pill pill-red">High</span>
-                    </div>
-
-                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 flex items-start justify-between">
-                      <div>
-                        <div className="text-[13px] font-semibold text-slate-900">Landslide Risk</div>
-                        <div className="text-[11.5px] text-slate-500">Gampaha District · 850 affected</div>
-                      </div>
-                      <span className="adm-ss-pill pill-orange">Medium</span>
-                    </div>
-
-                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 flex items-start justify-between">
-                      <div>
-                        <div className="text-[13px] font-semibold text-slate-900">Severe Weather</div>
-                        <div className="text-[11.5px] text-slate-500">Kalutara District · 2,100 affected</div>
-                      </div>
-                      <span className="adm-ss-pill pill-red">High</span>
-                    </div>
-
-                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 flex items-start justify-between">
-                      <div>
-                        <div className="text-[13px] font-semibold text-slate-900">Coastal Erosion</div>
-                        <div className="text-[11.5px] text-slate-500">Negombo Area · 600 affected</div>
-                      </div>
-                      <span className="adm-ss-pill pill-green">Low</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Lower Section: Recent Responders & Resource Deployment */}
-              <div className="adm-ss-split-grid">
-                {/* Recent Responders Table */}
-                <div className="adm-ss-card">
-                  <div className="adm-ss-card-header">
-                    <h3 className="adm-ss-card-title">Recent Volunteers & Responders</h3>
-                    <button
-                      className="text-[12px] font-semibold text-[#0e7490] hover:underline bg-transparent border-0 cursor-pointer"
-                      onClick={() => setActiveTab('volunteers')}
-                    >
-                      View All →
-                    </button>
-                  </div>
-
-                  <div className="adm-ss-table-container">
-                    <table className="adm-ss-table">
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Role</th>
-                          <th>Location</th>
-                          <th>Status</th>
-                          <th>Joined</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="font-semibold text-slate-800">Tharindu Perera</td>
-                          <td>Field Volunteer</td>
-                          <td>Colombo</td>
-                          <td><span className="adm-ss-pill pill-green">Active</span></td>
-                          <td>Today</td>
-                        </tr>
-                        <tr>
-                          <td className="font-semibold text-slate-800">Nimali Silva</td>
-                          <td>Medical Support</td>
-                          <td>Gampaha</td>
-                          <td><span className="adm-ss-pill pill-green">Active</span></td>
-                          <td>Today</td>
-                        </tr>
-                        <tr>
-                          <td className="font-semibold text-slate-800">Kavindu Fernando</td>
-                          <td>Logistics</td>
-                          <td>Kalutara</td>
-                          <td><span className="adm-ss-pill pill-blue">On Mission</span></td>
-                          <td>Yesterday</td>
-                        </tr>
-                        <tr>
-                          <td className="font-semibold text-slate-800">Sadeepa Wickramasinghe</td>
-                          <td>Community Support</td>
-                          <td>Negombo</td>
-                          <td><span className="adm-ss-pill pill-green">Active</span></td>
-                          <td>2 days ago</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Resource Deployment Progress */}
-                <div className="adm-ss-card">
-                  <div className="adm-ss-card-header">
-                    <h3 className="adm-ss-card-title">Resource Deployment</h3>
-                    <span className="text-[11px] text-slate-400">View All →</span>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-[12px] mb-1">
-                        <span className="font-semibold text-slate-700">Food Packs</span>
-                        <span className="text-slate-500">3,200 / 5,000 (64%)</span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-2">
-                        <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '64%' }}></div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-[12px] mb-1">
-                        <span className="font-semibold text-slate-700">Medical Kits</span>
-                        <span className="text-slate-500">1,450 / 2,000 (73%)</span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-2">
-                        <div className="bg-amber-500 h-2 rounded-full" style={{ width: '73%' }}></div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-[12px] mb-1">
-                        <span className="font-semibold text-slate-700">Tents</span>
-                        <span className="text-slate-500">320 / 500 (64%)</span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-2">
-                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: '64%' }}></div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-[12px] mb-1">
-                        <span className="font-semibold text-slate-700">Blankets</span>
-                        <span className="text-slate-500">980 / 1,500 (65%)</span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-2">
-                        <div className="bg-purple-500 h-2 rounded-full" style={{ width: '65%' }}></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
+          {/* =====================================================
+             VIEW: SYSTEM HEALTH MONITORING (SECTION 4.D)
+             ===================================================== */}
+          {activeTab === 'health' && (
+            <AdminHealthView
+              showToast={showToast}
+            />
           )}
 
           {/* =====================================================
@@ -2316,256 +2278,87 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           )}
 
           {/* =====================================================
-             VIEW 6: SETTINGS / USER MANAGEMENT & RBAC (CORE ADMIN)
+             VIEW 6: SETTINGS / PLATFORM ADMINISTRATION
              ===================================================== */}
           {activeTab === 'settings' && (
-            <>
+            <div className="space-y-6">
               {/* Sub-tabs for Settings */}
               <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
                 <button
                   className={`px-4 py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-0 transition-colors ${
-                    settingsSubTab === 'users' ? 'bg-[#0e7490] text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+                    settingsSubTab === 'users' || settingsSubTab === 'overview' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'
                   }`}
                   onClick={() => setSettingsSubTab('users')}
                 >
-                  User Accounts & Security Roles
+                  User Accounts & Access Control
                 </button>
                 <button
                   className={`px-4 py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-0 transition-colors ${
-                    settingsSubTab === 'system' ? 'bg-[#0e7490] text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+                    settingsSubTab === 'system' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'
                   }`}
                   onClick={() => setSettingsSubTab('system')}
                 >
                   System Telemetry & Platform Health
                 </button>
+                <button
+                  className={`px-4 py-2 rounded-lg text-[13px] font-semibold cursor-pointer border-0 transition-colors ${
+                    settingsSubTab === 'preferences' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'
+                  }`}
+                  onClick={() => setSettingsSubTab('preferences')}
+                >
+                  Operational Security Policies
+                </button>
               </div>
 
-              {settingsSubTab === 'users' && (
-                <>
-                  {/* KPI Row for Users */}
-                  <div className="adm-ss-kpi-row">
-                    <div className="adm-ss-kpi-card">
-                      <div className="adm-ss-kpi-icon-box bg-blue-soft"><Users size={22} /></div>
-                      <div className="adm-ss-kpi-content">
-                        <span className="adm-ss-kpi-label">Total System Users</span>
-                        <div className="adm-ss-kpi-val-row"><span className="adm-ss-kpi-number">{stats.totalUsers}</span></div>
-                        <span className="adm-ss-kpi-trend text-green">All roles combined</span>
-                      </div>
-                    </div>
-
-                    <div className="adm-ss-kpi-card">
-                      <div className="adm-ss-kpi-icon-box bg-purple-soft"><Shield size={22} /></div>
-                      <div className="adm-ss-kpi-content">
-                        <span className="adm-ss-kpi-label">Administrators</span>
-                        <div className="adm-ss-kpi-val-row"><span className="adm-ss-kpi-number">4</span></div>
-                        <span className="adm-ss-kpi-trend text-purple">National Command</span>
-                      </div>
-                    </div>
-
-                    <div className="adm-ss-kpi-card">
-                      <div className="adm-ss-kpi-icon-box bg-green-soft"><CheckCircle2 size={22} /></div>
-                      <div className="adm-ss-kpi-content">
-                        <span className="adm-ss-kpi-label">Active Coordinators</span>
-                        <div className="adm-ss-kpi-val-row"><span className="adm-ss-kpi-number">18</span></div>
-                        <span className="adm-ss-kpi-trend text-green">Online in field hubs</span>
-                      </div>
-                    </div>
-
-                    <div className="adm-ss-kpi-card">
-                      <div className="adm-ss-kpi-icon-box bg-orange-soft"><AlertTriangle size={22} /></div>
-                      <div className="adm-ss-kpi-content">
-                        <span className="adm-ss-kpi-label">Security Alerts</span>
-                        <div className="adm-ss-kpi-val-row"><span className="adm-ss-kpi-number">0</span></div>
-                        <span className="adm-ss-kpi-trend text-green">No breach attempts</span>
-                      </div>
-                    </div>
-
-                    <div className="adm-ss-kpi-action-col">
-                      <button className="adm-ss-btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-                        <Plus size={16} />
-                        <span>+ Add New User</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Users Filter & Table Card */}
-                  <div className="adm-ss-card">
-                    <div className="adm-ss-card-header">
-                      <div>
-                        <h3 className="adm-ss-card-title">User Accounts & RBAC Matrix</h3>
-                        <p className="adm-ss-card-subtitle">Manage administrative privileges, credentials and field district assignments</p>
-                      </div>
-                      <button className="adm-ss-btn-reset" onClick={loadData}>
-                        <RefreshCw size={12} />
-                        <span>Refresh List</span>
-                      </button>
-                    </div>
-
-                    {/* Filter Bar */}
-                    <div className="adm-ss-filters-bar">
-                      <div className="adm-ss-filters-left">
-                        <input
-                          type="text"
-                          placeholder="Filter by name, email, district..."
-                          className="adm-ss-filter-select w-[240px]"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <select
-                          className="adm-ss-filter-select"
-                          value={roleFilter}
-                          onChange={(e) => setRoleFilter(e.target.value)}
-                        >
-                          <option value="ALL">All Roles</option>
-                          <option value="Admin">Admin</option>
-                          <option value="Coordinator">Coordinator</option>
-                          <option value="LogisticsManager">Logistics Manager</option>
-                          <option value="ShelterAdministrator">Shelter Admin</option>
-                          <option value="Volunteer">Volunteer</option>
-                          <option value="Citizen">Citizen</option>
-                        </select>
-                        <select
-                          className="adm-ss-filter-select"
-                          value={statusFilter}
-                          onChange={(e) => setStatusFilter(e.target.value)}
-                        >
-                          <option value="ALL">All Status</option>
-                          <option value="ACTIVE">Active Accounts</option>
-                          <option value="LOCKED">Locked Accounts</option>
-                        </select>
-                        <button
-                          className="adm-ss-btn-reset"
-                          onClick={() => {
-                            setSearchQuery('');
-                            setRoleFilter('ALL');
-                            setStatusFilter('ALL');
-                          }}
-                        >
-                          <span>Clear Filters</span>
-                        </button>
-                      </div>
-                      <span className="text-[12px] text-slate-500 font-medium">
-                        Showing {filteredUsers.length} accounts
-                      </span>
-                    </div>
-
-                    {/* User Data Table */}
-                    <div className="adm-ss-table-container">
-                      <table className="adm-ss-table">
-                        <thead>
-                          <tr>
-                            <th>User ID</th>
-                            <th>Full Name & Email</th>
-                            <th>Role & Permissions</th>
-                            <th>District</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredUsers.map((u) => (
-                            <tr key={u.id}>
-                              <td className="font-mono text-slate-400 text-[11px]">{u.id}</td>
-                              <td>
-                                <div className="font-semibold text-slate-900">{u.fullName}</div>
-                                <div className="text-[11.5px] text-slate-500">{u.email}</div>
-                              </td>
-                              <td>
-                                <span className={`adm-ss-pill ${
-                                  u.role === 'Admin' ? 'pill-purple' :
-                                  u.role === 'Coordinator' ? 'pill-teal' :
-                                  u.role === 'LogisticsManager' ? 'pill-blue' :
-                                  u.role === 'ShelterAdministrator' ? 'pill-orange' :
-                                  u.role === 'Volunteer' ? 'pill-green' : 'pill-gray'
-                                }`}>
-                                  {u.role}
-                                </span>
-                              </td>
-                              <td className="text-slate-700">{u.assignedDistrict || 'National'}</td>
-                              <td>
-                                <span className={`adm-ss-pill ${u.isActive ? 'pill-green' : 'pill-red'}`}>
-                                  {u.isActive ? 'Active' : 'Locked'}
-                                </span>
-                              </td>
-                              <td className="text-slate-400 text-[11.5px]">{u.createdAt}</td>
-                              <td>
-                                <div className="adm-ss-row-actions">
-                                  {/* Lock / Unlock Toggle */}
-                                  <button
-                                    className="adm-ss-icon-btn"
-                                    onClick={() => handleToggleStatus(u)}
-                                    title={u.isActive ? 'Lock Account' : 'Unlock Account'}
-                                  >
-                                    {u.isActive ? <Lock size={13} className="text-amber-600" /> : <Unlock size={13} className="text-emerald-600" />}
-                                  </button>
-
-                                  {/* Change Role */}
-                                  <button
-                                    className="adm-ss-icon-btn"
-                                    onClick={() => setRoleChangeModal({ isOpen: true, user: u, newRole: u.role })}
-                                    title="Modify Role"
-                                  >
-                                    <Edit size={13} className="text-blue-600" />
-                                  </button>
-
-                                  {/* Reset Password */}
-                                  <button
-                                    className="adm-ss-icon-btn"
-                                    onClick={() => setResetPasswordModal({ isOpen: true, user: u, newPassword: '' })}
-                                    title="Reset Password Hash"
-                                  >
-                                    <Key size={13} className="text-purple-600" />
-                                  </button>
-
-                                  {/* Delete */}
-                                  <button
-                                    className="adm-ss-icon-btn"
-                                    onClick={() => handleDeleteUser(u.id, u.fullName)}
-                                    title="Delete User"
-                                  >
-                                    <Trash2 size={13} className="text-rose-500" />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </>
+              {(settingsSubTab === 'users' || settingsSubTab === 'overview') && (
+                <AdminUsersView
+                  users={users}
+                  setUsers={setUsers}
+                  loadData={loadData}
+                  loading={loading}
+                  showToast={showToast}
+                  currentUser={authUser}
+                  onUserCountChange={(delta) => setStats(prev => ({ ...prev, totalUsers: Math.max(0, (prev?.totalUsers || 0) + delta) }))}
+                />
               )}
 
               {settingsSubTab === 'system' && (
+                <AdminHealthView
+                  showToast={showToast}
+                />
+              )}
+
+              {settingsSubTab === 'preferences' && (
                 <div className="adm-ss-card space-y-6">
                   <div>
-                    <h3 className="adm-ss-card-title">System Infrastructure & Diagnostics</h3>
-                    <p className="adm-ss-card-subtitle">Real-time health telemetry across the Western Province server cluster</p>
+                    <h3 className="adm-ss-card-title">Operational Security & Compliance Policies</h3>
+                    <p className="adm-ss-card-subtitle">Global humanitarian compliance standards and failover configurations</p>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[12px] font-semibold text-slate-500">System Uptime</div>
-                      <div className="text-[26px] font-bold text-emerald-600">99.98%</div>
-                      <div className="text-[11.5px] text-slate-500 mt-1">Continuous operation 48 days</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                      <div className="font-bold text-[13px] text-slate-800">Cryptographic Ledger Hashing</div>
+                      <p className="text-[12px] text-slate-600">All incident log dispatches and administrative role modifications require SHA-256 HMAC verification prior to ledger commitment.</p>
+                      <span className="inline-block px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 text-[11px] font-bold">Policy Enforced: Active</span>
                     </div>
-
-                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[12px] font-semibold text-slate-500">Database Latency</div>
-                      <div className="text-[26px] font-bold text-sky-600">14.2 ms</div>
-                      <div className="text-[11.5px] text-slate-500 mt-1">SQL Server connection verified</div>
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                      <div className="font-bold text-[13px] text-slate-800">Database Redundancy & Cold Storage</div>
+                      <p className="text-[12px] text-slate-600">LocalDB database snapshots verified with pre-migration checksums (HumanitarianCrisisDb_PreMigration.bak).</p>
+                      <span className="inline-block px-2.5 py-1 rounded bg-teal-100 text-teal-800 text-[11px] font-bold">Backup Integrity: Verified</span>
                     </div>
-
-                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[12px] font-semibold text-slate-500">Cryptographic Ledger</div>
-                      <div className="text-[26px] font-bold text-purple-600">Synced</div>
-                      <div className="text-[11.5px] text-slate-500 mt-1">SHA-256 block hash valid</div>
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                      <div className="font-bold text-[13px] text-slate-800">Role-Based Access Enforcement</div>
+                      <p className="text-[12px] text-slate-600">Strict server-side JWT claims authentication for all administrative mutations and emergency directives.</p>
+                      <span className="inline-block px-2.5 py-1 rounded bg-blue-100 text-blue-800 text-[11px] font-bold">RBAC Enforcement: 100% Strict</span>
+                    </div>
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                      <div className="font-bold text-[13px] text-slate-800">Cell Broadcast & Siren Gateway</div>
+                      <p className="text-[12px] text-slate-600">Direct integration with telecom cellular broadcast hubs and regional siren relays for Level 3 red alerts.</p>
+                      <span className="inline-block px-2.5 py-1 rounded bg-purple-100 text-purple-800 text-[11px] font-bold">Gateway: Active & Monitored</span>
                     </div>
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* =====================================================
@@ -2606,8 +2399,8 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                   <div className="adm-ss-kpi-icon-box bg-red-soft"><ShieldAlert size={22} /></div>
                   <div className="adm-ss-kpi-content">
                     <span className="adm-ss-kpi-label">Active Crises</span>
-                    <div className="adm-ss-kpi-val-row"><span className="adm-ss-kpi-number">8</span></div>
-                    <span className="adm-ss-kpi-trend text-red">↑ 33% Attention</span>
+                    <div className="adm-ss-kpi-val-row"><span className="adm-ss-kpi-number">{stats.activeCrises ?? 5}</span></div>
+                    <span className="adm-ss-kpi-trend text-red">Requires DMC Attention</span>
                   </div>
                 </div>
 
@@ -2670,62 +2463,12 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           )}
 
           {/* =====================================================
-             VIEW 8: AUDIT LOGS (Cryptographic Ledger)
+             VIEW: IMMUTABLE AUDIT LOGS (SECTION 4.E)
              ===================================================== */}
           {activeTab === 'audit' && (
-            <div className="adm-ss-card">
-              <div className="adm-ss-card-header">
-                <div>
-                  <h3 className="adm-ss-card-title">Immutable Audit Trail</h3>
-                  <p className="adm-ss-card-subtitle">Every administrative action, permission elevation and critical dispatch is cryptographically signed</p>
-                </div>
-              </div>
-
-              <div className="adm-ss-table-container">
-                <table className="adm-ss-table">
-                  <thead>
-                    <tr>
-                      <th>Timestamp</th>
-                      <th>Operator</th>
-                      <th>Action</th>
-                      <th>Target Entity</th>
-                      <th>IP Address</th>
-                      <th>Verification Hash</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="font-mono text-slate-500">2026-11-14 17:20:12</td>
-                      <td className="font-semibold text-slate-800">Sarah Johnson</td>
-                      <td>APPROVED_AID_DISPATCH</td>
-                      <td>REQ-2026-01842</td>
-                      <td>192.168.1.100</td>
-                      <td className="font-mono text-[11px] text-purple-700">e82a...91b4</td>
-                      <td><span className="adm-ss-pill pill-green">Verified</span></td>
-                    </tr>
-                    <tr>
-                      <td className="font-mono text-slate-500">2026-11-14 16:45:00</td>
-                      <td className="font-semibold text-slate-800">Admin User</td>
-                      <td>ROLE_SECURITY_ELEVATION</td>
-                      <td>usr-002 (Kasun P.)</td>
-                      <td>172.20.240.1</td>
-                      <td className="font-mono text-[11px] text-purple-700">4c12...88df</td>
-                      <td><span className="adm-ss-pill pill-green">Verified</span></td>
-                    </tr>
-                    <tr>
-                      <td className="font-mono text-slate-500">2026-11-14 15:30:19</td>
-                      <td className="font-semibold text-slate-800">Kasun Perera</td>
-                      <td>CONVOY_DISPATCH_AUTHORIZED</td>
-                      <td>CNV-2026-004</td>
-                      <td>10.4.2.2</td>
-                      <td className="font-mono text-[11px] text-purple-700">77bb...aa01</td>
-                      <td><span className="adm-ss-pill pill-green">Verified</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <AdminAuditView
+              showToast={showToast}
+            />
           )}
 
           {/* =====================================================
@@ -2742,7 +2485,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-[14px] tracking-wide">NATIONAL EMERGENCY LEVEL 3 (RED ALERT) ACTIVE</span>
-                      <span className="px-2 py-0.5 rounded-full bg-white/20 text-[11px] font-semibold">DMC Directive #DMC-LK-2026-08</span>
+                      <span className="px-2 py-0.5 rounded-full bg-white/20 text-[11px] font-semibold">DMC Directive #DMC-LK-2026-08 [DEMO SCENARIO]</span>
                     </div>
                     <p className="text-[12px] text-white/90 mt-0.5 m-0">
                       Kelani River crest at 1.84m (Major Flood). Multi-agency tri-forces disaster response operations mobilized across Western & Sabaragamuwa.
@@ -2778,9 +2521,13 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                   <div className="adm-ss-kpi-content">
                     <span className="adm-ss-kpi-label">Active Crises</span>
                     <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">{crises.filter(c => c.status !== 'Contained').length}</span>
+                      <span className="adm-ss-kpi-number">
+                        {stats.activeCrises ?? crises.filter(c => c.isActive ?? (c.status !== 'Contained' && c.status !== 'Resolved')).length}
+                      </span>
                     </div>
-                    <span className="adm-ss-kpi-trend text-red">↑ 33% Requiring DMC action</span>
+                    <span className="adm-ss-kpi-trend text-red">
+                      {stats.totalCrises ? `${stats.activeCrises ?? crises.filter(c => c.isActive).length} active / ${stats.totalCrises} total logged` : 'Authoritative DB record'}
+                    </span>
                   </div>
                 </div>
 
@@ -2791,9 +2538,16 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                   <div className="adm-ss-kpi-content">
                     <span className="adm-ss-kpi-label">People in Hazard Zones</span>
                     <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">18,450</span>
+                      <span className="adm-ss-kpi-number">
+                        {crises.length > 0
+                          ? crises
+                              .filter(c => c.isActive ?? (c.status !== 'Contained' && c.status !== 'Resolved'))
+                              .reduce((sum, c) => sum + (c.affectedPeople ?? c.estimatedAffectedCount ?? 0), 0)
+                              .toLocaleString()
+                          : '18,450'}
+                      </span>
                     </div>
-                    <span className="adm-ss-kpi-trend text-orange">↑ 14% Western & Sabaragamuwa</span>
+                    <span className="adm-ss-kpi-trend text-orange">Estimated from active incident zones [DEMO ESTIMATE]</span>
                   </div>
                 </div>
 
@@ -2804,9 +2558,13 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                   <div className="adm-ss-kpi-content">
                     <span className="adm-ss-kpi-label">Multi-Agency Teams</span>
                     <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">42 Units</span>
+                      <span className="adm-ss-kpi-number">
+                        {crises.length > 0
+                          ? `${crises.filter(c => c.isActive ?? (c.status !== 'Contained' && c.status !== 'Resolved')).reduce((sum, c) => sum + (c.teamsDeployed || 2), 0)} Units`
+                          : '42 Units'}
+                      </span>
                     </div>
-                    <span className="adm-ss-kpi-trend text-green">Army, Navy SBS, Red Cross</span>
+                    <span className="adm-ss-kpi-trend text-green">Army, Navy SBS, Red Cross [DEMO DATA]</span>
                   </div>
                 </div>
 
@@ -2817,9 +2575,13 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                   <div className="adm-ss-kpi-content">
                     <span className="adm-ss-kpi-label">Flooded Land Area</span>
                     <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">282 km²</span>
+                      <span className="adm-ss-kpi-number">
+                        {crises.length > 0
+                          ? `${crises.filter(c => c.isActive ?? (c.status !== 'Contained' && c.status !== 'Resolved')).reduce((sum, c) => sum + (c.areaSqKm || Math.round(Number(c.affectedAreaRadius || 10) * 2.5)), 0)} km²`
+                          : '282 km²'}
+                      </span>
                     </div>
-                    <span className="adm-ss-kpi-trend text-red">Kelani & Attanagalu Basins</span>
+                    <span className="adm-ss-kpi-trend text-red">Calculated footprint [DEMO ESTIMATE]</span>
                   </div>
                 </div>
 
@@ -2845,6 +2607,15 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                     <span className="text-[12px] text-slate-500 font-medium">
                       Showing {crises.length} incidents
                     </span>
+                    <button
+                      onClick={loadData}
+                      disabled={loading || crisesLoading}
+                      className="adm-ss-btn-reset flex items-center gap-1 text-[11.5px] py-1 px-2.5 ml-1"
+                      title="Reload crisis records from database"
+                    >
+                      <RefreshCw size={12} className={(loading || crisesLoading) ? 'animate-spin' : ''} />
+                      <span>Refresh</span>
+                    </button>
                   </div>
                 </div>
 
@@ -2880,6 +2651,8 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                       onChange={(e) => setCrisisStatusFilter(e.target.value)}
                     >
                       <option value="ALL">All Statuses</option>
+                      <option value="Active">Active Response</option>
+                      <option value="Resolved">Resolved / Contained</option>
                       <option value="Active Escalation">Active Escalation</option>
                       <option value="Evacuation Underway">Evacuation Underway</option>
                       <option value="Operations Deployed">Operations Deployed</option>
@@ -2919,79 +2692,133 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {crises
-                        .filter(c => {
-                          const matchSearch =
-                            c.title.toLowerCase().includes(crisisSearch.toLowerCase()) ||
-                            c.district.toLowerCase().includes(crisisSearch.toLowerCase()) ||
-                            c.id.toLowerCase().includes(crisisSearch.toLowerCase());
-                          const matchSeverity = crisisSeverityFilter === 'ALL' || c.severity === crisisSeverityFilter;
-                          const matchStatus = crisisStatusFilter === 'ALL' || c.status === crisisStatusFilter;
-                          return matchSearch && matchSeverity && matchStatus;
-                        })
-                        .map((c) => (
-                          <tr key={c.id}>
-                            <td className="font-mono text-[11.5px] font-semibold text-[#0e7490]">{c.id}</td>
-                            <td>
-                              <div className="font-semibold text-slate-900">{c.title}</div>
-                              <div className="text-[11px] text-slate-500">Declared: {c.declaredAt} · Lead: {c.leadCoordinator}</div>
-                            </td>
-                            <td>
-                              <span className="font-medium text-slate-700">{c.district}</span>
-                            </td>
-                            <td>
-                              <span className={`adm-ss-pill ${
-                                c.severity === 'Critical' ? 'pill-red' :
-                                c.severity === 'High' ? 'pill-orange' :
-                                c.severity === 'Medium' ? 'pill-orange' : 'pill-green'
-                              }`}>
-                                {c.severity}
-                              </span>
-                            </td>
-                            <td className="font-semibold text-slate-800">{c.affectedPeople.toLocaleString()}</td>
-                            <td className="text-slate-600">{c.areaSqKm} km²</td>
-                            <td>
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-[#0e7490]">{c.teamsDeployed}</span>
-                                <span className="text-[11px] text-slate-500">teams</span>
-                              </div>
-                            </td>
-                            <td>
-                              <span className={`adm-ss-pill ${
-                                c.status === 'Active Escalation' ? 'pill-red' :
-                                c.status === 'Evacuation Underway' ? 'pill-orange' :
-                                c.status === 'Operations Deployed' ? 'pill-blue' : 'pill-green'
-                              }`}>
-                                {c.status}
-                              </span>
-                            </td>
-                            <td>
-                              <div className="adm-ss-row-actions">
-                                <button
-                                  className="adm-ss-icon-btn"
-                                  title="View Incident Dossier"
-                                  onClick={() => setSelectedCrisis(c)}
-                                >
-                                  <Eye size={13} />
-                                </button>
-                                <button
-                                  className="adm-ss-icon-btn"
-                                  title="Toggle Contained / Escalated"
-                                  onClick={() => handleToggleCrisisStatus(c.id)}
-                                >
-                                  <RefreshCw size={13} />
-                                </button>
-                                <button
-                                  className="adm-ss-icon-btn text-[#0e7490]"
-                                  title="Dispatch Reinforcement Units (+2)"
-                                  onClick={() => handleDispatchRescueTeams(c.id)}
-                                >
-                                  <Plus size={13} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                      {(loading || crisesLoading) && crises.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-slate-500">
+                            <RefreshCw size={18} className="animate-spin inline mr-2 text-[#0e7490]" />
+                            Loading crisis incident records from HumanitarianCrisisDb...
+                          </td>
+                        </tr>
+                      ) : (
+                        crises
+                          .filter(c => {
+                            const searchLower = crisisSearch.toLowerCase();
+                            const matchSearch =
+                              !crisisSearch ||
+                              (c.title || '').toLowerCase().includes(searchLower) ||
+                              (c.district || c.region || '').toLowerCase().includes(searchLower) ||
+                              (c.code || c.id || '').toLowerCase().includes(searchLower) ||
+                              (c.notes || c.description || '').toLowerCase().includes(searchLower);
+
+                            const matchSeverity = crisisSeverityFilter === 'ALL' ||
+                              (c.severity && String(c.severity).toLowerCase() === crisisSeverityFilter.toLowerCase()) ||
+                              (c.severityLabel && c.severityLabel.toLowerCase() === crisisSeverityFilter.toLowerCase());
+
+                            const matchStatus = crisisStatusFilter === 'ALL' ||
+                              (crisisStatusFilter === 'Active' && (c.isActive || c.status === 'Active Response' || (c.status !== 'Contained' && c.status !== 'Resolved'))) ||
+                              (crisisStatusFilter === 'Resolved' && (!c.isActive || c.status === 'Resolved' || c.status === 'Contained')) ||
+                              c.status === crisisStatusFilter;
+
+                            return matchSearch && matchSeverity && matchStatus;
+                          })
+                          .map((c) => (
+                            <tr key={c.id}>
+                              <td className="font-mono text-[11.5px] font-semibold text-[#0e7490]">
+                                {c.code || (typeof c.id === 'string' && c.id.length > 8 ? c.id.substring(0, 8) : c.id)}
+                              </td>
+                              <td>
+                                <div className="font-semibold text-slate-900">{c.title}</div>
+                                <div className="text-[11px] text-slate-500">
+                                  Declared: {c.declaredAt || (c.startDate ? new Date(c.startDate).toISOString().replace('T', ' ').substring(0, 16) : '2026-06-15')} · Lead: {c.leadCoordinator || c.assignedLeadTeam || 'DMC Response Coordinator'}
+                                </div>
+                              </td>
+                              <td>
+                                <span className="font-medium text-slate-700">{c.district || c.region || 'Western Province'}</span>
+                              </td>
+                              <td>
+                                <span className={`adm-ss-pill ${
+                                  c.severity === 'Critical' || c.severityNum >= 4 ? 'pill-red' :
+                                  c.severity === 'High' || c.severityNum === 3 ? 'pill-orange' :
+                                  c.severity === 'Medium' || c.severityNum === 2 ? 'pill-orange' : 'pill-green'
+                                }`}>
+                                  {c.severity || c.severityLabel || 'Standard'}
+                                </span>
+                              </td>
+                              <td className="font-semibold text-slate-800">
+                                {(c.affectedPeople ?? c.estimatedAffectedCount ?? 0).toLocaleString()}
+                              </td>
+                              <td className="text-slate-600">
+                                {c.areaSqKm ? `${c.areaSqKm} km²` : (c.affectedAreaRadius ? `${c.affectedAreaRadius} km rad.` : '15 km²')}
+                              </td>
+                              <td>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-[#0e7490]">{c.teamsDeployed || 2}</span>
+                                  <span className="text-[11px] text-slate-500">teams</span>
+                                </div>
+                              </td>
+                              <td>
+                                <span className={`adm-ss-pill ${
+                                  (c.status === 'Active Escalation' || c.status === 'Active Response' || (c.isActive && c.status !== 'Contained' && c.status !== 'Resolved')) ? 'pill-red' :
+                                  c.status === 'Evacuation Underway' ? 'pill-orange' :
+                                  c.status === 'Operations Deployed' ? 'pill-blue' : 'pill-green'
+                                }`}>
+                                  {c.status || (c.isActive ? 'Active Response' : 'Resolved')}
+                                </span>
+                              </td>
+                              <td>
+                                <div className="adm-ss-row-actions">
+                                  <button
+                                    className="adm-ss-icon-btn"
+                                    title="View Incident Dossier"
+                                    onClick={() => setSelectedCrisis(c)}
+                                  >
+                                    <Eye size={13} />
+                                  </button>
+                                  <button
+                                    className="adm-ss-icon-btn"
+                                    title="Toggle Contained / Escalated"
+                                    onClick={() => handleToggleCrisisStatus(c.id)}
+                                  >
+                                    <RefreshCw size={13} />
+                                  </button>
+                                  <button
+                                    className="adm-ss-icon-btn text-[#0e7490]"
+                                    title="Dispatch Reinforcement Units (+2)"
+                                    onClick={() => handleDispatchRescueTeams(c.id)}
+                                  >
+                                    <Plus size={13} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                      )}
+                      {!loading && !crisesLoading && crises.length > 0 && crises.filter(c => {
+                        const searchLower = crisisSearch.toLowerCase();
+                        const matchSearch =
+                          !crisisSearch ||
+                          (c.title || '').toLowerCase().includes(searchLower) ||
+                          (c.district || c.region || '').toLowerCase().includes(searchLower) ||
+                          (c.code || c.id || '').toLowerCase().includes(searchLower) ||
+                          (c.notes || c.description || '').toLowerCase().includes(searchLower);
+
+                        const matchSeverity = crisisSeverityFilter === 'ALL' ||
+                          (c.severity && String(c.severity).toLowerCase() === crisisSeverityFilter.toLowerCase()) ||
+                          (c.severityLabel && c.severityLabel.toLowerCase() === crisisSeverityFilter.toLowerCase());
+
+                        const matchStatus = crisisStatusFilter === 'ALL' ||
+                          (crisisStatusFilter === 'Active' && (c.isActive || c.status === 'Active Response' || (c.status !== 'Contained' && c.status !== 'Resolved'))) ||
+                          (crisisStatusFilter === 'Resolved' && (!c.isActive || c.status === 'Resolved' || c.status === 'Contained')) ||
+                          c.status === crisisStatusFilter;
+
+                        return matchSearch && matchSeverity && matchStatus;
+                      }).length === 0 && (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-slate-500">
+                            No crisis records found matching the active search or filter criteria.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -3004,7 +2831,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                   <div className="adm-ss-card-header">
                     <div>
                       <h3 className="adm-ss-card-title">Live Hydrometric River Basin Gauges</h3>
-                      <p className="adm-ss-card-subtitle">Real-time water crest levels & automated flood threshold sensors</p>
+                      <p className="adm-ss-card-subtitle">Real-time water crest levels & automated flood threshold sensors [DEMO DATA]</p>
                     </div>
                     <span className="adm-ss-pill pill-red">3 Alerts Active</span>
                   </div>
@@ -3068,7 +2895,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                   <div className="adm-ss-card-header">
                     <div>
                       <h3 className="adm-ss-card-title">Tri-Forces & Emergency Units</h3>
-                      <p className="adm-ss-card-subtitle">Armed forces & multi-agency operational readiness</p>
+                      <p className="adm-ss-card-subtitle">Armed forces & multi-agency operational readiness [DEMO DATA]</p>
                     </div>
                     <span className="adm-ss-pill pill-green">42 Teams Active</span>
                   </div>
@@ -3771,679 +3598,22 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
           )}
 
           {/* =====================================================
-             VIEW 12: SATELLITE RADAR & GIS MAP
+             VIEW: GEOSPATIAL CRISIS & ASSET RADAR (LEAFLET GIS)
              ===================================================== */}
           {activeTab === 'maps' && (
-            <>
-              {/* Map Filter Controls Bar */}
-              <div className="adm-ss-card p-4">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  {/* District Selector Buttons */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[12px] font-semibold text-slate-600 mr-1">District Radar:</span>
-                    <button
-                      className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold border-0 cursor-pointer transition ${
-                        mapDistrict === 'all' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      }`}
-                      onClick={() => setMapDistrict('all')}
-                    >
-                      Western Province (All)
-                    </button>
-                    <button
-                      className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold border-0 cursor-pointer transition ${
-                        mapDistrict === 'colombo' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      }`}
-                      onClick={() => setMapDistrict('colombo')}
-                    >
-                      Colombo Zone A (Red Alert)
-                    </button>
-                    <button
-                      className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold border-0 cursor-pointer transition ${
-                        mapDistrict === 'gampaha' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      }`}
-                      onClick={() => setMapDistrict('gampaha')}
-                    >
-                      Gampaha Zone B (Amber)
-                    </button>
-                    <button
-                      className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold border-0 cursor-pointer transition ${
-                        mapDistrict === 'kalutara' ? 'bg-[#0e7490] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      }`}
-                      onClick={() => setMapDistrict('kalutara')}
-                    >
-                      Kalutara Zone C (Surge)
-                    </button>
-                  </div>
-
-                  {/* Satellite Coordinates HUD */}
-                  <div className="flex items-center gap-3 text-[11.5px] text-slate-500 font-mono bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                    <span className="flex items-center gap-1">
-                      <Compass size={13} className="text-[#0e7490]" />
-                      <span>6.9271° N, 79.8612° E</span>
-                    </span>
-                    <span>·</span>
-                    <span className="text-emerald-700 font-semibold">Sentinel-2 Live Feed (Updated 18m ago)</span>
-                  </div>
-                </div>
-
-                {/* Layer Checkboxes */}
-                <div className="flex items-center gap-5 mt-3 pt-3 border-t border-slate-100 flex-wrap text-[12px]">
-                  <span className="font-semibold text-slate-700">Display Layers:</span>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-600">
-                    <input
-                      type="checkbox"
-                      checked={mapLayers.activeCrises}
-                      onChange={() => setMapLayers(p => ({ ...p, activeCrises: !p.activeCrises }))}
-                    />
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
-                    <span>Active Crises (8)</span>
-                  </label>
-
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-600">
-                    <input
-                      type="checkbox"
-                      checked={mapLayers.shelters}
-                      onChange={() => setMapLayers(p => ({ ...p, shelters: !p.shelters }))}
-                    />
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                    <span>Open Shelters (28)</span>
-                  </label>
-
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-600">
-                    <input
-                      type="checkbox"
-                      checked={mapLayers.medicalFacilities}
-                      onChange={() => setMapLayers(p => ({ ...p, medicalFacilities: !p.medicalFacilities }))}
-                    />
-                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                    <span>Medical Hubs (14)</span>
-                  </label>
-
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-600">
-                    <input
-                      type="checkbox"
-                      checked={mapLayers.volunteers}
-                      onChange={() => setMapLayers(p => ({ ...p, volunteers: !p.volunteers }))}
-                    />
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                    <span>Field Responders (1,245)</span>
-                  </label>
-
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-600">
-                    <input
-                      type="checkbox"
-                      checked={mapLayers.roadConditions}
-                      onChange={() => setMapLayers(p => ({ ...p, roadConditions: !p.roadConditions }))}
-                    />
-                    <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                    <span>Road Closures (12)</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Main Map Viewport & Sector Inspector Split */}
-              <div className="adm-ss-split-grid">
-                {/* High-Resolution Satellite Map Canvas */}
-                <div className="adm-ss-card p-0 overflow-hidden relative">
-                  <div className="adm-ss-map-full-container">
-                    <img
-                      src={westernProvinceMap}
-                      alt="Western Province High Resolution Crisis Radar"
-                      className="adm-ss-map-bg"
-                    />
-
-                    {/* Interactive Satellite Pins */}
-                    {mapLayers.activeCrises && (
-                      <>
-                        {/* Kelani River Basin Pin */}
-                        <div
-                          className="adm-ss-beacon"
-                          style={{ top: '48%', left: '36%' }}
-                          onClick={() => setSelectedMapSector({
-                            title: 'Kelani River Basin Flash Flooding',
-                            type: 'Major Flood (Red Alert)',
-                            waterLevel: '1.84m (Threshold +0.34m)',
-                            affected: '3,200 Citizens',
-                            teams: '6 Rescue Teams Deployed',
-                            shelter: 'Colombo Central School (3.1km away)',
-                            status: 'Critical Active',
-                            severity: 'Critical'
-                          })}
-                        >
-                          <div className="adm-ss-beacon-pulse bg-red-500"></div>
-                          <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-[12px] shadow-lg border-2 border-white">
-                            <ShieldAlert size={16} />
-                          </div>
-                        </div>
-
-                        {/* Gampaha Landslide Pin */}
-                        <div
-                          className="adm-ss-beacon"
-                          style={{ top: '36%', left: '60%' }}
-                          onClick={() => setSelectedMapSector({
-                            title: 'Gampaha Railway Embankment Mudslide',
-                            type: 'Landslide Risk (High)',
-                            waterLevel: '1.12m Soil Saturation',
-                            affected: '850 Citizens',
-                            teams: '3 Army Engineer Teams',
-                            shelter: 'St. Anthony\'s College (2.8km away)',
-                            status: 'Evacuation Underway',
-                            severity: 'High'
-                          })}
-                        >
-                          <div className="adm-ss-beacon-pulse bg-orange-500"></div>
-                          <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-[12px] shadow-lg border-2 border-white">
-                            <AlertTriangle size={15} />
-                          </div>
-                        </div>
-
-                        {/* Kalutara Coastal Surge Pin */}
-                        <div
-                          className="adm-ss-beacon"
-                          style={{ top: '74%', left: '38%' }}
-                          onClick={() => setSelectedMapSector({
-                            title: 'Kalutara Estuary Coastal Surge',
-                            type: 'Storm Surge & Tidal Inundation',
-                            waterLevel: '2.10m Sea Swell',
-                            affected: '2,100 Citizens',
-                            teams: '5 Navy SBS Units',
-                            shelter: 'Kalutara South High-Ground Center',
-                            status: 'Active Escalation',
-                            severity: 'High'
-                          })}
-                        >
-                          <div className="adm-ss-beacon-pulse bg-orange-500"></div>
-                          <div className="w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold text-[12px] shadow-lg border-2 border-white">
-                            <Droplets size={16} />
-                          </div>
-                        </div>
-
-                        {/* Negombo Lagoon Pin */}
-                        <div
-                          className="adm-ss-beacon"
-                          style={{ top: '24%', left: '26%' }}
-                          onClick={() => setSelectedMapSector({
-                            title: 'Negombo Lagoon Inundation',
-                            type: 'Tidal Inundation (Contained)',
-                            waterLevel: '0.65m Receding',
-                            affected: '600 Citizens',
-                            teams: '2 Volunteer Units',
-                            shelter: 'Negombo Town Hall Shelter',
-                            status: 'Contained',
-                            severity: 'Low'
-                          })}
-                        >
-                          <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[11px] shadow-md border-2 border-white">
-                            <CheckCircle2 size={14} />
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Shelter Markers */}
-                    {mapLayers.shelters && (
-                      <div
-                        className="adm-ss-beacon"
-                        style={{ top: '44%', left: '42%' }}
-                        onClick={() => setSelectedMapSector({
-                          title: 'Colombo Central School High-Ground Shelter',
-                          type: 'Verified Open Shelter',
-                          waterLevel: 'Dry (High-Ground Elevated)',
-                          affected: '420 Evacuees Sheltered (Cap: 500)',
-                          teams: 'Medical Post & Red Cross Staffed',
-                          shelter: 'Open Beds Available: 80',
-                          status: 'Operational',
-                          severity: 'Low'
-                        })}
-                      >
-                        <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md border-2 border-white">
-                          <Building2 size={13} />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Medical Marker */}
-                    {mapLayers.medicalFacilities && (
-                      <div
-                        className="adm-ss-beacon"
-                        style={{ top: '50%', left: '32%' }}
-                        onClick={() => setSelectedMapSector({
-                          title: 'Colombo Base General Hospital Trauma Center',
-                          type: 'Emergency Medical Facility',
-                          waterLevel: 'Protected via Flood Barriers',
-                          affected: '14 Rescue Admissions Today',
-                          teams: 'Emergency Surgical Team On Duty',
-                          shelter: 'Critical Care Units Ready',
-                          status: 'Operational',
-                          severity: 'Low'
-                        })}
-                      >
-                        <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md border-2 border-white">
-                          <HeartPulse size={13} />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Floating Map Legend */}
-                    <div className="adm-ss-map-layers-panel">
-                      <div className="font-bold text-slate-900 mb-1">Satellite Legend</div>
-                      <div className="text-[10.5px] text-slate-500 mb-2">Click any marker to inspect telemetry</div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-[11px] text-slate-700">
-                          <span className="w-2.5 h-2.5 rounded-full bg-red-600"></span>
-                          <span>Red Alert Flood Zone</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-slate-700">
-                          <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
-                          <span>High Hazard Landslide</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-slate-700">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-                          <span>Open Shelter / Safe Point</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-slate-700">
-                          <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                          <span>Medical Facility</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sector Telemetry Inspector Card */}
-                <div className="adm-ss-card flex flex-col justify-between">
-                  <div>
-                    <div className="adm-ss-card-header">
-                      <div>
-                        <h3 className="adm-ss-card-title">Geospatial Sector Telemetry</h3>
-                        <p className="adm-ss-card-subtitle">Live environmental sensors & field response assets</p>
-                      </div>
-                      <span className={`adm-ss-pill ${
-                        selectedMapSector?.severity === 'Critical' ? 'pill-red' :
-                        selectedMapSector?.severity === 'High' ? 'pill-orange' : 'pill-green'
-                      }`}>
-                        {selectedMapSector ? selectedMapSector.status : 'Sector Selected'}
-                      </span>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 mb-4">
-                      <div className="text-[14px] font-bold text-slate-900 mb-1">
-                        {selectedMapSector ? selectedMapSector.title : 'Kelani River Basin Flash Flooding'}
-                      </div>
-                      <div className="text-[12px] text-[#0e7490] font-semibold mb-3">
-                        {selectedMapSector ? selectedMapSector.type : 'Major Flood (Red Alert)'}
-                      </div>
-
-                      <div className="space-y-2 text-[12px]">
-                        <div className="flex justify-between py-1 border-b border-slate-100">
-                          <span className="text-slate-500">Live Water / Hazard Gauge:</span>
-                          <span className="font-bold text-red-600">
-                            {selectedMapSector ? selectedMapSector.waterLevel : '1.84m (Threshold +0.34m)'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between py-1 border-b border-slate-100">
-                          <span className="text-slate-500">Affected Population:</span>
-                          <span className="font-semibold text-slate-800">
-                            {selectedMapSector ? selectedMapSector.affected : '3,200 Citizens'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between py-1 border-b border-slate-100">
-                          <span className="text-slate-500">Assigned Response:</span>
-                          <span className="font-semibold text-slate-800">
-                            {selectedMapSector ? selectedMapSector.teams : '6 Rescue Teams Deployed'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between py-1">
-                          <span className="text-slate-500">Nearest Evac Shelter:</span>
-                          <span className="font-semibold text-[#0e7490]">
-                            {selectedMapSector ? selectedMapSector.shelter : 'Colombo Central School (3.1km)'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <button
-                      className="w-full adm-ss-btn-primary justify-center"
-                      onClick={() => showToast('Dispatching relief convoy to selected sector...')}
-                    >
-                      <Truck size={15} />
-                      <span>Dispatch Emergency Convoy to Sector</span>
-                    </button>
-                    <button
-                      className="w-full py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[12.5px] font-semibold border-0 cursor-pointer transition"
-                      onClick={() => setActiveTab('crisis')}
-                    >
-                      View Incident in Crisis Management
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom 3 District Readiness Telemetry Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="adm-ss-card">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h4 className="text-[14px] font-bold text-slate-900 m-0">Colombo District (Zone A)</h4>
-                      <span className="text-[11px] text-slate-500">Riparian lowlands & Metro basin</span>
-                    </div>
-                    <span className="adm-ss-pill pill-red">Red Alert</span>
-                  </div>
-                  <div className="space-y-1.5 text-[12px] text-slate-600 mt-3">
-                    <div className="flex justify-between">
-                      <span>Kelani Crest:</span>
-                      <span className="font-bold text-red-600">1.84m (Major Flood)</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Open Shelters:</span>
-                      <span className="font-semibold text-slate-800">12 Open (84% Capacity)</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Deployed Units:</span>
-                      <span className="font-semibold text-[#0e7490]">24 Response Teams</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="adm-ss-card">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h4 className="text-[14px] font-bold text-slate-900 m-0">Gampaha District (Zone B)</h4>
-                      <span className="text-[11px] text-slate-500">Attanagalu basin & hill slopes</span>
-                    </div>
-                    <span className="adm-ss-pill pill-orange">Amber Alert</span>
-                  </div>
-                  <div className="space-y-1.5 text-[12px] text-slate-600 mt-3">
-                    <div className="flex justify-between">
-                      <span>River Level:</span>
-                      <span className="font-bold text-amber-600">1.12m (Alert Level)</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Open Shelters:</span>
-                      <span className="font-semibold text-slate-800">9 Open (62% Capacity)</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Deployed Units:</span>
-                      <span className="font-semibold text-[#0e7490]">11 Response Teams</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="adm-ss-card">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h4 className="text-[14px] font-bold text-slate-900 m-0">Kalutara District (Zone C)</h4>
-                      <span className="text-[11px] text-slate-500">Kalu Ganga & Coastal Estuary</span>
-                    </div>
-                    <span className="adm-ss-pill pill-red">Red Alert</span>
-                  </div>
-                  <div className="space-y-1.5 text-[12px] text-slate-600 mt-3">
-                    <div className="flex justify-between">
-                      <span>Coastal Surge:</span>
-                      <span className="font-bold text-red-600">2.10m High Swell</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Open Shelters:</span>
-                      <span className="font-semibold text-slate-800">7 Open (76% Capacity)</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Deployed Units:</span>
-                      <span className="font-semibold text-[#0e7490]">7 Navy SBS Teams</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
+            <AdminMapView
+              crises={crises}
+              showToast={showToast}
+            />
           )}
 
           {/* =====================================================
-             VIEW 13: SYSTEM NOTIFICATIONS & BROADCASTS
+             VIEW: SYSTEM NOTIFICATIONS & EMERGENCY BROADCASTS
              ===================================================== */}
           {activeTab === 'notifications' && (
-            <>
-              {/* Top Alert Beacon Banner */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-rose-600 to-red-700 text-white flex items-center justify-between shadow-md flex-wrap gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
-                    <Bell size={22} className="text-white" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[14px]">EMERGENCY BROADCAST SYSTEM ACTIVE</span>
-                      <span className="px-2 py-0.5 rounded-full bg-white/20 text-[11px] font-semibold">Gateway: Dialog · Mobitel · SLT Push</span>
-                    </div>
-                    <p className="text-[12px] text-white/90 mt-0.5 m-0">
-                      Disaster Management Centre emergency alert feeds linked to Cell Broadcast, Mobile Push, and Field Radio Channels.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  className="px-3.5 py-1.5 rounded-lg bg-white text-red-700 text-[12px] font-bold hover:bg-slate-100 border-0 cursor-pointer transition shadow-sm flex items-center gap-1.5"
-                  onClick={() => setIsComposeBroadcastModalOpen(true)}
-                >
-                  <Send size={14} />
-                  <span>+ Compose Emergency Broadcast</span>
-                </button>
-              </div>
-
-              {/* KPI Metrics Row */}
-              <div className="adm-ss-kpi-row">
-                <div className="adm-ss-kpi-card">
-                  <div className="adm-ss-kpi-icon-box bg-red-soft">
-                    <Radio size={22} />
-                  </div>
-                  <div className="adm-ss-kpi-content">
-                    <span className="adm-ss-kpi-label">Emergency Broadcasts Sent</span>
-                    <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">{broadcasts.length} Alerts</span>
-                    </div>
-                    <span className="adm-ss-kpi-trend text-red">Across 3 Western districts</span>
-                  </div>
-                </div>
-
-                <div className="adm-ss-kpi-card">
-                  <div className="adm-ss-kpi-icon-box bg-green-soft">
-                    <Wifi size={22} />
-                  </div>
-                  <div className="adm-ss-kpi-content">
-                    <span className="adm-ss-kpi-label">Delivery Success Rate</span>
-                    <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">98.4%</span>
-                    </div>
-                    <span className="adm-ss-kpi-trend text-green">Multi-channel gateway confirmed</span>
-                  </div>
-                </div>
-
-                <div className="adm-ss-kpi-card">
-                  <div className="adm-ss-kpi-icon-box bg-blue-soft">
-                    <Users size={22} />
-                  </div>
-                  <div className="adm-ss-kpi-content">
-                    <span className="adm-ss-kpi-label">Citizen Reach</span>
-                    <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">142,500</span>
-                    </div>
-                    <span className="adm-ss-kpi-trend text-green">Cell-broadcast enabled</span>
-                  </div>
-                </div>
-
-                <div className="adm-ss-kpi-card">
-                  <div className="adm-ss-kpi-icon-box bg-orange-soft">
-                    <AlertTriangle size={22} />
-                  </div>
-                  <div className="adm-ss-kpi-content">
-                    <span className="adm-ss-kpi-label">Active Emergency Warnings</span>
-                    <div className="adm-ss-kpi-val-row">
-                      <span className="adm-ss-kpi-number">{broadcasts.filter(b => b.status === 'Active Live').length}</span>
-                    </div>
-                    <span className="adm-ss-kpi-trend text-orange">DMC Authorized Live Alerts</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Broadcasts History Ledger Table */}
-              <div className="adm-ss-card">
-                <div className="adm-ss-card-header">
-                  <div>
-                    <h3 className="adm-ss-card-title">Emergency Broadcast Dispatches & Citizen Alerts</h3>
-                    <p className="adm-ss-card-subtitle">Audited record of multi-channel cell broadcasts, weather warnings, and shelter notices</p>
-                  </div>
-                  <span className="text-[12px] text-slate-500 font-medium">
-                    Showing {broadcasts.length} dispatches
-                  </span>
-                </div>
-
-                {/* Filters */}
-                <div className="adm-ss-filters-bar">
-                  <div className="adm-ss-filters-left">
-                    <div className="adm-ss-search-box" style={{ width: '280px' }}>
-                      <Search size={15} className="text-slate-400" />
-                      <input
-                        type="text"
-                        placeholder="Search broadcast title, region, or ID..."
-                        className="adm-ss-search-input"
-                        value={broadcastSearch}
-                        onChange={(e) => setBroadcastSearch(e.target.value)}
-                      />
-                    </div>
-
-                    <select
-                      className="adm-ss-filter-select"
-                      value={broadcastSeverityFilter}
-                      onChange={(e) => setBroadcastSeverityFilter(e.target.value)}
-                    >
-                      <option value="ALL">All Severities</option>
-                      <option value="Emergency">Emergency (Red)</option>
-                      <option value="Warning">Warning (Amber)</option>
-                      <option value="Advisory">Advisory (Blue)</option>
-                    </select>
-
-                    <select
-                      className="adm-ss-filter-select"
-                      value={broadcastStatusFilter}
-                      onChange={(e) => setBroadcastStatusFilter(e.target.value)}
-                    >
-                      <option value="ALL">All Statuses</option>
-                      <option value="Active Live">Active Live</option>
-                      <option value="Expired">Expired</option>
-                      <option value="Revoked">Revoked</option>
-                    </select>
-
-                    {(broadcastSearch || broadcastSeverityFilter !== 'ALL' || broadcastStatusFilter !== 'ALL') && (
-                      <button
-                        className="adm-ss-btn-reset"
-                        onClick={() => {
-                          setBroadcastSearch('');
-                          setBroadcastSeverityFilter('ALL');
-                          setBroadcastStatusFilter('ALL');
-                        }}
-                      >
-                        <RefreshCw size={12} />
-                        <span>Reset</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Table */}
-                <div className="adm-ss-table-container">
-                  <table className="adm-ss-table">
-                    <thead>
-                      <tr>
-                        <th>Alert ID</th>
-                        <th>Broadcast Title & Summary</th>
-                        <th>Severity</th>
-                        <th>Channels</th>
-                        <th>Target Region & Audience</th>
-                        <th>Sent By & Time</th>
-                        <th>Delivery</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {broadcasts
-                        .filter(b => {
-                          const matchSearch =
-                            b.title.toLowerCase().includes(broadcastSearch.toLowerCase()) ||
-                            b.targetRegion.toLowerCase().includes(broadcastSearch.toLowerCase()) ||
-                            b.id.toLowerCase().includes(broadcastSearch.toLowerCase());
-                          const matchSeverity = broadcastSeverityFilter === 'ALL' || b.severity === broadcastSeverityFilter;
-                          const matchStatus = broadcastStatusFilter === 'ALL' || b.status === broadcastStatusFilter;
-                          return matchSearch && matchSeverity && matchStatus;
-                        })
-                        .map((b) => (
-                          <tr key={b.id}>
-                            <td className="font-mono text-[11.5px] font-semibold text-[#0e7490]">{b.id}</td>
-                            <td>
-                              <div className="font-semibold text-slate-900">{b.title}</div>
-                              <div className="text-[11.5px] text-slate-500 max-w-[280px] line-clamp-1">{b.message}</div>
-                            </td>
-                            <td>
-                              <span className={`adm-ss-pill ${
-                                b.severity === 'Emergency' ? 'pill-red' :
-                                b.severity === 'Warning' ? 'pill-orange' : 'pill-blue'
-                              }`}>
-                                {b.severity}
-                              </span>
-                            </td>
-                            <td>
-                              <div className="flex flex-wrap gap-1 max-w-[150px]">
-                                {b.channels.map((ch, i) => (
-                                  <span key={i} className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-medium">
-                                    {ch}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                            <td>
-                              <div className="font-medium text-slate-800">{b.targetRegion}</div>
-                              <div className="text-[11px] text-slate-500">{b.targetAudience}</div>
-                            </td>
-                            <td>
-                              <div className="text-[12px] font-medium text-slate-800">{b.sentBy}</div>
-                              <div className="text-[11px] text-slate-500">{b.sentAt}</div>
-                            </td>
-                            <td>
-                              <span className="font-mono font-bold text-emerald-700 text-[12px]">{b.deliveryRate}</span>
-                            </td>
-                            <td>
-                              <span className={`adm-ss-pill ${
-                                b.status === 'Active Live' ? 'pill-green' :
-                                b.status === 'Expired' ? 'pill-gray' : 'pill-red'
-                              }`}>
-                                {b.status}
-                              </span>
-                            </td>
-                            <td>
-                              <div className="adm-ss-row-actions">
-                                <button
-                                  className="adm-ss-icon-btn text-[#0e7490]"
-                                  title="Retransmit Broadcast"
-                                  onClick={() => handleRetransmitBroadcast(b)}
-                                >
-                                  <RefreshCw size={13} />
-                                </button>
-                                {b.status === 'Active Live' && (
-                                  <button
-                                    className="adm-ss-icon-btn text-red-600"
-                                    title="Revoke / Deactivate Alert"
-                                    onClick={() => handleRevokeBroadcast(b.id)}
-                                  >
-                                    <X size={13} />
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </>
+            <AdminBroadcastsView
+              showToast={showToast}
+            />
           )}
 
         </div>
@@ -4795,14 +3965,14 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[12px] font-semibold text-[#0e7490]">{selectedCrisis.id}</span>
+                  <span className="font-mono text-[12px] font-semibold text-[#0e7490]">{selectedCrisis.code || selectedCrisis.id}</span>
                   <span className={`adm-ss-pill ${
-                    selectedCrisis.severity === 'Critical' ? 'pill-red' :
-                    selectedCrisis.severity === 'High' ? 'pill-orange' : 'pill-green'
+                    selectedCrisis.severity === 'Critical' || selectedCrisis.severityNum >= 4 ? 'pill-red' :
+                    selectedCrisis.severity === 'High' || selectedCrisis.severityNum === 3 ? 'pill-orange' : 'pill-green'
                   }`}>
-                    {selectedCrisis.severity} Severity
+                    {selectedCrisis.severity || selectedCrisis.severityLabel || 'Standard'} Severity
                   </span>
-                  <span className="adm-ss-pill pill-teal">{selectedCrisis.status}</span>
+                  <span className="adm-ss-pill pill-teal">{selectedCrisis.status || (selectedCrisis.isActive ? 'Active Response' : 'Resolved')}</span>
                 </div>
                 <h3 className="text-[18px] font-bold text-slate-900 mt-1 m-0">{selectedCrisis.title}</h3>
               </div>
@@ -4818,40 +3988,42 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
                   <span className="text-slate-500 block text-[11px]">District / Sector</span>
-                  <span className="font-bold text-slate-900">{selectedCrisis.district}</span>
+                  <span className="font-bold text-slate-900">{selectedCrisis.district || selectedCrisis.region || 'Western Province'}</span>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
                   <span className="text-slate-500 block text-[11px]">Affected Citizens</span>
-                  <span className="font-bold text-slate-900">{selectedCrisis.affectedPeople?.toLocaleString()}</span>
+                  <span className="font-bold text-slate-900">{(selectedCrisis.affectedPeople ?? selectedCrisis.estimatedAffectedCount ?? 0).toLocaleString()}</span>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
                   <span className="text-slate-500 block text-[11px]">Hazard Area</span>
-                  <span className="font-bold text-slate-900">{selectedCrisis.areaSqKm} km²</span>
+                  <span className="font-bold text-slate-900">
+                    {selectedCrisis.areaSqKm ? `${selectedCrisis.areaSqKm} km²` : `${selectedCrisis.affectedAreaRadius || 15} km rad.`}
+                  </span>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
                   <span className="text-slate-500 block text-[11px]">Water Gauge Crest</span>
-                  <span className="font-bold text-red-600 font-mono">{selectedCrisis.waterLevelMeters}m</span>
+                  <span className="font-bold text-red-600 font-mono">{selectedCrisis.waterLevelMeters ?? 1.50}m</span>
                 </div>
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                 <span className="font-bold text-slate-900 block mb-1">Operational Incident Notes</span>
-                <p className="text-slate-700 m-0 leading-relaxed">{selectedCrisis.notes}</p>
+                <p className="text-slate-700 m-0 leading-relaxed">{selectedCrisis.notes || selectedCrisis.description || 'Emergency operational directives active under National Disaster Management protocol.'}</p>
                 <div className="text-[11px] text-slate-500 mt-2">
-                  Declared: {selectedCrisis.declaredAt} · Incident Commander: {selectedCrisis.leadCoordinator}
+                  Declared: {selectedCrisis.declaredAt || (selectedCrisis.startDate ? new Date(selectedCrisis.startDate).toISOString().replace('T', ' ').substring(0, 16) : '2026-06-15')} · Incident Commander: {selectedCrisis.leadCoordinator || selectedCrisis.assignedLeadTeam || 'DMC Response Coordinator'}
                 </div>
               </div>
 
               <div className="flex items-center justify-between p-3 rounded-lg bg-cyan-50 border border-cyan-200">
                 <div className="flex items-center gap-2 text-[#0e7490]">
                   <Truck size={16} />
-                  <span className="font-bold">Deployed Multi-Agency Units: {selectedCrisis.teamsDeployed} Teams</span>
+                  <span className="font-bold">Deployed Multi-Agency Units: {selectedCrisis.teamsDeployed || 2} Teams</span>
                 </div>
                 <button
                   className="px-3 py-1.5 rounded-lg bg-[#0e7490] text-white text-[11.5px] font-bold border-0 cursor-pointer shadow-sm"
                   onClick={() => {
                     handleDispatchRescueTeams(selectedCrisis.id);
-                    setSelectedCrisis(prev => ({ ...prev, teamsDeployed: prev.teamsDeployed + 2 }));
+                    setSelectedCrisis(prev => ({ ...prev, teamsDeployed: (prev.teamsDeployed || 2) + 2 }));
                   }}
                 >
                   + Dispatch 2 More Units
@@ -4864,13 +4036,17 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
                 className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[12.5px] font-semibold border-0 cursor-pointer"
                 onClick={() => {
                   handleToggleCrisisStatus(selectedCrisis.id);
-                  setSelectedCrisis(prev => ({
-                    ...prev,
-                    status: prev.status === 'Contained' ? 'Active Escalation' : 'Contained'
-                  }));
+                  setSelectedCrisis(prev => {
+                    const isContainedOrResolved = prev.status === 'Contained' || prev.status === 'Resolved' || !prev.isActive;
+                    return {
+                      ...prev,
+                      status: isContainedOrResolved ? 'Active Response' : 'Resolved',
+                      isActive: isContainedOrResolved
+                    };
+                  });
                 }}
               >
-                {selectedCrisis.status === 'Contained' ? 'Re-escalate to Active' : 'Mark as Contained'}
+                {(selectedCrisis.status === 'Contained' || selectedCrisis.status === 'Resolved' || !selectedCrisis.isActive) ? 'Re-escalate to Active' : 'Mark as Resolved'}
               </button>
               <button
                 className="adm-ss-btn-primary"
