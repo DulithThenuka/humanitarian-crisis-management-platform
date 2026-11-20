@@ -9,13 +9,15 @@ import {
   Calendar,
   ShieldCheck,
   Building2,
-  Search
+  Search,
+  RefreshCw
 } from 'lucide-react';
 
 export const ShelterReportsView = ({
   shelters = [],
   reportData = {},
-  onOpenExportModal
+  onOpenExportModal,
+  onRefreshData
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [areaFilter, setAreaFilter] = useState('ALL');
@@ -54,6 +56,12 @@ export const ShelterReportsView = ({
           </p>
         </div>
         <div className="sh-header-actions">
+          {onRefreshData && (
+            <button className="sh-btn-outline" onClick={onRefreshData} title="Sync with database">
+              <RefreshCw size={15} />
+              Sync Reports
+            </button>
+          )}
           <button className="sh-btn-primary" onClick={onOpenExportModal}>
             <Download size={15} />
             Export Operational Report

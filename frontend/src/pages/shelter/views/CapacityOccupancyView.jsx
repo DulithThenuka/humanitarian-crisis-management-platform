@@ -11,7 +11,8 @@ import {
   Edit3,
   UserCheck,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  RefreshCw
 } from 'lucide-react';
 
 export const CapacityOccupancyView = ({
@@ -21,7 +22,8 @@ export const CapacityOccupancyView = ({
   onOpenCreateModal,
   onOpenExportModal,
   onOpenEditModal,
-  onOpenAllocateModal
+  onOpenAllocateModal,
+  onRefreshData
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -121,6 +123,12 @@ export const CapacityOccupancyView = ({
           </p>
         </div>
         <div className="sh-header-actions">
+          {onRefreshData && (
+            <button className="sh-btn-outline" onClick={onRefreshData} title="Sync with database">
+              <RefreshCw size={15} />
+              Sync Capacity
+            </button>
+          )}
           <button className="sh-btn-outline" onClick={onOpenExportModal}>
             <Download size={15} />
             Export Capacity Report

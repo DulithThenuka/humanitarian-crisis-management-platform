@@ -717,6 +717,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
               shelters={shelters}
               reportData={reportsData}
               onOpenExportModal={() => setIsExportModalOpen(true)}
+              onRefreshData={refreshAllShelterData}
             />
           )}
         </main>
