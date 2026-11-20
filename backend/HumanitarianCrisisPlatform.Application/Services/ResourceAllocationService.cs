@@ -276,10 +276,15 @@ public class ResourceAllocationService : IResourceAllocationService
         var resource = await _repository.GetByIdAsync(id, cancellationToken);
         if (resource == null) return Result<ResourceDto>.Failure("Resource not found");
 
-        var newTotal = resource.TotalQuantity + dto.QuantityDelta;
+        var newTotal = dto.NewQuantity ?? (resource.TotalQuantity + dto.QuantityDelta);
+        if (newTotal < 0)
+        {
+            return Result<ResourceDto>.Failure("Stock quantity cannot be negative.");
+        }
+
         if (newTotal < resource.AllocatedQuantity)
         {
-            return Result<ResourceDto>.Failure("Adjusted total quantity cannot be less than currently allocated stock.");
+            return Result<ResourceDto>.Failure($"Adjusted total quantity ({newTotal}) cannot be less than currently allocated stock ({resource.AllocatedQuantity}).");
         }
 
         resource.TotalQuantity = newTotal;
@@ -289,10 +294,40 @@ public class ResourceAllocationService : IResourceAllocationService
         await _repository.UpdateAsync(resource, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
 
-        var sign = dto.QuantityDelta >= 0 ? "+" : "";
-        LogActivity("Stock adjusted", $"RES-{resource.Id.ToString()[..6].ToUpper()}", user ?? "Resource Manager", $"{resource.Name} {sign}{dto.QuantityDelta} {resource.Unit} ({dto.Reason})");
+        var logDesc = dto.NewQuantity.HasValue
+            ? $"{resource.Name} stock set to {newTotal} {resource.Unit} ({dto.Reason})"
+            : $"{resource.Name} {(dto.QuantityDelta >= 0 ? "+" : "")}{dto.QuantityDelta} {resource.Unit} ({dto.Reason})";
+
+        LogActivity("Stock adjusted", $"RES-{resource.Id.ToString()[..6].ToUpper()}", user ?? "Resource Manager", logDesc);
 
         return Result<ResourceDto>.Success(MapToDto(resource), "Stock adjusted successfully");
+    }
+
+    public async Task<Result<ResourceDto>> UpdateStockQuantityAsync(Guid id, UpdateStockQuantityDto dto, string? user = null, CancellationToken cancellationToken = default)
+    {
+        var resource = await _repository.GetByIdAsync(id, cancellationToken);
+        if (resource == null) return Result<ResourceDto>.Failure("Resource not found");
+
+        if (dto.Quantity < 0)
+        {
+            return Result<ResourceDto>.Failure("Stock quantity cannot be negative.");
+        }
+
+        if (dto.Quantity < resource.AllocatedQuantity)
+        {
+            return Result<ResourceDto>.Failure($"Adjusted total quantity ({dto.Quantity}) cannot be less than currently allocated stock ({resource.AllocatedQuantity}).");
+        }
+
+        resource.TotalQuantity = dto.Quantity;
+        resource.LastModifiedBy = user ?? "Resource Manager";
+        resource.UpdatedAt = DateTime.UtcNow;
+
+        await _repository.UpdateAsync(resource, cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        LogActivity("Stock updated", $"RES-{resource.Id.ToString()[..6].ToUpper()}", user ?? "Resource Manager", $"{resource.Name} stock set to {dto.Quantity} {resource.Unit} ({dto.Reason})");
+
+        return Result<ResourceDto>.Success(MapToDto(resource), "Stock quantity updated successfully");
     }
 
     // ==========================================
