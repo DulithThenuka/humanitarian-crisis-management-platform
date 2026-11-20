@@ -1,18 +1,176 @@
 /* =========================================================
-   AI DECISION SUPPORT VIEW STYLESHEET
-   Header strip, responsibility alert, priority score card,
-   circular confidence gauge, factors influence list, duplicate warning,
-   next actions, suggested resources, human review panel
+   AI DECISION SUPPORT & PRIORITY ASSESSMENT STYLESHEET
+   RELIEFCORE Crisis Operations System - Modern Blue & Oceanic Theme
+   Optimized 2-Column Responsive Layout:
+   1. Header, Case Selector & Operational Mandate Notice
+   2. Left Column: AI Recommendation, Urgency Score, Rationale, Evidence Factors & Duplicates
+   3. Right Column: Linked Request Facts & Mandatory Human Review Decision Form
    ========================================================= */
 
+.ec-ai-support-root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   1. HEADER STRIP & CASE SELECTOR
+   ========================================================= */
 .ec-ai-header-strip {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 10px;
+  background-color: #ffffff;
+  border: 1px solid var(--ec-border, #dfe5d8);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.ec-ai-responsibility-banner {
+.ec-ai-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #657367;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ec-ai-breadcrumb-sep {
+  color: #c5ccbe;
+}
+
+.ec-ai-breadcrumb-id {
+  color: #3d6b4f;
+}
+
+.ec-ai-main-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #14291e;
+  letter-spacing: -0.02em;
+  margin: 4px 0 2px 0;
+}
+
+.ec-ai-sub-meta {
+  font-size: 12px;
+  color: #657367;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.ec-linked-case-link {
+  color: #3d6b4f;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.15s;
+}
+
+.ec-linked-case-link:hover {
+  color: #2d5a3e;
+}
+
+.ec-ai-status-dock {
+  display: flex;
+  align-items: center;
+}
+
+/* Case Selector Bar */
+.ec-ai-case-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #ffffff;
+  border: 1px solid var(--ec-border, #dfe5d8);
+  border-radius: 10px;
+  padding: 8px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  flex-wrap: wrap;
+}
+
+.ec-selector-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #657367;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ec-selector-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ec-selector-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #c5ccbe;
+  background-color: #f4f6f2;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #2a4a35;
+  transition: all 0.15s ease;
+}
+
+.ec-selector-pill:hover {
+  background-color: #eef1ea;
+  border-color: #3d6b4f;
+  color: #3d6b4f;
+}
+
+.ec-selector-pill.is-active {
+  background-color: #eff6ff;
+  border-color: #3d6b4f;
+  color: #3d6b4f;
+  box-shadow: 0 1px 4px rgba(2, 132, 199, 0.15);
+}
+
+.ec-pill-id {
+  letter-spacing: -0.01em;
+}
+
+.ec-pill-priority {
+  font-size: 9.5px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ec-priority-critical {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.ec-priority-high {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.ec-priority-medium {
+  background-color: #edf2e6;
+  color: #3d6b4f;
+}
+
+.ec-priority-low {
+  background-color: #eef1ea;
+  color: #657367;
+}
+
+/* Mandatory Human Review Mandate Banner */
+.ec-ai-mandate-card {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -20,112 +178,440 @@
   border: 1px solid #bfdbfe;
   border-radius: 10px;
   padding: 12px 16px;
-  font-size: 12.5px;
+  font-size: 12px;
   color: #1e3a8a;
-  line-height: 1.4;
+  line-height: 1.45;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
+.ec-mandate-icon {
+  flex-shrink: 0;
+}
+
+.ec-mandate-content strong {
+  color: #14291e;
+}
+
+/* =========================================================
+   2. TWO-COLUMN OPERATIONAL GRID
+   ========================================================= */
 .ec-ai-split-grid {
   display: grid;
-  grid-template-columns: 2fr 1.1fr;
+  grid-template-columns: 1.35fr 1fr;
   gap: 20px;
+  align-items: start;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1040px) {
   .ec-ai-split-grid {
     grid-template-columns: 1fr;
   }
 }
 
+.ec-ai-left-column,
+.ec-ai-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* =========================================================
+   3. LEFT COLUMN: RECOMMENDATION & EVIDENCE
+   ========================================================= */
+
+/* Priority & Urgency Score Card */
 .ec-ai-priority-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: #ffffff;
-  border: 1px solid var(--ec-border);
+  border: 1px solid var(--ec-border, #dfe5d8);
   border-radius: 12px;
-  padding: 20px 24px;
+  padding: 18px 22px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.ec-ai-priority-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ec-ai-card-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #3d6b4f;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ec-recommended-priority-val {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 2px 0;
+}
+
+.ec-priority-text-critical {
+  color: #dc2626;
+}
+
+.ec-priority-text-high {
+  color: #d97706;
+}
+
+.ec-priority-text-medium {
+  color: #3d6b4f;
+}
+
+.ec-priority-text-low {
+  color: #657367;
+}
+
+.ec-urgency-score-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #657367;
+}
+
+.ec-urgency-score-label {
+  font-weight: 600;
+}
+
+.ec-urgency-score-num {
+  color: #14291e;
+  font-size: 13px;
+}
+
+.ec-urgency-score-tier {
+  font-size: 11px;
+  color: #657367;
+}
+
+/* Confidence Gauge */
+.ec-confidence-gauge-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
 .ec-confidence-gauge-circle {
-  width: 72px;
-  height: 72px;
+  width: 66px;
+  height: 66px;
   border-radius: 50%;
-  border: 5px solid #0284c7;
+  border: 4px solid #3d6b4f;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #0f172a;
-  box-shadow: 0 0 12px rgba(2, 132, 199, 0.2);
+  color: #14291e;
+  background-color: #f4f6f2;
+  box-shadow: 0 0 10px rgba(2, 132, 199, 0.15);
+}
+
+.ec-confidence-pct {
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ec-confidence-sub {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #657367;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.ec-confidence-footnote {
+  font-size: 10px;
+  color: #657367;
+  font-weight: 600;
+}
+
+/* Rationale Callout Box */
+.ec-ai-rationale-box {
+  background-color: #f4f6f2;
+  border: 1px solid #c7dbc0;
+  border-left: 4px solid #3d6b4f;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.ec-rationale-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #2d5a3e;
+  margin-bottom: 4px;
+}
+
+.ec-rationale-text {
+  font-size: 12.5px;
+  color: #14291e;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Factors List */
+.ec-factors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .ec-factor-item-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 10px 12px;
   border-radius: 8px;
-  background-color: #f8fafc;
-  border: 1px solid #f1f5f9;
-  margin-bottom: 8px;
+  background-color: #f4f6f2;
+  border: 1px solid #eef1ea;
+  transition: all 0.15s;
+}
+
+.ec-factor-item-row:hover {
+  background-color: #eef1ea;
+  border-color: #dfe5d8;
 }
 
 .ec-factor-left {
   display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ec-duplicate-card {
-  background-color: #ffffff;
-  border: 1px solid var(--ec-border);
-  border-radius: 12px;
-  padding: 18px 20px;
-}
-
-.ec-next-actions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.ec-next-action-item {
-  display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 12.5px;
-  color: #334155;
+  min-width: 0;
 }
 
-.ec-action-num-badge {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: #e0f2fe;
-  color: #0284c7;
-  font-size: 11px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.ec-factor-icon {
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
-.ec-tags-pill-row {
+.ec-factor-head-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
+  margin-bottom: 2px;
 }
 
-.ec-resource-tag-pill {
+.ec-factor-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #14291e;
+}
+
+.ec-factor-tag-tiny {
+  font-size: 9px;
+  font-weight: 800;
+  color: #3d6b4f;
+  background-color: #edf2e6;
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ec-factor-detail {
+  font-size: 11.5px;
+  color: #4a5b4a;
+  line-height: 1.35;
+}
+
+/* Duplicate Card */
+.ec-duplicate-card {
+  background-color: #ffffff;
+  border: 1px solid var(--ec-border, #dfe5d8);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.ec-duplicate-item-box {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background-color: #f4f6f2;
+  border: 1px solid #dfe5d8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ec-duplicate-match-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #14291e;
+}
+
+.ec-duplicate-match-desc {
+  font-size: 11.5px;
+  color: #657367;
+  margin-top: 2px;
+}
+
+/* =========================================================
+   4. RIGHT COLUMN: LINKED REQUEST & HUMAN REVIEW
+   ========================================================= */
+
+/* Linked Request Card */
+.ec-linked-request-card {
+  border-top: 3px solid #3d6b4f;
+}
+
+.ec-btn-link-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid #c5ccbe;
+  border-radius: 6px;
+  padding: 4px 8px;
   font-size: 11px;
   font-weight: 700;
-  color: #0f172a;
-  background-color: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  padding: 3px 10px;
-  border-radius: 12px;
+  color: #3d6b4f;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ec-btn-link-action:hover {
+  background-color: #eff6ff;
+  border-color: #3d6b4f;
+}
+
+.ec-linked-case-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eef1ea;
+}
+
+.ec-linked-meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.ec-linked-meta-label {
+  width: 72px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #657367;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ec-linked-meta-val {
+  color: #14291e;
+}
+
+.ec-linked-citizen-quote {
+  margin-top: 12px;
+}
+
+.ec-quote-label {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #657367;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.ec-quote-body {
+  font-size: 12px;
+  color: #2a4a35;
+  font-style: italic;
+  line-height: 1.45;
+  background-color: #f4f6f2;
+  border-left: 3px solid #3d6b4f;
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+  margin: 0;
+}
+
+/* Human Review Card */
+.ec-human-review-card {
+  border-top: 3px solid #059669;
+}
+
+.ec-recorded-decision-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 11.5px;
+  color: #166534;
+  margin-bottom: 14px;
+}
+
+.ec-form-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.ec-field-label-tiny {
+  font-size: 10px;
+  font-weight: 800;
+  color: #657367;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ec-select-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #c5ccbe;
+  background-color: #ffffff;
+  color: #14291e;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.ec-select-input:focus {
+  border-color: #3d6b4f;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
+.ec-btn-reject-outline {
+  color: #dc2626 !important;
+  border-color: #fecaca !important;
+}
+
+.ec-btn-reject-outline:hover {
+  background-color: #fee2e2 !important;
+  border-color: #dc2626 !important;
+  color: #b91c1c !important;
+}
+
+/* Spin animation for loading state */
+.ec-spin-icon {
+  animation: ecSpin 1s linear infinite;
+}
+
+@keyframes ecSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

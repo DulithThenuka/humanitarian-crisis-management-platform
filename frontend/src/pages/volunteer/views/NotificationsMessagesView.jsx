@@ -82,7 +82,7 @@ export const NotificationsMessagesView = ({
         <div className="vol-card">
           <div className="vol-card-header">
             <h3 className="vol-card-title">Recent Broadcasts & Alerts</h3>
-            <span style={{ fontSize: '12px', color: '#64748b' }}>
+            <span style={{ fontSize: '12px', color: '#657367' }}>
               {notifications.length} notifications
             </span>
           </div>
@@ -93,7 +93,7 @@ export const NotificationsMessagesView = ({
                 <div className="vol-item-left">
                   <div className="vol-item-icon-box">
                     {item.type === 'assignment' && <Bell size={18} style={{ color: '#ea580c' }} />}
-                    {item.type === 'safety' && <ShieldCheck size={18} style={{ color: '#0284c7' }} />}
+                    {item.type === 'safety' && <ShieldCheck size={18} style={{ color: '#3d6b4f' }} />}
                     {item.type === 'approval' && <CheckCircle2 size={18} style={{ color: '#16a34a' }} />}
                   </div>
                   <div>
@@ -104,7 +104,7 @@ export const NotificationsMessagesView = ({
                       )}
                     </div>
                     <div className="vol-item-sub">{item.subtitle}</div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
+                    <div style={{ fontSize: '11px', color: '#8a9480', marginTop: '4px' }}>
                       {item.time}
                     </div>
                   </div>
@@ -119,7 +119,7 @@ export const NotificationsMessagesView = ({
           <div className="vol-card-header">
             <div>
               <h3 className="vol-card-title">Coordinator Channel</h3>
-              <div style={{ fontSize: '11px', color: '#64748b' }}>
+              <div style={{ fontSize: '11px', color: '#657367' }}>
                 Direct communication with assigned operational leads
               </div>
             </div>
@@ -137,8 +137,8 @@ export const NotificationsMessagesView = ({
                 style={{
                   alignSelf: msg.isCoordinator ? 'flex-start' : 'flex-end',
                   maxWidth: '85%',
-                  background: msg.isCoordinator ? '#f1f5f9' : '#183526',
-                  color: msg.isCoordinator ? '#1e293b' : '#ffffff',
+                  background: msg.isCoordinator ? '#eef1ea' : '#183526',
+                  color: msg.isCoordinator ? '#1e3328' : '#ffffff',
                   padding: '10px 14px',
                   borderRadius: '10px',
                   fontSize: '12.5px',

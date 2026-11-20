@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutGrid,
   Search,
@@ -53,9 +53,35 @@ import './VolunteerPortal.css';
 
 export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Navigation State
   const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Reactively sync activeTab with URL route and props
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+    const p = (location.pathname || '').toLowerCase();
+    if (p.includes('/opportunities')) {
+      setActiveTab('opportunities');
+    } else if (p.includes('/assignments')) {
+      setActiveTab('assignments');
+    } else if (p.includes('/progress')) {
+      setActiveTab('progress');
+    } else if (p.includes('/schedule') || p.includes('/availability') || p.includes('/roster')) {
+      setActiveTab('schedule');
+    } else if (p.includes('/notifications')) {
+      setActiveTab('notifications');
+    } else if (p.includes('/profile')) {
+      setActiveTab('profile');
+    } else if (p.includes('/help')) {
+      setActiveTab('help');
+    } else if (p.includes('/overview') || p === '/volunteer' || p === '/volunteer/portal' || p === '/volunteer/dashboard' || p === '/volunteers') {
+      setActiveTab('overview');
+    }
+  }, [initialTab, location.pathname]);
 
   // Core Data States
   const [user, setUser] = useState(VOLUNTEER_USER);

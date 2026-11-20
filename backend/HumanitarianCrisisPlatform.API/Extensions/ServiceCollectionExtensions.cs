@@ -19,9 +19,20 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
     {
-        // Database
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection") ?? "Server=(localdb)\\mssqllocaldb;Database=HumanitarianCrisisDb;Trusted_Connection=True;MultipleActiveResultSets=true"));
+        // Database Configuration: supports InMemory or SQL Server
+        var useInMemory = config.GetValue<bool>("UseInMemoryDatabase", false);
+        var connectionString = config.GetConnectionString("DefaultConnection");
+
+        if (useInMemory || string.IsNullOrWhiteSpace(connectionString))
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseInMemoryDatabase("HumanitarianCrisisDb"));
+        }
+        else
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
+        }
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -31,24 +42,41 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAssistanceRequestRepository, AssistanceRequestRepository>();
         services.AddScoped<IShelterRepository, ShelterRepository>();
         services.AddScoped<IResourceRepository, ResourceRepository>();
+        services.AddScoped<IVolunteerRepository, VolunteerRepository>();
         services.AddScoped<IAIDecisionAuditRepository, AIDecisionAuditRepository>();
+        services.AddScoped<IPartnerRepository, PartnerRepository>();
+        services.AddScoped<IIncidentRepository, IncidentRepository>();
 
         // Domain & Application Services
         services.AddScoped<IAssistanceRequestService, AssistanceRequestService>();
         services.AddScoped<IShelterService, ShelterService>();
         services.AddScoped<IResourceAllocationService, ResourceAllocationService>();
         services.AddScoped<IAIDecisionService, AIDecisionService>();
+        services.AddScoped<IHomeService, HomeService>();
+        services.AddScoped<ICrisisService, CrisisService>();
+        services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<ICoordinatorService, CoordinatorService>();
+        services.AddScoped<IPartnerService, PartnerService>();
         services.AddScoped<IDonationService, DonationService>();
+        services.AddScoped<IVolunteerService, VolunteerService>();
         services.AddScoped<VolunteerService>();
+        services.AddScoped<IIncidentService, IncidentService>();
+        services.AddScoped<ICaseAssignmentService, CaseAssignmentService>();
+        services.AddScoped<IIncidentAIReviewService, IncidentAIReviewService>();
+        services.AddScoped<IIncidentReportingService, IncidentReportingService>();
+        services.AddScoped<IIncidentDuplicateDetectionService, RuleBasedIncidentDuplicateDetectionService>();
 
         // Infrastructure Services
         services.AddHttpClient<OpenAIServiceClient>();
         services.AddSingleton<RuleBasedFallbackAIService>();
+        services.AddSingleton<IIncidentAIProvider, RuleBasedIncidentAIProvider>();
         services.AddScoped<IAIServiceClient, OpenAIServiceClient>();
         services.AddSingleton<IMappingService, OpenStreetMapService>();
         services.AddScoped<INotificationService, EmailNotificationService>();
-        services.AddSingleton<JwtTokenGenerator>();
+        services.AddSingleton<IConfiguration>(config);
+        services.AddSingleton(_ => new JwtTokenGenerator(config));
 
         return services;
     }
 }
+

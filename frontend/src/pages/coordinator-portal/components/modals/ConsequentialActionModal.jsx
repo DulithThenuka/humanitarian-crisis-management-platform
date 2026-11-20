@@ -25,7 +25,7 @@ export const ConsequentialActionModal = ({
       <div className="ec-verify-modal-card" onClick={(e) => e.stopPropagation()}>
         {/* Shield Icon in Styled Circle Badge */}
         <div className={`ec-modal-shield-icon ${isDanger ? 'icon-danger' : 'icon-primary'}`}>
-          {icon || (isDanger ? <ShieldAlert size={22} color="#dc2626" /> : <ShieldCheck size={22} color="#0284c7" />)}
+          {icon || (isDanger ? <ShieldAlert size={22} color="#dc2626" /> : <ShieldCheck size={22} color="#3d6b4f" />)}
         </div>
 
         {/* Modal Header */}
@@ -52,7 +52,7 @@ export const ConsequentialActionModal = ({
             type="checkbox"
             checked={confirmedCheck}
             onChange={(e) => setConfirmedCheck(e.target.checked)}
-            style={{ accentColor: isDanger ? '#dc2626' : '#0284c7' }}
+            style={{ accentColor: isDanger ? '#dc2626' : '#3d6b4f' }}
           />
           <span>I reviewed the request information and understand the operational impact.</span>
         </label>

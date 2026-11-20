@@ -58,7 +58,7 @@ export const MyProfileView = ({ user, activitySummary }) => {
               <div style={{ fontSize: '13px', color: '#4b6152', marginTop: '2px' }}>
                 {user.role} • <span className="vol-task-id-mono">{user.volunteerId}</span>
               </div>
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+              <div style={{ fontSize: '12px', color: '#657367', marginTop: '2px' }}>
                 {user.verificationTier}
               </div>
             </div>
@@ -66,32 +66,32 @@ export const MyProfileView = ({ user, activitySummary }) => {
 
           {/* Contact Details Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
-            <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8e0' }}>
-              <div style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+            <div style={{ background: '#f4f6f2', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8e0' }}>
+              <div style={{ fontSize: '11px', color: '#657367', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
                 <Phone size={12} /> Contact Number
               </div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>{user.phone}</div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e3328' }}>{user.phone}</div>
             </div>
 
-            <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8e0' }}>
-              <div style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+            <div style={{ background: '#f4f6f2', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8e0' }}>
+              <div style={{ fontSize: '11px', color: '#657367', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
                 <Mail size={12} /> Email Address
               </div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>{user.email}</div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e3328' }}>{user.email}</div>
             </div>
 
-            <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8e0' }}>
-              <div style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+            <div style={{ background: '#f4f6f2', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8e0' }}>
+              <div style={{ fontSize: '11px', color: '#657367', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
                 <Heart size={12} /> Blood Group
               </div>
               <div style={{ fontSize: '13px', fontWeight: 700, color: '#dc2626' }}>{user.bloodGroup}</div>
             </div>
 
-            <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8e0' }}>
-              <div style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+            <div style={{ background: '#f4f6f2', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8e0' }}>
+              <div style={{ fontSize: '11px', color: '#657367', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
                 <MapPin size={12} /> Primary Deployment Area
               </div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>{user.serviceArea}</div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e3328' }}>{user.serviceArea}</div>
             </div>
           </div>
 
@@ -118,7 +118,7 @@ export const MyProfileView = ({ user, activitySummary }) => {
                 key={cIdx}
                 style={{
                   padding: '10px 12px',
-                  background: '#f8fafc',
+                  background: '#f4f6f2',
                   border: '1px solid #e2e8e0',
                   borderRadius: '8px',
                   display: 'flex',
@@ -128,10 +128,10 @@ export const MyProfileView = ({ user, activitySummary }) => {
               >
                 <FileCheck2 size={18} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e3328' }}>
                     {cert.title}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>
+                  <div style={{ fontSize: '11px', color: '#657367' }}>
                     {cert.issuer} • Validated {cert.year}
                   </div>
                 </div>
@@ -149,11 +149,11 @@ export const MyProfileView = ({ user, activitySummary }) => {
               </div>
               <div style={{ fontSize: '11px', color: '#15803d' }}>Completed Shifts</div>
             </div>
-            <div style={{ background: '#f0f9ff', padding: '10px', borderRadius: '6px', textAlign: 'center', border: '1px solid #bae6fd' }}>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: '#0369a1' }}>
+            <div style={{ background: '#f4f6f2', padding: '10px', borderRadius: '6px', textAlign: 'center', border: '1px solid #c7dbc0' }}>
+              <div style={{ fontSize: '20px', fontWeight: 800, color: '#2d5a3e' }}>
                 {activitySummary.volunteerHours}
               </div>
-              <div style={{ fontSize: '11px', color: '#0284c7' }}>Field Hours</div>
+              <div style={{ fontSize: '11px', color: '#3d6b4f' }}>Field Hours</div>
             </div>
           </div>
         </div>

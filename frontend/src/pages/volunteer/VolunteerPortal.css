@@ -1,20 +1,20 @@
 /* =========================================================
    VOLUNTEER PORTAL - HumanAid Design System
-   Sidebar: Dark Blue Theme (#0f172a / #0b1528)
-   Canvas (#f6f8f5), Crisp Surfaces, Modern Typography
+   Sidebar: Deep Pine Green (#14291e), Pale Sage (#dbe4c6)
+   Canvas (#f4f6f2), Crisp Surfaces, Modern Typography
    ========================================================= */
 
 :root {
-  /* Brand Dark Blue Theme for Sidebar */
-  --vol-sidebar-bg: #0b1528;
-  --vol-sidebar-hover: #1e293b;
-  --vol-sidebar-active-bg: #dbeafe;
-  --vol-sidebar-active-text: #0f172a;
-  --vol-sidebar-text: #cbd5e1;
-  --vol-sidebar-muted: #8297b0;
+  /* Brand Deep Pine Green Theme for Sidebar */
+  --vol-sidebar-bg: #14291e;
+  --vol-sidebar-hover: #1b3829;
+  --vol-sidebar-active-bg: #dbe4c6;
+  --vol-sidebar-active-text: #14291e;
+  --vol-sidebar-text: #bcc5b9;
+  --vol-sidebar-muted: #829486;
 
   /* Canvas & Cards */
-  --vol-canvas-bg: #f6f8f5;
+  --vol-canvas-bg: #f4f6f2;
   --vol-card-bg: #ffffff;
   --vol-border: #e2e8e0;
   --vol-border-subtle: #edf2eb;
@@ -26,8 +26,8 @@
   --vol-text-light: #94a89b;
 
   /* Accent & Action Colors */
-  --vol-primary-green: #183526;
-  --vol-primary-green-hover: #224432;
+  --vol-primary-green: #14291e;
+  --vol-primary-green-hover: #1f3e2e;
   --vol-sage-light: #edf3ea;
   --vol-sage-border: #dbe7d7;
   --vol-sage-accent: #d2e5ce;
@@ -48,10 +48,10 @@
   --vol-danger-border: #fecaca;
   --vol-danger-dot: #ef4444;
 
-  --vol-info-bg: #e0f2fe;
-  --vol-info-text: #0369a1;
-  --vol-info-border: #bae6fd;
-  --vol-info-dot: #0ea5e9;
+  --vol-info-bg: #edf2e6;
+  --vol-info-text: #2d5a3e;
+  --vol-info-border: #c7dbc0;
+  --vol-info-dot: #5a8c6a;
 
   --vol-orange-bg: #ffedd5;
   --vol-orange-text: #c2410c;
@@ -70,13 +70,13 @@
 }
 
 /* =========================================================
-   1. Left Sidebar - Dark Blue Theme
+   1. Left Sidebar - HumanAid Deep Pine Theme
    ========================================================= */
 .vol-sidebar {
   width: 260px;
   min-width: 260px;
   background-color: var(--vol-sidebar-bg);
-  background-image: linear-gradient(180deg, #0b1528 0%, #070d19 100%);
+  background-image: none;
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -97,19 +97,19 @@
   align-items: center;
   gap: 10px;
   padding: 4px 8px 16px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .vol-brand-icon-box {
   width: 32px;
   height: 32px;
-  border: 1.5px solid rgba(147, 197, 253, 0.5);
+  border: 1px solid rgba(219, 228, 198, 0.3);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #93c5fd;
-  background: rgba(147, 197, 253, 0.1);
+  color: #dbe4c6;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .vol-brand-title {
@@ -151,9 +151,9 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #dbeafe;
-  color: #0f172a;
-  font-weight: 700;
+  background: #ffffff;
+  color: #14291e;
+  font-weight: 800;
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -171,7 +171,7 @@
 .vol-user-role-name {
   font-size: 12px;
   font-weight: 700;
-  color: #93c5fd;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -225,11 +225,12 @@
 }
 
 .vol-toggle-switch input:checked + .vol-toggle-slider {
-  background-color: #3b82f6;
+  background-color: #ffffff;
 }
 
 .vol-toggle-switch input:checked + .vol-toggle-slider:before {
   transform: translateX(16px);
+  background-color: #14291e;
 }
 
 /* Navigation Menu */
@@ -278,7 +279,7 @@
 }
 
 .vol-nav-badge {
-  background: rgba(255, 255, 255, 0.15);
+  background: #ef4444;
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
@@ -292,7 +293,7 @@
 }
 
 .vol-nav-btn.active .vol-nav-badge {
-  background: #0f172a;
+  background: #14291e;
   color: #ffffff;
 }
 
@@ -307,7 +308,7 @@
 }
 
 .vol-boundary-box {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   padding: 10px;
@@ -319,7 +320,7 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #93c5fd;
+  color: #dbe4c6;
   margin-bottom: 4px;
 }
 
@@ -519,8 +520,8 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #dbeafe;
-  color: #0f172a;
+  background: #dbe4c6;
+  color: #14291e;
   font-size: 11px;
   font-weight: 800;
   display: flex;
@@ -715,8 +716,8 @@
 }
 
 .vol-stat-icon-box.blue {
-  background: #e0f2fe;
-  color: #0284c7;
+  background: #edf2e6;
+  color: #3d6b4f;
 }
 
 .vol-stat-icon-box.orange {
@@ -725,8 +726,8 @@
 }
 
 .vol-stat-icon-box.gray {
-  background: #f1f5f9;
-  color: #64748b;
+  background: #eef1ea;
+  color: #657367;
 }
 
 .vol-stat-icon-box.green {
@@ -832,9 +833,9 @@
 }
 
 .vol-pill.tag-blue {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
+  background: #edf2e6;
+  color: #2d5a3e;
+  border: 1px solid #c7dbc0;
 }
 
 .vol-pill.tag-green {
@@ -899,7 +900,7 @@
 
 .vol-btn-outline:hover {
   background: var(--vol-canvas-bg);
-  border-color: #cbd5e1;
+  border-color: #c5ccbe;
 }
 
 /* =========================================================
@@ -974,7 +975,7 @@
 
 .vol-list-item:hover {
   background: #ffffff;
-  border-color: #cbd5e1;
+  border-color: #c5ccbe;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
 }
 
@@ -1226,15 +1227,15 @@
 }
 
 .vol-opp-priority-pill.blue {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
+  background: #edf2e6;
+  color: #2d5a3e;
+  border: 1px solid #c7dbc0;
 }
 
 .vol-opp-priority-pill.gray {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background: #eef1ea;
+  color: #4a5b4a;
+  border: 1px solid #dfe5d8;
 }
 
 .vol-opp-title {
@@ -1332,7 +1333,7 @@
 }
 
 .vol-data-table th {
-  background: #f8fafc;
+  background: #f4f6f2;
   padding: 12px 16px;
   font-size: 11px;
   font-weight: 700;
@@ -1448,7 +1449,7 @@
 }
 
 .vol-day-col {
-  background: #f8fafc;
+  background: #f4f6f2;
   border: 1px solid var(--vol-border);
   border-radius: 8px;
   padding: 8px 6px;
@@ -1685,7 +1686,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  background: #f8fafc;
+  background: #f4f6f2;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
 }

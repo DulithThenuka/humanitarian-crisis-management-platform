@@ -290,5 +290,146 @@ public class DonationsControllerTests : IClassFixture<DatabaseFixture>
         Assert.Contains("Admin", deleteAuth!.Roles);
         Assert.Contains("Coordinator", deleteAuth.Roles);
     }
+
+    [Fact]
+    public async Task FundingOfficer_VerifyAllocateAndDashboard_ShouldSynchronizeFromDatabase()
+    {
+        using var db = _fixture.CreateContext();
+        var controller = CreateController(db, role: "Coordinator");
+
+        var createAction = await controller.CreateDonorRecord(new CreateDonorRecordDto
+        {
+            DonorOrg = "Lanka Relief Trust",
+            Type = "Monetary",
+            Amount = 200000m,
+            Currency = "LKR",
+            OperationalArea = "Colombo District"
+        }, CancellationToken.None);
+
+        var createdOk = Assert.IsType<OkObjectResult>(createAction.Result);
+        var createdRecord = Assert.IsAssignableFrom<Result<DonorRecordDto>>(createdOk.Value).Data!;
+        Assert.Equal("Pending", createdRecord.Status);
+
+        // Verify
+        var verifyAction = await controller.ProcessDonorDecision(createdRecord.Id, new DonorDecisionDto
+        {
+            Action = "verify",
+            DecisionReason = "Bank transfer confirmed"
+        }, CancellationToken.None);
+        var verifiedRecord = Assert.IsAssignableFrom<Result<DonorRecordDto>>(Assert.IsType<OkObjectResult>(verifyAction.Result).Value).Data!;
+        Assert.Equal("Verified", verifiedRecord.Status);
+
+        // Allocate via CreateAllocation
+        var allocAction = await controller.CreateAllocation(new CreateFundingAllocationDto
+        {
+            SourceReference = createdRecord.Id,
+            TargetHubOrDepot = "Peliyagoda Depot",
+            Purpose = "Dry Rations",
+            Amount = 200000m
+        }, CancellationToken.None);
+        var allocResult = Assert.IsAssignableFrom<Result<FundingAllocationDto>>(Assert.IsType<OkObjectResult>(allocAction.Result).Value);
+        Assert.True(allocResult.Succeeded);
+        Assert.Equal("Approved", allocResult.Data!.Status);
+
+        // Dashboard & Donor Profiles reflect persisted state
+        var dashAction = await controller.GetDashboard(CancellationToken.None);
+        var dash = Assert.IsAssignableFrom<Result<FundingOfficerDashboardDto>>(Assert.IsType<OkObjectResult>(dashAction.Result).Value).Data!;
+        Assert.True((dash.MonetaryRecords.Raw ?? 0) >= 200000m);
+
+        var profilesAction = await controller.GetDonorProfiles(null, null, "Lanka Relief", CancellationToken.None);
+        var profiles = Assert.IsAssignableFrom<Result<IReadOnlyList<DonorProfileDto>>>(Assert.IsType<OkObjectResult>(profilesAction.Result).Value).Data!;
+        Assert.Contains(profiles, p => p.DonorName == "Lanka Relief Trust" && p.TotalMonetaryAmount >= 200000m);
+    }
+
+    [Fact]
+    public async Task FundingOfficer_CreateAllocation_ShouldPreventOverAllocation()
+    {
+        using var db = _fixture.CreateContext();
+        var controller = CreateController(db, role: "Coordinator");
+
+        var createAction = await controller.CreateDonorRecord(new CreateDonorRecordDto
+        {
+            DonorOrg = "Small Grant Donor",
+            Type = "Monetary",
+            Amount = 50000m
+        }, CancellationToken.None);
+        var created = Assert.IsAssignableFrom<Result<DonorRecordDto>>(Assert.IsType<OkObjectResult>(createAction.Result).Value).Data!;
+
+        await controller.ProcessDonorDecision(created.Id, new DonorDecisionDto
+        {
+            Action = "verify",
+            DecisionReason = "Verified"
+        }, CancellationToken.None);
+
+        var overAllocAction = await controller.CreateAllocation(new CreateFundingAllocationDto
+        {
+            SourceReference = created.Id,
+            TargetHubOrDepot = "Kaduwela Hub",
+            Purpose = "Over-allocation test",
+            Amount = 999999999m
+        }, CancellationToken.None);
+
+        var badReq = Assert.IsType<BadRequestObjectResult>(overAllocAction.Result);
+        var result = Assert.IsAssignableFrom<Result<FundingAllocationDto>>(badReq.Value);
+        Assert.False(result.Succeeded);
+    }
+
+    [Fact]
+    public async Task FundingOfficer_SuspiciousFlag_ShouldRequireReasonAndPersistClearance()
+    {
+        using var db = _fixture.CreateContext();
+        var controller = CreateController(db, role: "Coordinator");
+
+        var createAction = await controller.CreateDonorRecord(new CreateDonorRecordDto
+        {
+            DonorOrg = "High Value Consortium",
+            Type = "Monetary",
+            Amount = 1500000m
+        }, CancellationToken.None);
+        var created = Assert.IsAssignableFrom<Result<DonorRecordDto>>(Assert.IsType<OkObjectResult>(createAction.Result).Value).Data!;
+
+        var flagsAction = await controller.GetSuspiciousFlags(CancellationToken.None);
+        var flags = Assert.IsAssignableFrom<Result<IReadOnlyList<SuspiciousFlagDto>>>(Assert.IsType<OkObjectResult>(flagsAction.Result).Value).Data!;
+        var targetFlag = flags.First(f => f.RecordId == created.Id);
+        Assert.Equal("Open", targetFlag.Status);
+
+        var resolveAction = await controller.ResolveSuspiciousFlag(targetFlag.Id, new ResolveSuspiciousFlagDto
+        {
+            Action = "clear",
+            ResolutionNotes = "Verified audited bank statement"
+        }, CancellationToken.None);
+        var resolved = Assert.IsAssignableFrom<Result<SuspiciousFlagDto>>(Assert.IsType<OkObjectResult>(resolveAction.Result).Value).Data!;
+        Assert.Equal("Cleared", resolved.Status);
+
+        var refreshedRecord = Assert.IsAssignableFrom<Result<DonorRecordDto>>(
+            Assert.IsType<OkObjectResult>((await controller.GetDonorRecordById(created.Id, CancellationToken.None)).Result).Value).Data!;
+        Assert.Equal("Verified", refreshedRecord.Status);
+    }
+
+    [Fact]
+    public async Task FundingOfficer_CampaignAndTransparencyReport_ShouldComputeFromDatabase()
+    {
+        using var db = _fixture.CreateContext();
+        var controller = CreateController(db, role: "Coordinator");
+
+        var campAction = await controller.CreateCampaign(new CreateFundingCampaignDto
+        {
+            Title = "Ratnapura Flood Relief 2026",
+            TargetAmount = 500000m,
+            OperationalArea = "Ratnapura",
+            DurationDays = 15
+        }, CancellationToken.None);
+        var camp = Assert.IsAssignableFrom<Result<FundingCampaignDto>>(Assert.IsType<OkObjectResult>(campAction.Result).Value).Data!;
+        Assert.Equal("Active", camp.Status);
+
+        var pauseAction = await controller.UpdateCampaignStatus(camp.Id, new UpdateCampaignStatusDto { Status = "Paused" }, CancellationToken.None);
+        var paused = Assert.IsAssignableFrom<Result<FundingCampaignDto>>(Assert.IsType<OkObjectResult>(pauseAction.Result).Value).Data!;
+        Assert.Equal("Paused", paused.Status);
+
+        var reportAction = await controller.GetTransparencyReport(null, null, null, null, null, CancellationToken.None);
+        var report = Assert.IsAssignableFrom<Result<TransparencyReportDto>>(Assert.IsType<OkObjectResult>(reportAction.Result).Value).Data!;
+        Assert.False(report.HasExpenditureTracking);
+        Assert.NotNull(report.CampaignSummaries);
+    }
 }
 

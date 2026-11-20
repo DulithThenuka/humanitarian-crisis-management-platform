@@ -1,6 +1,6 @@
 /**
  * Emergency Coordinator Portal - Illustrative Operations Dataset
- * Designed for HumanAid / RELIEFCORE Crisis Response Coordination
+ * Designed for HumanAid Crisis Response Coordination
  */
 
 export const COORDINATOR_USER = {
@@ -14,25 +14,25 @@ export const COORDINATOR_USER = {
 };
 
 export const INITIAL_METRICS = {
-  incomingRequests: 248,
-  incomingTrend: '18 today',
-  pendingReviews: 46,
-  pendingTrend: '12 due soon',
-  criticalPriority: 64,
-  criticalTrend: '17 critical',
-  moreInfoRequired: 9,
-  moreInfoTrend: '3 overdue',
-  activeEmergencies: 3,
-  emergenciesTrend: '1 high severity',
-  volunteersAssigned: 86,
-  volunteersTrend: '12 tasks active'
+  incomingRequests: 0,
+  incomingTrend: 'Connecting to database...',
+  pendingReviews: 0,
+  pendingTrend: 'Connecting to database...',
+  criticalPriority: 0,
+  criticalTrend: 'Connecting to database...',
+  moreInfoRequired: 0,
+  moreInfoTrend: 'Connecting to database...',
+  activeEmergencies: 0,
+  emergenciesTrend: 'Connecting to database...',
+  volunteersAssigned: 0,
+  volunteersTrend: 'Connecting to database...'
 };
 
 export const RESPONSE_PERFORMANCE = [
-  { label: 'Initial review within target', value: 84, color: '#0284c7' },
-  { label: 'Requests verified', value: 71, color: '#0284c7' },
-  { label: 'Resolved requests', value: 62, color: '#0284c7' },
-  { label: 'Resource fulfillment', value: 68, color: '#0284c7' }
+  { label: 'Initial review within target', value: 84, color: '#3d6b4f' },
+  { label: 'Requests verified', value: 71, color: '#3d6b4f' },
+  { label: 'Resolved requests', value: 62, color: '#3d6b4f' },
+  { label: 'Resource fulfillment', value: 68, color: '#3d6b4f' }
 ];
 
 export const EMERGENCY_ALERTS = [
@@ -554,9 +554,9 @@ export const RESOURCE_COORDINATION_DATA = [
 ];
 
 export const RESOURCE_DISTRIBUTION_STATUS = [
-  { stage: 'Requested', units: 430, total: 450, color: '#0284c7' },
-  { stage: 'Approved', units: 342, total: 450, color: '#0ea5e9' },
-  { stage: 'Dispatched', units: 228, total: 450, color: '#38bdf8' },
+  { stage: 'Requested', units: 430, total: 450, color: '#3d6b4f' },
+  { stage: 'Approved', units: 342, total: 450, color: '#5a8c6a' },
+  { stage: 'Dispatched', units: 228, total: 450, color: '#7caa7e' },
   { stage: 'Delivered', units: 146, total: 450, color: '#10b981' }
 ];
 
@@ -803,8 +803,8 @@ export const REPORTS_ANALYTICS_DATA = {
     slices: [
       { name: 'Critical', pct: 17, count: 218, color: '#ef4444' },
       { name: 'High', pct: 26, count: 334, color: '#f59e0b' },
-      { name: 'Medium', pct: 39, count: 501, color: '#0284c7' },
-      { name: 'Low', pct: 18, count: 231, color: '#64748b' }
+      { name: 'Medium', pct: 39, count: 501, color: '#3d6b4f' },
+      { name: 'Low', pct: 18, count: 231, color: '#657367' }
     ]
   },
   requestsByCategory: [

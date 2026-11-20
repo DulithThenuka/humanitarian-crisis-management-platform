@@ -13,7 +13,7 @@
 .ec-profile-main-card,
 .ec-profile-side-card {
   background: #ffffff;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid #dfe5d8;
   border-radius: 14px;
   padding: 24px;
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
@@ -26,14 +26,14 @@
   gap: 16px;
   padding-bottom: 20px;
   margin-bottom: 22px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #eef1ea;
 }
 
 .ec-profile-avatar-circle {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  background: linear-gradient(135deg, #3d6b4f 0%, #7caa7e 100%);
   color: #ffffff;
   font-size: 18px;
   font-weight: 800;
@@ -50,13 +50,13 @@
 .ec-profile-name {
   font-size: 18px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0 0 4px 0;
 }
 
 .ec-profile-role-dept {
   font-size: 12.5px;
-  color: #64748b;
+  color: #657367;
   margin: 0;
   font-weight: 500;
 }
@@ -84,7 +84,7 @@
 .ec-perm-card-title {
   font-size: 15px;
   font-weight: 800;
-  color: #0f172a;
+  color: #14291e;
   margin: 0 0 16px 0;
 }
 
@@ -100,7 +100,7 @@
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  color: #1e293b;
+  color: #1e3328;
   font-weight: 600;
 }
 

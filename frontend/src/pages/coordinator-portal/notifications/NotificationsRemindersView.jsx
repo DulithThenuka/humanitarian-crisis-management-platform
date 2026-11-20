@@ -14,16 +14,46 @@ import {
 import { NOTIFICATIONS_REMINDERS_DATA } from '../data/coordinatorPortalData';
 import './NotificationsRemindersView.css';
 
-export const NotificationsRemindersView = ({ onOpenCaseReview, onNavigateTab, showToast }) => {
+export const NotificationsRemindersView = ({
+  onOpenCaseReview,
+  onNavigateTab,
+  showToast,
+  cases = [],
+  metrics = {}
+}) => {
   const [reminders, setReminders] = useState(NOTIFICATIONS_REMINDERS_DATA.records);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedReminderModal, setSelectedReminderModal] = useState(null);
 
-  const { summary } = NOTIFICATIONS_REMINDERS_DATA;
+  const summary = useMemo(() => {
+    return {
+      awaitingReview: metrics?.pendingReviews ?? NOTIFICATIONS_REMINDERS_DATA.summary.awaitingReview,
+      alertsAttention: NOTIFICATIONS_REMINDERS_DATA.summary.alertsAttention,
+      overdueActions: metrics?.criticalPriority ?? NOTIFICATIONS_REMINDERS_DATA.summary.overdueActions
+    };
+  }, [metrics]);
+
+  const computedReminders = useMemo(() => {
+    return reminders.map(r => {
+      if (r.relatedRecord === 'HMR-1042') {
+        const hmr1042 = cases.find(c => c.id === 'HMR-1042');
+        if (hmr1042 && hmr1042.status === 'Verified') {
+          return {
+            ...r,
+            reminder: 'Case HMR-1042 verified and scheduled for dispatch',
+            status: 'Verified',
+            statusClass: 'pill-verified',
+            timing: 'Completed'
+          };
+        }
+      }
+      return r;
+    });
+  }, [reminders, cases]);
 
   const filteredReminders = useMemo(() => {
-    return reminders.filter((item) => {
+    return computedReminders.filter((item) => {
       const matchSearch =
         !searchQuery ||
         item.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -34,7 +64,7 @@ export const NotificationsRemindersView = ({ onOpenCaseReview, onNavigateTab, sh
 
       return matchSearch && matchStatus;
     });
-  }, [reminders, searchQuery, statusFilter]);
+  }, [computedReminders, searchQuery, statusFilter]);
 
   const handleMarkAllRead = () => {
     showToast('All operational reminders marked as acknowledged.', 'success');
@@ -94,7 +124,7 @@ export const NotificationsRemindersView = ({ onOpenCaseReview, onNavigateTab, sh
       <div className="ec-rc-toolbar-container" style={{ padding: '12px 18px', marginBottom: '18px' }}>
         <div className="ec-rc-filter-bar">
           <div className="ec-rc-search-box">
-            <Search size={14} color="#94a3b8" />
+            <Search size={14} color="#8a9480" />
             <input
               type="text"
               placeholder="Search reminders, record codes..."
@@ -139,11 +169,11 @@ export const NotificationsRemindersView = ({ onOpenCaseReview, onNavigateTab, sh
             {filteredReminders.map((rem) => (
               <tr key={rem.id} onClick={() => handleActionReminder(rem)}>
                 <td className="ec-table-req-id">{rem.id}</td>
-                <td style={{ fontWeight: 600, color: '#0f172a' }}>{rem.reminder}</td>
-                <td style={{ color: '#0284c7', fontWeight: 600, fontFamily: 'monospace' }}>
+                <td style={{ fontWeight: 600, color: '#14291e' }}>{rem.reminder}</td>
+                <td style={{ color: '#3d6b4f', fontWeight: 600, fontFamily: 'monospace' }}>
                   {rem.relatedRecord}
                 </td>
-                <td style={{ color: '#475569', fontSize: '12px' }}>{rem.timing}</td>
+                <td style={{ color: '#4a5b4a', fontSize: '12px' }}>{rem.timing}</td>
                 <td>
                   <span
                     className={`ec-svc-status-pill ${

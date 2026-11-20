@@ -17,7 +17,7 @@ export const VerifyRequestModal = ({
     <div className="ec-modal-overlay" onClick={onClose}>
       <div className="ec-verify-modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="ec-modal-shield-icon icon-primary">
-          <ShieldCheck size={22} color="#0284c7" />
+          <ShieldCheck size={22} color="#3d6b4f" />
         </div>
 
         <div>
@@ -43,7 +43,7 @@ export const VerifyRequestModal = ({
             type="checkbox"
             checked={verifyConfirmedCheck}
             onChange={(e) => setVerifyConfirmedCheck(e.target.checked)}
-            style={{ accentColor: '#0284c7' }}
+            style={{ accentColor: '#3d6b4f' }}
           />
           <span>I reviewed the request information and understand the operational impact.</span>
         </label>

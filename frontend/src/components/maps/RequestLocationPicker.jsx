@@ -24,9 +24,9 @@ export const RequestLocationPicker = ({ onLocationSelect }) => {
   };
 
   return (
-    <div style={{ padding: '14px', borderRadius: '8px', backgroundColor: '#0f172a', border: '1px solid #334155', marginBottom: '16px' }}>
+    <div style={{ padding: '14px', borderRadius: '8px', backgroundColor: '#14291e', border: '1px solid #2a4a35', marginBottom: '16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-        <span style={{ fontSize: '13px', fontWeight: 600, color: '#cbd5e1' }}>Incident Geolocation</span>
+        <span style={{ fontSize: '13px', fontWeight: 600, color: '#c5ccbe' }}>Incident Geolocation</span>
         <button
           type="button"
           onClick={handleGetCurrentLocation}
@@ -37,25 +37,25 @@ export const RequestLocationPicker = ({ onLocationSelect }) => {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         <div>
-          <label style={{ fontSize: '11px', color: '#94a3b8' }}>Latitude</label>
+          <label style={{ fontSize: '11px', color: '#8a9480' }}>Latitude</label>
           <input
             type="number"
             step="0.0001"
             name="lat"
             value={coords.lat}
             onChange={handleManualChange}
-            style={{ width: '100%', padding: '6px 10px', borderRadius: '4px', border: '1px solid #334155', background: '#1e293b', color: '#f8fafc', fontSize: '12px' }}
+            style={{ width: '100%', padding: '6px 10px', borderRadius: '4px', border: '1px solid #2a4a35', background: '#1e3328', color: '#f4f6f2', fontSize: '12px' }}
           />
         </div>
         <div>
-          <label style={{ fontSize: '11px', color: '#94a3b8' }}>Longitude</label>
+          <label style={{ fontSize: '11px', color: '#8a9480' }}>Longitude</label>
           <input
             type="number"
             step="0.0001"
             name="lon"
             value={coords.lon}
             onChange={handleManualChange}
-            style={{ width: '100%', padding: '6px 10px', borderRadius: '4px', border: '1px solid #334155', background: '#1e293b', color: '#f8fafc', fontSize: '12px' }}
+            style={{ width: '100%', padding: '6px 10px', borderRadius: '4px', border: '1px solid #2a4a35', background: '#1e3328', color: '#f4f6f2', fontSize: '12px' }}
           />
         </div>
       </div>

@@ -8,8 +8,8 @@
   align-items: center;
   gap: 8px;
   background-color: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  color: #334155;
+  border: 1.5px solid #c5ccbe;
+  color: #2a4a35;
   font-size: 13px;
   font-weight: 700;
   padding: 8px 16px;
@@ -20,8 +20,8 @@
 }
 
 .ec-btn-action-outline:hover {
-  border-color: #0284c7;
-  color: #0284c7;
-  background-color: #f0f9ff;
+  border-color: #3d6b4f;
+  color: #3d6b4f;
+  background-color: #f4f6f2;
   box-shadow: 0 2px 8px rgba(2, 132, 199, 0.12);
 }

@@ -11,11 +11,19 @@ public abstract class BaseApiController : ControllerBase
     {
         get
         {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                     ?? User.FindFirst("sub")?.Value;
+            var claim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                     ?? User?.FindFirst("sub")?.Value;
             return Guid.TryParse(claim, out var id) ? id : Guid.Empty;
         }
     }
 
-    protected string CurrentUserRole => User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+    protected string CurrentUserRole =>
+        User?.FindFirst(ClaimTypes.Role)?.Value
+        ?? User?.FindFirst("role")?.Value
+        ?? string.Empty;
+
+    protected string CurrentUserName =>
+        User?.FindFirst(ClaimTypes.Name)?.Value
+        ?? User?.FindFirst("name")?.Value
+        ?? "Emergency Coordinator";
 }

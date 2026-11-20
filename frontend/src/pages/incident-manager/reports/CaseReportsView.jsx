@@ -1,0 +1,178 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Download
+} from 'lucide-react';
+import { REPORT_BARS_DATA, REPORT_BREAKDOWN } from '../data/caseManagerData';
+import { incidentService } from '../../../services/incidentService';
+
+export const CaseReportsView = ({ showToast }) => {
+  const [selectedOperation, setSelectedOperation] = useState('Current operation');
+  const [hoveredBar, setHoveredBar] = useState(null);
+  const [reportBars, setReportBars] = useState(REPORT_BARS_DATA);
+  const [reportBreakdown, setReportBreakdown] = useState(REPORT_BREAKDOWN);
+  const [isLiveReport, setIsLiveReport] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const loadSummary = async () => {
+      try {
+        const res = await incidentService.getReportSummary(selectedOperation);
+        if (!active) return;
+        const summary = res?.data || res;
+        if (summary) {
+          if (Array.isArray(summary.reportBarsData) && summary.reportBarsData.length > 0) {
+            setReportBars(summary.reportBarsData);
+          }
+          if (Array.isArray(summary.reportBreakdown) && summary.reportBreakdown.length > 0) {
+            setReportBreakdown(summary.reportBreakdown);
+          }
+          setIsLiveReport(true);
+        }
+      } catch {
+        if (!active) return;
+        setIsLiveReport(false);
+      }
+    };
+
+    loadSummary();
+    return () => {
+      active = false;
+    };
+  }, [selectedOperation]);
+
+  const handleExportCSV = () => {
+    showToast?.('Generating Case Manager reporting metrics CSV...', 'info');
+    try {
+      const headers1 = 'Interval_Hour,Unresolved_Cases_Count,Bar_Height_Pct\n';
+      const rows1 = reportBars.map((b) => `"${b.hour}",${b.count},${b.height}%`).join('\n');
+
+      const headers2 = '\n\nMetric_Label,Percentage\n';
+      const rows2 = reportBreakdown.map((r) => `"${r.label}",${r.pct}%`).join('\n');
+
+      const csvContent = `data:text/csv;charset=utf-8,HumanAid Case Manager Report - ${selectedOperation}\nGenerated: ${new Date().toISOString()}\n\n${headers1}${rows1}${headers2}${rows2}`;
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `humanaid-casemanager-report-${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast?.('Reports exported: workload trend & breakdown saved to CSV.', 'success');
+    } catch {
+      showToast?.('Failed to export CSV report.', 'error');
+    }
+  };
+
+  return (
+    <div className="cm-canvas-wrapper">
+      {/* Header */}
+      <div className="cm-management-head-row">
+        <div>
+          <span className="cm-tag-uppercase">
+            {isLiveReport ? 'OPERATIONAL REPORTING · /API/INCIDENTS/REPORTS/SUMMARY' : 'ILLUSTRATIVE REPORTING · FALLBACK METRICS'}
+          </span>
+          <h1 className="cm-canvas-h1">Case Manager Reports</h1>
+          <p className="cm-canvas-sub">
+            {isLiveReport
+              ? 'Aggregated incident status, escalation, and AI governance metrics from the backend service.'
+              : 'Filterable demonstration summaries use fallback records when the API is offline.'}
+          </p>
+        </div>
+
+        <div className="cm-mgmt-actions-group">
+          <select
+            className="cm-filter-select"
+            value={selectedOperation}
+            onChange={(e) => setSelectedOperation(e.target.value)}
+          >
+            <option value="Current operation">Current operation</option>
+            <option value="Western Province Flood">Western Province Flood</option>
+            <option value="Southern Coastal Surge">Southern Coastal Surge</option>
+            <option value="All active emergencies">All active emergencies</option>
+          </select>
+
+          <button className="cm-btn-export-outline" onClick={handleExportCSV}>
+            <Download size={14} />
+            <span>Export demo CSV</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Two-Column Split Layout (Screenshot 5 exact match) */}
+      <div className="cm-dash-split-row">
+        {/* Left Column: Unresolved Cases Over Time Bar Chart */}
+        <div className="cm-panel-card">
+          <div className="cm-panel-header">
+            <div>
+              <h3 className="cm-panel-title">Unresolved cases over time</h3>
+              <p className="cm-panel-sub">Illustrative trend across monitored shift intervals</p>
+            </div>
+            <span className="cm-pill-tag purple">● {isLiveReport ? 'API Summary' : 'Demo'}</span>
+          </div>
+
+          <div className="cm-barchart-container">
+            {reportBars.map((bar) => {
+              const isHovered = hoveredBar === bar.hour;
+              return (
+                <div
+                  key={bar.hour}
+                  className="cm-bar-col"
+                  onMouseEnter={() => setHoveredBar(bar.hour)}
+                  onMouseLeave={() => setHoveredBar(null)}
+                >
+                  {isHovered && (
+                    <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#3d6b4f' }}>
+                      {bar.count}
+                    </span>
+                  )}
+                  <div
+                    className="cm-bar-pillar"
+                    style={{ height: `${bar.height}%` }}
+                    title={`Interval ${bar.hour}: ${bar.count} unresolved cases`}
+                  />
+                  <span className="cm-bar-label">{bar.hour}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', fontSize: '11px', color: '#8a9480' }}>
+            <span>Shift hours (1 - 12)</span>
+            <span>Average peak: Interval 8 (42 open cases)</span>
+          </div>
+        </div>
+
+        {/* Right Column: Operational Breakdown Progress Bars */}
+        <div className="cm-panel-card">
+          <div className="cm-panel-header">
+            <div>
+              <h3 className="cm-panel-title">Operational breakdown</h3>
+              <p className="cm-panel-sub">SLA adherence, resolution rate and verification velocity</p>
+            </div>
+          </div>
+
+          <div className="cm-breakdown-list">
+            {reportBreakdown.map((item) => (
+              <div key={item.label} className="cm-breakdown-item">
+                <div className="cm-breakdown-header">
+                  <span className="cm-breakdown-label">{item.label}</span>
+                  <span className="cm-breakdown-pct">{item.pct}%</span>
+                </div>
+                <div className="cm-progress-track">
+                  <div
+                    className="cm-progress-bar-fill"
+                    style={{ width: `${item.pct}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: '24px', padding: '12px 14px', background: '#f4f6f2', borderRadius: '8px', border: '1px solid #dfe5d8', fontSize: '11.5px', color: '#657367', lineHeight: 1.4 }}>
+            <strong>System Safeguard Note:</strong> Summaries reflect role-scoped incident records only. No private citizen credentials or redacted notes are exposed.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

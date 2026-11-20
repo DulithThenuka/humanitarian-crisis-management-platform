@@ -5,7 +5,7 @@
 
 /* Hero KPI Summary Strip - Modern Oceanic Navy & Electric Blue */
 .ec-req-summary-strip {
-  background: linear-gradient(135deg, #091a2b 0%, #0d2847 45%, #0284c7 100%);
+  background: linear-gradient(135deg, #14291e 0%, #0d2847 45%, #3d6b4f 100%);
   border-radius: 14px;
   padding: 18px 28px;
   display: flex;
@@ -60,7 +60,7 @@
 .ec-req-stat-label {
   font-size: 12px;
   font-weight: 600;
-  color: #cbd5e1;
+  color: #c5ccbe;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -68,7 +68,7 @@
 /* Multi-Criteria Toolbar */
 .ec-req-toolbar-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 12px;
   padding: 14px 20px;
   display: flex;
@@ -90,8 +90,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background-color: #f8fafc;
-  border: 1.5px solid #cbd5e1;
+  background-color: #f4f6f2;
+  border: 1.5px solid #c5ccbe;
   border-radius: 8px;
   padding: 8px 14px;
   min-width: 280px;
@@ -100,7 +100,7 @@
 }
 
 .ec-req-search-box:focus-within {
-  border-color: #0284c7;
+  border-color: #3d6b4f;
   background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.16);
 }
@@ -111,12 +111,12 @@
   width: 100%;
   font-size: 13px;
   font-family: inherit;
-  color: #0f172a;
+  color: #14291e;
   outline: none;
 }
 
 .ec-search-input::placeholder {
-  color: #94a3b8;
+  color: #8a9480;
 }
 
 .ec-req-filter-group {
@@ -131,8 +131,8 @@
   align-items: center;
   gap: 8px;
   background-color: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  color: #1e293b;
+  border: 1.5px solid #c5ccbe;
+  color: #1e3328;
   font-size: 12.5px;
   font-weight: 600;
   padding: 8px 14px;
@@ -144,21 +144,21 @@
 }
 
 .ec-filter-dropdown-btn:hover {
-  border-color: #0284c7;
-  color: #0284c7;
-  background-color: #f0f9ff;
+  border-color: #3d6b4f;
+  color: #3d6b4f;
+  background-color: #f4f6f2;
   box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08);
 }
 
 .ec-filter-dropdown-btn:focus {
-  border-color: #0284c7;
+  border-color: #3d6b4f;
   box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
 }
 
 .ec-btn-clear-filters {
   background: none;
   border: none;
-  color: #64748b;
+  color: #657367;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -186,8 +186,8 @@
   align-items: center;
   gap: 6px;
   background-color: #eff6ff;
-  border: 1px solid #93c5fd;
-  color: #0369a1;
+  border: 1px solid #b8ccaa;
+  color: #2d5a3e;
   font-size: 11.5px;
   font-weight: 700;
   padding: 4px 10px;
@@ -197,15 +197,15 @@
 }
 
 .ec-filter-tag-chip:hover {
-  background-color: #dbeafe;
-  border-color: #60a5fa;
+  background-color: #dbe4c6;
+  border-color: #7caa7e;
   transform: translateY(-1px);
 }
 
 /* Rich Data Table */
 .ec-table-container {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dfe5d8;
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
@@ -219,42 +219,42 @@
 }
 
 .ec-data-table thead {
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border-bottom: 2px solid #e2e8f0;
+  background: linear-gradient(180deg, #f4f6f2 0%, #eef1ea 100%);
+  border-bottom: 2px solid #dfe5d8;
 }
 
 .ec-data-table th {
   padding: 14px 18px;
   font-size: 11px;
   font-weight: 800;
-  color: #475569;
+  color: #4a5b4a;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
 .ec-data-table tbody tr {
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #eef1ea;
   cursor: pointer;
   transition: all 0.18s ease;
   position: relative;
 }
 
 .ec-data-table tbody tr:hover {
-  background: linear-gradient(90deg, #f0f9ff 0%, #ffffff 100%);
+  background: linear-gradient(90deg, #f4f6f2 0%, #ffffff 100%);
   transform: translateY(-1px);
-  box-shadow: inset 3px 0 0 #0284c7;
+  box-shadow: inset 3px 0 0 #3d6b4f;
 }
 
 .ec-data-table td {
   padding: 14px 18px;
-  color: #1e293b;
+  color: #1e3328;
   font-size: 13px;
   vertical-align: middle;
 }
 
 .ec-table-req-id {
   font-weight: 800;
-  color: #0284c7;
+  color: #3d6b4f;
   letter-spacing: -0.01em;
   display: inline-flex;
   align-items: center;
@@ -262,7 +262,7 @@
 }
 
 .ec-table-req-id:hover {
-  color: #0369a1;
+  color: #2d5a3e;
   text-decoration: underline;
 }
 
@@ -323,9 +323,22 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.ec-badge-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background-color: #eff6ff;
-  color: #0284c7;
-  border: 1px solid #bae6fd;
+  color: #3d6b4f;
+  border: 1px solid #c7dbc0;
   font-size: 11px;
   font-weight: 700;
   padding: 3px 8px;
@@ -338,10 +351,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 22px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #dfe5d8;
   background: #fafafa;
   font-size: 12.5px;
-  color: #64748b;
+  color: #657367;
   font-weight: 500;
 }
 
@@ -355,9 +368,9 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid #c5ccbe;
   background-color: #ffffff;
-  color: #334155;
+  color: #2a4a35;
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -368,14 +381,14 @@
 }
 
 .ec-page-num-btn:hover {
-  border-color: #0284c7;
-  color: #0284c7;
-  background-color: #f0f9ff;
+  border-color: #3d6b4f;
+  color: #3d6b4f;
+  background-color: #f4f6f2;
 }
 
 .ec-page-num-btn.active {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  background: linear-gradient(135deg, #3d6b4f 0%, #2d5a3e 100%);
   color: #ffffff;
-  border-color: #0284c7;
+  border-color: #3d6b4f;
   box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
 }

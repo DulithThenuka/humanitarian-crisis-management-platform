@@ -34,7 +34,16 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
 
     public virtual Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
     {
-        _context.Entry(entity).State = EntityState.Modified;
+        var tracked = _dbSet.Local.FirstOrDefault(e => e.Id == entity.Id);
+        if (tracked != null && !ReferenceEquals(tracked, entity))
+        {
+            _context.Entry(tracked).CurrentValues.SetValues(entity);
+            _context.Entry(tracked).State = EntityState.Modified;
+        }
+        else
+        {
+            _context.Entry(entity).State = EntityState.Modified;
+        }
         return Task.CompletedTask;
     }
 

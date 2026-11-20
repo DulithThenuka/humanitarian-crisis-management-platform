@@ -17,6 +17,7 @@ import {
   Bell,
   Settings
 } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 import { COORDINATOR_USER } from '../data/coordinatorPortalData';
 import './CoordinatorSidebar.css';
 
@@ -26,9 +27,16 @@ export const CoordinatorSidebar = ({
   dutyActive,
   setDutyActive,
   onShowAlertModal,
-  showToast
+  showToast,
+  coordinator
 }) => {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
+
+  const activeUser = coordinator || authUser;
+  const fullName = activeUser?.fullName || activeUser?.name || COORDINATOR_USER.fullName;
+  const initials = activeUser?.initials || (fullName ? fullName.split(' ').filter(Boolean).map(p => p[0]).join('').slice(0, 2).toUpperCase() : COORDINATOR_USER.initials);
+  const role = activeUser?.role === 'Coordinator' ? 'Emergency Coordinator' : (activeUser?.role || COORDINATOR_USER.role);
 
   return (
     <aside className="ec-sidebar">
@@ -48,12 +56,12 @@ export const CoordinatorSidebar = ({
         <div className="ec-user-status-card">
           <div className="ec-user-meta-left">
             <div className="ec-avatar-circle">
-              {COORDINATOR_USER.initials}
+              {initials}
             </div>
             <div>
               <span className="ec-user-tag-tiny">SIGNED IN AS</span>
-              <div className="ec-user-name-bold">{COORDINATOR_USER.role}</div>
-              <div style={{ fontSize: '11px', color: '#94a3b8' }}>{COORDINATOR_USER.fullName}</div>
+              <div className="ec-user-name-bold">{role}</div>
+              <div style={{ fontSize: '11px', color: '#8a9480' }}>{fullName}</div>
             </div>
           </div>
           <div
@@ -210,7 +218,7 @@ export const CoordinatorSidebar = ({
       <div className="ec-sidebar-bottom-block">
         <div className="ec-access-notice-box">
           <div className="ec-access-title">
-            <ShieldCheck size={14} color="#38bdf8" />
+            <ShieldCheck size={14} color="#7caa7e" />
             <span>Coordinator access</span>
           </div>
           <div>Operational actions only. System administration is restricted.</div>

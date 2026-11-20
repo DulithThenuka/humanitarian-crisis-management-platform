@@ -11,18 +11,18 @@ export const CrisisSeverityChart = ({ data = { critical: 12, high: 28, medium: 4
   ];
 
   return (
-    <div style={{ padding: '20px', borderRadius: '12px', backgroundColor: '#1e293b', border: '1px solid #334155' }}>
-      <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#f8fafc', marginBottom: '16px' }}>Request Volume by Urgency</h4>
+    <div style={{ padding: '20px', borderRadius: '12px', backgroundColor: '#1e3328', border: '1px solid #2a4a35' }}>
+      <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#f4f6f2', marginBottom: '16px' }}>Request Volume by Urgency</h4>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {categories.map((cat, idx) => {
           const pct = Math.round((cat.count / total) * 100);
           return (
             <div key={idx}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                <span style={{ color: '#cbd5e1' }}>{cat.label}</span>
-                <span style={{ fontWeight: 600, color: '#f8fafc' }}>{cat.count} ({pct}%)</span>
+                <span style={{ color: '#c5ccbe' }}>{cat.label}</span>
+                <span style={{ fontWeight: 600, color: '#f4f6f2' }}>{cat.count} ({pct}%)</span>
               </div>
-              <div style={{ height: '8px', borderRadius: '4px', backgroundColor: '#0f172a', overflow: 'hidden' }}>
+              <div style={{ height: '8px', borderRadius: '4px', backgroundColor: '#14291e', overflow: 'hidden' }}>
                 <div style={{ width: `${pct}%`, height: '100%', backgroundColor: cat.color, borderRadius: '4px' }} />
               </div>
             </div>

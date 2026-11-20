@@ -17,6 +17,8 @@ export const CrisisManagementView = ({
   onNavigateTab,
   showToast
 }) => {
+  const activeIncident = currentIncident || (incidents && incidents.length > 0 ? incidents[0] : null);
+
   return (
     <div className="ec-portal-canvas">
       {/* Header Strip */}
@@ -41,7 +43,7 @@ export const CrisisManagementView = ({
       <div className="ec-req-toolbar-card" style={{ padding: '8px 14px' }}>
         <div className="ec-req-toolbar-row">
           <div className="ec-req-search-box" style={{ maxWidth: '360px' }}>
-            <Search size={14} color="#94a3b8" />
+            <Search size={14} color="#8a9480" />
             <input
               type="text"
               placeholder="Search incidents or locations..."
@@ -66,7 +68,7 @@ export const CrisisManagementView = ({
       <div className="ec-crisis-upper-grid">
         {/* Left Column: Incidents Cards List */}
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {incidents.map((inc) => (
+          {(incidents || []).map((inc) => (
             <div
               key={inc.id}
               className={`ec-incident-card ${inc.id === selectedIncidentId ? 'active' : ''}`}
@@ -74,15 +76,15 @@ export const CrisisManagementView = ({
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <span className="ec-meta-label-tiny">{inc.id}</span>
-                <span className={inc.severity === 'High' ? 'ec-badge-critical' : 'ec-badge-high'}>
-                  ● {inc.severity}
+                <span className={inc.severity === 'High' || inc.severity === 'Critical' ? 'ec-badge-critical' : 'ec-badge-high'}>
+                  ● {inc.severity || 'High'}
                 </span>
               </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#14291e', marginBottom: '4px' }}>
                 {inc.title}
               </div>
-              <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
-                <MapPin size={12} color="#0284c7" />
+              <div style={{ fontSize: '11.5px', color: '#657367', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+                <MapPin size={12} color="#3d6b4f" />
                 <span>{inc.area}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -107,7 +109,7 @@ export const CrisisManagementView = ({
               <path
                 d="M -20 200 Q 150 170 300 220 T 620 190"
                 fill="none"
-                stroke="#93c5fd"
+                stroke="#b8ccaa"
                 strokeWidth="28"
                 opacity="0.8"
               />
@@ -126,7 +128,7 @@ export const CrisisManagementView = ({
 
               {/* Resource Depot Marker */}
               <g transform="translate(370, 110)">
-                <rect width="84" height="20" rx="4" fill="#0284c7" />
+                <rect width="84" height="20" rx="4" fill="#3d6b4f" />
                 <text x="42" y="14" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
                   RES-021 · 240
                 </text>
@@ -166,7 +168,7 @@ export const CrisisManagementView = ({
                 <span>Verified shelters</span>
               </div>
               <div className="ec-layer-item">
-                <span style={{ color: '#0284c7' }}>●</span>
+                <span style={{ color: '#3d6b4f' }}>●</span>
                 <span>Resource depots</span>
               </div>
             </div>
@@ -175,117 +177,131 @@ export const CrisisManagementView = ({
       </div>
 
       {/* Lower Section: Incident Detail Panel */}
-      <div className="ec-incident-detail-panel">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <div>
-            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 2px 0' }}>
-              {currentIncident.title}
-            </h3>
-            <div style={{ fontSize: '12px', color: '#64748b' }}>
-              {currentIncident.id} · Lead team: {currentIncident.leadTeam}
+      {activeIncident && (
+        <div className="ec-incident-detail-panel">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#14291e', margin: '0 0 2px 0' }}>
+                {activeIncident.title || 'Incident Event'}
+              </h3>
+              <div style={{ fontSize: '12px', color: '#657367' }}>
+                {activeIncident.id} · Lead team: {activeIncident.leadTeam || 'National Relief Unit'}
+              </div>
+            </div>
+            <span className="ec-badge-critical">● {activeIncident.severity || 'High'} severity</span>
+          </div>
+
+          {/* 4-Item Metric Quad */}
+          <div className="ec-incident-quad-metrics">
+            <div className="ec-meta-quad-item">
+              <span className="ec-meta-label-tiny">AFFECTED ESTIMATE</span>
+              <span className="ec-meta-val-text">{activeIncident.affectedEstimate || 'Assessing'}</span>
+            </div>
+            <div className="ec-meta-quad-item">
+              <span className="ec-meta-label-tiny">RELATED REQUESTS</span>
+              <span
+                className="ec-meta-val-text"
+                style={{ color: '#3d6b4f', cursor: 'pointer', textDecoration: 'underline' }}
+                onClick={() => onNavigateTab('requests')}
+              >
+                {activeIncident.relatedRequests || 'Open'}
+              </span>
+            </div>
+            <div className="ec-meta-quad-item">
+              <span className="ec-meta-label-tiny">ASSIGNED COORDINATOR</span>
+              <span className="ec-meta-val-text">{activeIncident.assignedCoordinator || 'Emergency Coordinator'}</span>
+            </div>
+            <div className="ec-meta-quad-item">
+              <span className="ec-meta-label-tiny">CURRENT STATUS</span>
+              <span className="ec-meta-val-text" style={{ color: '#059669' }}>{activeIncident.currentStatus || 'Active'}</span>
             </div>
           </div>
-          <span className="ec-badge-critical">● {currentIncident.severity} severity</span>
-        </div>
 
-        {/* 4-Item Metric Quad */}
-        <div className="ec-incident-quad-metrics">
-          <div className="ec-meta-quad-item">
-            <span className="ec-meta-label-tiny">AFFECTED ESTIMATE</span>
-            <span className="ec-meta-val-text">{currentIncident.affectedEstimate}</span>
+          {/* Split Sub-rows: Unresolved Issues & Timeline */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
+            {/* Left: Unresolved Issues */}
+            <div>
+              <span className="ec-meta-label-tiny" style={{ display: 'block', marginBottom: '10px' }}>
+                UNRESOLVED ISSUES
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {(activeIncident.unresolvedIssues && activeIncident.unresolvedIssues.length > 0) ? (
+                  activeIncident.unresolvedIssues.map((iss) => (
+                    <div key={iss.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: 600 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <AlertTriangle size={13} color={iss.severity === 'Critical' ? '#ef4444' : '#f59e0b'} />
+                          <span>{iss.title}</span>
+                        </span>
+                        <span className={iss.severity === 'Critical' ? 'ec-badge-critical' : 'ec-badge-high'}>
+                          {iss.severity}
+                        </span>
+                      </div>
+                      <div className="ec-meter-track">
+                        <div
+                          className={iss.severity === 'Critical' ? 'ec-meter-fill-red' : 'ec-meter-fill-amber'}
+                          style={{ width: `${iss.percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ fontSize: '12px', color: '#657367', fontStyle: 'italic', padding: '8px 0' }}>
+                    No critical unresolved issues currently flagged.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Situation Timeline */}
+            <div>
+              <span className="ec-meta-label-tiny" style={{ display: 'block', marginBottom: '10px' }}>
+                SITUATION TIMELINE
+              </span>
+              <div className="ec-history-stepper-list">
+                {((activeIncident.timeline && activeIncident.timeline.length > 0) ? activeIncident.timeline : [
+                  {
+                    time: '08:00 AM',
+                    event: 'Emergency operations coordination active',
+                    actor: 'Response Center'
+                  }
+                ]).map((step, idx) => (
+                  <div key={idx} className="ec-history-step-row">
+                    <span className="ec-step-time-lbl">{step.time}</span>
+                    <div className="ec-step-bullet-dot" />
+                    <div>
+                      <div className="ec-step-title">{step.event}</div>
+                      <div className="ec-step-actor">{step.actor}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="ec-meta-quad-item">
-            <span className="ec-meta-label-tiny">RELATED REQUESTS</span>
-            <span
-              className="ec-meta-val-text"
-              style={{ color: '#0284c7', cursor: 'pointer', textDecoration: 'underline' }}
+
+          {/* Bottom Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #eef1ea' }}>
+            <button
+              className="ec-btn-hero-outline"
+              onClick={() => showToast('Update log form opened')}
+            >
+              Record update
+            </button>
+            <button
+              className="ec-btn-hero-outline"
               onClick={() => onNavigateTab('requests')}
             >
-              {currentIncident.relatedRequests}
-            </span>
-          </div>
-          <div className="ec-meta-quad-item">
-            <span className="ec-meta-label-tiny">ASSIGNED COORDINATOR</span>
-            <span className="ec-meta-val-text">{currentIncident.assignedCoordinator}</span>
-          </div>
-          <div className="ec-meta-quad-item">
-            <span className="ec-meta-label-tiny">CURRENT STATUS</span>
-            <span className="ec-meta-val-text" style={{ color: '#059669' }}>{currentIncident.currentStatus}</span>
+              Link requests
+            </button>
+            <button
+              className="ec-btn-hero-primary"
+              onClick={() => showToast('Incident escalated to National Disaster Management Center (DMC)', 'warning')}
+            >
+              Escalate incident
+            </button>
           </div>
         </div>
-
-        {/* Split Sub-rows: Unresolved Issues & Timeline */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
-          {/* Left: Unresolved Issues */}
-          <div>
-            <span className="ec-meta-label-tiny" style={{ display: 'block', marginBottom: '10px' }}>
-              UNRESOLVED ISSUES
-            </span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {currentIncident.unresolvedIssues?.map((iss) => (
-                <div key={iss.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: 600 }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <AlertTriangle size={13} color={iss.severity === 'Critical' ? '#ef4444' : '#f59e0b'} />
-                      <span>{iss.title}</span>
-                    </span>
-                    <span className={iss.severity === 'Critical' ? 'ec-badge-critical' : 'ec-badge-high'}>
-                      {iss.severity}
-                    </span>
-                  </div>
-                  <div className="ec-meter-track">
-                    <div
-                      className={iss.severity === 'Critical' ? 'ec-meter-fill-red' : 'ec-meter-fill-amber'}
-                      style={{ width: `${iss.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: Situation Timeline */}
-          <div>
-            <span className="ec-meta-label-tiny" style={{ display: 'block', marginBottom: '10px' }}>
-              SITUATION TIMELINE
-            </span>
-            <div className="ec-history-stepper-list">
-              {currentIncident.timeline?.map((step, idx) => (
-                <div key={idx} className="ec-history-step-row">
-                  <span className="ec-step-time-lbl">{step.time}</span>
-                  <div className="ec-step-bullet-dot" />
-                  <div>
-                    <div className="ec-step-title">{step.event}</div>
-                    <div className="ec-step-actor">{step.actor}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
-          <button
-            className="ec-btn-hero-outline"
-            onClick={() => showToast('Update log form opened')}
-          >
-            Record update
-          </button>
-          <button
-            className="ec-btn-hero-outline"
-            onClick={() => onNavigateTab('requests')}
-          >
-            Link requests
-          </button>
-          <button
-            className="ec-btn-hero-primary"
-            onClick={() => showToast('Incident escalated to National Disaster Management Center (DMC)', 'warning')}
-          >
-            Escalate incident
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

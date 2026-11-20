@@ -14,10 +14,11 @@ public class AssistanceRequestsControllerTests
     public async Task GetAll_ShouldReturnOkWithList()
     {
         var serviceMock = new Mock<IAssistanceRequestService>();
+        var coordinatorMock = new Mock<ICoordinatorService>();
         serviceMock.Setup(s => s.GetAllAsync(null, null, default))
                    .ReturnsAsync(Result<IReadOnlyList<AssistanceRequestResponseDto>>.Success(new List<AssistanceRequestResponseDto>()));
 
-        var controller = new AssistanceRequestsController(serviceMock.Object);
+        var controller = new AssistanceRequestsController(serviceMock.Object, coordinatorMock.Object);
         var actionResult = await controller.GetAll(null, null);
 
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);

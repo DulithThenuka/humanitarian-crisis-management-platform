@@ -69,7 +69,7 @@ export const TaskProgressView = ({
           <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#12281b', margin: '0 0 6px 0' }}>
             {activeTask.taskTitle}
           </h2>
-          <div style={{ display: 'flex', gap: '16px', fontSize: '12.5px', color: '#64748b', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '16px', fontSize: '12.5px', color: '#657367', marginBottom: '16px' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <MapPin size={14} /> {activeTask.location}
             </span>
@@ -78,11 +78,11 @@ export const TaskProgressView = ({
             </span>
           </div>
 
-          <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8e0', marginBottom: '20px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: '6px' }}>
+          <div style={{ background: '#f4f6f2', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8e0', marginBottom: '20px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#657367', marginBottom: '6px' }}>
               Operational Brief
             </div>
-            <p style={{ fontSize: '12.5px', color: '#334155', margin: 0, lineHeight: 1.45 }}>
+            <p style={{ fontSize: '12.5px', color: '#2a4a35', margin: 0, lineHeight: 1.45 }}>
               {activeTask.details || 'Coordinate with on-site staff for food ration pack deliveries and family allocations. Ensure all recipient IDs are recorded in field logs.'}
             </p>
           </div>
@@ -104,7 +104,7 @@ export const TaskProgressView = ({
                   border: `1px solid ${item.checked ? '#bbf7d0' : '#e2e8e0'}`,
                   cursor: 'pointer',
                   fontSize: '12.5px',
-                  color: item.checked ? '#166534' : '#1e293b'
+                  color: item.checked ? '#166534' : '#1e3328'
                 }}
               >
                 <input
@@ -129,7 +129,7 @@ export const TaskProgressView = ({
 
           <form onSubmit={handleSubmitReport}>
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4a5b4a', marginBottom: '6px' }}>
                 Hours Worked
               </label>
               <input
@@ -145,7 +145,7 @@ export const TaskProgressView = ({
             </div>
 
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4a5b4a', marginBottom: '6px' }}>
                 Shift Debrief & Notes
               </label>
               <textarea
@@ -158,12 +158,12 @@ export const TaskProgressView = ({
               />
             </div>
 
-            <div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '14px', textAlign: 'center', marginBottom: '18px' }}>
-              <Upload size={20} style={{ color: '#64748b', marginBottom: '4px' }} />
-              <div style={{ fontSize: '12px', fontWeight: 600, color: '#1e293b' }}>
+            <div style={{ background: '#f4f6f2', border: '1px dashed #c5ccbe', borderRadius: '8px', padding: '14px', textAlign: 'center', marginBottom: '18px' }}>
+              <Upload size={20} style={{ color: '#657367', marginBottom: '4px' }} />
+              <div style={{ fontSize: '12px', fontWeight: 600, color: '#1e3328' }}>
                 Attach sign-off sheet or photo (optional)
               </div>
-              <div style={{ fontSize: '11px', color: '#94a3b8' }}>PNG, JPG up to 5MB</div>
+              <div style={{ fontSize: '11px', color: '#8a9480' }}>PNG, JPG up to 5MB</div>
             </div>
 
             <button

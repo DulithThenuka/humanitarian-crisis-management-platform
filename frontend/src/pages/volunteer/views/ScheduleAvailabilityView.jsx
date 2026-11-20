@@ -99,7 +99,7 @@ export const ScheduleAvailabilityView = ({
             </div>
           </div>
 
-          <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '12px' }}>
+          <div style={{ fontSize: '11px', color: '#657367', marginBottom: '12px' }}>
             Your assignments and availability
           </div>
 
@@ -167,7 +167,7 @@ export const ScheduleAvailabilityView = ({
                     disabled={!d.active}
                     onChange={(e) => handleTimeChange(index, 'start', e.target.value)}
                   />
-                  <span style={{ fontSize: '11px', color: '#64748b' }}>to</span>
+                  <span style={{ fontSize: '11px', color: '#657367' }}>to</span>
                   <input
                     type="text"
                     className="vol-time-input"
