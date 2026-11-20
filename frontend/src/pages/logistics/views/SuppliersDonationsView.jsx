@@ -9,10 +9,44 @@ import {
   Package,
   RotateCcw,
   CheckCircle,
-  FileCheck
+  FileCheck,
+  Download
 } from 'lucide-react';
 import { RecordDonationModal } from '../components/modals/RecordDonationModal';
 import { SupplierDetailDrawer } from '../components/modals/SupplierDetailDrawer';
+
+const INITIAL_RECEIPTS = [
+  {
+    receiptNo: 'RCP-2026-042',
+    supplierDonor: 'Global Relief Trust',
+    manifest: 'MNF-9921 · Central Depot',
+    itemsReceived: '450 boxes · Bottled Water',
+    inspectionLog: 'PASSED · Quality Verified',
+    status: 'Cleared',
+    statusBadge: 'available',
+    dateReceived: '18 Feb 2026 · 09:30'
+  },
+  {
+    receiptNo: 'RCP-2026-039',
+    supplierDonor: 'HealthLine Distributors',
+    manifest: 'MNF-8840 · Medical Store',
+    itemsReceived: '140 packs · First Aid Packs',
+    inspectionLog: 'PASSED · Seal Intact',
+    status: 'Cleared',
+    statusBadge: 'available',
+    dateReceived: '17 Feb 2026 · 14:15'
+  },
+  {
+    receiptNo: 'RCP-2026-035',
+    supplierDonor: 'Rotary Club Colombo West',
+    manifest: 'MNF-7712 · Central Depot',
+    itemsReceived: '320 boxes · Emergency Rations',
+    inspectionLog: 'QUARANTINE · Awaiting Lab Test',
+    status: 'Pending Inspection',
+    statusBadge: 'warning',
+    dateReceived: '16 Feb 2026 · 11:00'
+  }
+];
 
 const INITIAL_DONATIONS = [
   {
@@ -103,6 +137,7 @@ export const SuppliersDonationsView = ({
   const [isRecordDonationOpen, setIsRecordDonationOpen] = useState(false);
   const [donations, setDonations] = useState(INITIAL_DONATIONS);
   const [addedDonations, setAddedDonations] = useState([]);
+  const [receipts, setReceipts] = useState(INITIAL_RECEIPTS);
 
   // Dynamically extract unique categories from supplier records
   const dynamicCategories = useMemo(() => {
@@ -180,6 +215,101 @@ export const SuppliersDonationsView = ({
       return matchesSearch && matchesCategory;
     });
   }, [donations, searchTerm, categoryFilter]);
+
+  // Filtering for Receipt History
+  const filteredReceipts = useMemo(() => {
+    return receipts.filter(r => {
+      const term = searchTerm.toLowerCase().trim();
+      const matchesSearch = !term ||
+        r.receiptNo.toLowerCase().includes(term) ||
+        r.supplierDonor.toLowerCase().includes(term) ||
+        r.itemsReceived.toLowerCase().includes(term) ||
+        r.manifest.toLowerCase().includes(term) ||
+        r.status.toLowerCase().includes(term);
+
+      return matchesSearch;
+    });
+  }, [receipts, searchTerm]);
+
+  // Clean CSV Export for active subtab's filtered records
+  const handleExportCsv = () => {
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    let headers = [];
+    let rows = [];
+    let filename = '';
+    let recordCount = 0;
+    let label = '';
+
+    if (activeSubtab === 'suppliers') {
+      headers = ['Supplier ID', 'Supplier Name', 'Categories', 'Contact Reference', 'Status', 'Last Delivery'];
+      rows = filteredSuppliers.map(s => [
+        s.id,
+        s.name,
+        s.categories,
+        s.contactRef,
+        s.status,
+        s.lastDelivery
+      ]);
+      filename = `suppliers_catalog_${timestamp}.csv`;
+      recordCount = filteredSuppliers.length;
+      label = 'supplier';
+    } else if (activeSubtab === 'donated') {
+      headers = ['Donation ID', 'Donor / Organization', 'Category', 'Description', 'Quantity', 'Unit', 'Stock Status', 'Warehouse', 'Recorded Date'];
+      rows = filteredDonations.map(d => [
+        d.id,
+        d.donorName,
+        d.category,
+        d.description,
+        d.quantity,
+        d.unit,
+        d.stockStatus,
+        d.warehouse || d.targetWarehouse || 'Central Depot',
+        d.recordedDate
+      ]);
+      filename = `donated_supplies_${timestamp}.csv`;
+      recordCount = filteredDonations.length;
+      label = 'donated supply';
+    } else {
+      headers = ['Receipt No', 'Supplier / Donor', 'Dispatch Manifest & Depot', 'Items Received', 'Inspection Log', 'Status', 'Date Received'];
+      rows = filteredReceipts.map(r => [
+        r.receiptNo,
+        r.supplierDonor,
+        r.manifest,
+        r.itemsReceived,
+        r.inspectionLog,
+        r.status,
+        r.dateReceived
+      ]);
+      filename = `receipt_history_${timestamp}.csv`;
+      recordCount = filteredReceipts.length;
+      label = 'receipt';
+    }
+
+    const csvContent = [
+      headers.map(escapeCsv).join(','),
+      ...rows.map(row => row.map(escapeCsv).join(','))
+    ].join('\r\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    if (showToast) {
+      showToast(`Exported ${recordCount} ${label} records as CSV`);
+    }
+  };
 
   const handleResetFilters = () => {
     setSearchTerm('');
@@ -407,37 +537,47 @@ export const SuppliersDonationsView = ({
             cursor: 'pointer'
           }}
         >
-          Receipt history
+          Receipt history <span style={{ fontSize: '11px', color: '#738075', marginLeft: '4px' }}>
+            {searchTerm ? `${filteredReceipts.length} of ${receipts.length}` : receipts.length}
+          </span>
         </button>
       </div>
 
-      {/* Filter Bar with Category Dropdown Filter */}
+      {/* Filter Bar with Category Dropdown Filter & CSV Export */}
       <div className="rm-filter-bar">
         <div className="rm-filter-search">
           <Search size={14} className="rm-search-icon" />
           <input
             type="text"
-            placeholder={activeSubtab === 'donated' ? "Search donation, donor or description..." : "Search supplier, category or reference..."}
+            placeholder={
+              activeSubtab === 'donated' 
+                ? "Search donation, donor or description..." 
+                : activeSubtab === 'receipts'
+                ? "Search receipt number, donor, depot or status..."
+                : "Search supplier, category or reference..."
+            }
             className="rm-search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <div className="rm-filter-selects">
-          {/* Dynamic Category Filter */}
-          <select 
-            className="rm-select"
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-          >
-            <option value="All">All Categories</option>
-            {dynamicCategories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+        <div className="rm-filter-selects" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Dynamic Category Filter (for Suppliers and Donations) */}
+          {activeSubtab !== 'receipts' && (
+            <select 
+              className="rm-select"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="All">All Categories</option>
+              {dynamicCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          )}
 
           {activeSubtab === 'suppliers' && (
             <>
@@ -479,6 +619,25 @@ export const SuppliersDonationsView = ({
               <span>Reset</span>
             </button>
           )}
+
+          {/* Export CSV Button */}
+          <button
+            type="button"
+            className="rm-btn rm-btn-secondary"
+            onClick={handleExportCsv}
+            style={{ 
+              padding: '6px 12px', 
+              fontSize: '11.5px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap'
+            }}
+            title={`Export ${activeSubtab === 'suppliers' ? 'supplier' : activeSubtab === 'donated' ? 'donation' : 'receipt'} records as CSV`}
+          >
+            <Download size={13} />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 
@@ -611,7 +770,7 @@ export const SuppliersDonationsView = ({
             <tbody>
               {filteredDonations.length > 0 ? (
                 filteredDonations.map((d) => (
-                  <tr key={d.id}>
+                  <tr key={d.id} className="hover:bg-[#f6f8f5] transition-colors">
                     <td>
                       <span style={{ fontWeight: 700, color: '#162e20' }}>{d.id}</span>
                     </td>
@@ -707,33 +866,73 @@ export const SuppliersDonationsView = ({
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><span style={{ fontWeight: 700, color: '#162e20' }}>RCP-2026-042</span></td>
-                <td><span style={{ fontWeight: 600, color: '#162e20' }}>Global Relief Trust</span></td>
-                <td><span style={{ color: '#405044' }}>MNF-9921 · Central Depot</span></td>
-                <td><span style={{ fontWeight: 600, color: '#162e20' }}>450 boxes · Bottled Water</span></td>
-                <td><span style={{ color: '#047857', fontWeight: 600 }}>PASSED · Quality Verified</span></td>
-                <td><span className="rm-status-badge available">● Cleared</span></td>
-                <td><span style={{ color: '#738075' }}>18 Feb 2026 · 09:30</span></td>
-              </tr>
-              <tr>
-                <td><span style={{ fontWeight: 700, color: '#162e20' }}>RCP-2026-039</span></td>
-                <td><span style={{ fontWeight: 600, color: '#162e20' }}>HealthLine Distributors</span></td>
-                <td><span style={{ color: '#405044' }}>MNF-8840 · Medical Store</span></td>
-                <td><span style={{ fontWeight: 600, color: '#162e20' }}>140 packs · First Aid Packs</span></td>
-                <td><span style={{ color: '#047857', fontWeight: 600 }}>PASSED · Seal Intact</span></td>
-                <td><span className="rm-status-badge available">● Cleared</span></td>
-                <td><span style={{ color: '#738075' }}>17 Feb 2026 · 14:15</span></td>
-              </tr>
-              <tr>
-                <td><span style={{ fontWeight: 700, color: '#162e20' }}>RCP-2026-035</span></td>
-                <td><span style={{ fontWeight: 600, color: '#162e20' }}>Rotary Club Colombo West</span></td>
-                <td><span style={{ color: '#405044' }}>MNF-7712 · Central Depot</span></td>
-                <td><span style={{ fontWeight: 600, color: '#162e20' }}>320 boxes · Emergency Rations</span></td>
-                <td><span style={{ color: '#b45309', fontWeight: 600 }}>QUARANTINE · Awaiting Lab Test</span></td>
-                <td><span className="rm-status-badge warning">● Pending Inspection</span></td>
-                <td><span style={{ color: '#738075' }}>16 Feb 2026 · 11:00</span></td>
-              </tr>
+              {filteredReceipts.length > 0 ? (
+                filteredReceipts.map((r) => (
+                  <tr key={r.receiptNo} className="hover:bg-[#f6f8f5] transition-colors">
+                    <td><span style={{ fontWeight: 700, color: '#162e20' }}>{r.receiptNo}</span></td>
+                    <td><span style={{ fontWeight: 600, color: '#162e20' }}>{r.supplierDonor}</span></td>
+                    <td><span style={{ color: '#405044' }}>{r.manifest}</span></td>
+                    <td><span style={{ fontWeight: 600, color: '#162e20' }}>{r.itemsReceived}</span></td>
+                    <td>
+                      <span style={{ 
+                        color: r.inspectionLog.includes('PASSED') ? '#047857' : '#b45309', 
+                        fontWeight: 600 
+                      }}>
+                        {r.inspectionLog}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`rm-status-badge ${r.statusBadge || (r.status === 'Cleared' ? 'available' : 'warning')}`}>
+                        ● {r.status}
+                      </span>
+                    </td>
+                    <td><span style={{ color: '#738075' }}>{r.dateReceived}</span></td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} style={{ padding: 0 }}>
+                    <div style={{
+                      padding: '48px 24px',
+                      textAlign: 'center',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#fafcf9'
+                    }}>
+                      <div style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '50%',
+                        backgroundColor: '#edf4ec',
+                        color: '#1e3d2c',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '14px'
+                      }}>
+                        <Search size={20} />
+                      </div>
+                      <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 700, color: '#162e20' }}>
+                        No matching receipts found
+                      </h4>
+                      <p style={{ margin: '0 0 18px 0', fontSize: '12.5px', color: '#657367', maxWidth: '380px', lineHeight: 1.5 }}>
+                        No warehouse intake receipts matched your current search query. Clear search term to view all logged manifest receipts.
+                      </p>
+                      <button
+                        type="button"
+                        className="rm-btn rm-btn-secondary"
+                        onClick={handleResetFilters}
+                        style={{ fontSize: '12px', padding: '7px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <RotateCcw size={13} />
+                        <span>Clear search</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
