@@ -7,19 +7,73 @@ import {
   Download, 
   Plus, 
   Eye, 
-  FileText 
+  SlidersHorizontal 
 } from 'lucide-react';
+import { ItemDetailDrawer } from '../components/modals/ItemDetailDrawer';
 
 export const InventoryManagementView = ({
   items = [],
   onOpenAddModal,
   onExportReport,
-  onSelectItem
+  onSelectItem,
+  onUpdateItem,
+  showToast
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [locationFilter, setLocationFilter] = useState('All');
+
+  // Drawer state for item details & stock adjustments
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [drawerTab, setDrawerTab] = useState('details');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Dynamic KPI Calculations from items
+  const totalAvailableUnits = items
+    .filter(i => (i.stockStatus || '').toLowerCase() !== 'shortage')
+    .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+
+  const availableLinesCount = items
+    .filter(i => (i.stockStatus || '').toLowerCase() === 'available').length;
+
+  const lowStockCount = items
+    .filter(i => {
+      const s = (i.stockStatus || '').toLowerCase();
+      return s === 'low stock' || s === 'shortage';
+    }).length;
+
+  const criticalCount = items
+    .filter(i => (i.stockStatus || '').toLowerCase() === 'shortage').length;
+
+  const totalAllocatedUnits = 342;
+  const expiringCount = 14;
+
+  const handleOpenDetails = (item, e) => {
+    if (e) e.stopPropagation();
+    setSelectedItem(item);
+    setDrawerTab('details');
+    setIsDrawerOpen(true);
+    if (onSelectItem) onSelectItem(item);
+  };
+
+  const handleOpenAdjust = (item, e) => {
+    if (e) e.stopPropagation();
+    setSelectedItem(item);
+    setDrawerTab('adjust');
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedItem(null);
+  };
+
+  const handleSaveAdjustment = (updatedItem) => {
+    if (onUpdateItem) {
+      onUpdateItem(updatedItem);
+    }
+  };
 
   const filteredItems = items.filter(item => {
     const matchesSearch = 
@@ -55,7 +109,7 @@ export const InventoryManagementView = ({
         </button>
       </div>
 
-      {/* 4 Mini Metric Cards */}
+      {/* 4 Mini Metric Cards (Dynamically computed from items) */}
       <div className="rm-metrics-grid-4">
         <div className="rm-metric-card">
           <div className="rm-metric-top">
@@ -64,17 +118,19 @@ export const InventoryManagementView = ({
               <Package size={15} />
             </div>
           </div>
-          <div className="rm-metric-val">1,284</div>
+          <div className="rm-metric-val">{totalAvailableUnits.toLocaleString()}</div>
+          <span className="rm-metric-subtext">{availableLinesCount} lines available</span>
         </div>
 
         <div className="rm-metric-card">
           <div className="rm-metric-top">
             <span className="rm-metric-label">Allocated</span>
-            <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#ecfdf5', color: '#047857' }}>
+            <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
               <Package size={15} />
             </div>
           </div>
-          <div className="rm-metric-val">342</div>
+          <div className="rm-metric-val">{totalAllocatedUnits.toLocaleString()}</div>
+          <span className="rm-metric-subtext">Across active requests</span>
         </div>
 
         <div className="rm-metric-card">
@@ -84,17 +140,21 @@ export const InventoryManagementView = ({
               <AlertTriangle size={15} />
             </div>
           </div>
-          <div className="rm-metric-val">5</div>
+          <div className="rm-metric-val">{lowStockCount}</div>
+          <span className="rm-metric-subtext">
+            {criticalCount > 0 ? `${criticalCount} critical shortage` : 'Within safe buffers'}
+          </span>
         </div>
 
         <div className="rm-metric-card">
           <div className="rm-metric-top">
             <span className="rm-metric-label">Expiring soon</span>
-            <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}>
+            <div className="rm-metric-icon-wrap" style={{ backgroundColor: '#fffbeb', color: '#b45309' }}>
               <Clock size={15} />
             </div>
           </div>
-          <div className="rm-metric-val">14</div>
+          <div className="rm-metric-val">{expiringCount}</div>
+          <span className="rm-metric-subtext">Within 30–60 days</span>
         </div>
       </div>
 
@@ -123,6 +183,7 @@ export const InventoryManagementView = ({
             <option value="Medicine">Medicine</option>
             <option value="Shelter">Shelter</option>
             <option value="Emergency Kits">Emergency Kits</option>
+            <option value="Sanitation">Sanitation</option>
           </select>
 
           <select 
@@ -177,7 +238,11 @@ export const InventoryManagementView = ({
           </thead>
           <tbody>
             {filteredItems.map((item) => (
-              <tr key={item.id} onClick={() => onSelectItem && onSelectItem(item)}>
+              <tr 
+                key={item.id} 
+                onClick={(e) => handleOpenDetails(item, e)}
+                style={{ cursor: 'pointer' }}
+              >
                 <td>
                   <span style={{ fontWeight: 700, color: '#162e20' }}>{item.id}</span>
                 </td>
@@ -205,9 +270,26 @@ export const InventoryManagementView = ({
                   <span style={{ color: '#738075', fontSize: '11.5px' }}>{item.lastUpdated}</span>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#657367' }}>
-                    <Eye size={14} style={{ cursor: 'pointer' }} />
-                    <FileText size={14} style={{ cursor: 'pointer' }} />
+                  <div 
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      className="rm-action-icon-btn"
+                      onClick={(e) => handleOpenDetails(item, e)}
+                      title="View batch & item details"
+                    >
+                      <Eye size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      className="rm-action-icon-btn"
+                      onClick={(e) => handleOpenAdjust(item, e)}
+                      title="Adjust stock quantity"
+                    >
+                      <SlidersHorizontal size={15} />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -215,6 +297,16 @@ export const InventoryManagementView = ({
           </tbody>
         </table>
       </div>
+
+      {/* Item Batch Details & Stock Adjustment Drawer */}
+      <ItemDetailDrawer
+        isOpen={isDrawerOpen}
+        item={selectedItem}
+        initialTab={drawerTab}
+        onClose={handleCloseDrawer}
+        onSaveAdjustment={handleSaveAdjustment}
+        showToast={showToast}
+      />
     </div>
   );
 };

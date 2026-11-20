@@ -211,6 +211,8 @@ export const ResourceManagerPortal = () => {
   };
 
   const handleSaveInventory = async (item) => {
+    setItems(prev => [item, ...prev]);
+    showToast(`Inventory item "${item.name}" (${item.id}) added to ${item.storageLocation}`);
     try {
       const res = await resourceService.createResource({
         name: item.name,
@@ -218,18 +220,18 @@ export const ResourceManagerPortal = () => {
         quantity: item.quantity,
         unit: item.unit,
         storageLocation: item.storageLocation,
-        minimumThreshold: 100
+        minimumThreshold: item.threshold || 100
       });
       if (res?.data?.succeeded) {
-        showToast(`Inventory item "${item.name}" registered in live catalog`);
         fetchLiveData();
-        return;
       }
     } catch {
-      // Fallback
+      // Kept in local state
     }
-    setItems(prev => [item, ...prev]);
-    showToast(`Inventory item "${item.name}" (${item.id}) added to ${item.storageLocation}`);
+  };
+
+  const handleUpdateInventoryItem = (updatedItem) => {
+    setItems(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
   };
 
   const handleSaveSupplier = async (supplier) => {
@@ -389,6 +391,7 @@ export const ResourceManagerPortal = () => {
               showToast={showToast}
               onOpenAddModal={handleOpenAddInventory}
               onExportReport={() => handleExportCsv('inventory')}
+              onUpdateItem={handleUpdateInventoryItem}
             />
           )}
 
