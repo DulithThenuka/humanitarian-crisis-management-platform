@@ -10,14 +10,14 @@ import {
   ShieldCheck,
   Building2,
   Search,
-  RefreshCw,
+  RefreshCw
 } from 'lucide-react';
 
 export const ShelterReportsView = ({
   shelters = [],
   reportData = {},
   onOpenExportModal,
-  onRefreshData,
+  onRefreshData
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [areaFilter, setAreaFilter] = useState('ALL');

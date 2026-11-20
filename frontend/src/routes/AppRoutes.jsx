@@ -293,6 +293,8 @@ export const AppRoutes = () => {
       <Route path="/volunteer/roster" element={<VolunteerRosterPage />} />
 
       {/* Volunteer Backward-Compatible Aliases */}
+      <Route path="/volunteers" element={<Navigate to="/volunteer" replace />} />
+      <Route path="/volunteers/portal" element={<Navigate to="/volunteer" replace />} />
       <Route path="/volunteer-admin" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteer-admin/dashboard" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteer-manager" element={<VolunteerPortal initialTab="overview" />} />

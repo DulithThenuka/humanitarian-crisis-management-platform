@@ -39,7 +39,7 @@ const resolvePostLoginRoute = (role, redirectParam) => {
     return '/volunteer-coordinator';
   }
   if (normalizedRole === 'volunteer') {
-    return '/volunteers';
+    return '/volunteer';
   }
   if (normalizedRole === 'donor' || normalizedRole.includes('funding')) {
     return '/donor';
