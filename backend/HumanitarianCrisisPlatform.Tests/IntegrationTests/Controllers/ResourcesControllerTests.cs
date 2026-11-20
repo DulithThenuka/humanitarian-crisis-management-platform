@@ -163,4 +163,83 @@ public class ResourcesControllerTests : IClassFixture<DatabaseFixture>
         Assert.Equal("text/csv", fileResult.ContentType);
         Assert.NotEmpty(fileResult.FileContents);
     }
+
+    [Fact]
+    public async Task UpdateStockQuantity_WhenValid_ShouldReturnOkWithUpdatedStock()
+    {
+        using var db = _fixture.CreateContext();
+        var controller = CreateController(db);
+
+        // First create an item
+        var createResponse = await controller.CreateResource(new CreateResourceDto
+        {
+            Name = "Clean Drinking Water Cans",
+            Category = "Water",
+            Quantity = 100,
+            MinimumThreshold = 50
+        }, default);
+
+        var created = Assert.IsType<CreatedAtActionResult>(createResponse.Result);
+        var createdResource = Assert.IsType<Result<ResourceDto>>(created.Value).Data!;
+
+        // Update stock quantity to 25 (Available: 25 <= 50 => "Low stock")
+        var updateResponse = await controller.UpdateStockQuantity(createdResource.Id, new UpdateStockQuantityDto
+        {
+            Quantity = 25,
+            Reason = "Crisis staging deduction"
+        }, default);
+
+        var okResult = Assert.IsType<OkObjectResult>(updateResponse.Result);
+        var result = Assert.IsType<Result<ResourceDto>>(okResult.Value);
+        Assert.True(result.Succeeded);
+        Assert.Equal(25, result.Data!.TotalQuantity);
+        Assert.Equal("Low stock", result.Data.StockStatus);
+    }
+
+    [Fact]
+    public async Task UpdateStockQuantity_WhenNegative_ShouldReturnBadRequest()
+    {
+        var controller = CreateController();
+        var response = await controller.UpdateStockQuantity(Guid.NewGuid(), new UpdateStockQuantityDto
+        {
+            Quantity = -20
+        }, default);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(response.Result);
+        var result = Assert.IsType<Result<ResourceDto>>(badRequest.Value);
+        Assert.False(result.Succeeded);
+        Assert.Contains("Stock quantity cannot be negative", string.Join(" ", result.Errors));
+    }
+
+    [Fact]
+    public async Task UpdateStockQuantity_WhenNotFound_ShouldReturnNotFound()
+    {
+        using var db = _fixture.CreateContext();
+        var controller = CreateController(db);
+
+        var response = await controller.UpdateStockQuantity(Guid.NewGuid(), new UpdateStockQuantityDto
+        {
+            Quantity = 100
+        }, default);
+
+        var notFound = Assert.IsType<NotFoundObjectResult>(response.Result);
+        var result = Assert.IsType<Result<ResourceDto>>(notFound.Value);
+        Assert.False(result.Succeeded);
+    }
+
+    [Fact]
+    public async Task AdjustStock_WhenNotFound_ShouldReturnNotFound()
+    {
+        using var db = _fixture.CreateContext();
+        var controller = CreateController(db);
+
+        var response = await controller.AdjustStock(Guid.NewGuid(), new StockAdjustmentDto
+        {
+            QuantityDelta = 50
+        }, default);
+
+        var notFound = Assert.IsType<NotFoundObjectResult>(response.Result);
+        var result = Assert.IsType<Result<ResourceDto>>(notFound.Value);
+        Assert.False(result.Succeeded);
+    }
 }

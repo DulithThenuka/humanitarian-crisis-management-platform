@@ -25,7 +25,8 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
         (allowedStr === 'coordinator' && (userRoleStr === '1' || user?.role === 1)) ||
         (allowedStr === 'logisticsmanager' && (userRoleStr === '2' || user?.role === 2)) ||
         (allowedStr === 'volunteer' && (userRoleStr === '3' || user?.role === 3)) ||
-        (allowedStr === 'citizen' && (userRoleStr === '0' || user?.role === 0))
+        (allowedStr === 'citizen' && (userRoleStr === '0' || user?.role === 0)) ||
+        (allowedStr === 'sheltermanager' && (userRoleStr === '6' || user?.role === 6 || userRoleStr === 'sheltermanager' || userRoleStr === 'shelter manager'))
       );
     });
 

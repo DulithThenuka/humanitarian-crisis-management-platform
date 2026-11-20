@@ -17,4 +17,5 @@ public interface IShelterRepository : IRepository<Shelter>
     Task<ResourceAllocation?> GetShelterResourceAllocationByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<ResourceAllocation> AddResourceAllocationAsync(ResourceAllocation allocation, CancellationToken cancellationToken = default);
     Task UpdateResourceAllocationAsync(ResourceAllocation allocation, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<AssistanceRequest>> GetPendingIntakeRequestsAsync(CancellationToken cancellationToken = default);
 }

@@ -7,12 +7,14 @@ import {
   AlertCircle,
   FileText,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  RefreshCw,
 } from 'lucide-react';
 
 export const MyAssignmentsView = ({
-  assignments,
-  onActionClick
+  assignments = [],
+  onActionClick,
+  onRefreshData,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -47,6 +49,12 @@ export const MyAssignmentsView = ({
             Only assignments associated with your volunteer account are displayed.
           </p>
         </div>
+        {onRefreshData && (
+          <button className="vol-btn-outline" onClick={onRefreshData} title="Sync with server">
+            <RefreshCw size={14} />
+            <span>Sync Assignments</span>
+          </button>
+        )}
       </div>
 
       {/* Filter Bar */}

@@ -74,6 +74,7 @@ builder.Services.AddSwaggerGen(c =>
 // Clean Architecture registrations
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddSingleton<HumanitarianCrisisPlatform.API.Services.RealtimeEventBus>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -120,6 +121,7 @@ app.UseMiddleware<RequestRateLimitingMiddleware>();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<RealtimeBroadcastMiddleware>();
 
 app.MapControllers();
 

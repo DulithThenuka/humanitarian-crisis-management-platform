@@ -42,6 +42,9 @@ export const volunteerService = {
   assignTask: async (assignmentData) => {
     return await apiClient.post('/volunteers/assign', assignmentData);
   },
+  acceptAssignment: async (id) => {
+    return await apiClient.post(`/volunteers/assignments/${id}/accept`);
+  },
   completeAssignment: async (id, data = {}) => {
     return await apiClient.post(`/volunteers/assignments/${id}/complete`, data);
   },

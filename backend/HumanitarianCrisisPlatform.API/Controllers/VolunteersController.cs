@@ -15,8 +15,7 @@ public class VolunteersController : BaseApiController
     private readonly ApplicationDbContext _context;
     private readonly IVolunteerService _volunteerService;
 
-    public VolunteersController(ApplicationDbContext context)
-    public VolunteersController(IVolunteerService volunteerService)
+    public VolunteersController(ApplicationDbContext context, IVolunteerService volunteerService)
     {
         _context = context;
         _volunteerService = volunteerService;
@@ -37,35 +36,15 @@ public class VolunteersController : BaseApiController
     // ─────────────────────────────────────────────────────────────────────────────
     [HttpGet]
     [Authorize(Roles = "Coordinator,Admin")]
-    public async Task<ActionResult<Result<IReadOnlyList<VolunteerDto>>>> GetAll()
     public async Task<ActionResult<Result<IReadOnlyList<VolunteerCoordinatorDto>>>> GetAll(
         [FromQuery] string? search,
         [FromQuery] string? status,
         [FromQuery] string? serviceArea,
         CancellationToken cancellationToken)
     {
-        var volunteers = await _context.Volunteers
-            .Include(v => v.User)
-            .Select(v => new VolunteerDto
-            {
-                Id = v.Id,
-                UserId = v.UserId,
-                FullName = v.User != null ? v.User.FullName : string.Empty,
-                Email = v.User != null ? v.User.Email : string.Empty,
-                PhoneNumber = v.User != null ? v.User.PhoneNumber : null,
-                Skills = v.Skills,
-                Availability = v.Availability,
-                IsAvailable = v.IsAvailable,
-                Latitude = v.Latitude,
-                Longitude = v.Longitude,
-                MaxTravelDistance = v.MaxTravelDistance
-            })
-            .ToListAsync();
         var result = await _volunteerService.GetAllVolunteersAsync(search, status, serviceArea, cancellationToken);
         return result.Succeeded ? Ok(result) : BadRequest(result);
     }
-
-        return Ok(Result<IReadOnlyList<VolunteerDto>>.Success(volunteers));
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<Result<VolunteerCoordinatorDto>>> GetById(Guid id, CancellationToken cancellationToken)
     {
@@ -129,9 +108,10 @@ public class VolunteersController : BaseApiController
     public async Task<ActionResult<Result<IReadOnlyList<VolunteerAssignmentDetailDto>>>> GetAssignments(
         [FromQuery] string? status,
         [FromQuery] string? area,
+        [FromQuery] Guid? volunteerId,
         CancellationToken cancellationToken)
     {
-        var result = await _volunteerService.GetAssignmentsAsync(status, area, cancellationToken);
+        var result = await _volunteerService.GetAssignmentsAsync(status, area, volunteerId, cancellationToken);
         return result.Succeeded ? Ok(result) : BadRequest(result);
     }
 
@@ -146,30 +126,32 @@ public class VolunteersController : BaseApiController
 
     [HttpPost("assign")]
     [Authorize(Roles = "Coordinator,Admin")]
-    public async Task<ActionResult<Result<bool>>> AssignTask([FromBody] AssignTaskDto dto)
-    public async Task<ActionResult<Result<bool>>> AssignTaskLegacy(
+    public async Task<ActionResult<Result<bool>>> AssignTask(
         [FromBody] AssignTaskDto dto,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
-        var assignment = new VolunteerAssignment
         var assignShiftDto = new AssignShiftRequestDto
         {
             VolunteerId = dto.VolunteerId,
             AssistanceRequestId = dto.AssistanceRequestId,
-            TaskDescription = dto.TaskDescription,
-            Notes = dto.Notes,
-            AssignmentStatus = 0,
-            StartTime = DateTime.UtcNow
             ShiftTask = dto.TaskDescription,
             ShiftTime = "08:00-14:00",
             Note = dto.Notes
         };
 
-        _context.VolunteerAssignments.Add(assignment);
-        await _context.SaveChangesAsync();
-        return Ok(Result<bool>.Success(true, "Task successfully assigned"));
         var result = await _volunteerService.AssignShiftAsync(assignShiftDto, CurrentUserName, cancellationToken);
-        return result.Succeeded ? Ok(Result<bool>.Success(true, result.Message)) : BadRequest(Result<bool>.Failure(result.Message ?? "Assignment failed."));
+        return result.Succeeded 
+            ? Ok(Result<bool>.Success(true, result.Message)) 
+            : BadRequest(Result<bool>.Failure(result.Message ?? "Assignment failed."));
+    }
+
+    [HttpPost("assignments/{id:guid}/accept")]
+    public async Task<ActionResult<Result<bool>>> AcceptAssignment(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _volunteerService.AcceptAssignmentAsync(id, CurrentUserName, cancellationToken);
+        return result.Succeeded ? Ok(result) : BadRequest(result);
     }
 
     [HttpPost("assignments/{id:guid}/complete")]

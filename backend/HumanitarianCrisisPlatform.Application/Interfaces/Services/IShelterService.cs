@@ -24,6 +24,7 @@ public interface IShelterService
 
     // Placement Allocations
     Task<Result<IReadOnlyList<PlacementAllocationDto>>> GetPlacementsAsync(Guid? shelterId = null, string? status = null, string? search = null, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<ShelterIntakeQueueItemDto>>> GetIntakeQueueAsync(CancellationToken cancellationToken = default);
     Task<Result<PlacementAllocationDto>> CreatePlacementAsync(CreatePlacementDto dto, Guid userId, CancellationToken cancellationToken = default);
     Task<Result<PlacementAllocationDto>> UpdatePlacementStatusAsync(Guid id, UpdatePlacementStatusDto dto, Guid userId, CancellationToken cancellationToken = default);
 

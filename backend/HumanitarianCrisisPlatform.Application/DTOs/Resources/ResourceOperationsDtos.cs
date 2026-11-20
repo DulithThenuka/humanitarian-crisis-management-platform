@@ -26,6 +26,14 @@ public class UpdateResourceDto
 public class StockAdjustmentDto
 {
     public decimal QuantityDelta { get; set; }
+    public decimal? NewQuantity { get; set; }
     public string Reason { get; set; } = "Stock adjustment";
+    public string? Notes { get; set; }
+}
+
+public class UpdateStockQuantityDto
+{
+    public decimal Quantity { get; set; }
+    public string Reason { get; set; } = "Stock quantity update";
     public string? Notes { get; set; }
 }

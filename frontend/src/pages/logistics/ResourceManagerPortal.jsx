@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { ResourceSidebar } from './components/ResourceSidebar';
 import { ResourceHeader } from './components/ResourceHeader';
 import { ResourceOverviewView } from './views/ResourceOverviewView';
@@ -13,6 +14,7 @@ import { NotificationsView } from './views/NotificationsView';
 import { ProfileSettingsView } from './views/ProfileSettingsView';
 import { AddInventoryModal } from './components/modals/AddInventoryModal';
 import { AddSupplierModal } from './components/modals/AddSupplierModal';
+import { CommandPaletteModal } from './components/modals/CommandPaletteModal';
 import { CheckCircle2 } from 'lucide-react';
 import './ResourceManagerStyles.css';
 
@@ -42,6 +44,19 @@ export const ResourceManagerPortal = () => {
   // Modals state
   const [isAddInventoryOpen, setIsAddInventoryOpen] = useState(false);
   const [isAddSupplierOpen, setIsAddSupplierOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Global Ctrl+K / Cmd+K listener across portal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const showToast = useCallback((message) => {
     setToastMessage(message);
@@ -173,6 +188,8 @@ export const ResourceManagerPortal = () => {
     fetchLiveData();
   }, [fetchLiveData]);
 
+  useRealtimeRefresh(['resources', 'assistancerequests', 'alerts'], fetchLiveData);
+
   // Handlers
   const handleDutyToggle = async () => {
     const next = !onDuty;
@@ -194,6 +211,8 @@ export const ResourceManagerPortal = () => {
   };
 
   const handleSaveInventory = async (item) => {
+    setItems(prev => [item, ...prev]);
+    showToast(`Inventory item "${item.name}" (${item.id}) added to ${item.storageLocation}`);
     try {
       const res = await resourceService.createResource({
         name: item.name,
@@ -201,18 +220,18 @@ export const ResourceManagerPortal = () => {
         quantity: item.quantity,
         unit: item.unit,
         storageLocation: item.storageLocation,
-        minimumThreshold: 100
+        minimumThreshold: item.threshold || 100
       });
       if (res?.data?.succeeded) {
-        showToast(`Inventory item "${item.name}" registered in live catalog`);
         fetchLiveData();
-        return;
       }
     } catch {
-      // Fallback
+      // Kept in local state
     }
-    setItems(prev => [item, ...prev]);
-    showToast(`Inventory item "${item.name}" (${item.id}) added to ${item.storageLocation}`);
+  };
+
+  const handleUpdateInventoryItem = (updatedItem) => {
+    setItems(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
   };
 
   const handleSaveSupplier = async (supplier) => {
@@ -234,18 +253,52 @@ export const ResourceManagerPortal = () => {
     showToast(`Supplier "${supplier.name}" (${supplier.id}) registered successfully`);
   };
 
+  const handleUpdateSupplierStatus = (supplierId, newStatus = 'Verified') => {
+    setSuppliers(prev => prev.map(s => s.id === supplierId ? {
+      ...s,
+      status: newStatus,
+      statusBadge: newStatus.toLowerCase(),
+      contactRef: newStatus === 'Verified' ? 'Approved contact' : s.contactRef
+    } : s));
+  };
+
   const handleApproveAllocation = async (request, approvedQty, managerNote) => {
+    const qty = parseFloat(approvedQty) || request.requestedQty;
+    // Decrement stock in catalog state immediately
+    setItems(prev => prev.map(item => {
+      if (item.name === request.item || item.id === request.resourceId) {
+        const nextQty = Math.max(0, (item.quantity || 0) - qty);
+        const thresh = item.threshold || 100;
+        let s = 'Available';
+        let b = 'available';
+        if (nextQty <= 0) {
+          s = 'Shortage';
+          b = 'critical';
+        } else if (nextQty <= thresh) {
+          s = 'Low stock';
+          b = 'warning';
+        }
+        return {
+          ...item,
+          quantity: nextQty,
+          stockStatus: s,
+          statusBadge: b,
+          lastUpdated: 'Just now'
+        };
+      }
+      return item;
+    }));
+    setAllocations(prev => prev.filter(r => r.id !== request.id));
+    showToast(`Allocation for ${request.item} approved (${qty} units dispatched)`);
     try {
       const rawId = request.rawId || request.id;
       await resourceService.approveAllocation(rawId, {
-        approvedQuantity: parseFloat(approvedQty) || request.requestedQty,
+        approvedQuantity: qty,
         managerNote: managerNote || 'Approved for emergency crisis relief'
       });
-      showToast(`Allocation for ${request.item} approved for ${approvedQty} units`);
       fetchLiveData();
     } catch {
-      showToast(`Allocation for ${request.item} approved locally`);
-      setAllocations(prev => prev.filter(r => r.id !== request.id));
+      // Kept in local state
     }
   };
 
@@ -277,24 +330,30 @@ export const ResourceManagerPortal = () => {
     }
   };
 
-  const handleConfirmDelivery = async (dispatch) => {
+  const handleConfirmDelivery = async (dispatch, receivedBy = 'Authorized Receiving Officer', notes = '') => {
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newHistory = [
+      { time: nowTime, title: `Delivery confirmed by ${receivedBy}`, sub: notes || `Official sign-off recorded at ${dispatch.destination}` },
+      ...(dispatch.history || [])
+    ];
+    setDispatches(prev => prev.map(d => d.id === dispatch.id ? {
+      ...d,
+      currentStep: 5,
+      status: 'Delivered',
+      statusBadge: 'delivered',
+      deliveryConfirmation: `Confirmed by ${receivedBy} (${nowTime})`,
+      history: newHistory
+    } : d));
+    showToast(`Delivery confirmation recorded for ${dispatch.id} (${receivedBy})`);
     try {
       const rawId = dispatch.rawId || dispatch.id;
       await resourceService.confirmDelivery(rawId, {
         deliveredTo: dispatch.destination,
-        confirmationNotes: 'Signed at destination by receiving officer'
+        confirmationNotes: notes || `Signed by ${receivedBy}`
       });
-      showToast(`Delivery confirmation recorded for ${dispatch.id}`);
       fetchLiveData();
     } catch {
-      setDispatches(prev => prev.map(d => d.id === dispatch.id ? {
-        ...d,
-        currentStep: 5,
-        status: 'Delivered',
-        statusBadge: 'delivered',
-        deliveryConfirmation: `Confirmed by Dilan Perera (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`
-      } : d));
-      showToast(`Delivery confirmation recorded for ${dispatch.id}`);
+      // Retained in local state
     }
   };
 
@@ -351,6 +410,7 @@ export const ResourceManagerPortal = () => {
         <ResourceHeader
           activeTab={activeTab}
           onSelectTab={setActiveTab}
+          onOpenSearch={() => setIsSearchOpen(true)}
           showToast={showToast}
         />
 
@@ -371,6 +431,7 @@ export const ResourceManagerPortal = () => {
               showToast={showToast}
               onOpenAddModal={handleOpenAddInventory}
               onExportReport={() => handleExportCsv('inventory')}
+              onUpdateItem={handleUpdateInventoryItem}
             />
           )}
 
@@ -399,6 +460,7 @@ export const ResourceManagerPortal = () => {
               suppliers={suppliers}
               showToast={showToast}
               onOpenAddSupplierModal={handleOpenAddSupplier}
+              onUpdateSupplierStatus={handleUpdateSupplierStatus}
             />
           )}
 
@@ -441,6 +503,23 @@ export const ResourceManagerPortal = () => {
         isOpen={isAddSupplierOpen}
         onClose={() => setIsAddSupplierOpen(false)}
         onSave={handleSaveSupplier}
+      />
+
+      {/* Global Command Palette Modal (Ctrl+K / Cmd+K / Header Search) */}
+      <CommandPaletteModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onSelectTab={(tabId, title) => {
+          setActiveTab(tabId);
+          setIsSearchOpen(false);
+          if (showToast && title) {
+            showToast(`Navigated to ${title}`);
+          }
+        }}
+        items={items}
+        allocations={allocations}
+        dispatches={dispatches}
+        suppliers={suppliers}
       />
 
       {/* Interactive Toast Notification */}

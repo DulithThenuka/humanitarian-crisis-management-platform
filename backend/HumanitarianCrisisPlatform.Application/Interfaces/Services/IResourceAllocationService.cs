@@ -17,6 +17,7 @@ public interface IResourceAllocationService
     Task<Result<ResourceDto>> GetResourceByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Result<ResourceDto>> CreateResourceAsync(CreateResourceDto dto, string? user = null, CancellationToken cancellationToken = default);
     Task<Result<ResourceDto>> UpdateResourceAsync(Guid id, UpdateResourceDto dto, string? user = null, CancellationToken cancellationToken = default);
+    Task<Result<ResourceDto>> UpdateStockQuantityAsync(Guid id, UpdateStockQuantityDto dto, string? user = null, CancellationToken cancellationToken = default);
     Task<Result<bool>> DeleteResourceAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Result<ResourceDto>> AdjustStockAsync(Guid id, StockAdjustmentDto dto, string? user = null, CancellationToken cancellationToken = default);
 

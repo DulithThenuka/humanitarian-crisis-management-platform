@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Package, ShieldCheck } from 'lucide-react';
 
 export const AddInventoryModal = ({ isOpen, onClose, onSave }) => {
@@ -12,22 +12,53 @@ export const AddInventoryModal = ({ isOpen, onClose, onSave }) => {
     notes: ''
   });
 
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        name: '',
+        category: 'Water',
+        quantity: '',
+        unit: 'units',
+        storageLocation: 'Central Depot',
+        threshold: '100',
+        notes: ''
+      });
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
+    const qty = parseInt(formData.quantity, 10) || 0;
+    const thresh = parseInt(formData.threshold, 10) || 100;
+    
+    // Automatic status badge determination
+    let status = 'Available';
+    let badge = 'available';
+    if (qty <= 0) {
+      status = 'Shortage';
+      badge = 'critical';
+    } else if (qty <= thresh) {
+      status = 'Low stock';
+      badge = 'warning';
+    }
+
     const newItem = {
       id: `RES-${Math.floor(100 + Math.random() * 900)}`,
-      name: formData.name,
+      name: formData.name.trim(),
       category: formData.category,
-      quantity: parseInt(formData.quantity, 10) || 0,
+      quantity: qty,
       unit: formData.unit,
       storageLocation: formData.storageLocation,
-      stockStatus: 'Available',
-      statusBadge: 'available',
-      lastUpdated: 'Just now'
+      threshold: thresh,
+      stockStatus: status,
+      statusBadge: badge,
+      lastUpdated: 'Just now',
+      notes: formData.notes
     };
 
     onSave(newItem);

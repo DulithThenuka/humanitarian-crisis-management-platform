@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Package, 
   CheckCircle, 
@@ -8,7 +8,8 @@ import {
   Send, 
   Droplet, 
   Plus, 
-  ArrowRight 
+  ArrowRight,
+  ChevronRight 
 } from 'lucide-react';
 
 export const ResourceOverviewView = ({
@@ -19,21 +20,23 @@ export const ResourceOverviewView = ({
   onAddInventory,
   showToast
 }) => {
+  const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
   const handleNav = onNavigateTab || onSelectTab || (() => {});
   const handleAdd = onOpenAddModal || onAddInventory || (() => {});
+
   const chartBars = [
-    { label: '06', height: 20 },
-    { label: '08', height: 35 },
-    { label: '10', height: 28 },
-    { label: '12', height: 50 },
-    { label: '14', height: 44 },
-    { label: '16', height: 68 },
-    { label: '18', height: 58 },
-    { label: '20', height: 80 },
-    { label: '22', height: 70 },
-    { label: '00', height: 95, active: true },
-    { label: '02', height: 75 },
-    { label: '04', height: 85 }
+    { label: '06', time: '06:00 AM', category: 'Water & Hydration', available: 240, allocated: 140, height: 28 },
+    { label: '08', time: '08:00 AM', category: 'Emergency Food Kits', available: 320, allocated: 180, height: 45 },
+    { label: '10', time: '10:00 AM', category: 'Medical Supplies', available: 110, allocated: 40, height: 32 },
+    { label: '12', time: '12:00 PM', category: 'Thermal Blankets', available: 86, allocated: 60, height: 58 },
+    { label: '14', time: '02:00 PM', category: 'Family Hygiene Packs', available: 160, allocated: 90, height: 48 },
+    { label: '16', time: '04:00 PM', category: 'Water Purification', available: 420, allocated: 250, height: 72 },
+    { label: '18', time: '06:00 PM', category: 'Infant Nutrition Kits', available: 95, allocated: 55, height: 62 },
+    { label: '20', time: '08:00 PM', category: 'Emergency Tarpaulins', available: 210, allocated: 160, height: 82 },
+    { label: '22', time: '10:00 PM', category: 'First Aid Packs', available: 175, allocated: 120, height: 70 },
+    { label: '00', time: '12:00 AM (Peak)', category: 'High-Energy Rations', available: 540, allocated: 380, height: 95, active: true },
+    { label: '02', time: '02:00 AM', category: 'Clean Water Reservoirs', available: 380, allocated: 220, height: 76 },
+    { label: '04', time: '04:00 AM', category: 'Shelter Equipment', available: 290, allocated: 190, height: 86 }
   ];
 
   return (
@@ -60,7 +63,10 @@ export const ResourceOverviewView = ({
           </button>
           <button 
             className="rm-btn rm-btn-primary"
-            onClick={() => handleNav('allocations')}
+            onClick={() => {
+              handleNav('allocations');
+              if (showToast) showToast('Switched to Allocation Requests');
+            }}
           >
             <span>Review allocations</span>
           </button>
@@ -157,22 +163,35 @@ export const ResourceOverviewView = ({
             </div>
 
             <button
-              onClick={() => handleNav('reports')}
+              onClick={() => {
+                handleNav('reports');
+                if (showToast) showToast('Navigated to Reports & Analytics');
+              }}
               style={{
                 background: 'none',
                 border: 'none',
                 color: '#1e3d2c',
                 fontSize: '12.5px',
                 fontWeight: 600,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 8px',
+                borderRadius: '5px',
+                transition: 'background-color 0.15s ease'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eef3eb'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              View analytics
+              <span>View analytics</span>
+              <ArrowRight size={13} />
             </button>
           </div>
 
-          {/* Bar Chart */}
+          {/* Bar Chart with interactive hover tooltips */}
           <div style={{
+            position: 'relative',
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'space-between',
@@ -181,16 +200,67 @@ export const ResourceOverviewView = ({
             borderBottom: '1px solid #edf1eb',
             gap: '12px'
           }}>
+            {/* Interactive Tooltip Bubble */}
+            {hoveredBarIndex !== null && chartBars[hoveredBarIndex] && (
+              <div 
+                style={{
+                  position: 'absolute',
+                  left: `${((hoveredBarIndex + 0.5) / chartBars.length) * 100}%`,
+                  bottom: `${Math.min(chartBars[hoveredBarIndex].height + 14, 82)}%`,
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#14291e',
+                  color: '#ffffff',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+                  fontSize: '11px',
+                  pointerEvents: 'none',
+                  zIndex: 20,
+                  whiteSpace: 'nowrap',
+                  animation: 'fadeIn 0.15s ease-out'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '4px', borderBottom: '1px solid rgba(255,255,255,0.12)', paddingBottom: '4px' }}>
+                  <span style={{ fontWeight: 700, color: '#dbe4c6' }}>{chartBars[hoveredBarIndex].category}</span>
+                  <span style={{ fontSize: '10px', color: '#9bb19f' }}>{chartBars[hoveredBarIndex].time}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', marginTop: '3px' }}>
+                  <span style={{ color: '#bcc5b9' }}>Available:</span>
+                  <span style={{ fontWeight: 700, color: '#86efac' }}>{chartBars[hoveredBarIndex].available.toLocaleString()} units</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', marginTop: '2px' }}>
+                  <span style={{ color: '#bcc5b9' }}>Allocated:</span>
+                  <span style={{ fontWeight: 700, color: '#fde047' }}>{chartBars[hoveredBarIndex].allocated.toLocaleString()} units</span>
+                </div>
+                {/* Pointer triangle */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-5px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 0,
+                  height: 0,
+                  borderLeft: '5px solid transparent',
+                  borderRight: '5px solid transparent',
+                  borderTop: '5px solid #14291e'
+                }} />
+              </div>
+            )}
+
             {chartBars.map((bar, idx) => (
               <div 
                 key={idx}
+                onMouseEnter={() => setHoveredBarIndex(idx)}
+                onMouseLeave={() => setHoveredBarIndex(null)}
                 style={{
                   flex: 1,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   height: '100%',
-                  justifyContent: 'flex-end'
+                  justifyContent: 'flex-end',
+                  cursor: 'pointer',
+                  padding: '0 2px'
                 }}
               >
                 <div 
@@ -198,11 +268,15 @@ export const ResourceOverviewView = ({
                     width: '100%',
                     maxWidth: '32px',
                     height: `${bar.height}%`,
-                    backgroundColor: bar.active ? '#1e3d2c' : '#94a395',
+                    backgroundColor: idx === hoveredBarIndex 
+                      ? '#166534' 
+                      : (bar.active ? '#1e3d2c' : '#94a395'),
                     borderRadius: '3px 3px 0 0',
-                    transition: 'height 0.4s ease'
+                    transform: idx === hoveredBarIndex ? 'scaleY(1.03)' : 'scaleY(1)',
+                    transformOrigin: 'bottom',
+                    transition: 'height 0.3s ease, background-color 0.15s ease, transform 0.15s ease'
                   }}
-                  title={`Hour ${bar.label}: ${bar.height}%`}
+                  title={`${bar.category} (${bar.time}): ${bar.available} available, ${bar.allocated} allocated`}
                 />
               </div>
             ))}
@@ -218,12 +292,16 @@ export const ResourceOverviewView = ({
             {chartBars.map((bar, idx) => (
               <div
                 key={idx}
+                onMouseEnter={() => setHoveredBarIndex(idx)}
+                onMouseLeave={() => setHoveredBarIndex(null)}
                 style={{
                   flex: 1,
                   textAlign: 'center',
                   fontSize: '11px',
-                  color: bar.active ? '#162e20' : '#738075',
-                  fontWeight: bar.active ? 700 : 500
+                  cursor: 'pointer',
+                  color: (idx === hoveredBarIndex || bar.active) ? '#162e20' : '#738075',
+                  fontWeight: (idx === hoveredBarIndex || bar.active) ? 700 : 500,
+                  transition: 'color 0.15s ease'
                 }}
               >
                 {bar.label}
@@ -244,30 +322,47 @@ export const ResourceOverviewView = ({
               </div>
             </div>
 
-            <span style={{
-              fontSize: '11px',
-              fontWeight: 700,
-              padding: '3px 8px',
-              borderRadius: '12px',
-              backgroundColor: '#fef2f2',
-              color: '#dc2626',
-              border: '1px solid #fecaca'
-            }}>
+            <button
+              onClick={() => {
+                handleNav('stock-alerts');
+                if (showToast) showToast('Navigated to Stock Alerts');
+              }}
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                padding: '3px 8px',
+                borderRadius: '12px',
+                backgroundColor: '#fef2f2',
+                color: '#dc2626',
+                border: '1px solid #fecaca',
+                cursor: 'pointer',
+                transition: 'background-color 0.15s ease'
+              }}
+              title="Click to view all stock alerts"
+            >
               ● 5 alerts
-            </span>
+            </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {/* Item 1 */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px',
-              backgroundColor: '#ffffff',
-              border: '1px solid #edf1eb',
-              borderRadius: '8px'
-            }}>
+            <div 
+              className="rm-overview-alert-card"
+              onClick={() => {
+                handleNav('stock-alerts');
+                if (showToast) showToast('Viewing Drinking Water stock alert');
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #edf1eb',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{
                   width: '32px',
@@ -291,19 +386,30 @@ export const ResourceOverviewView = ({
                 </div>
               </div>
 
-              <span className="rm-status-badge critical">● Critical</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="rm-status-badge critical">● Critical</span>
+                <ChevronRight size={14} className="rm-alert-arrow" color="#657367" />
+              </div>
             </div>
 
             {/* Item 2 */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px',
-              backgroundColor: '#ffffff',
-              border: '1px solid #edf1eb',
-              borderRadius: '8px'
-            }}>
+            <div 
+              className="rm-overview-alert-card"
+              onClick={() => {
+                handleNav('stock-alerts');
+                if (showToast) showToast('Viewing Thermal Blankets stock alert');
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #edf1eb',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{
                   width: '32px',
@@ -327,19 +433,30 @@ export const ResourceOverviewView = ({
                 </div>
               </div>
 
-              <span className="rm-status-badge warning">● Low stock</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="rm-status-badge warning">● Low stock</span>
+                <ChevronRight size={14} className="rm-alert-arrow" color="#657367" />
+              </div>
             </div>
 
             {/* Item 3 */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px',
-              backgroundColor: '#ffffff',
-              border: '1px solid #edf1eb',
-              borderRadius: '8px'
-            }}>
+            <div 
+              className="rm-overview-alert-card"
+              onClick={() => {
+                handleNav('stock-alerts');
+                if (showToast) showToast('Viewing Medical Supply Packs expiry alert');
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #edf1eb',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{
                   width: '32px',
@@ -363,7 +480,10 @@ export const ResourceOverviewView = ({
                 </div>
               </div>
 
-              <span className="rm-status-badge warning">● Expiry</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="rm-status-badge warning">● Expiry</span>
+                <ChevronRight size={14} className="rm-alert-arrow" color="#657367" />
+              </div>
             </div>
           </div>
         </div>

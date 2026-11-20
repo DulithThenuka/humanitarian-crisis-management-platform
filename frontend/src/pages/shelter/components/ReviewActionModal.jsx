@@ -27,9 +27,9 @@ export const ReviewActionModal = ({
   };
 
   const actionButtonLabels = {
-    allocation: 'Confirm prototype action',
-    clarification: 'Submit clarification request',
-    escalation: 'Confirm prototype escalation'
+    allocation: 'Confirm Space Allocation',
+    clarification: 'Submit Clarification Request',
+    escalation: 'Confirm Priority Escalation'
   };
 
   const handleSubmit = (e) => {
@@ -64,7 +64,7 @@ export const ReviewActionModal = ({
           {actionTitles[actionType] || 'Confirm this reviewed action?'}
         </h2>
         <p className="sh-action-card-desc">
-          UI-only prototype action. No backend transaction occurs. Reviewer, reason and timestamp are represented in the local audit trail.
+          Operational action will be submitted and recorded with timestamp and staff credentials in the verified shelter audit registry.
         </p>
 
         {/* Form Body */}

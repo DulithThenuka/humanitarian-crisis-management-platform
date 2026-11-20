@@ -13,6 +13,7 @@ public class AssistanceRequestsController : BaseApiController
     private readonly IAssistanceRequestService _service;
     private readonly ICoordinatorService? _coordinatorService;
 
+    [Microsoft.Extensions.DependencyInjection.ActivatorUtilitiesConstructor]
     public AssistanceRequestsController(
         IAssistanceRequestService service,
         ICoordinatorService coordinatorService)

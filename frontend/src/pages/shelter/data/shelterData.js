@@ -1,14 +1,16 @@
-export const SHELTER_ADMIN_USER = {
+export const SHELTER_MANAGER_USER = {
   name: 'Tharushi De Alwis',
-  role: 'Shelter Administrator',
-  roleCode: 'SHELTER_ADMIN',
-  shortRole: 'Shelter Admin',
+  role: 'Shelter Manager',
+  roleCode: 'SHELTER_MANAGER',
+  shortRole: 'Shelter Manager',
   avatar: 'TA',
   operationArea: 'Western Province Flood',
   notificationCount: 3,
   dutyStatus: true,
   accessBoundaryNotice: 'Shelter operations and placements only. Detailed case notes remain hidden.'
 };
+
+export const SHELTER_ADMIN_USER = SHELTER_MANAGER_USER;
 
 export const INITIAL_METRICS = {
   registeredShelters: 16,
@@ -63,7 +65,7 @@ export const CONNECTED_ASSISTANCE_WORKFLOW = [
   {
     step: 2,
     title: 'Human/Case review',
-    description: 'Shelter Admin action creates an audit history',
+    description: 'Shelter Manager action creates a verified audit record',
     status: 'completed'
   },
   {
@@ -91,21 +93,21 @@ export const INITIAL_RECENT_ACTIVITY = [
     id: 'ACT-101',
     time: '10:22',
     title: 'SH-008 - Kelani Community Centre - Kelani East',
-    action: 'Prototype record updated by authorised staff',
+    action: 'Operational record synced with central crisis registry',
     shelterId: 'SH-008'
   },
   {
     id: 'ACT-102',
     time: '09:18',
     title: 'SH-003 - Biyagama School Hall - Biyagama North',
-    action: 'Prototype record updated by authorised staff',
+    action: 'Capacity audit completed by facility team',
     shelterId: 'SH-003'
   },
   {
     id: 'ACT-103',
     time: '08:41',
     title: 'SH-011 - Wattala Civic Centre - Wattala South',
-    action: 'Prototype record updated by authorised staff',
+    action: 'Replenishment supplies logged by logistics convoy',
     shelterId: 'SH-011'
   }
 ];

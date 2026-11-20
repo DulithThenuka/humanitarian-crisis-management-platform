@@ -76,6 +76,13 @@ export const shelterService = {
   },
 
   /**
+   * Fetches pending assistance requests awaiting shelter allocation (family intake queue).
+   */
+  getIntakeQueue: async () => {
+    return await apiClient.get('/shelters/intake-queue');
+  },
+
+  /**
    * Creates a new evacuee placement allocation record.
    */
   createPlacement: async (placementData) => {

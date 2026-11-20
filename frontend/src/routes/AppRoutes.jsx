@@ -253,7 +253,15 @@ export const AppRoutes = () => {
       <Route path="/shelter/resources" element={<ShelterAdminDashboard initialTab="resources" />} />
       <Route path="/shelter/reports" element={<ShelterAdminDashboard initialTab="reports" />} />
 
-      {/* Shelter Manager Backward-Compatible Aliases */}
+      {/* Shelter Manager Official Routes & Backward-Compatible Aliases */}
+      <Route path="/shelter-manager" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+      <Route path="/shelter-manager/dashboard" element={<ShelterAdminDashboard initialTab="dashboard" />} />
+      <Route path="/shelter-manager/directory" element={<ShelterAdminDashboard initialTab="directory" />} />
+      <Route path="/shelter-manager/capacity" element={<ShelterAdminDashboard initialTab="capacity" />} />
+      <Route path="/shelter-manager/placements" element={<ShelterAdminDashboard initialTab="placements" />} />
+      <Route path="/shelter-manager/resources" element={<ShelterAdminDashboard initialTab="resources" />} />
+      <Route path="/shelter-manager/reports" element={<ShelterAdminDashboard initialTab="reports" />} />
+      <Route path="/shelter-manager/*" element={<ShelterAdminDashboard initialTab="dashboard" />} />
       <Route path="/shelter-admin" element={<ShelterAdminDashboard initialTab="dashboard" />} />
       <Route path="/shelter-admin/dashboard" element={<ShelterAdminDashboard initialTab="dashboard" />} />
       <Route path="/shelter-admin/directory" element={<ShelterAdminDashboard initialTab="directory" />} />
@@ -261,8 +269,6 @@ export const AppRoutes = () => {
       <Route path="/shelter-admin/placements" element={<ShelterAdminDashboard initialTab="placements" />} />
       <Route path="/shelter-admin/resources" element={<ShelterAdminDashboard initialTab="resources" />} />
       <Route path="/shelter-admin/reports" element={<ShelterAdminDashboard initialTab="reports" />} />
-      <Route path="/shelter-manager" element={<ShelterAdminDashboard initialTab="dashboard" />} />
-      <Route path="/shelter-manager/*" element={<ShelterAdminDashboard initialTab="dashboard" />} />
       <Route path="/shelter-manger" element={<Navigate to="/shelter" replace />} />
       <Route path="/shelters/admin" element={<ShelterAdminDashboard initialTab="dashboard" />} />
       <Route path="/shelter-dashboard" element={<ShelterAdminDashboard initialTab="dashboard" />} />
@@ -287,6 +293,8 @@ export const AppRoutes = () => {
       <Route path="/volunteer/roster" element={<VolunteerRosterPage />} />
 
       {/* Volunteer Backward-Compatible Aliases */}
+      <Route path="/volunteers" element={<Navigate to="/volunteer" replace />} />
+      <Route path="/volunteers/portal" element={<Navigate to="/volunteer" replace />} />
       <Route path="/volunteer-admin" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteer-admin/dashboard" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteer-manager" element={<VolunteerPortal initialTab="overview" />} />

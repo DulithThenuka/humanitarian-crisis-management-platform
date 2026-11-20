@@ -106,6 +106,46 @@ public class PartnerService : IPartnerService
         return Result<PartnerOrganisationDto>.Success(MapPartnerToDto(entity), "Partner organisation registered successfully.");
     }
 
+    public async Task<Result<PartnerOrganisationDto>> UpdatePartnerAsync(
+        Guid id,
+        UpdatePartnerOrganisationDto dto,
+        string? userId,
+        CancellationToken cancellationToken = default)
+    {
+        var partner = await _partnerRepository.GetPartnerByIdWithDetailsAsync(id, cancellationToken);
+        if (partner is null)
+            return Result<PartnerOrganisationDto>.Failure($"Partner organisation '{id}' was not found.");
+
+        partner.Name = dto.Name.Trim();
+        partner.Acronym = dto.Acronym.Trim().ToUpperInvariant();
+        partner.Type = dto.Type.Trim();
+        partner.LeadContact = dto.LeadContact.Trim();
+        partner.Phone = dto.Phone.Trim();
+        partner.Email = dto.Email.Trim();
+        partner.FieldTeamsCount = dto.FieldTeamsCount;
+        partner.FleetCount = dto.FleetCount;
+
+        if (!string.IsNullOrWhiteSpace(dto.Status))
+        {
+            partner.Status = dto.Status.Trim();
+            partner.StatusClass = ResolveStatusClass(dto.Status);
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.MouStatus))
+        {
+            partner.MouStatus = dto.MouStatus.Trim();
+            partner.MouBadge = ResolveMouBadge(dto.MouStatus);
+        }
+
+        partner.UpdatedAt = DateTime.UtcNow;
+        partner.LastModifiedBy = userId;
+
+        await _partnerRepository.UpdateAsync(partner, cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        return Result<PartnerOrganisationDto>.Success(MapPartnerToDto(partner), "Partner organisation profile updated.");
+    }
+
     public async Task<Result<PartnerOrganisationDto>> UpdatePartnerStatusAsync(
         Guid id,
         UpdatePartnerStatusDto dto,
@@ -172,6 +212,35 @@ public class PartnerService : IPartnerService
         await _unitOfWork.CommitAsync(cancellationToken);
 
         return Result<PartnerCommitmentDto>.Success(MapCommitmentToDto(commitment), "Resource commitment logged successfully.");
+    }
+
+    public async Task<Result<PartnerCommitmentDto>> UpdateCommitmentAsync(
+        Guid commitmentId,
+        UpdatePartnerCommitmentDto dto,
+        string? userId,
+        CancellationToken cancellationToken = default)
+    {
+        if (dto.Qty <= 0)
+            return Result<PartnerCommitmentDto>.Failure("Commitment quantity must be greater than zero.");
+
+        var commitment = await _partnerRepository.GetCommitmentByIdAsync(commitmentId, cancellationToken);
+        if (commitment is null)
+            return Result<PartnerCommitmentDto>.Failure($"Commitment '{commitmentId}' was not found.");
+
+        commitment.Item = dto.Item.Trim();
+        commitment.Quantity = dto.Qty;
+        commitment.DestinationZone = dto.DestinationZone.Trim();
+        commitment.EstimatedValueLkr = dto.EstimatedValueLkr;
+        if (!string.IsNullOrWhiteSpace(dto.Status))
+        {
+            commitment.Status = dto.Status.Trim();
+        }
+        commitment.UpdatedAt = DateTime.UtcNow;
+        commitment.LastModifiedBy = userId;
+
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        return Result<PartnerCommitmentDto>.Success(MapCommitmentToDto(commitment), "Resource commitment updated.");
     }
 
     public async Task<Result<PartnerCommitmentDto>> UpdateCommitmentStatusAsync(
@@ -274,7 +343,9 @@ public class PartnerService : IPartnerService
                     Status = c.Status,
                     DestinationZone = c.DestinationZone,
                     EstimatedValueLkr = c.EstimatedValueLkr,
-                    CreatedAt = c.CreatedAt
+                    CreatedAt = c.CreatedAt,
+                    UpdatedAt = c.UpdatedAt,
+                    LastModifiedBy = c.LastModifiedBy
                 })
                 .ToList()
         };
@@ -294,7 +365,9 @@ public class PartnerService : IPartnerService
             Status = c.Status,
             DestinationZone = c.DestinationZone,
             EstimatedValueLkr = c.EstimatedValueLkr,
-            CreatedAt = c.CreatedAt
+            CreatedAt = c.CreatedAt,
+            UpdatedAt = c.UpdatedAt,
+            LastModifiedBy = c.LastModifiedBy
         };
     }
 
