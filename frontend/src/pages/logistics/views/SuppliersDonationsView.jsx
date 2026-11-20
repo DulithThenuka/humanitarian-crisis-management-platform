@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, 
   Plus, 
@@ -12,6 +12,7 @@ import {
   FileCheck
 } from 'lucide-react';
 import { RecordDonationModal } from '../components/modals/RecordDonationModal';
+import { SupplierDetailDrawer } from '../components/modals/SupplierDetailDrawer';
 
 const INITIAL_DONATIONS = [
   {
@@ -80,6 +81,7 @@ export const SuppliersDonationsView = ({
   suppliers = [],
   onOpenAddSupplierModal,
   onSelectSupplier,
+  onUpdateSupplierStatus,
   showToast
 }) => {
   const [activeSubtab, setActiveSubtab] = useState('suppliers');
@@ -87,6 +89,15 @@ export const SuppliersDonationsView = ({
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [dateRange, setDateRange] = useState('All');
+
+  // Supplier state and detail drawer state
+  const [localSuppliers, setLocalSuppliers] = useState(suppliers);
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    setLocalSuppliers(suppliers);
+  }, [suppliers]);
 
   // Record Donation Modal State & Donations List State
   const [isRecordDonationOpen, setIsRecordDonationOpen] = useState(false);
@@ -99,7 +110,7 @@ export const SuppliersDonationsView = ({
     const defaults = ['Water', 'Medicine', 'Hygiene', 'Blankets', 'Shelter', 'Emergency kits'];
     defaults.forEach(c => catMap.set(c.toLowerCase(), c));
 
-    suppliers.forEach(s => {
+    localSuppliers.forEach(s => {
       if (s.categories) {
         const parts = Array.isArray(s.categories) 
           ? s.categories 
@@ -117,11 +128,11 @@ export const SuppliersDonationsView = ({
     });
 
     return Array.from(catMap.values());
-  }, [suppliers]);
+  }, [localSuppliers]);
 
   // Combined search, status, category, and date filtering for suppliers
   const filteredSuppliers = useMemo(() => {
-    return suppliers.filter(s => {
+    return localSuppliers.filter(s => {
       const term = searchTerm.toLowerCase().trim();
       const catText = Array.isArray(s.categories) ? s.categories.join(' ') : (s.categories || '');
       
@@ -151,7 +162,7 @@ export const SuppliersDonationsView = ({
 
       return matchesSearch && matchesStatus && matchesCategory && matchesDate;
     });
-  }, [suppliers, searchTerm, statusFilter, categoryFilter, dateRange]);
+  }, [localSuppliers, searchTerm, statusFilter, categoryFilter, dateRange]);
 
   // Filtering for Donated Supplies
   const filteredDonations = useMemo(() => {
@@ -179,6 +190,41 @@ export const SuppliersDonationsView = ({
 
   const isFiltered = searchTerm !== '' || categoryFilter !== 'All' || statusFilter !== 'All' || dateRange !== 'All';
 
+  // Handle opening supplier drawer
+  const handleOpenSupplierDrawer = (supplier) => {
+    setSelectedSupplier(supplier);
+    setIsDrawerOpen(true);
+    if (onSelectSupplier) {
+      onSelectSupplier(supplier);
+    }
+  };
+
+  // Handle approving a supplier in "Review" status (e.g. SUP-021)
+  const handleApproveSupplier = (supplierId) => {
+    setLocalSuppliers(prev => prev.map(s => {
+      if (s.id === supplierId) {
+        return {
+          ...s,
+          status: 'Verified',
+          statusBadge: 'verified',
+          contactRef: 'Approved contact'
+        };
+      }
+      return s;
+    }));
+
+    setSelectedSupplier(prev => prev && prev.id === supplierId ? {
+      ...prev,
+      status: 'Verified',
+      statusBadge: 'verified',
+      contactRef: 'Approved contact'
+    } : prev);
+
+    if (onUpdateSupplierStatus) {
+      onUpdateSupplierStatus(supplierId, 'Verified');
+    }
+  };
+
   // Handle saving newly recorded donation
   const handleSaveDonation = (newDonation) => {
     setDonations(prev => [newDonation, ...prev]);
@@ -189,10 +235,10 @@ export const SuppliersDonationsView = ({
   };
 
   // Dynamic KPI Calculations based on supplier records and inbound contributions
-  const verifiedBase = suppliers.filter(s => s.status?.toLowerCase() === 'verified').length;
-  const reviewBase = suppliers.filter(s => s.status?.toLowerCase() === 'review' || s.status?.toLowerCase() === 'pending').length;
-  const verifiedCount = Math.max(10, 8 + verifiedBase);
-  const pendingReviewCount = Math.max(2, 1 + reviewBase);
+  const verifiedBase = localSuppliers.filter(s => s.status?.toLowerCase() === 'verified').length;
+  const reviewBase = localSuppliers.filter(s => s.status?.toLowerCase() === 'review' || s.status?.toLowerCase() === 'pending').length;
+  const verifiedCount = 8 + verifiedBase;
+  const pendingReviewCount = Math.max(0, 1 + reviewBase);
 
   // Dynamic Donation KPIs
   const addedUnitsTotal = addedDonations.reduce((sum, d) => sum + (Number(d.quantity) || 0), 0);
@@ -456,8 +502,9 @@ export const SuppliersDonationsView = ({
                 filteredSuppliers.map((s) => (
                   <tr 
                     key={s.id} 
-                    onClick={() => onSelectSupplier && onSelectSupplier(s)}
+                    onClick={() => handleOpenSupplierDrawer(s)}
                     style={{ cursor: 'pointer' }}
+                    className="hover:bg-[#f6f8f5] transition-colors"
                   >
                     <td>
                       <span style={{ fontWeight: 700, color: '#162e20' }}>{s.id}</span>
@@ -480,7 +527,18 @@ export const SuppliersDonationsView = ({
                       <span style={{ color: '#738075' }}>{s.lastDelivery}</span>
                     </td>
                     <td>
-                      <ChevronRight size={14} color="#738075" />
+                      <button
+                        type="button"
+                        className="rm-btn-ghost"
+                        style={{ padding: '6px', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenSupplierDrawer(s);
+                        }}
+                        title="Open supplier details drawer"
+                      >
+                        <ChevronRight size={16} color="#1e3d2c" />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -686,6 +744,15 @@ export const SuppliersDonationsView = ({
         isOpen={isRecordDonationOpen}
         onClose={() => setIsRecordDonationOpen(false)}
         onSave={handleSaveDonation}
+      />
+
+      {/* Supplier Detail Drawer */}
+      <SupplierDetailDrawer
+        isOpen={isDrawerOpen}
+        supplier={selectedSupplier}
+        onClose={() => setIsDrawerOpen(false)}
+        onApproveSupplier={handleApproveSupplier}
+        showToast={showToast}
       />
     </div>
   );

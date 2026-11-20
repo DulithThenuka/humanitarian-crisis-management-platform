@@ -253,6 +253,15 @@ export const ResourceManagerPortal = () => {
     showToast(`Supplier "${supplier.name}" (${supplier.id}) registered successfully`);
   };
 
+  const handleUpdateSupplierStatus = (supplierId, newStatus = 'Verified') => {
+    setSuppliers(prev => prev.map(s => s.id === supplierId ? {
+      ...s,
+      status: newStatus,
+      statusBadge: newStatus.toLowerCase(),
+      contactRef: newStatus === 'Verified' ? 'Approved contact' : s.contactRef
+    } : s));
+  };
+
   const handleApproveAllocation = async (request, approvedQty, managerNote) => {
     const qty = parseFloat(approvedQty) || request.requestedQty;
     // Decrement stock in catalog state immediately
@@ -451,6 +460,7 @@ export const ResourceManagerPortal = () => {
               suppliers={suppliers}
               showToast={showToast}
               onOpenAddSupplierModal={handleOpenAddSupplier}
+              onUpdateSupplierStatus={handleUpdateSupplierStatus}
             />
           )}
 
