@@ -14,6 +14,7 @@ import { NotificationsView } from './views/NotificationsView';
 import { ProfileSettingsView } from './views/ProfileSettingsView';
 import { AddInventoryModal } from './components/modals/AddInventoryModal';
 import { AddSupplierModal } from './components/modals/AddSupplierModal';
+import { CommandPaletteModal } from './components/modals/CommandPaletteModal';
 import { CheckCircle2 } from 'lucide-react';
 import './ResourceManagerStyles.css';
 
@@ -43,6 +44,19 @@ export const ResourceManagerPortal = () => {
   // Modals state
   const [isAddInventoryOpen, setIsAddInventoryOpen] = useState(false);
   const [isAddSupplierOpen, setIsAddSupplierOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Global Ctrl+K / Cmd+K listener across portal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const showToast = useCallback((message) => {
     setToastMessage(message);
@@ -354,6 +368,7 @@ export const ResourceManagerPortal = () => {
         <ResourceHeader
           activeTab={activeTab}
           onSelectTab={setActiveTab}
+          onOpenSearch={() => setIsSearchOpen(true)}
           showToast={showToast}
         />
 
@@ -444,6 +459,23 @@ export const ResourceManagerPortal = () => {
         isOpen={isAddSupplierOpen}
         onClose={() => setIsAddSupplierOpen(false)}
         onSave={handleSaveSupplier}
+      />
+
+      {/* Global Command Palette Modal (Ctrl+K / Cmd+K / Header Search) */}
+      <CommandPaletteModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onSelectTab={(tabId, title) => {
+          setActiveTab(tabId);
+          setIsSearchOpen(false);
+          if (showToast && title) {
+            showToast(`Navigated to ${title}`);
+          }
+        }}
+        items={items}
+        allocations={allocations}
+        dispatches={dispatches}
+        suppliers={suppliers}
       />
 
       {/* Interactive Toast Notification */}
