@@ -208,7 +208,7 @@ export const ActivitySafetyView = ({ onRecordUpdate }) => {
                         width: '8px',
                         height: '8px',
                         borderRadius: '50%',
-                        backgroundColor: '#233831',
+                        backgroundColor: '#0c2340',
                         marginTop: '6px',
                         flexShrink: 0,
                         zIndex: 1
@@ -341,7 +341,7 @@ export const ActivitySafetyView = ({ onRecordUpdate }) => {
                   width: '100%',
                   padding: '10px',
                   justifyContent: 'center',
-                  backgroundColor: '#233831',
+                  backgroundColor: '#0c2340',
                   color: '#ffffff',
                   display: 'inline-flex',
                   alignItems: 'center',
