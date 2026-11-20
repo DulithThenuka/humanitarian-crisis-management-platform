@@ -15,7 +15,8 @@ import {
   MessageSquare,
   ChevronRight,
   ExternalLink,
-  Info
+  Info,
+  RefreshCw,
 } from 'lucide-react';
 
 export const OverviewView = ({
@@ -28,7 +29,8 @@ export const OverviewView = ({
   onNavigateTab,
   onViewAssignment,
   onUpdateAvailability,
-  onChangeAvailabilityStatus
+  onChangeAvailabilityStatus,
+  onRefreshData,
 }) => {
   return (
     <div>
@@ -49,13 +51,25 @@ export const OverviewView = ({
             Your availability is active for {user.serviceArea} and nearby service areas.
           </p>
         </div>
-        <button
-          className="vol-btn-outline"
-          onClick={onUpdateAvailability}
-        >
-          <Calendar size={14} />
-          <span>Update availability</span>
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {onRefreshData && (
+            <button
+              className="vol-btn-outline"
+              onClick={onRefreshData}
+              title="Sync with server"
+            >
+              <RefreshCw size={14} />
+              <span>Sync</span>
+            </button>
+          )}
+          <button
+            className="vol-btn-outline"
+            onClick={onUpdateAvailability}
+          >
+            <Calendar size={14} />
+            <span>Update availability</span>
+          </button>
+        </div>
       </div>
 
       {/* 3. Availability Status Ribbon */}

@@ -18,8 +18,9 @@ public interface IVolunteerService
     Task<Result<bool>> EscalateVolunteerAsync(Guid id, VolunteerActionRequestDto dto, string escalatedBy, CancellationToken cancellationToken = default);
 
     // Scheduling & Assignment
-    Task<Result<IReadOnlyList<VolunteerAssignmentDetailDto>>> GetAssignmentsAsync(string? status = null, string? area = null, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<VolunteerAssignmentDetailDto>>> GetAssignmentsAsync(string? status = null, string? area = null, Guid? volunteerId = null, CancellationToken cancellationToken = default);
     Task<Result<VolunteerAssignmentDetailDto>> AssignShiftAsync(AssignShiftRequestDto dto, string assignedBy, CancellationToken cancellationToken = default);
+    Task<Result<bool>> AcceptAssignmentAsync(Guid assignmentId, string acceptedBy, CancellationToken cancellationToken = default);
     Task<Result<bool>> CompleteAssignmentAsync(Guid assignmentId, AssignmentActionRequestDto dto, string completedBy, CancellationToken cancellationToken = default);
     Task<Result<bool>> ReleaseAssignmentAsync(Guid assignmentId, AssignmentActionRequestDto dto, string releasedBy, CancellationToken cancellationToken = default);
 

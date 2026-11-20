@@ -108,9 +108,10 @@ public class VolunteersController : BaseApiController
     public async Task<ActionResult<Result<IReadOnlyList<VolunteerAssignmentDetailDto>>>> GetAssignments(
         [FromQuery] string? status,
         [FromQuery] string? area,
+        [FromQuery] Guid? volunteerId,
         CancellationToken cancellationToken)
     {
-        var result = await _volunteerService.GetAssignmentsAsync(status, area, cancellationToken);
+        var result = await _volunteerService.GetAssignmentsAsync(status, area, volunteerId, cancellationToken);
         return result.Succeeded ? Ok(result) : BadRequest(result);
     }
 
@@ -142,6 +143,15 @@ public class VolunteersController : BaseApiController
         return result.Succeeded 
             ? Ok(Result<bool>.Success(true, result.Message)) 
             : BadRequest(Result<bool>.Failure(result.Message ?? "Assignment failed."));
+    }
+
+    [HttpPost("assignments/{id:guid}/accept")]
+    public async Task<ActionResult<Result<bool>>> AcceptAssignment(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _volunteerService.AcceptAssignmentAsync(id, CurrentUserName, cancellationToken);
+        return result.Succeeded ? Ok(result) : BadRequest(result);
     }
 
     [HttpPost("assignments/{id:guid}/complete")]

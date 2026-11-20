@@ -440,6 +440,7 @@ public class VolunteerService : IVolunteerService
     public async Task<Result<IReadOnlyList<VolunteerAssignmentDetailDto>>> GetAssignmentsAsync(
         string? status = null,
         string? area = null,
+        Guid? volunteerId = null,
         CancellationToken cancellationToken = default)
     {
         var assignments = await _context.VolunteerAssignments
@@ -450,6 +451,11 @@ public class VolunteerService : IVolunteerService
             .ToListAsync(cancellationToken);
 
         var list = assignments.Select(MapToAssignmentDetailDto).ToList();
+
+        if (volunteerId.HasValue && volunteerId.Value != Guid.Empty)
+        {
+            list = list.Where(a => a.VolunteerId == volunteerId.Value).ToList();
+        }
 
         if (!string.IsNullOrWhiteSpace(status) && !status.Equals("All", StringComparison.OrdinalIgnoreCase))
         {
@@ -520,6 +526,33 @@ public class VolunteerService : IVolunteerService
         return Result<VolunteerAssignmentDetailDto>.Success(
             MapToAssignmentDetailDto(assignment),
             $"Shift successfully assigned to {FormatVolunteerCode(volunteer.Id)}.");
+    }
+
+    public async Task<Result<bool>> AcceptAssignmentAsync(
+        Guid assignmentId,
+        string acceptedBy,
+        CancellationToken cancellationToken = default)
+    {
+        var assignment = await _context.VolunteerAssignments
+            .Include(a => a.Volunteer)
+            .FirstOrDefaultAsync(a => a.Id == assignmentId, cancellationToken);
+
+        if (assignment == null)
+            return Result<bool>.Failure("Assignment record not found.");
+
+        if (assignment.AssignmentStatus == 2)
+            return Result<bool>.Failure("Cannot accept an already completed assignment.");
+
+        if (assignment.AssignmentStatus == 3)
+            return Result<bool>.Failure("Cannot accept a cancelled assignment.");
+
+        assignment.AssignmentStatus = 1; // InProgress / Accepted
+        assignment.Notes = $"{assignment.Notes} | Accepted by {acceptedBy}".Trim(' ', '|');
+        assignment.LastModifiedBy = acceptedBy;
+        assignment.UpdatedAt = DateTime.UtcNow;
+
+        await _unitOfWork.CommitAsync(cancellationToken);
+        return Result<bool>.Success(true, "Assignment accepted successfully.");
     }
 
     public async Task<Result<bool>> CompleteAssignmentAsync(
