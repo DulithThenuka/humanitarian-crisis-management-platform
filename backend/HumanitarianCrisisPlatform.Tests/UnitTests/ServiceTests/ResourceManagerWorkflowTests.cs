@@ -158,6 +158,123 @@ public class ResourceManagerWorkflowTests
     }
 
     [Fact]
+    public async Task UpdateStockQuantity_ValidQuantity_ShouldSetTotalAndRecalculateStatus()
+    {
+        var resourceId = Guid.NewGuid();
+        var resource = new Resource
+        {
+            Id = resourceId,
+            Name = "Emergency Family Blankets",
+            TotalQuantity = 100,
+            AllocatedQuantity = 20,
+            MinimumThreshold = 50
+        };
+
+        _repoMock.Setup(r => r.GetByIdAsync(resourceId, default)).ReturnsAsync(resource);
+        _uowMock.Setup(u => u.CommitAsync(default)).ReturnsAsync(1);
+
+        // 1. Update to 200 (Available: 180 > 50 => "Available")
+        var result1 = await _service.UpdateStockQuantityAsync(resourceId, new UpdateStockQuantityDto
+        {
+            Quantity = 200,
+            Reason = "Depot delivery intake"
+        }, "Dilan Perera");
+
+        Assert.True(result1.Succeeded);
+        Assert.Equal(200, result1.Data!.TotalQuantity);
+        Assert.Equal(180, result1.Data.AvailableQuantity);
+        Assert.Equal("Available", result1.Data.StockStatus);
+        Assert.Equal("available", result1.Data.StatusBadge);
+
+        // 2. Update to 60 (Available: 40 <= 50 => "Low stock")
+        var result2 = await _service.UpdateStockQuantityAsync(resourceId, new UpdateStockQuantityDto
+        {
+            Quantity = 60,
+            Reason = "Crisis dispatch"
+        }, "Dilan Perera");
+
+        Assert.True(result2.Succeeded);
+        Assert.Equal(60, result2.Data!.TotalQuantity);
+        Assert.Equal(40, result2.Data.AvailableQuantity);
+        Assert.Equal("Low stock", result2.Data.StockStatus);
+        Assert.Equal("warning", result2.Data.StatusBadge);
+
+        // 3. Update to 20 (Available: 0 <= 0 => "Shortage")
+        var result3 = await _service.UpdateStockQuantityAsync(resourceId, new UpdateStockQuantityDto
+        {
+            Quantity = 20,
+            Reason = "Final reservation"
+        }, "Dilan Perera");
+
+        Assert.True(result3.Succeeded);
+        Assert.Equal(20, result3.Data!.TotalQuantity);
+        Assert.Equal(0, result3.Data.AvailableQuantity);
+        Assert.Equal("Shortage", result3.Data.StockStatus);
+        Assert.Equal("shortage", result3.Data.StatusBadge);
+    }
+
+    [Fact]
+    public async Task UpdateStockQuantity_NegativeQuantity_ShouldFail()
+    {
+        var resourceId = Guid.NewGuid();
+        var resource = new Resource
+        {
+            Id = resourceId,
+            Name = "Baby Food Kits",
+            TotalQuantity = 50,
+            AllocatedQuantity = 10
+        };
+
+        _repoMock.Setup(r => r.GetByIdAsync(resourceId, default)).ReturnsAsync(resource);
+
+        var result = await _service.UpdateStockQuantityAsync(resourceId, new UpdateStockQuantityDto
+        {
+            Quantity = -5,
+            Reason = "Discrepancy"
+        }, "Dilan Perera");
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, e => e.Contains("cannot be negative"));
+    }
+
+    [Fact]
+    public async Task UpdateStockQuantity_BelowAllocated_ShouldFail()
+    {
+        var resourceId = Guid.NewGuid();
+        var resource = new Resource
+        {
+            Id = resourceId,
+            Name = "Baby Food Kits",
+            TotalQuantity = 50,
+            AllocatedQuantity = 30
+        };
+
+        _repoMock.Setup(r => r.GetByIdAsync(resourceId, default)).ReturnsAsync(resource);
+
+        var result = await _service.UpdateStockQuantityAsync(resourceId, new UpdateStockQuantityDto
+        {
+            Quantity = 25, // Less than 30 allocated
+            Reason = "Adjustment"
+        }, "Dilan Perera");
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, e => e.Contains("cannot be less than currently allocated"));
+    }
+
+    [Fact]
+    public void UpdateStockQuantityValidator_ShouldEnforceNonNegative()
+    {
+        var validator = new UpdateStockQuantityValidator();
+
+        var errors = validator.Validate(new UpdateStockQuantityDto { Quantity = -1 });
+        Assert.NotEmpty(errors);
+        Assert.Contains(errors, e => e.Contains("cannot be negative"));
+
+        var validErrors = validator.Validate(new UpdateStockQuantityDto { Quantity = 0 });
+        Assert.Empty(validErrors);
+    }
+
+    [Fact]
     public async Task GetOverviewMetrics_ShouldComputeAccurateAggregations()
     {
         var resources = new List<Resource>

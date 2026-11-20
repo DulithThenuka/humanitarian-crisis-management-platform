@@ -32,6 +32,28 @@ public class UpdateResourceValidator
     }
 }
 
+public class UpdateStockQuantityValidator
+{
+    public List<string> Validate(UpdateStockQuantityDto dto)
+    {
+        var errors = new List<string>();
+        if (dto.Quantity < 0)
+            errors.Add("Stock quantity cannot be negative.");
+        return errors;
+    }
+}
+
+public class StockAdjustmentValidator
+{
+    public List<string> Validate(StockAdjustmentDto dto)
+    {
+        var errors = new List<string>();
+        if (dto.NewQuantity.HasValue && dto.NewQuantity.Value < 0)
+            errors.Add("Stock quantity cannot be negative.");
+        return errors;
+    }
+}
+
 public class CreateSupplierValidator
 {
     public List<string> Validate(CreateSupplierDto dto)

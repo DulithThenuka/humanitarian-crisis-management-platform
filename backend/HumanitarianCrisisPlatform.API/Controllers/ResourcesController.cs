@@ -66,7 +66,7 @@ public class ResourcesController : BaseApiController
     /// Registers a new inventory item in the catalog.
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "LogisticsManager,Coordinator,Admin")]
+    [Authorize(Roles = "LogisticsManager,ResourceManager,Resource Manager,Coordinator,Admin")]
     public async Task<ActionResult<Result<ResourceDto>>> CreateResource([FromBody] CreateResourceDto dto, CancellationToken cancellationToken)
     {
         var validator = new CreateResourceValidator();
@@ -77,6 +77,10 @@ public class ResourcesController : BaseApiController
         }
 
         var result = await _resourceService.CreateResourceAsync(dto, CurrentUserName, cancellationToken);
+        if (!result.Succeeded)
+        {
+            return BadRequest(result);
+        }
         return CreatedAtAction(nameof(GetById), new { id = result.Data?.Id }, result);
     }
 
@@ -84,7 +88,7 @@ public class ResourcesController : BaseApiController
     /// Updates an existing inventory item.
     /// </summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "LogisticsManager,Coordinator,Admin")]
+    [Authorize(Roles = "LogisticsManager,ResourceManager,Resource Manager,Coordinator,Admin")]
     public async Task<ActionResult<Result<ResourceDto>>> UpdateResource(Guid id, [FromBody] UpdateResourceDto dto, CancellationToken cancellationToken)
     {
         var validator = new UpdateResourceValidator();
@@ -95,7 +99,36 @@ public class ResourcesController : BaseApiController
         }
 
         var result = await _resourceService.UpdateResourceAsync(id, dto, CurrentUserName, cancellationToken);
-        if (!result.Succeeded) return NotFound(result);
+        if (!result.Succeeded)
+        {
+            if (result.Errors.Any(e => e.Contains("not found", StringComparison.OrdinalIgnoreCase)))
+                return NotFound(result);
+            return BadRequest(result);
+        }
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Updates an existing inventory item's stock quantity directly with non-negative validation and status calculation.
+    /// </summary>
+    [HttpPut("{id:guid}/stock")]
+    [Authorize(Roles = "LogisticsManager,ResourceManager,Resource Manager,Coordinator,Admin")]
+    public async Task<ActionResult<Result<ResourceDto>>> UpdateStockQuantity(Guid id, [FromBody] UpdateStockQuantityDto dto, CancellationToken cancellationToken)
+    {
+        var validator = new UpdateStockQuantityValidator();
+        var errors = validator.Validate(dto);
+        if (errors.Count > 0)
+        {
+            return BadRequest(Result<ResourceDto>.Failure(string.Join("; ", errors)));
+        }
+
+        var result = await _resourceService.UpdateStockQuantityAsync(id, dto, CurrentUserName, cancellationToken);
+        if (!result.Succeeded)
+        {
+            if (result.Errors.Any(e => e.Contains("not found", StringComparison.OrdinalIgnoreCase)))
+                return NotFound(result);
+            return BadRequest(result);
+        }
         return Ok(result);
     }
 
@@ -103,23 +136,40 @@ public class ResourcesController : BaseApiController
     /// Deletes an inventory item if no active allocations exist.
     /// </summary>
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "LogisticsManager,Admin")]
+    [Authorize(Roles = "LogisticsManager,ResourceManager,Resource Manager,Admin")]
     public async Task<ActionResult<Result<bool>>> DeleteResource(Guid id, CancellationToken cancellationToken)
     {
         var result = await _resourceService.DeleteResourceAsync(id, cancellationToken);
-        if (!result.Succeeded) return BadRequest(result);
+        if (!result.Succeeded)
+        {
+            if (result.Errors.Any(e => e.Contains("not found", StringComparison.OrdinalIgnoreCase)))
+                return NotFound(result);
+            return BadRequest(result);
+        }
         return Ok(result);
     }
 
     /// <summary>
-    /// Adjusts stock total quantity (+/-) with operational reason.
+    /// Adjusts stock total quantity (+/- or absolute) with operational reason and automatic status recalculation.
     /// </summary>
     [HttpPost("{id:guid}/adjust-stock")]
-    [Authorize(Roles = "LogisticsManager,Coordinator,Admin")]
+    [Authorize(Roles = "LogisticsManager,ResourceManager,Resource Manager,Coordinator,Admin")]
     public async Task<ActionResult<Result<ResourceDto>>> AdjustStock(Guid id, [FromBody] StockAdjustmentDto dto, CancellationToken cancellationToken)
     {
+        var validator = new StockAdjustmentValidator();
+        var errors = validator.Validate(dto);
+        if (errors.Count > 0)
+        {
+            return BadRequest(Result<ResourceDto>.Failure(string.Join("; ", errors)));
+        }
+
         var result = await _resourceService.AdjustStockAsync(id, dto, CurrentUserName, cancellationToken);
-        if (!result.Succeeded) return BadRequest(result);
+        if (!result.Succeeded)
+        {
+            if (result.Errors.Any(e => e.Contains("not found", StringComparison.OrdinalIgnoreCase)))
+                return NotFound(result);
+            return BadRequest(result);
+        }
         return Ok(result);
     }
 
