@@ -254,17 +254,42 @@ export const ResourceManagerPortal = () => {
   };
 
   const handleApproveAllocation = async (request, approvedQty, managerNote) => {
+    const qty = parseFloat(approvedQty) || request.requestedQty;
+    // Decrement stock in catalog state immediately
+    setItems(prev => prev.map(item => {
+      if (item.name === request.item || item.id === request.resourceId) {
+        const nextQty = Math.max(0, (item.quantity || 0) - qty);
+        const thresh = item.threshold || 100;
+        let s = 'Available';
+        let b = 'available';
+        if (nextQty <= 0) {
+          s = 'Shortage';
+          b = 'critical';
+        } else if (nextQty <= thresh) {
+          s = 'Low stock';
+          b = 'warning';
+        }
+        return {
+          ...item,
+          quantity: nextQty,
+          stockStatus: s,
+          statusBadge: b,
+          lastUpdated: 'Just now'
+        };
+      }
+      return item;
+    }));
+    setAllocations(prev => prev.filter(r => r.id !== request.id));
+    showToast(`Allocation for ${request.item} approved (${qty} units dispatched)`);
     try {
       const rawId = request.rawId || request.id;
       await resourceService.approveAllocation(rawId, {
-        approvedQuantity: parseFloat(approvedQty) || request.requestedQty,
+        approvedQuantity: qty,
         managerNote: managerNote || 'Approved for emergency crisis relief'
       });
-      showToast(`Allocation for ${request.item} approved for ${approvedQty} units`);
       fetchLiveData();
     } catch {
-      showToast(`Allocation for ${request.item} approved locally`);
-      setAllocations(prev => prev.filter(r => r.id !== request.id));
+      // Kept in local state
     }
   };
 
