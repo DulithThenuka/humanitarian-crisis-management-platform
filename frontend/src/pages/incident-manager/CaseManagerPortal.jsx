@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { useNavigate, useLocation, useParams, Navigate } from 'react-router-dom';
 import { 
   Shield, 
@@ -187,6 +188,12 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
       fetchCasesAndDashboard();
     }
   }, [isAuthenticated, fetchCasesAndDashboard]);
+
+  useRealtimeRefresh(
+    ['incidents', 'assistancerequests', 'aireview'],
+    fetchCasesAndDashboard,
+    { enabled: Boolean(isAuthenticated) }
+  );
 
   const handleSelectCase = useCallback(
     (caseId) => {

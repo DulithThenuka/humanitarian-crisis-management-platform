@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 
 // API Services
 import coordinatorService from '../../services/coordinatorService';
@@ -271,6 +272,11 @@ export const EmergencyCoordinatorPortal = ({
   useEffect(() => {
     loadPortalData();
   }, [loadPortalData]);
+
+  useRealtimeRefresh(
+    ['assistancerequests', 'crises', 'resources', 'shelters', 'alerts', 'aireview', 'coordinator'],
+    loadPortalData
+  );
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });

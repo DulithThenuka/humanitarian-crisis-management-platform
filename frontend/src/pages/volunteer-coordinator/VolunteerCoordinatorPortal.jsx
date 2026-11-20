@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield,
@@ -102,6 +103,11 @@ export const VolunteerCoordinatorPortal = () => {
   useEffect(() => {
     loadPortalData();
   }, [loadPortalData]);
+
+  useRealtimeRefresh(
+    ['volunteers', 'crises', 'assistancerequests'],
+    () => loadPortalData(true)
+  );
 
   // Derived metrics from live dashboard data
   const metrics = {

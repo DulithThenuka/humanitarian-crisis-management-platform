@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { shelterService } from '../../services/shelterService';
@@ -257,6 +258,9 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
   useEffect(() => {
     refreshAllShelterData();
   }, [refreshAllShelterData]);
+
+  // Real-time synchronization
+  useRealtimeRefresh(['shelters', 'resources', 'placements'], refreshAllShelterData);
 
   // Selected Shelter Object
   const selectedShelter =
