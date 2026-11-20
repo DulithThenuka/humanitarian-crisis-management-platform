@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { ResourceSidebar } from './components/ResourceSidebar';
 import { ResourceHeader } from './components/ResourceHeader';
 import { ResourceOverviewView } from './views/ResourceOverviewView';
@@ -172,6 +173,8 @@ export const ResourceManagerPortal = () => {
   useEffect(() => {
     fetchLiveData();
   }, [fetchLiveData]);
+
+  useRealtimeRefresh(['resources', 'assistancerequests', 'alerts'], fetchLiveData);
 
   // Handlers
   const handleDutyToggle = async () => {

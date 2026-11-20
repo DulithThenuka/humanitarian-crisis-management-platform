@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Home,
@@ -918,6 +919,8 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
   useEffect(() => {
     loadData();
   }, [roleFilter]);
+
+  useRealtimeRefresh(['*'], loadData);
 
   // User RBAC Actions
   const handleToggleStatus = async (targetUser) => {

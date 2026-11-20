@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AlertProvider } from './context/AlertContext';
+import { RealtimeProvider } from './context/RealtimeContext';
 import { AppRoutes } from './routes/AppRoutes';
 import './assets/styles.css';
 
@@ -17,9 +18,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AlertProvider>
-          <AppLayout />
-        </AlertProvider>
+        <RealtimeProvider>
+          <AlertProvider>
+            <AppLayout />
+          </AlertProvider>
+        </RealtimeProvider>
       </AuthProvider>
     </BrowserRouter>
   );
