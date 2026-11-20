@@ -321,24 +321,30 @@ export const ResourceManagerPortal = () => {
     }
   };
 
-  const handleConfirmDelivery = async (dispatch) => {
+  const handleConfirmDelivery = async (dispatch, receivedBy = 'Authorized Receiving Officer', notes = '') => {
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newHistory = [
+      { time: nowTime, title: `Delivery confirmed by ${receivedBy}`, sub: notes || `Official sign-off recorded at ${dispatch.destination}` },
+      ...(dispatch.history || [])
+    ];
+    setDispatches(prev => prev.map(d => d.id === dispatch.id ? {
+      ...d,
+      currentStep: 5,
+      status: 'Delivered',
+      statusBadge: 'delivered',
+      deliveryConfirmation: `Confirmed by ${receivedBy} (${nowTime})`,
+      history: newHistory
+    } : d));
+    showToast(`Delivery confirmation recorded for ${dispatch.id} (${receivedBy})`);
     try {
       const rawId = dispatch.rawId || dispatch.id;
       await resourceService.confirmDelivery(rawId, {
         deliveredTo: dispatch.destination,
-        confirmationNotes: 'Signed at destination by receiving officer'
+        confirmationNotes: notes || `Signed by ${receivedBy}`
       });
-      showToast(`Delivery confirmation recorded for ${dispatch.id}`);
       fetchLiveData();
     } catch {
-      setDispatches(prev => prev.map(d => d.id === dispatch.id ? {
-        ...d,
-        currentStep: 5,
-        status: 'Delivered',
-        statusBadge: 'delivered',
-        deliveryConfirmation: `Confirmed by Dilan Perera (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`
-      } : d));
-      showToast(`Delivery confirmation recorded for ${dispatch.id}`);
+      // Retained in local state
     }
   };
 
