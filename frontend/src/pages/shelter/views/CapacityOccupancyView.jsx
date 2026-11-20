@@ -12,7 +12,7 @@ import {
   UserCheck,
   ShieldAlert,
   ArrowRight,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 
 export const CapacityOccupancyView = ({
@@ -23,7 +23,7 @@ export const CapacityOccupancyView = ({
   onOpenExportModal,
   onOpenEditModal,
   onOpenAllocateModal,
-  onRefreshData
+  onRefreshData,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
