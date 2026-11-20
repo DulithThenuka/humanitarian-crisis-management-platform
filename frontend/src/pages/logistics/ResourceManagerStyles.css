@@ -1748,3 +1748,26 @@
   align-items: center;
   gap: 8px;
 }
+
+/* Overview interactive alert cards & chart */
+.rm-overview-alert-card {
+  transition: all 0.18s ease;
+}
+
+.rm-overview-alert-card:hover {
+  background-color: #f7faf5 !important;
+  border-color: #c7d5c5 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(22, 46, 32, 0.05);
+}
+
+.rm-overview-alert-card .rm-alert-arrow {
+  opacity: 0.35;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.rm-overview-alert-card:hover .rm-alert-arrow {
+  opacity: 1;
+  transform: translateX(2px);
+  color: #1e3d2c !important;
+}
