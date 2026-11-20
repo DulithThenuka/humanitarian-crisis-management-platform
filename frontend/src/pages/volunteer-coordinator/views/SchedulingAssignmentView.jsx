@@ -127,7 +127,7 @@ const ConfirmAssignmentModal = ({
               outline: 'none'
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = '#14291e';
+              e.target.style.borderColor = '#0c2340';
               e.target.style.backgroundColor = '#fff';
             }}
             onBlur={(e) => {
@@ -155,7 +155,7 @@ const ConfirmAssignmentModal = ({
             checked={reviewed}
             onChange={(e) => setReviewed(e.target.checked)}
             disabled={isSubmitting}
-            style={{ width: '15px', height: '15px', accentColor: '#14291e', cursor: 'pointer' }}
+            style={{ width: '15px', height: '15px', accentColor: '#0c2340', cursor: 'pointer' }}
           />
           I confirmed volunteer eligibility, verification, and non-conflicting shift hours.
         </label>
@@ -192,7 +192,7 @@ const ConfirmAssignmentModal = ({
               padding: '9px 20px',
               borderRadius: '8px',
               border: 'none',
-              backgroundColor: reviewed && !isSubmitting ? '#14291e' : '#8a9480',
+              backgroundColor: reviewed && !isSubmitting ? '#0c2340' : '#8a9480',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700,
@@ -203,10 +203,10 @@ const ConfirmAssignmentModal = ({
               gap: '6px'
             }}
             onMouseEnter={(e) => {
-              if (reviewed && !isSubmitting) e.target.style.backgroundColor = '#1e3a5f';
+              if (reviewed && !isSubmitting) e.target.style.backgroundColor = '#173d66';
             }}
             onMouseLeave={(e) => {
-              if (reviewed && !isSubmitting) e.target.style.backgroundColor = '#14291e';
+              if (reviewed && !isSubmitting) e.target.style.backgroundColor = '#0c2340';
             }}
           >
             {isSubmitting ? (

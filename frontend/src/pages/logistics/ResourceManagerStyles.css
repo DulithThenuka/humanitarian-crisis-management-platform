@@ -702,6 +702,13 @@
   border-color: #c4d0c2 !important;
 }
 
+.rm-btn:focus-visible,
+.rm-btn-primary:focus-visible,
+.rm-btn-secondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(30, 61, 44, 0.16) !important;
+}
+
 .rm-btn-danger {
   background-color: #dc2626;
   color: #ffffff;
@@ -1091,10 +1098,12 @@
   color: var(--rm-text-title);
   outline: none;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .rm-select:focus {
   border-color: var(--rm-green-primary);
+  box-shadow: 0 0 0 3px rgba(30, 61, 44, 0.12);
 }
 
 /* Table Container */

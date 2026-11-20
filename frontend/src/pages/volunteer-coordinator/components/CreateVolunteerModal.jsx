@@ -50,7 +50,7 @@ export const CreateVolunteerModal = ({ isOpen, onClose, onCreateVolunteer }) => 
       <div className="vc-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="vc-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <UserPlus size={18} style={{ color: '#233831' }} />
+            <UserPlus size={18} style={{ color: '#0c2340' }} />
             <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#14291e' }}>
               Register Field Volunteer
             </h3>

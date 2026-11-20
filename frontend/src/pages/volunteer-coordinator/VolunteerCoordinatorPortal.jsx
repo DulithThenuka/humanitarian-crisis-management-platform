@@ -429,7 +429,7 @@ export const VolunteerCoordinatorPortal = () => {
                   width: '26px',
                   height: '26px',
                   borderRadius: '50%',
-                  background: '#14291e',
+                  background: '#0c2340',
                   color: '#ffffff',
                   fontSize: '11px',
                   fontWeight: 700,
