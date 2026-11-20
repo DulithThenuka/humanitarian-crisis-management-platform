@@ -1,202 +1,215 @@
-import React, { useState } from 'react';
-import { Download } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Download, Search, Info } from 'lucide-react';
 
 export const TransparencyReportsView = ({
-  reports,
-  onExportReport
+  reportData,
+  campaigns = [],
+  loading = false,
+  onExportCsv
 }) => {
-  const [selectedOperation, setSelectedOperation] = useState('Current operation');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCampaign, setSelectedCampaign] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
-  const barData = [
-    { label: '1', height: 34 },
-    { label: '2', height: 50 },
-    { label: '3', height: 40 },
-    { label: '4', height: 65 },
-    { label: '5', height: 58 },
-    { label: '6', height: 78 },
-    { label: '7', height: 70 },
-    { label: '8', height: 92 },
-    { label: '9', height: 64 },
-    { label: '10', height: 72 },
-    { label: '11', height: 58 },
-    { label: '12', height: 52 }
-  ];
+  const allRecords = reportData?.records || [];
 
-  const breakdownMetrics = [
-    { label: 'Campaign progress', value: 68 },
-    { label: 'Inventory', value: 82 },
-    { label: 'Allocations', value: 31 },
-    { label: 'Expenditure', value: 24 }
-  ];
+  const filteredRecords = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return allRecords.filter((r) => {
+      const matchesSearch = !q ||
+        r.id.toLowerCase().includes(q) ||
+        r.donorOrg.toLowerCase().includes(q) ||
+        r.source.toLowerCase().includes(q) ||
+        r.allocationTarget.toLowerCase().includes(q);
+      const matchesCampaign = selectedCampaign === 'All' || r.source === selectedCampaign;
+      const matchesStatus = statusFilter === 'All' || r.status.toLowerCase() === statusFilter.toLowerCase();
+      const created = new Date(r.createdAt);
+      const matchesFrom = !fromDate || created >= new Date(fromDate);
+      const matchesTo = !toDate || created <= new Date(`${toDate}T23:59:59`);
+      return matchesSearch && matchesCampaign && matchesStatus && matchesFrom && matchesTo;
+    });
+  }, [allRecords, searchTerm, selectedCampaign, statusFilter, fromDate, toDate]);
+
+  const metrics = useMemo(() => {
+    const verifiedMonetary = filteredRecords
+      .filter(r => r.type === 'Monetary' && (r.status === 'Verified' || r.status === 'Allocated' || r.status === 'Dispatched'))
+      .reduce((sum, r) => sum + Number(r.rawValue || 0), 0);
+    const pendingMonetary = filteredRecords
+      .filter(r => r.type === 'Monetary' && (r.status === 'Pending' || r.status === 'Flagged'))
+      .reduce((sum, r) => sum + Number(r.rawValue || 0), 0);
+    const materialUnits = filteredRecords
+      .filter(r => r.type === 'Material' && r.status !== 'Rejected')
+      .reduce((sum, r) => sum + Number(r.rawValue || 0), 0);
+    const allocatedMonetary = filteredRecords
+      .filter(r => r.type === 'Monetary' && (r.status === 'Allocated' || r.status === 'Dispatched'))
+      .reduce((sum, r) => sum + Number(r.rawValue || 0), 0);
+
+    return {
+      verifiedMonetary,
+      pendingMonetary,
+      materialUnits,
+      allocatedMonetary,
+      verifiedCount: filteredRecords.filter(r => r.status === 'Verified' || r.status === 'Allocated' || r.status === 'Dispatched').length,
+      pendingCount: filteredRecords.filter(r => r.status === 'Pending' || r.status === 'Flagged').length,
+      rejectedCount: filteredRecords.filter(r => r.status === 'Rejected').length
+    };
+  }, [filteredRecords]);
 
   return (
     <div className="fo-workspace">
-      {/* Title & Action Block (Screenshot 7) */}
       <div className="fo-title-block">
         <div>
           <div className="fo-eyebrow">
-            <span>ILLUSTRATIVE REPORTING · NOT LIVE METRICS</span>
+            <span>AUDITABLE REAL-TIME REPORTING</span>
           </div>
-          <h1 className="fo-title">Funding Officer Reports</h1>
+          <h1 className="fo-title">Transparency Reports</h1>
           <p className="fo-subtitle">
-            Filterable demonstration summaries use fictional coursework records.
+            Live financial and material summaries recalculated dynamically from filtered database records.
           </p>
         </div>
 
         <div className="fo-title-actions">
-          <select
-            className="fo-select"
-            value={selectedOperation}
-            onChange={(e) => setSelectedOperation(e.target.value)}
-            style={{ minWidth: '160px' }}
-          >
-            <option value="Current operation">Current operation</option>
-            <option value="Western Province Flood">Western Province Flood</option>
-            <option value="Southern Monsoon Relief">Southern Monsoon Relief</option>
-            <option value="Eastern Coastal Aid">Eastern Coastal Aid</option>
-          </select>
-
-          <button 
+          <button
             className="fo-btn fo-btn-secondary"
-            onClick={onExportReport}
+            disabled={filteredRecords.length === 0}
+            onClick={() => onExportCsv && onExportCsv(filteredRecords, 'Transparency_Report')}
           >
-            <span>Export demo CSV</span>
+            <Download size={14} />
+            <span>Export filtered CSV ({filteredRecords.length})</span>
           </button>
         </div>
       </div>
 
-      {/* Main Grid: Left Campaign progress over time, Right Operational breakdown */}
-      <div className="fo-split-layout">
-        {/* Left Card (60%): Campaign progress over time */}
-        <div style={{ flex: '1 1 58%' }}>
-          <div className="fo-panel" style={{ padding: '24px', height: '100%', boxSizing: 'border-box' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px' }}>
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#162e20', margin: 0 }}>
-                  Campaign progress over time
-                </h3>
-                <div style={{ fontSize: '12px', color: '#657367', marginTop: '3px' }}>
-                  Illustrative trend
-                </div>
-              </div>
-
-              <span style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                padding: '3px 10px',
-                borderRadius: '12px',
-                backgroundColor: '#eff6ff',
-                color: '#1d4ed8',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></span>
-                Demo
-              </span>
-            </div>
-
-            {/* Vertical 12-bar chart */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
-              height: '220px',
-              padding: '0 10px',
-              borderBottom: '1px solid #edf1eb',
-              gap: '12px'
-            }}>
-              {barData.map((bar, idx) => (
-                <div 
-                  key={idx}
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    height: '100%',
-                    justifyContent: 'flex-end'
-                  }}
-                >
-                  <div 
-                    style={{
-                      width: '100%',
-                      maxWidth: '38px',
-                      height: `${bar.height}%`,
-                      background: 'linear-gradient(180deg, #244131 0%, #687452 100%)',
-                      borderRadius: '3px 3px 0 0',
-                      transition: 'height 0.4s ease'
-                    }}
-                    title={`Interval ${bar.label}: ${bar.height}%`}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Bottom X-axis labels 1 to 12 */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '8px 10px 0 10px',
-              gap: '12px'
-            }}>
-              {barData.map((bar, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    flex: 1,
-                    textAlign: 'center',
-                    fontSize: '11px',
-                    color: '#738075',
-                    fontWeight: 500
-                  }}
-                >
-                  {bar.label}
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Filters */}
+      <div className="fo-filter-bar" style={{ flexWrap: 'wrap', gap: '10px' }}>
+        <div className="fo-filter-search" style={{ minWidth: '220px' }}>
+          <Search size={14} className="fo-search-icon" />
+          <input
+            type="text"
+            placeholder="Search donor, ID, or target..."
+            className="fo-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
-        {/* Right Card (40%): Operational breakdown */}
-        <div style={{ flex: '1 1 38%' }}>
-          <div className="fo-panel" style={{ padding: '24px', height: '100%', boxSizing: 'border-box' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#162e20', marginBottom: '28px' }}>
-              Operational breakdown
-            </h3>
+        <select className="fo-select" value={selectedCampaign} onChange={(e) => setSelectedCampaign(e.target.value)}>
+          <option value="All">All Campaigns / Operations</option>
+          {campaigns.map((c) => (
+            <option key={c.id} value={c.title}>{c.title}</option>
+          ))}
+        </select>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {breakdownMetrics.map((item, idx) => (
-                <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 500, color: '#162e20' }}>
-                      {item.label}
-                    </span>
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#162e20' }}>
-                      {item.value}%
-                    </span>
+        <select className="fo-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value="All">All Statuses</option>
+          <option value="Verified">Verified</option>
+          <option value="Allocated">Allocated</option>
+          <option value="Dispatched">Dispatched</option>
+          <option value="Pending">Pending</option>
+          <option value="Flagged">Flagged</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+
+        <input type="date" className="fo-select" value={fromDate} onChange={(e) => setFromDate(e.target.value)} title="From date" />
+        <input type="date" className="fo-select" value={toDate} onChange={(e) => setToDate(e.target.value)} title="To date" />
+      </div>
+
+      {/* Dynamic Summary Cards */}
+      <div className="fo-metrics-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: '16px' }}>
+        <div className="fo-metric-card">
+          <span className="fo-metric-label">Verified Monetary</span>
+          <div className="fo-metric-val">LKR {metrics.verifiedMonetary.toLocaleString()}</div>
+          <span className="fo-metric-subtext">{metrics.verifiedCount} verified records</span>
+        </div>
+        <div className="fo-metric-card">
+          <span className="fo-metric-label">Pending / Flagged</span>
+          <div className="fo-metric-val">LKR {metrics.pendingMonetary.toLocaleString()}</div>
+          <span className="fo-metric-subtext">{metrics.pendingCount} pending · {metrics.rejectedCount} rejected</span>
+        </div>
+        <div className="fo-metric-card">
+          <span className="fo-metric-label">Material Units</span>
+          <div className="fo-metric-val">{metrics.materialUnits.toLocaleString()}</div>
+          <span className="fo-metric-subtext">Non-rejected supply units</span>
+        </div>
+        <div className="fo-metric-card">
+          <span className="fo-metric-label">Allocated / Dispatched</span>
+          <div className="fo-metric-val">LKR {metrics.allocatedMonetary.toLocaleString()}</div>
+          <span className="fo-metric-subtext">Committed to operations</span>
+        </div>
+      </div>
+
+      {reportData && !reportData.hasExpenditureTracking && (
+        <div className="fo-panel" style={{ padding: '10px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#475569' }}>
+          <Info size={15} color="#0e6f76" />
+          <span>{reportData.expenditureTrackingNote}</span>
+        </div>
+      )}
+
+      {/* Campaign Progress Summary + Filtered Records Table */}
+      <div className="fo-split-layout">
+        <div className="fo-panel" style={{ flex: '1 1 38%', padding: '20px' }}>
+          <h3 style={{ margin: '0 0 14px 0', fontSize: '15px', color: '#162e20' }}>Campaign Progress Summary</h3>
+          {campaigns.length === 0 ? (
+            <div style={{ fontSize: '13px', color: '#657367' }}>No active campaigns found.</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {campaigns.map((c) => (
+                <div key={c.id}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>
+                    <span>{c.title}</span>
+                    <span>{c.percentFunded}%</span>
                   </div>
-
-                  {/* Horizontal progress track */}
-                  <div style={{
-                    width: '100%',
-                    height: '6px',
-                    backgroundColor: '#e5ece0',
-                    borderRadius: '4px',
-                    overflow: 'hidden'
-                  }}>
-                    <div style={{
-                      width: `${item.value}%`,
-                      height: '100%',
-                      backgroundColor: '#1e3d2c',
-                      borderRadius: '4px',
-                      transition: 'width 0.5s ease'
-                    }} />
+                  <div style={{ height: '7px', backgroundColor: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${c.percentFunded}%`, height: '100%', backgroundColor: '#0e6f76' }} />
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#657367', marginTop: '2px' }}>
+                    LKR {Number(c.raisedAmount || 0).toLocaleString()} / LKR {Number(c.targetAmount || 0).toLocaleString()}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          )}
+        </div>
+
+        <div className="fo-panel fo-table-panel" style={{ flex: '1 1 62%' }}>
+          {loading ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#657367' }}>Loading report dataset...</div>
+          ) : filteredRecords.length === 0 ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#657367' }}>
+              No records match the selected report filters.
+            </div>
+          ) : (
+            <div className="fo-table-wrap">
+              <table className="fo-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>DONOR</th>
+                    <th>CAMPAIGN / SOURCE</th>
+                    <th>TYPE</th>
+                    <th>VALUE</th>
+                    <th>STATUS</th>
+                    <th>DATE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRecords.map((r) => (
+                    <tr key={r.id}>
+                      <td><strong style={{ color: '#0e6f76' }}>{r.id}</strong></td>
+                      <td>{r.donorOrg}</td>
+                      <td>{r.source}</td>
+                      <td>{r.type}</td>
+                      <td><strong>{r.recordedValue}</strong></td>
+                      <td>{r.status}</td>
+                      <td style={{ fontSize: '12px', color: '#657367' }}>{new Date(r.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>

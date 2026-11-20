@@ -127,6 +127,8 @@ public class DonationReceiptDto
 public class DonorRecordDto
 {
     public string Id { get; set; } = string.Empty;
+    public Guid? DonationGuid { get; set; }
+    public Guid? CrisisEventId { get; set; }
     public string Source { get; set; } = string.Empty;
     public string DonorOrg { get; set; } = string.Empty;
     public string ContactPerson { get; set; } = string.Empty;
@@ -173,24 +175,58 @@ public class CreateDonorRecordDto
 public class DonorDecisionDto
 {
     [Required]
-    public string Action { get; set; } = "submit-approval"; // "submit-approval", "request-clarification", "escalate"
+    public string Action { get; set; } = "submit-approval"; // "submit-approval", "verify", "allocate", "dispatch", "request-clarification", "escalate", "reject", "memo-note"
     public string DecisionReason { get; set; } = string.Empty;
     public string? Note { get; set; }
+    public string? AllocationTarget { get; set; }
+}
+
+public class DonorProfileDto
+{
+    public string DonorId { get; set; } = string.Empty;
+    public string DonorName { get; set; } = string.Empty;
+    public string DonorType { get; set; } = "Individual"; // Individual, Corporate, Institutional, NGO
+    public string VerificationStatus { get; set; } = "Pending"; // Verified, Pending, Flagged
+    public decimal TotalMonetaryAmount { get; set; }
+    public int TotalMaterialUnits { get; set; }
+    public int DonationCount { get; set; }
+    public DateTime? LatestContributionDate { get; set; }
+    public string OperationalArea { get; set; } = "Western Province";
+    public List<DonorRecordDto> DonationHistory { get; set; } = new();
+}
+
+public class UpdateDonorVerificationDto
+{
+    [Required]
+    public string Status { get; set; } = "Verified"; // Verified, Pending, Flagged
+    [Required]
+    public string AuditNote { get; set; } = string.Empty;
 }
 
 public class FundingCampaignDto
 {
     public string Id { get; set; } = string.Empty;
+    public Guid? CrisisEventId { get; set; }
     public string Title { get; set; } = string.Empty;
     public decimal TargetAmount { get; set; }
     public decimal RaisedAmount { get; set; }
+    public decimal RemainingAmount { get; set; }
+    public int MaterialUnitsReceived { get; set; }
+    public int DonationCount { get; set; }
     public int PercentFunded { get; set; }
-    public string Status { get; set; } = "Active"; // Active, Completed, Paused
+    public string Status { get; set; } = "Active"; // Draft, Active, Paused, Completed, Closed
     public string OperationalArea { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public string TargetDescription { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public List<DonorRecordDto> LinkedDonations { get; set; } = new();
+}
+
+public class UpdateCampaignStatusDto
+{
+    [Required]
+    public string Status { get; set; } = "Active"; // Active, Paused, Completed, Closed
 }
 
 public class CreateFundingCampaignDto
@@ -209,16 +245,43 @@ public class FundingAllocationDto
 {
     public string Id { get; set; } = string.Empty;
     public string AllocationCode { get; set; } = string.Empty;
+    public string SourceReference { get; set; } = string.Empty;
     public string TargetHubOrDepot { get; set; } = string.Empty;
     public string Purpose { get; set; } = string.Empty;
     public decimal Amount { get; set; }
+    public decimal UtilizedAmount { get; set; }
     public string Currency { get; set; } = "LKR";
-    public string Status { get; set; } = "Pending Dual Approval"; // Pending Dual Approval, Approved, Dispatched
+    public string Status { get; set; } = "Pending Dual Approval"; // Pending Dual Approval, Approved, Dispatched, Delivered
     public bool RequiresDualApproval { get; set; } = true;
     public string CoSignedBy { get; set; } = string.Empty;
     public string CoSignedAt { get; set; } = string.Empty;
     public string AuthorizedNote { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class CreateFundingAllocationDto
+{
+    [Required]
+    public string SourceReference { get; set; } = string.Empty;
+    [Required]
+    public string TargetHubOrDepot { get; set; } = string.Empty;
+    [Required]
+    public string Purpose { get; set; } = string.Empty;
+    [Range(1, 1000000000)]
+    public decimal Amount { get; set; }
+    public string Currency { get; set; } = "LKR";
+    public string? AuthorizedNote { get; set; }
+}
+
+public class AllocationOverviewDto
+{
+    public decimal TotalVerifiedMonetary { get; set; }
+    public decimal TotalAllocatedMonetary { get; set; }
+    public decimal AvailableUnallocatedMonetary { get; set; }
+    public decimal TotalDispatchedMonetary { get; set; }
+    public bool HasExpenditureTracking { get; set; } = false;
+    public string ExpenditureTrackingNote { get; set; } = "Monetary expenditure tracking table is not yet present in the shared database schema; displaying verified receipts, allocations, and material dispatches.";
+    public List<FundingAllocationDto> Allocations { get; set; } = new();
 }
 
 public class ApproveFundingAllocationDto
@@ -232,12 +295,16 @@ public class SuspiciousFlagDto
 {
     public string Id { get; set; } = string.Empty;
     public string RecordId { get; set; } = string.Empty;
+    public Guid? DonationGuid { get; set; }
     public string DonorOrg { get; set; } = string.Empty;
     public string AnomalyReason { get; set; } = string.Empty;
     public string Severity { get; set; } = "warning"; // urgent, warning, info
     public int RiskScore { get; set; }
-    public string Status { get; set; } = "Review"; // Review, Cleared, Escalated
+    public string Status { get; set; } = "Open"; // Open, Under Investigation, Cleared, Escalated, Rejected
     public string Details { get; set; } = string.Empty;
+    public List<string> RiskFactors { get; set; } = new();
+    public string AIRecommendation { get; set; } = "Advisory only: Verify supporting documentation before clearance. AI cannot auto-approve or reject.";
+    public string? DecisionReason { get; set; }
     public DateTime DetectedAt { get; set; } = DateTime.UtcNow;
     public string? ResolvedBy { get; set; }
     public DateTime? ResolvedAt { get; set; }
@@ -246,7 +313,8 @@ public class SuspiciousFlagDto
 public class ResolveSuspiciousFlagDto
 {
     [Required]
-    public string Action { get; set; } = "clear"; // clear, dismiss, escalate
+    public string Action { get; set; } = "clear"; // clear, investigate, escalate, reject
+    [Required(ErrorMessage = "A human decision reason is mandatory.")]
     public string ResolutionNotes { get; set; } = string.Empty;
 }
 
@@ -258,9 +326,29 @@ public class FundingOfficerDashboardDto
     public FundingOfficerMetricDto ActiveCampaigns { get; set; } = new();
     public FundingOfficerMetricDto PendingVerification { get; set; } = new();
     public FundingOfficerMetricDto AllocatedBalance { get; set; } = new();
+    public FundingOfficerMetricDto AvailableUnallocated { get; set; } = new();
+    public int OpenSuspiciousFlagsCount { get; set; }
     public List<PriorityAttentionItemDto> PriorityAttentionItems { get; set; } = new();
     public List<ConnectedWorkflowStepDto> ConnectedWorkflowSteps { get; set; } = new();
     public List<RecentActivityItemDto> RecentActivity { get; set; } = new();
+}
+
+public class TransparencyReportDto
+{
+    public decimal TotalVerifiedMonetary { get; set; }
+    public decimal TotalPendingMonetary { get; set; }
+    public int TotalMaterialUnits { get; set; }
+    public int VerifiedCount { get; set; }
+    public int PendingCount { get; set; }
+    public int RejectedCount { get; set; }
+    public int AllocatedCount { get; set; }
+    public int DispatchedCount { get; set; }
+    public decimal TotalAllocatedAmount { get; set; }
+    public bool HasExpenditureTracking { get; set; } = false;
+    public string ExpenditureTrackingNote { get; set; } = "Monetary expenditure/disbursement tracking table is not yet present in the shared database schema; report shows verified receipts and approved allocations.";
+    public List<FundingCampaignDto> CampaignSummaries { get; set; } = new();
+    public List<FundingAllocationDto> AllocationSummaries { get; set; } = new();
+    public List<DonorRecordDto> Records { get; set; } = new();
 }
 
 public class FundingOfficerMetricDto

@@ -18,7 +18,8 @@ export const FundingSidebar = ({
   dutyActive,
   setDutyActive,
   officer,
-  pendingReviewCount = 12,
+  pendingReviewCount = 0,
+  suspiciousCount = 0,
   onSignOut
 }) => {
   const navItems = [
@@ -32,13 +33,13 @@ export const FundingSidebar = ({
       id: 'donors',
       label: 'Donor Management',
       icon: Users,
-      badge: pendingReviewCount
+      badge: null
     },
     {
       id: 'donations',
       label: 'Donation Records',
       icon: Heart,
-      badge: null
+      badge: pendingReviewCount
     },
     {
       id: 'campaigns',
@@ -56,7 +57,7 @@ export const FundingSidebar = ({
       id: 'suspicious',
       label: 'Suspicious Flag Review',
       icon: AlertTriangle,
-      badge: null
+      badge: suspiciousCount
     },
     {
       id: 'reports',

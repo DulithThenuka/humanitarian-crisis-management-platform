@@ -40,11 +40,11 @@ public class DonationService : IDonationService
             .CountAsync(s => s.IsActive, cancellationToken);
 
         var totalFundsRaised = donations
-            .Where(d => d.Amount.HasValue)
+            .Where(d => d.Amount.HasValue && d.Status >= 0)
             .Sum(d => d.Amount!.Value);
 
         var recent48HoursAmount = donations
-            .Where(d => d.Amount.HasValue && d.CreatedAt >= cutoff48h)
+            .Where(d => d.Amount.HasValue && d.Status >= 0 && d.CreatedAt >= cutoff48h)
             .Sum(d => d.Amount!.Value);
 
         var activeDonorsCount = donations
@@ -55,21 +55,21 @@ public class DonationService : IDonationService
 
         var pledgedCount = donations.Count(d => d.Status == 0);
         var receivedCount = donations.Count(d => d.Status == 1);
-        var distributedCount = donations.Count(d => d.Status == 2);
+        var distributedCount = donations.Count(d => d.Status >= 2);
 
         var itemsReceivedCount = donations
-            .Where(d => d.ItemQuantity.HasValue)
+            .Where(d => d.ItemQuantity.HasValue && d.Status >= 0)
             .Sum(d => d.ItemQuantity!.Value);
 
         var itemsDistributedCount = donations
-            .Where(d => d.Status == 2 && d.ItemQuantity.HasValue)
+            .Where(d => d.Status >= 2 && d.ItemQuantity.HasValue)
             .Sum(d => d.ItemQuantity!.Value);
 
         var pendingAllocationCount = donations
-            .Where(d => d.Status != 2 && d.ItemQuantity.HasValue)
+            .Where(d => d.Status == 1 && d.ItemQuantity.HasValue)
             .Sum(d => d.ItemQuantity!.Value);
 
-        var reliefPacksDistributed = donations.Count(d => d.Status == 2);
+        var reliefPacksDistributed = donations.Count(d => d.Status >= 2);
 
         double utilizationRatio = donations.Count == 0
             ? 0
@@ -99,7 +99,7 @@ public class DonationService : IDonationService
     {
         var donations = await _context.Donations
             .AsNoTracking()
-            .Where(d => d.ItemDescription != null)
+            .Where(d => d.ItemDescription != null && d.Status >= 0)
             .Select(d => new { d.ItemDescription, d.ItemQuantity })
             .ToListAsync(cancellationToken);
 
@@ -406,259 +406,316 @@ public class DonationService : IDonationService
         string Badge);
 
     // =========================================================================
-    // Advanced Donor & Funding Officer Portal Operations Implementation
+    // Advanced Donor & Funding Officer Portal Operations (Database-Backed)
     // =========================================================================
 
-    private static readonly List<DonorRecordDto> InMemDonorRecords = new()
-    {
-        new DonorRecordDto
-        {
-            Id = "DON-2048",
-            Source = "Community Relief Fund",
-            DonorOrg = "Colombo Community Relief Trust",
-            ContactPerson = "Dr. Dayan Jayasuriya",
-            Email = "treasury@communityrelieftrust.lk",
-            Phone = "+94 11 285 4100",
-            Type = "Monetary",
-            RecordedValue = "LKR 450,000",
-            RawValue = 450000m,
-            Currency = "LKR",
-            Verification = "Verified",
-            Allocation = "Flood campaign",
-            AllocationTarget = "Western Province Flood Emergency Fund (WPF-2026)",
-            Status = "Allocated",
-            StatusColor = "#3d6b4f",
-            StatusBg = "#edf2e6",
-            StatusBorder = "#dfe5d8",
-            OperationalArea = "Colombo District",
-            Notes = "Dual verification completed for flood relief fund. Earmarked for high-ground shelter hygiene and dry ration packages.",
-            VerifiedAt = "2026-11-05 14:10",
-            VerifiedBy = "Malini Wijeratne (Funding Officer)",
-            Category = "Emergency Relief Grants",
-            ComplianceDoc = "DOC-CRF-4820-AUDIT.pdf",
-            CreatedAt = DateTime.UtcNow.AddDays(-2)
-        },
-        new DonorRecordDto
-        {
-            Id = "DON-2047",
-            Source = "MedCare Lanka",
-            DonorOrg = "MedCare Lanka Pharmaceutical Consortium",
-            ContactPerson = "Samanthi Perera",
-            Email = "donations@medcarelanka.org",
-            Phone = "+94 77 392 8110",
-            Type = "Material",
-            RecordedValue = "240 medicine packs",
-            RawValue = 240m,
-            Currency = "Units",
-            Verification = "Pending",
-            Allocation = "Unallocated",
-            AllocationTarget = "Regional Medical Stockpile",
-            Status = "Review",
-            StatusColor = "#b45309",
-            StatusBg = "#fffbeb",
-            StatusBorder = "#fde68a",
-            OperationalArea = "Gampaha District",
-            Notes = "Awaiting secondary batch certificate for antibiotics and insulin storage temperature logs. Dual verification pending.",
-            VerifiedAt = "Pending Review",
-            VerifiedBy = "Assigned to Malini Wijeratne",
-            Category = "Medical Supplies",
-            ComplianceDoc = "BATCH-MCL-2026-X12.pdf",
-            CreatedAt = DateTime.UtcNow.AddDays(-3)
-        },
-        new DonorRecordDto
-        {
-            Id = "DON-2044",
-            Source = "Public campaign",
-            DonorOrg = "National Displaced Aid Consortium",
-            ContactPerson = "Kavinda Wickramasinghe",
-            Email = "aid@nationaldisplacedaid.lk",
-            Phone = "+94 11 490 2233",
-            Type = "Monetary",
-            RecordedValue = "LKR 128,500",
-            RawValue = 128500m,
-            Currency = "LKR",
-            Verification = "Verified",
-            Allocation = "Shelter supplies",
-            AllocationTarget = "Central High-Ground Shelter Hub",
-            Status = "Completed",
-            StatusColor = "#166534",
-            StatusBg = "#f0fdf4",
-            StatusBorder = "#bbf7d0",
-            OperationalArea = "Kalutara District",
-            Notes = "Matched with 150 thermal blankets and emergency family kits. Full audit trail verified.",
-            VerifiedAt = "2026-11-02 09:30",
-            VerifiedBy = "Malini Wijeratne (Funding Officer)",
-            Category = "Shelter Logistics",
-            ComplianceDoc = "DOC-PAC-1285-SIGNED.pdf",
-            CreatedAt = DateTime.UtcNow.AddDays(-5)
-        },
-        new DonorRecordDto
-        {
-            Id = "DON-2041",
-            Source = "WaterAid Response",
-            DonorOrg = "WaterAid Sri Lanka Humanitarian Office",
-            ContactPerson = "Anura Dissanayake",
-            Email = "logistics@wateraid-response.org",
-            Phone = "+94 71 883 1920",
-            Type = "Material",
-            RecordedValue = "1,200 water units",
-            RawValue = 1200m,
-            Currency = "Units",
-            Verification = "Verified",
-            Allocation = "RES-021",
-            AllocationTarget = "Kelani Buffer Zone Depot (RES-021)",
-            Status = "Dispatched",
-            StatusColor = "#1e40af",
-            StatusBg = "#eff6ff",
-            StatusBorder = "#bfdbfe",
-            OperationalArea = "Gampaha District",
-            Notes = "Certified potable drinking water tanks delivered directly via road tanker. Dispatched to Kelaniya distribution cluster.",
-            VerifiedAt = "2026-11-01 16:45",
-            VerifiedBy = "Malini Wijeratne (Funding Officer)",
-            Category = "Water & Sanitation",
-            ComplianceDoc = "BATCH-WA-1200-QUALITY.pdf",
-            CreatedAt = DateTime.UtcNow.AddDays(-7)
-        }
-    };
+    private static string FormatDonationCode(Guid id) =>
+        $"DON-{id.ToString("N")[..4].ToUpperInvariant()}";
 
-    private static readonly List<FundingCampaignDto> InMemCampaigns = new()
-    {
-        new FundingCampaignDto
-        {
-            Id = "CMP-101",
-            Title = "Western Province Flood Emergency Fund (WPF-2026)",
-            TargetAmount = 10000000m,
-            RaisedAmount = 8400000m,
-            PercentFunded = 84,
-            Status = "Active",
-            OperationalArea = "Western Province (All Districts)",
-            Category = "Emergency Monsoon Response",
-            TargetDescription = "Emergency aid, family shelter kits, and drinking water tankers across flooded regions.",
-            StartDate = DateTime.UtcNow.AddDays(-14),
-            EndDate = DateTime.UtcNow.AddDays(16)
-        },
-        new FundingCampaignDto
-        {
-            Id = "CMP-102",
-            Title = "Clean Drinking Water Bowser Operations",
-            TargetAmount = 2500000m,
-            RaisedAmount = 2100000m,
-            PercentFunded = 84,
-            Status = "Active",
-            OperationalArea = "Kelani River Basin",
-            Category = "WASH Infrastructure",
-            TargetDescription = "Deploying 100 bowser deliveries of potable water to contaminated water grid areas.",
-            StartDate = DateTime.UtcNow.AddDays(-10),
-            EndDate = DateTime.UtcNow.AddDays(20)
-        },
-        new FundingCampaignDto
-        {
-            Id = "CMP-103",
-            Title = "High-Ground Shelter Winterization & Hygiene",
-            TargetAmount = 5000000m,
-            RaisedAmount = 3200000m,
-            PercentFunded = 64,
-            Status = "Active",
-            OperationalArea = "Kaduwela & Biyagama Clusters",
-            Category = "Shelter Support",
-            TargetDescription = "Blankets, bedding, and hygiene sanitation packs for 4,000 evacuees.",
-            StartDate = DateTime.UtcNow.AddDays(-7),
-            EndDate = DateTime.UtcNow.AddDays(23)
-        }
-    };
+    private static string FormatCampaignCode(Guid id) =>
+        $"CMP-{id.ToString("N")[..4].ToUpperInvariant()}";
 
-    private static readonly List<FundingAllocationDto> InMemAllocations = new()
+    private static string FormatDonorCode(string donorName)
     {
-        new FundingAllocationDto
-        {
-            Id = "ALC-301",
-            AllocationCode = "ALC-2026-091",
-            TargetHubOrDepot = "Central Depot - Peliyagoda",
-            Purpose = "Emergency Dry Ration Procurement (5,000 packs)",
-            Amount = 1850000m,
-            Currency = "LKR",
-            Status = "Approved",
-            RequiresDualApproval = true,
-            CoSignedBy = "Malini Wijeratne & Senior Coordinator",
-            CoSignedAt = "2026-11-10 11:20",
-            AuthorizedNote = "Verified with District Secretariat distribution schedule.",
-            CreatedAt = DateTime.UtcNow.AddDays(-4)
-        },
-        new FundingAllocationDto
-        {
-            Id = "ALC-302",
-            AllocationCode = "ALC-2026-092",
-            TargetHubOrDepot = "Kaduwela Field Clinic Hub",
-            Purpose = "Urgent Antibiotics & Medical Consumables",
-            Amount = 850000m,
-            Currency = "LKR",
-            Status = "Pending Dual Approval",
-            RequiresDualApproval = true,
-            CoSignedBy = "",
-            CoSignedAt = "",
-            AuthorizedNote = "Awaiting secondary signature from Funding Officer co-signatory.",
-            CreatedAt = DateTime.UtcNow.AddHours(-18)
-        }
-    };
+        var hash = Math.Abs(donorName.Trim().ToLowerInvariant().GetHashCode());
+        return $"DNR-{(hash % 9000 + 1000)}";
+    }
 
-    private static readonly List<SuspiciousFlagDto> InMemFlags = new()
+    private static string InferDonorType(Donation d)
     {
-        new SuspiciousFlagDto
+        var name = d.DonorName.ToLowerInvariant();
+        if (name.Contains("foundation") || name.Contains("trust") || name.Contains("ngo") || name.Contains("red cross"))
+            return "NGO / Foundation";
+        if (name.Contains("un ") || name.Contains("ocha") || name.Contains("ministry") || name.Contains("consortium"))
+            return "Institutional";
+        if (name.Contains("ltd") || name.Contains("corp") || name.Contains("association") || name.Contains("exporters") || name.Contains("club"))
+            return "Corporate";
+        return "Individual";
+    }
+
+    private async Task<Donation?> FindDonationByIdOrCodeAsync(string idOrCode, CancellationToken cancellationToken)
+    {
+        if (Guid.TryParse(idOrCode, out var guid))
         {
-            Id = "FLG-401",
-            RecordId = "DON-2047",
-            DonorOrg = "MedCare Lanka",
-            AnomalyReason = "Quantity escalation mismatch against secondary warehouse receipt (+200% delta).",
-            Severity = "urgent",
-            RiskScore = 88,
-            Status = "Review",
-            Details = "Intake quantity spiked from 80 kits to 240 kits without accompanying manifest verification.",
-            DetectedAt = DateTime.UtcNow.AddHours(-2)
-        },
-        new SuspiciousFlagDto
-        {
-            Id = "FLG-402",
-            RecordId = "DON-2039",
-            DonorOrg = "Private Anonymous Grant",
-            AnomalyReason = "Single source contribution exceeding automated anti-fraud clearance ceiling without tax doc.",
-            Severity = "warning",
-            RiskScore = 65,
-            Status = "Review",
-            Details = "Single transaction of LKR 2,500,000 flagged for secondary regulatory clearance.",
-            DetectedAt = DateTime.UtcNow.AddDays(-1)
+            return await _context.Donations
+                .Include(d => d.CrisisEvent)
+                .FirstOrDefaultAsync(d => d.Id == guid, cancellationToken);
         }
-    };
+
+        var normalized = idOrCode.Trim().ToUpperInvariant();
+        var all = await _context.Donations
+            .Include(d => d.CrisisEvent)
+            .ToListAsync(cancellationToken);
+
+        return all.FirstOrDefault(d => FormatDonationCode(d.Id) == normalized);
+    }
+
+    private static DonorRecordDto MapDonationToRecordDto(Donation d)
+    {
+        var code = FormatDonationCode(d.Id);
+        var isMonetary = d.DonationType == 0;
+        var isFlagged = (d.AuditHash ?? "").Contains("FLAG", StringComparison.OrdinalIgnoreCase)
+                     || (d.AuditHash ?? "").Contains("ESCALATED", StringComparison.OrdinalIgnoreCase)
+                     || (d.AuditHash ?? "").Contains("INVESTIGATING", StringComparison.OrdinalIgnoreCase);
+
+        var verification = d.Status switch
+        {
+            -1 => "Rejected",
+            0 => isFlagged ? "Flagged" : "Pending",
+            _ => "Verified"
+        };
+
+        var statusLabel = d.Status switch
+        {
+            -1 => "Rejected",
+            0 => isFlagged ? "Flagged" : "Pending",
+            1 => "Verified",
+            2 => "Allocated",
+            3 => "Dispatched",
+            _ => "Pending"
+        };
+
+        var (color, bg, border) = d.Status switch
+        {
+            -1 => ("#dc2626", "#fef2f2", "#fecaca"),
+            0 => isFlagged ? ("#dc2626", "#fef2f2", "#fecaca") : ("#b45309", "#fffbeb", "#fde68a"),
+            1 => ("#0f766e", "#f0fdfa", "#99f6e4"),
+            2 => ("#3d6b4f", "#edf2e6", "#dfe5d8"),
+            3 => ("#1e40af", "#eff6ff", "#bfdbfe"),
+            _ => ("#b45309", "#fffbeb", "#fde68a")
+        };
+
+        return new DonorRecordDto
+        {
+            Id = code,
+            DonationGuid = d.Id,
+            CrisisEventId = d.CrisisEventId,
+            Source = d.CrisisEvent?.Title ?? "General Relief Fund",
+            DonorOrg = d.DonorName,
+            ContactPerson = d.DonorName,
+            Email = d.DonorEmail ?? "Not provided",
+            Phone = d.DonorPhone ?? "Not provided",
+            Type = isMonetary ? "Monetary" : "Material",
+            RecordedValue = isMonetary
+                ? $"{d.Currency ?? "LKR"} {(d.Amount ?? 0):N0}"
+                : $"{(d.ItemQuantity ?? 0):N0} units",
+            RawValue = isMonetary ? (d.Amount ?? 0) : (d.ItemQuantity ?? 0),
+            Currency = isMonetary ? (d.Currency ?? "LKR") : "Units",
+            Verification = verification,
+            Allocation = d.Status >= 2 ? (d.TargetDistrict ?? d.CrisisEvent?.Title ?? "Allocated") : "Unallocated",
+            AllocationTarget = d.TargetDistrict ?? d.CrisisEvent?.Title ?? "Unallocated",
+            Status = statusLabel,
+            StatusColor = color,
+            StatusBg = bg,
+            StatusBorder = border,
+            OperationalArea = d.TargetDistrict ?? "Western Province",
+            Notes = d.ItemDescription ?? string.Empty,
+            VerifiedAt = d.ReceivedAt?.ToString("yyyy-MM-dd HH:mm") ?? "Pending Review",
+            VerifiedBy = d.VerifiedBy ?? (d.Status >= 1 ? "Funding Officer" : "Awaiting Verification"),
+            Category = d.Sector ?? (isMonetary ? "Monetary Grant" : "Relief Supplies"),
+            ComplianceDoc = $"DOC-{code}-AUDIT.pdf",
+            CreatedAt = d.CreatedAt
+        };
+    }
+
+    private static List<SuspiciousFlagDto> BuildFlagsFromDonations(IEnumerable<Donation> donations)
+    {
+        var flags = new List<SuspiciousFlagDto>();
+        foreach (var d in donations)
+        {
+            var code = FormatDonationCode(d.Id);
+            var hash = d.AuditHash ?? string.Empty;
+            var isHighMonetary = d.DonationType == 0 && (d.Amount ?? 0) >= 1_000_000m;
+            var isHighMaterial = d.DonationType == 1 && (d.ItemQuantity ?? 0) >= 200;
+            var isExplicitlyFlagged = hash.Contains("FLAG", StringComparison.OrdinalIgnoreCase)
+                                   || hash.Contains("ESCALATED", StringComparison.OrdinalIgnoreCase)
+                                   || hash.Contains("INVESTIGATING", StringComparison.OrdinalIgnoreCase);
+
+            if (!isHighMonetary && !isHighMaterial && !isExplicitlyFlagged)
+                continue;
+
+            var riskFactors = new List<string>();
+            if (isHighMonetary)
+                riskFactors.Add($"High-value monetary contribution ({d.Currency ?? "LKR"} {d.Amount:N0}) exceeds standard single-officer threshold (LKR 1,000,000).");
+            if (isHighMaterial)
+                riskFactors.Add($"Large material batch ({d.ItemQuantity:N0} units) requires warehouse intake confirmation.");
+            if (string.IsNullOrWhiteSpace(d.DonorEmail))
+                riskFactors.Add("Missing donor contact email for tax/audit verification.");
+            if (isExplicitlyFlagged)
+                riskFactors.Add($"Audit marker recorded: {hash}.");
+
+            var reviewStatus = d.Status switch
+            {
+                -1 => "Rejected",
+                >= 1 when !hash.Contains("ESCALATED", StringComparison.OrdinalIgnoreCase) => "Cleared",
+                _ when hash.Contains("ESCALATED", StringComparison.OrdinalIgnoreCase) => "Escalated",
+                _ when hash.Contains("INVESTIGATING", StringComparison.OrdinalIgnoreCase) => "Under Investigation",
+                _ => "Open"
+            };
+
+            var riskScore = Math.Min(95, (isHighMonetary ? 55 : 0) + (isHighMaterial ? 50 : 0) + (string.IsNullOrWhiteSpace(d.DonorEmail) ? 20 : 10) + (isExplicitlyFlagged ? 20 : 0));
+
+            flags.Add(new SuspiciousFlagDto
+            {
+                Id = $"FLG-{d.Id.ToString("N")[..4].ToUpperInvariant()}",
+                RecordId = code,
+                DonationGuid = d.Id,
+                DonorOrg = d.DonorName,
+                AnomalyReason = isHighMonetary
+                    ? $"High-value contribution ({d.Currency ?? "LKR"} {d.Amount:N0}) pending dual compliance verification."
+                    : isHighMaterial
+                        ? $"High-volume material batch ({d.ItemQuantity:N0} units) pending warehouse manifest check."
+                        : "Flagged by Funding Officer for secondary compliance review.",
+                Severity = riskScore >= 75 ? "urgent" : "warning",
+                RiskScore = riskScore,
+                Status = reviewStatus,
+                Details = d.ItemDescription ?? "Automated rule-based threshold check triggered for human officer verification.",
+                RiskFactors = riskFactors,
+                AIRecommendation = "Advisory only: Review supporting documentation and verify donor identity before clearing. AI cannot approve, reject, accuse, or allocate funds.",
+                DecisionReason = d.LastModifiedBy,
+                DetectedAt = d.CreatedAt,
+                ResolvedBy = d.VerifiedBy,
+                ResolvedAt = d.UpdatedAt
+            });
+        }
+        return flags
+            .OrderByDescending(f => f.Status == "Open" || f.Status == "Under Investigation")
+            .ThenByDescending(f => f.DetectedAt)
+            .ToList();
+    }
 
     public async Task<Result<FundingOfficerDashboardDto>> GetFundingOfficerDashboardAsync(CancellationToken cancellationToken = default)
     {
-        var dbDonations = await _context.Donations.AsNoTracking().ToListAsync(cancellationToken);
-        
-        decimal totalMonetary = dbDonations.Where(d => d.Amount.HasValue).Sum(d => d.Amount!.Value);
-        if (totalMonetary == 0) totalMonetary = 8400000m;
+        var dbDonations = await _context.Donations
+            .AsNoTracking()
+            .Include(d => d.CrisisEvent)
+            .OrderByDescending(d => d.UpdatedAt ?? d.CreatedAt)
+            .ToListAsync(cancellationToken);
 
-        int totalMaterialUnits = dbDonations.Where(d => d.ItemQuantity.HasValue).Sum(d => d.ItemQuantity!.Value);
-        if (totalMaterialUnits == 0) totalMaterialUnits = 38420;
+        var crises = await _context.CrisisEvents
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
 
-        int registeredDonorsCount = InMemDonorRecords.Count + dbDonations.Select(d => d.DonorName).Distinct().Count();
-        if (registeredDonorsCount < 214) registeredDonorsCount = 214;
+        var allocations = await _context.ResourceAllocations
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        var verifiedMonetary = dbDonations
+            .Where(d => d.DonationType == 0 && d.Status >= 1 && d.Amount.HasValue)
+            .Sum(d => d.Amount!.Value);
+
+        var allocatedMonetary = dbDonations
+            .Where(d => d.DonationType == 0 && d.Status >= 2 && d.Amount.HasValue)
+            .Sum(d => d.Amount!.Value);
+
+        var unallocatedMonetary = Math.Max(0m, verifiedMonetary - allocatedMonetary);
+
+        var totalMaterialUnits = dbDonations
+            .Where(d => d.DonationType == 1 && d.Status >= 0 && d.ItemQuantity.HasValue)
+            .Sum(d => d.ItemQuantity!.Value);
+
+        var materialCategoriesCount = dbDonations
+            .Where(d => d.DonationType == 1 && !string.IsNullOrWhiteSpace(d.Sector))
+            .Select(d => d.Sector!.Trim().ToLowerInvariant())
+            .Distinct()
+            .Count();
+
+        var registeredDonorsCount = dbDonations
+            .Select(d => d.DonorName.Trim().ToLowerInvariant())
+            .Where(n => !string.IsNullOrEmpty(n))
+            .Distinct()
+            .Count();
+
+        var activeCampaignsCount = crises.Count(c => c.IsActive);
+        var pendingVerificationsCount = dbDonations.Count(d => d.Status == 0);
+
+        var allocationPct = verifiedMonetary > 0
+            ? Math.Min(100, (int)Math.Round(allocatedMonetary / verifiedMonetary * 100m))
+            : 0;
+
+        var flags = BuildFlagsFromDonations(dbDonations);
+        var openFlags = flags.Where(f => f.Status == "Open" || f.Status == "Under Investigation").ToList();
+
+        var priorityItems = new List<PriorityAttentionItemDto>();
+        foreach (var f in openFlags.Take(3))
+        {
+            priorityItems.Add(new PriorityAttentionItemDto
+            {
+                Id = f.RecordId,
+                Code = $"{f.RecordId} compliance flag",
+                Description = f.AnomalyReason,
+                Status = f.Severity,
+                TagColor = f.Severity == "urgent" ? "#dc2626" : "#d97706",
+                BadgeText = f.Severity,
+                RelatedTab = "suspicious",
+                Timestamp = f.DetectedAt.ToString("MMM dd, HH:mm"),
+                Details = f.Details
+            });
+        }
+
+        foreach (var pending in dbDonations.Where(d => d.Status == 0).Take(3))
+        {
+            var code = FormatDonationCode(pending.Id);
+            if (priorityItems.Any(p => p.Id == code)) continue;
+            priorityItems.Add(new PriorityAttentionItemDto
+            {
+                Id = code,
+                Code = $"{code} pending verification",
+                Description = $"{pending.DonorName} ({(pending.DonationType == 0 ? $"LKR {pending.Amount:N0}" : $"{pending.ItemQuantity:N0} units")})",
+                Status = "pending",
+                TagColor = "#d97706",
+                BadgeText = "pending",
+                RelatedTab = "donations",
+                Timestamp = pending.CreatedAt.ToString("MMM dd, HH:mm"),
+                Details = pending.ItemDescription ?? "Awaiting Funding Officer verification."
+            });
+        }
+
+        var recentActivity = dbDonations.Take(6).Select(d =>
+        {
+            var code = FormatDonationCode(d.Id);
+            var actionText = d.Status switch
+            {
+                -1 => "Rejected during compliance review",
+                0 => "Donation intake recorded (awaiting verification)",
+                1 => "Donation verified and cleared",
+                2 => "Funds/supplies allocated to target operation",
+                3 => "Dispatched to relief hub",
+                _ => "Donation updated"
+            };
+            return new RecentActivityItemDto
+            {
+                Id = $"ACT-{d.Id.ToString("N")[..6].ToUpperInvariant()}",
+                Time = (d.UpdatedAt ?? d.CreatedAt).ToString("MMM dd, HH:mm"),
+                RecordId = code,
+                Source = d.DonorName,
+                Action = actionText,
+                Officer = d.VerifiedBy ?? "Funding Officer",
+                Type = d.DonationType == 0 ? "Monetary" : "Material",
+                Amount = d.DonationType == 0 ? $"LKR {(d.Amount ?? 0):N0}" : $"{(d.ItemQuantity ?? 0):N0} units"
+            };
+        }).ToList();
 
         var dashboard = new FundingOfficerDashboardDto
         {
             RegisteredDonors = new FundingOfficerMetricDto
             {
                 Value = registeredDonorsCount,
+                Raw = registeredDonorsCount,
                 Label = "Registered donors",
-                Subtext = "Restricted directory",
-                Trend = "+18 this month",
+                Subtext = "Verified & active contributors",
+                Trend = $"{dbDonations.Count} total records",
                 TrendUp = true
             },
             MonetaryRecords = new FundingOfficerMetricDto
             {
-                Value = $"LKR {totalMonetary / 1_000_000m:F1}m",
-                Raw = totalMonetary,
-                Label = "Monetary records",
-                Subtext = "Demo transactions",
-                Trend = "+24% vs baseline",
+                Value = verifiedMonetary >= 1_000_000m
+                    ? $"LKR {verifiedMonetary / 1_000_000m:F2}m"
+                    : $"LKR {verifiedMonetary:N0}",
+                Raw = verifiedMonetary,
+                Label = "Verified monetary",
+                Subtext = $"{dbDonations.Count(d => d.DonationType == 0 && d.Status >= 1)} verified grants",
+                Trend = $"LKR {unallocatedMonetary:N0} unallocated",
                 TrendUp = true
             },
             MaterialDonations = new FundingOfficerMetricDto
@@ -666,91 +723,179 @@ public class DonationService : IDonationService
                 Value = totalMaterialUnits.ToString("N0"),
                 Raw = totalMaterialUnits,
                 Label = "Material donations",
-                Subtext = "Recorded units",
-                Trend = "14 categories",
+                Subtext = "Recorded supply units",
+                Trend = $"{Math.Max(1, materialCategoriesCount)} categories",
                 TrendUp = true
             },
             ActiveCampaigns = new FundingOfficerMetricDto
             {
-                Value = InMemCampaigns.Count(c => c.Status == "Active"),
+                Value = activeCampaignsCount,
+                Raw = activeCampaignsCount,
                 Label = "Active campaigns",
-                Subtext = "In scope",
-                Trend = "2 fully funded",
+                Subtext = $"{crises.Count} total operations",
+                Trend = "Live crisis operations",
                 TrendUp = true
             },
             PendingVerification = new FundingOfficerMetricDto
             {
-                Value = InMemDonorRecords.Count(d => d.Verification == "Pending"),
+                Value = pendingVerificationsCount,
+                Raw = pendingVerificationsCount,
                 Label = "Pending verification",
-                Subtext = "Actionable items",
-                Trend = "3 high priority",
-                TrendUp = false
+                Subtext = "Awaiting officer review",
+                Trend = $"{openFlags.Count} flagged",
+                TrendUp = pendingVerificationsCount == 0
             },
             AllocatedBalance = new FundingOfficerMetricDto
             {
-                Value = "64%",
-                Raw = 64,
+                Value = $"{allocationPct}%",
+                Raw = allocationPct,
                 Label = "Allocated balance",
-                Subtext = "Approved records",
-                Trend = "LKR 5.37m deployed",
+                Subtext = $"LKR {allocatedMonetary:N0} allocated",
+                Trend = $"{allocations.Count} depot dispatches",
                 TrendUp = true
             },
-            PriorityAttentionItems = new List<PriorityAttentionItemDto>
+            AvailableUnallocated = new FundingOfficerMetricDto
             {
-                new()
-                {
-                    Id = "DON-2047",
-                    Code = "DON-2047 anomaly flag",
-                    Description = "AI flag on value escalation requires review",
-                    Status = "urgent",
-                    TagColor = "#dc2626",
-                    BadgeText = "urgent",
-                    RelatedTab = "suspicious",
-                    Timestamp = "15 mins ago",
-                    Details = "Material intake quantity was updated without secondary warehouse receipt."
-                },
-                new()
-                {
-                    Id = "ALC-302",
-                    Code = "ALC-302 approval pending",
-                    Description = "Dual approval required before distribution",
-                    Status = "pending",
-                    TagColor = "#d97706",
-                    BadgeText = "pending",
-                    RelatedTab = "allocations",
-                    Timestamp = "42 mins ago",
-                    Details = "LKR 850,000 emergency medical allocation for Kaduwela requires Funding Officer co-signature."
-                },
-                new()
-                {
-                    Id = "CMP-104",
-                    Code = "Campaign target update",
-                    Description = "Kaduwela flood response reached 91%",
-                    Status = "tracking",
-                    TagColor = "#059669",
-                    BadgeText = "tracking",
-                    RelatedTab = "campaigns",
-                    Timestamp = "2 hours ago",
-                    Details = "Goal of LKR 3,500,000 reached LKR 3,185,000."
-                }
+                Value = $"LKR {unallocatedMonetary:N0}",
+                Raw = unallocatedMonetary,
+                Label = "Available unallocated",
+                Subtext = "Verified funds ready to allocate",
+                Trend = "Verified minus allocated",
+                TrendUp = true
             },
+            OpenSuspiciousFlagsCount = openFlags.Count,
+            PriorityAttentionItems = priorityItems,
             ConnectedWorkflowSteps = new List<ConnectedWorkflowStepDto>
             {
-                new() { Step = 1, Title = "Citizen request recorded", Description = "Funding officer views matched supply inventory", Status = "completed", NodeType = "intake", ActionLink = "Assistance Triage" },
-                new() { Step = 2, Title = "Relief core review", Description = "Verify donor-item match", Status = "completed", NodeType = "verification", ActionLink = "Donor Matching" },
-                new() { Step = 3, Title = "Outcome / shelter decision", Description = "Shipment allocated to local facility", Status = "in-progress", NodeType = "allocation", ActionLink = "Shelter Hubs" },
-                new() { Step = 4, Title = "Volunteer or partner handoff", Description = "Logistics dispatch verified", Status = "upcoming", NodeType = "dispatch", ActionLink = "Transport Fleet" },
-                new() { Step = 5, Title = "Citizen status notification", Description = "Aid arrival alert sent to shelter head", Status = "upcoming", NodeType = "fulfillment", ActionLink = "SMS / Alert Log" }
+                new() { Step = 1, Title = "Donation intake", Description = $"{dbDonations.Count} contributions logged", Status = dbDonations.Any() ? "completed" : "upcoming", NodeType = "intake", ActionLink = "donations" },
+                new() { Step = 2, Title = "Officer verification", Description = $"{dbDonations.Count(d => d.Status >= 1)} verified, {pendingVerificationsCount} pending", Status = pendingVerificationsCount > 0 ? "in-progress" : "completed", NodeType = "verification", ActionLink = "donors" },
+                new() { Step = 3, Title = "Campaign & hub allocation", Description = $"LKR {allocatedMonetary:N0} allocated", Status = allocatedMonetary > 0 ? "completed" : "in-progress", NodeType = "allocation", ActionLink = "allocations" },
+                new() { Step = 4, Title = "Field dispatch", Description = $"{dbDonations.Count(d => d.Status == 3)} dispatched to shelters", Status = dbDonations.Any(d => d.Status == 3) ? "completed" : "upcoming", NodeType = "dispatch", ActionLink = "allocations" }
             },
-            RecentActivity = new List<RecentActivityItemDto>
-            {
-                new() { Id = "ACT-101", Time = "14:10", RecordId = "DON-2048", Source = "Community Relief Fund", Action = "Allocation approved by authorised staff", Officer = "Malini Wijeratne", Type = "Monetary", Amount = "LKR 450,000" },
-                new() { Id = "ACT-102", Time = "13:45", RecordId = "DON-2047", Source = "MedCare Lanka", Action = "Material intake recorded by authorised staff", Officer = "Rohan Senanayake", Type = "Material", Amount = "240 medicine packs" },
-                new() { Id = "ACT-103", Time = "11:20", RecordId = "DON-2046", Source = "Public campaign", Action = "Monetary record submitted by authorised staff", Officer = "Amara Chen", Type = "Monetary", Amount = "LKR 120,000" }
-            }
+            RecentActivity = recentActivity
         };
 
         return Result<FundingOfficerDashboardDto>.Success(dashboard);
+    }
+
+    public async Task<Result<IReadOnlyList<DonorProfileDto>>> GetDonorProfilesAsync(
+        string? type = null,
+        string? status = null,
+        string? search = null,
+        CancellationToken cancellationToken = default)
+    {
+        var donations = await _context.Donations
+            .AsNoTracking()
+            .Include(d => d.CrisisEvent)
+            .OrderByDescending(d => d.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var profiles = donations
+            .GroupBy(d => d.DonorName.Trim(), StringComparer.OrdinalIgnoreCase)
+            .Select(g =>
+            {
+                var first = g.First();
+                var anyFlagged = g.Any(d => (d.AuditHash ?? "").Contains("FLAG", StringComparison.OrdinalIgnoreCase)
+                                         || (d.AuditHash ?? "").Contains("ESCALATED", StringComparison.OrdinalIgnoreCase));
+                var anyVerified = g.Any(d => d.Status >= 1);
+
+                var verStatus = anyFlagged ? "Flagged" : anyVerified ? "Verified" : "Pending";
+
+                return new DonorProfileDto
+                {
+                    DonorId = FormatDonorCode(g.Key),
+                    DonorName = first.DonorName,
+                    DonorType = InferDonorType(first),
+                    VerificationStatus = verStatus,
+                    TotalMonetaryAmount = g.Where(d => d.DonationType == 0 && d.Status >= 0).Sum(d => d.Amount ?? 0),
+                    TotalMaterialUnits = g.Where(d => d.DonationType == 1 && d.Status >= 0).Sum(d => d.ItemQuantity ?? 0),
+                    DonationCount = g.Count(),
+                    LatestContributionDate = g.Max(d => d.CreatedAt),
+                    OperationalArea = first.TargetDistrict ?? "Western Province",
+                    DonationHistory = g.Select(MapDonationToRecordDto).ToList()
+                };
+            })
+            .OrderByDescending(p => p.LatestContributionDate)
+            .AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(type) && !type.Equals("all", StringComparison.OrdinalIgnoreCase))
+        {
+            profiles = profiles.Where(p => p.DonorType.Equals(type, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(status) && !status.Equals("all", StringComparison.OrdinalIgnoreCase))
+        {
+            profiles = profiles.Where(p => p.VerificationStatus.Equals(status, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var q = search.Trim().ToLowerInvariant();
+            profiles = profiles.Where(p =>
+                p.DonorId.ToLowerInvariant().Contains(q) ||
+                p.DonorName.ToLowerInvariant().Contains(q) ||
+                p.DonorType.ToLowerInvariant().Contains(q) ||
+                p.OperationalArea.ToLowerInvariant().Contains(q));
+        }
+
+        return Result<IReadOnlyList<DonorProfileDto>>.Success(profiles.ToList());
+    }
+
+    public async Task<Result<DonorProfileDto>> UpdateDonorVerificationAsync(
+        string donorId,
+        UpdateDonorVerificationDto dto,
+        string? officerName,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(dto.AuditNote))
+        {
+            return Result<DonorProfileDto>.Failure("An authorised audit note is required.");
+        }
+
+        var donations = await _context.Donations
+            .Include(d => d.CrisisEvent)
+            .ToListAsync(cancellationToken);
+
+        var matching = donations
+            .Where(d => FormatDonorCode(d.DonorName).Equals(donorId, StringComparison.OrdinalIgnoreCase)
+                     || d.DonorName.Equals(donorId, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (!matching.Any())
+        {
+            return Result<DonorProfileDto>.Failure($"Donor profile '{donorId}' was not found.");
+        }
+
+        var officer = string.IsNullOrWhiteSpace(officerName) ? "Funding Officer" : officerName;
+        foreach (var d in matching)
+        {
+            if (dto.Status.Equals("Verified", StringComparison.OrdinalIgnoreCase))
+            {
+                if (d.Status == 0) d.Status = 1;
+                d.VerifiedBy = officer;
+                d.ReceivedAt ??= DateTime.UtcNow;
+                d.AuditHash = "[CLEARED]";
+            }
+            else if (dto.Status.Equals("Flagged", StringComparison.OrdinalIgnoreCase))
+            {
+                d.Status = 0;
+                d.AuditHash = "[FLAGGED]";
+            }
+            else
+            {
+                d.Status = 0;
+            }
+            d.LastModifiedBy = $"{officer}: {dto.AuditNote.Trim()}";
+            d.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var refreshed = await GetDonorProfilesAsync(null, null, null, cancellationToken);
+        var updatedProfile = refreshed.Data?.FirstOrDefault(p => p.DonorId.Equals(FormatDonorCode(matching[0].DonorName), StringComparison.OrdinalIgnoreCase));
+        return updatedProfile != null
+            ? Result<DonorProfileDto>.Success(updatedProfile, $"Donor {updatedProfile.DonorName} verification status updated to {dto.Status}.")
+            : Result<DonorProfileDto>.Failure("Failed to reload updated donor profile.");
     }
 
     public async Task<Result<IReadOnlyList<DonorRecordDto>>> GetDonorRecordsAsync(
@@ -761,69 +906,18 @@ public class DonationService : IDonationService
     {
         var dbDonations = await _context.Donations
             .AsNoTracking()
+            .Include(d => d.CrisisEvent)
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync(cancellationToken);
 
-        var list = new List<DonorRecordDto>(InMemDonorRecords);
+        IEnumerable<DonorRecordDto> filtered = dbDonations.Select(MapDonationToRecordDto);
 
-        foreach (var d in dbDonations)
-        {
-            var code = $"DON-{d.Id.ToString("N")[..4].ToUpperInvariant()}";
-            if (!list.Any(x => x.Id == code))
-            {
-                list.Add(new DonorRecordDto
-                {
-                    Id = code,
-                    Source = d.CrisisEvent?.Title ?? "Public Relief Fund",
-                    DonorOrg = d.DonorName,
-                    ContactPerson = d.DonorName,
-                    Email = d.DonorEmail ?? "donor@relief.lk",
-                    Phone = d.DonorPhone ?? "+94 77 000 0000",
-                    Type = d.DonationType == 0 ? "Monetary" : "Material",
-                    RecordedValue = d.DonationType == 0 ? $"LKR {d.Amount:N0}" : $"{d.ItemQuantity:N0} units",
-                    RawValue = d.Amount ?? d.ItemQuantity ?? 0,
-                    Currency = d.Currency ?? "LKR",
-                    Verification = d.Status >= 1 ? "Verified" : "Pending",
-                    Allocation = d.Status == 2 ? "Dispatched" : "Unallocated",
-                    AllocationTarget = d.TargetDistrict ?? "Western Province",
-                    Status = d.Status switch
-                    {
-                        2 => "Dispatched",
-                        1 => "Allocated",
-                        _ => "Review"
-                    },
-                    StatusColor = d.Status switch
-                    {
-                        2 => "#1e40af",
-                        1 => "#3d6b4f",
-                        _ => "#b45309"
-                    },
-                    StatusBg = d.Status switch
-                    {
-                        2 => "#eff6ff",
-                        1 => "#edf2e6",
-                        _ => "#fffbeb"
-                    },
-                    StatusBorder = "#dfe5d8",
-                    OperationalArea = d.TargetDistrict ?? "Western Province",
-                    Notes = d.ItemDescription ?? "Direct citizen / partner donation contribution.",
-                    VerifiedAt = d.ReceivedAt?.ToString("yyyy-MM-dd HH:mm") ?? "Pending Review",
-                    VerifiedBy = d.VerifiedBy ?? "Funding Officer Team",
-                    Category = d.Sector ?? "General Relief",
-                    ComplianceDoc = $"DOC-{code}-AUDIT.pdf",
-                    CreatedAt = d.CreatedAt
-                });
-            }
-        }
-
-        IEnumerable<DonorRecordDto> filtered = list;
-
-        if (!string.IsNullOrWhiteSpace(type) && type != "all")
+        if (!string.IsNullOrWhiteSpace(type) && !type.Equals("all", StringComparison.OrdinalIgnoreCase))
         {
             filtered = filtered.Where(x => x.Type.Equals(type, StringComparison.OrdinalIgnoreCase));
         }
 
-        if (!string.IsNullOrWhiteSpace(status) && status != "all")
+        if (!string.IsNullOrWhiteSpace(status) && !status.Equals("all", StringComparison.OrdinalIgnoreCase))
         {
             filtered = filtered.Where(x => x.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
         }
@@ -835,20 +929,21 @@ public class DonationService : IDonationService
                 x.Id.ToLowerInvariant().Contains(q) ||
                 x.DonorOrg.ToLowerInvariant().Contains(q) ||
                 x.Source.ToLowerInvariant().Contains(q) ||
-                x.ContactPerson.ToLowerInvariant().Contains(q));
+                x.AllocationTarget.ToLowerInvariant().Contains(q) ||
+                x.Notes.ToLowerInvariant().Contains(q));
         }
 
-        return Result<IReadOnlyList<DonorRecordDto>>.Success(filtered.OrderByDescending(x => x.CreatedAt).ToList());
+        return Result<IReadOnlyList<DonorRecordDto>>.Success(filtered.ToList());
     }
 
-    public Task<Result<DonorRecordDto>> GetDonorRecordByIdAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<Result<DonorRecordDto>> GetDonorRecordByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        var item = InMemDonorRecords.FirstOrDefault(x => x.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-        if (item == null)
+        var donation = await FindDonationByIdOrCodeAsync(id, cancellationToken);
+        if (donation == null)
         {
-            return Task.FromResult(Result<DonorRecordDto>.Failure($"Donor record '{id}' was not found."));
+            return Result<DonorRecordDto>.Failure($"Donation record '{id}' was not found.");
         }
-        return Task.FromResult(Result<DonorRecordDto>.Success(item));
+        return Result<DonorRecordDto>.Success(MapDonationToRecordDto(donation));
     }
 
     public async Task<Result<DonorRecordDto>> CreateDonorRecordAsync(
@@ -856,176 +951,647 @@ public class DonationService : IDonationService
         string? officerName,
         CancellationToken cancellationToken = default)
     {
-        var id = $"DON-{new Random().Next(2050, 9999)}";
         var isMonetary = dto.Type.Equals("Monetary", StringComparison.OrdinalIgnoreCase);
-
-        var record = new DonorRecordDto
+        if (dto.Amount <= 0)
         {
-            Id = id,
-            Source = dto.Source,
-            DonorOrg = dto.DonorOrg,
-            ContactPerson = string.IsNullOrWhiteSpace(dto.ContactPerson) ? dto.DonorOrg : dto.ContactPerson,
-            Email = dto.Email,
-            Phone = dto.Phone,
-            Type = dto.Type,
-            RecordedValue = isMonetary ? $"LKR {dto.Amount:N0}" : $"{dto.Amount:N0} units",
-            RawValue = dto.Amount,
-            Currency = dto.Currency,
-            Verification = "Verified",
-            Allocation = dto.AllocationTarget,
-            AllocationTarget = dto.AllocationTarget,
-            Status = "Allocated",
-            StatusColor = "#3d6b4f",
-            StatusBg = "#edf2e6",
-            StatusBorder = "#dfe5d8",
-            OperationalArea = dto.OperationalArea,
-            Notes = dto.Notes,
-            VerifiedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm"),
-            VerifiedBy = officerName ?? "Authorised Funding Officer",
-            Category = dto.Category,
-            ComplianceDoc = $"DOC-{id}-COMPLIANCE.pdf",
-            CreatedAt = DateTime.UtcNow
-        };
+            return Result<DonorRecordDto>.Failure("Contribution amount or quantity must be greater than zero.");
+        }
 
-        InMemDonorRecords.Insert(0, record);
+        Guid? crisisId = null;
+        if (!string.IsNullOrWhiteSpace(dto.Source))
+        {
+            var matchedCrisis = await _context.CrisisEvents
+                .FirstOrDefaultAsync(c => c.Title.ToLower() == dto.Source.Trim().ToLower(), cancellationToken);
+            if (matchedCrisis != null)
+            {
+                crisisId = matchedCrisis.Id;
+            }
+        }
 
+        var officer = string.IsNullOrWhiteSpace(officerName) ? "Funding Officer" : officerName;
         var dbDonation = new Donation
         {
-            DonorName = dto.DonorOrg,
-            DonorEmail = dto.Email,
-            DonorPhone = dto.Phone,
+            Id = Guid.NewGuid(),
+            DonorName = dto.DonorOrg.Trim(),
+            DonorEmail = string.IsNullOrWhiteSpace(dto.Email) ? null : dto.Email.Trim(),
+            DonorPhone = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone.Trim(),
             DonationType = isMonetary ? 0 : 1,
             Amount = isMonetary ? dto.Amount : null,
+            Currency = string.IsNullOrWhiteSpace(dto.Currency) ? "LKR" : dto.Currency.Trim().ToUpperInvariant(),
             ItemQuantity = isMonetary ? null : (int)dto.Amount,
-            ItemDescription = dto.Notes,
+            ItemDescription = string.IsNullOrWhiteSpace(dto.Notes) ? $"{dto.Category} contribution" : dto.Notes.Trim(),
             Sector = dto.Category,
-            TargetDistrict = dto.OperationalArea,
-            Status = 1, // Verified
-            VerifiedBy = officerName ?? "Funding Officer",
-            ReceivedAt = DateTime.UtcNow
+            TargetDistrict = string.IsNullOrWhiteSpace(dto.AllocationTarget) || dto.AllocationTarget == "Unallocated"
+                ? dto.OperationalArea
+                : dto.AllocationTarget,
+            CrisisEventId = crisisId,
+            Status = 0, // Queued as Pending verification
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = officer
         };
+
         _context.Donations.Add(dbDonation);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result<DonorRecordDto>.Success(record, "Donor record registered and verified successfully.");
+        if (crisisId.HasValue)
+        {
+            await _context.Entry(dbDonation).Reference(d => d.CrisisEvent).LoadAsync(cancellationToken);
+        }
+
+        return Result<DonorRecordDto>.Success(
+            MapDonationToRecordDto(dbDonation),
+            $"Donation {FormatDonationCode(dbDonation.Id)} recorded and queued for verification.");
     }
 
-    public Task<Result<DonorRecordDto>> ProcessDonorDecisionAsync(
+    public async Task<Result<DonorRecordDto>> ProcessDonorDecisionAsync(
         string id,
         DonorDecisionDto dto,
         string? officerName,
         CancellationToken cancellationToken = default)
     {
-        var item = InMemDonorRecords.FirstOrDefault(x => x.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-        if (item == null)
+        var donation = await FindDonationByIdOrCodeAsync(id, cancellationToken);
+        if (donation == null)
         {
-            return Task.FromResult(Result<DonorRecordDto>.Failure($"Donor record '{id}' was not found."));
+            return Result<DonorRecordDto>.Failure($"Donation record '{id}' was not found.");
         }
 
-        switch (dto.Action.ToLowerInvariant())
+        var officer = string.IsNullOrWhiteSpace(officerName) ? "Funding Officer" : officerName;
+        var action = dto.Action.Trim().ToLowerInvariant();
+        var reason = string.IsNullOrWhiteSpace(dto.DecisionReason) ? dto.Note ?? "Officer action" : dto.DecisionReason.Trim();
+
+        switch (action)
         {
+            case "verify":
             case "submit-approval":
-                item.Status = "Allocated";
-                item.Verification = "Verified";
-                item.StatusColor = "#3d6b4f";
-                item.StatusBg = "#edf2e6";
-                item.Notes += $" [Approved by {officerName ?? "Funding Officer"}: {dto.DecisionReason}]";
+                if (donation.Status == -1)
+                    return Result<DonorRecordDto>.Failure("Rejected donations cannot be verified without re-opening.");
+                donation.Status = 1;
+                donation.VerifiedBy = officer;
+                donation.ReceivedAt ??= DateTime.UtcNow;
+                donation.AuditHash = "[CLEARED]";
+                break;
+
+            case "allocate":
+                if (donation.Status < 1)
+                    return Result<DonorRecordDto>.Failure("Donation must be Verified before it can be Allocated.");
+                donation.Status = 2;
+                if (!string.IsNullOrWhiteSpace(dto.AllocationTarget))
+                {
+                    donation.TargetDistrict = dto.AllocationTarget.Trim();
+                }
+                break;
+
+            case "dispatch":
+                if (donation.Status < 2)
+                    return Result<DonorRecordDto>.Failure("Donation must be Allocated before it can be Dispatched.");
+                donation.Status = 3;
                 break;
 
             case "request-clarification":
-                item.Status = "Review";
-                item.Verification = "Pending";
-                item.StatusColor = "#b45309";
-                item.StatusBg = "#fffbeb";
-                item.Notes += $" [Clarification requested by {officerName ?? "Funding Officer"}: {dto.DecisionReason}]";
+            case "flag":
+                donation.Status = 0;
+                donation.AuditHash = "[FLAGGED]";
                 break;
 
             case "escalate":
-                item.Status = "Review";
-                item.StatusColor = "#dc2626";
-                item.StatusBg = "#fef2f2";
-                item.Notes += $" [Escalated to National Command by {officerName ?? "Funding Officer"}: {dto.DecisionReason}]";
+                donation.Status = 0;
+                donation.AuditHash = "[ESCALATED]";
                 break;
+
+            case "reject":
+                if (string.IsNullOrWhiteSpace(dto.DecisionReason))
+                    return Result<DonorRecordDto>.Failure("A rejection reason is required.");
+                donation.Status = -1;
+                donation.VerifiedBy = officer;
+                break;
+
+            case "memo-note":
+                donation.ItemDescription = string.IsNullOrWhiteSpace(dto.Note) ? reason : dto.Note.Trim();
+                break;
+
+            default:
+                return Result<DonorRecordDto>.Failure($"Unsupported action '{dto.Action}'.");
         }
 
-        return Task.FromResult(Result<DonorRecordDto>.Success(item, $"Decision '{dto.Action}' recorded for {id}."));
+        donation.LastModifiedBy = $"{officer} ({action}): {reason}";
+        donation.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result<DonorRecordDto>.Success(
+            MapDonationToRecordDto(donation),
+            $"Action '{action}' persisted for {FormatDonationCode(donation.Id)}.");
     }
 
-    public Task<Result<IReadOnlyList<FundingCampaignDto>>> GetCampaignsAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<FundingCampaignDto>>> GetCampaignsAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(Result<IReadOnlyList<FundingCampaignDto>>.Success(InMemCampaigns));
+        var crises = await _context.CrisisEvents
+            .AsNoTracking()
+            .OrderByDescending(c => c.IsActive)
+            .ThenByDescending(c => c.StartDate)
+            .ToListAsync(cancellationToken);
+
+        var donations = await _context.Donations
+            .AsNoTracking()
+            .Include(d => d.CrisisEvent)
+            .ToListAsync(cancellationToken);
+
+        var campaigns = crises.Select(c =>
+        {
+            var linked = donations
+                .Where(d => d.CrisisEventId == c.Id ||
+                           (d.CrisisEventId == null && d.TargetDistrict != null &&
+                            c.Title.Contains(d.TargetDistrict, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            var verifiedMonetary = linked
+                .Where(d => d.DonationType == 0 && d.Status >= 1 && d.Amount.HasValue)
+                .Sum(d => d.Amount!.Value);
+
+            var materialUnits = linked
+                .Where(d => d.DonationType == 1 && d.Status >= 1 && d.ItemQuantity.HasValue)
+                .Sum(d => d.ItemQuantity!.Value);
+
+            var targetAmount = c.AffectedAreaRadius.HasValue && c.AffectedAreaRadius.Value >= 1000m
+                ? c.AffectedAreaRadius.Value
+                : Math.Max(1_000_000m, c.Severity * 2_000_000m);
+
+            var pct = targetAmount > 0
+                ? (int)Math.Min(100, Math.Round(verifiedMonetary / targetAmount * 100m))
+                : 0;
+
+            var status = !c.IsActive
+                ? (c.EndDate.HasValue && c.EndDate.Value <= DateTime.UtcNow ? "Completed" : "Paused")
+                : (pct >= 100 ? "Completed" : "Active");
+
+            return new FundingCampaignDto
+            {
+                Id = FormatCampaignCode(c.Id),
+                CrisisEventId = c.Id,
+                Title = c.Title,
+                TargetAmount = targetAmount,
+                RaisedAmount = verifiedMonetary,
+                RemainingAmount = Math.Max(0m, targetAmount - verifiedMonetary),
+                MaterialUnitsReceived = materialUnits,
+                DonationCount = linked.Count(d => d.Status >= 1),
+                PercentFunded = pct,
+                Status = status,
+                OperationalArea = c.DisasterType.ToString(),
+                Category = $"{c.DisasterType} Response (Severity {c.Severity})",
+                TargetDescription = c.Description ?? "Emergency humanitarian response campaign.",
+                StartDate = c.StartDate,
+                EndDate = c.EndDate ?? c.StartDate.AddDays(30),
+                LinkedDonations = linked.Select(MapDonationToRecordDto).ToList()
+            };
+        }).ToList();
+
+        return Result<IReadOnlyList<FundingCampaignDto>>.Success(campaigns);
     }
 
-    public Task<Result<FundingCampaignDto>> CreateCampaignAsync(
+    public async Task<Result<FundingCampaignDto>> CreateCampaignAsync(
         CreateFundingCampaignDto dto,
         CancellationToken cancellationToken = default)
     {
-        var campaign = new FundingCampaignDto
+        var crisis = new CrisisEvent
         {
-            Id = $"CMP-{new Random().Next(105, 999)}",
-            Title = dto.Title,
-            TargetAmount = dto.TargetAmount,
-            RaisedAmount = 0,
-            PercentFunded = 0,
-            Status = "Active",
-            OperationalArea = dto.OperationalArea,
-            Category = dto.Category,
-            TargetDescription = dto.TargetDescription,
+            Id = Guid.NewGuid(),
+            Title = dto.Title.Trim(),
+            Description = string.IsNullOrWhiteSpace(dto.TargetDescription) ? $"{dto.Category} - {dto.OperationalArea}" : dto.TargetDescription.Trim(),
+            DisasterType = Domain.Enums.DisasterType.Flood,
+            Severity = 3,
+            AffectedAreaRadius = dto.TargetAmount,
             StartDate = DateTime.UtcNow,
-            EndDate = DateTime.UtcNow.AddDays(dto.DurationDays)
+            EndDate = DateTime.UtcNow.AddDays(Math.Max(1, dto.DurationDays)),
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
         };
 
-        InMemCampaigns.Add(campaign);
-        return Task.FromResult(Result<FundingCampaignDto>.Success(campaign, "New emergency campaign established successfully."));
+        _context.CrisisEvents.Add(crisis);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var campaigns = await GetCampaignsAsync(cancellationToken);
+        var created = campaigns.Data?.FirstOrDefault(c => c.CrisisEventId == crisis.Id);
+        return created != null
+            ? Result<FundingCampaignDto>.Success(created, $"Campaign '{created.Title}' created and persisted.")
+            : Result<FundingCampaignDto>.Failure("Campaign created but could not be reloaded.");
     }
 
-    public Task<Result<IReadOnlyList<FundingAllocationDto>>> GetAllocationsAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<FundingCampaignDto>> UpdateCampaignStatusAsync(
+        string id,
+        UpdateCampaignStatusDto dto,
+        CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(Result<IReadOnlyList<FundingAllocationDto>>.Success(InMemAllocations));
+        var crises = await _context.CrisisEvents.ToListAsync(cancellationToken);
+        var crisis = Guid.TryParse(id, out var guid)
+            ? crises.FirstOrDefault(c => c.Id == guid)
+            : crises.FirstOrDefault(c => FormatCampaignCode(c.Id).Equals(id, StringComparison.OrdinalIgnoreCase));
+
+        if (crisis == null)
+        {
+            return Result<FundingCampaignDto>.Failure($"Campaign '{id}' was not found.");
+        }
+
+        var normalized = dto.Status.Trim().ToLowerInvariant();
+        if (normalized == "active")
+        {
+            crisis.IsActive = true;
+        }
+        else if (normalized == "paused")
+        {
+            crisis.IsActive = false;
+            crisis.EndDate = DateTime.UtcNow.AddDays(30);
+        }
+        else if (normalized == "completed" || normalized == "closed")
+        {
+            crisis.IsActive = false;
+            crisis.EndDate = DateTime.UtcNow;
+        }
+        else
+        {
+            return Result<FundingCampaignDto>.Failure($"Unsupported campaign status '{dto.Status}'.");
+        }
+
+        crisis.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var campaigns = await GetCampaignsAsync(cancellationToken);
+        var updated = campaigns.Data?.FirstOrDefault(c => c.CrisisEventId == crisis.Id);
+        return Result<FundingCampaignDto>.Success(updated!, $"Campaign status updated to {dto.Status}.");
     }
 
-    public Task<Result<FundingAllocationDto>> ApproveAllocationAsync(
+    public async Task<Result<AllocationOverviewDto>> GetAllocationOverviewAsync(CancellationToken cancellationToken = default)
+    {
+        var donations = await _context.Donations
+            .AsNoTracking()
+            .Include(d => d.CrisisEvent)
+            .ToListAsync(cancellationToken);
+
+        var resourceAllocations = await _context.ResourceAllocations
+            .AsNoTracking()
+            .Include(a => a.Resource)
+            .Include(a => a.Shelter)
+            .Include(a => a.AssistanceRequest)
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var totalVerifiedMonetary = donations
+            .Where(d => d.DonationType == 0 && d.Status >= 1 && d.Amount.HasValue)
+            .Sum(d => d.Amount!.Value);
+
+        var totalAllocatedMonetary = donations
+            .Where(d => d.DonationType == 0 && d.Status >= 2 && d.Amount.HasValue)
+            .Sum(d => d.Amount!.Value);
+
+        var totalDispatchedMonetary = donations
+            .Where(d => d.DonationType == 0 && d.Status == 3 && d.Amount.HasValue)
+            .Sum(d => d.Amount!.Value);
+
+        var list = new List<FundingAllocationDto>();
+
+        foreach (var d in donations.Where(d => d.Status >= 1).OrderByDescending(d => d.UpdatedAt ?? d.CreatedAt))
+        {
+            var code = FormatDonationCode(d.Id);
+            list.Add(new FundingAllocationDto
+            {
+                Id = code,
+                AllocationCode = $"ALC-{d.Id.ToString("N")[..6].ToUpperInvariant()}",
+                SourceReference = $"{code} ({d.DonorName})",
+                TargetHubOrDepot = d.TargetDistrict ?? d.CrisisEvent?.Title ?? "Unassigned Relief Hub",
+                Purpose = d.ItemDescription ?? (d.DonationType == 0 ? "Monetary relief grant" : "Material relief batch"),
+                Amount = d.DonationType == 0 ? (d.Amount ?? 0) : (d.ItemQuantity ?? 0),
+                UtilizedAmount = d.Status == 3 ? (d.DonationType == 0 ? (d.Amount ?? 0) : (d.ItemQuantity ?? 0)) : 0,
+                Currency = d.DonationType == 0 ? (d.Currency ?? "LKR") : "Units",
+                Status = d.Status switch
+                {
+                    1 => "Pending Dual Approval",
+                    2 => "Approved",
+                    3 => "Dispatched",
+                    _ => "Pending Dual Approval"
+                },
+                RequiresDualApproval = d.Status == 1,
+                CoSignedBy = d.Status >= 2 ? (d.VerifiedBy ?? "Funding Officer") : string.Empty,
+                CoSignedAt = d.Status >= 2 ? (d.UpdatedAt ?? d.ReceivedAt ?? d.CreatedAt).ToString("yyyy-MM-dd HH:mm") : string.Empty,
+                AuthorizedNote = d.LastModifiedBy ?? "Verified contribution ready for allocation.",
+                CreatedAt = d.CreatedAt
+            });
+        }
+
+        foreach (var ra in resourceAllocations)
+        {
+            list.Add(new FundingAllocationDto
+            {
+                Id = ra.Id.ToString(),
+                AllocationCode = $"RES-{ra.Id.ToString("N")[..4].ToUpperInvariant()}",
+                SourceReference = ra.Resource?.Name ?? "Central Inventory",
+                TargetHubOrDepot = ra.Shelter?.Name ?? (ra.AssistanceRequest != null ? $"Request {ra.AssistanceRequest.Id.ToString("N")[..6].ToUpperInvariant()}" : "Field Hub"),
+                Purpose = ra.Notes ?? "Material supply dispatch",
+                Amount = ra.Quantity,
+                UtilizedAmount = ra.DispatchStatus >= 2 ? ra.Quantity : 0,
+                Currency = ra.Resource?.Unit ?? "Units",
+                Status = ra.DispatchStatus switch
+                {
+                    0 => "Pending Dual Approval",
+                    1 => "Approved",
+                    2 => "Dispatched",
+                    _ => "Delivered"
+                },
+                RequiresDualApproval = ra.DispatchStatus == 0,
+                CoSignedBy = ra.LastModifiedBy ?? string.Empty,
+                CoSignedAt = ra.DispatchedAt?.ToString("yyyy-MM-dd HH:mm") ?? string.Empty,
+                AuthorizedNote = ra.Notes ?? string.Empty,
+                CreatedAt = ra.CreatedAt
+            });
+        }
+
+        var overview = new AllocationOverviewDto
+        {
+            TotalVerifiedMonetary = totalVerifiedMonetary,
+            TotalAllocatedMonetary = totalAllocatedMonetary,
+            AvailableUnallocatedMonetary = Math.Max(0m, totalVerifiedMonetary - totalAllocatedMonetary),
+            TotalDispatchedMonetary = totalDispatchedMonetary,
+            HasExpenditureTracking = false,
+            Allocations = list
+        };
+
+        return Result<AllocationOverviewDto>.Success(overview);
+    }
+
+    public async Task<Result<IReadOnlyList<FundingAllocationDto>>> GetAllocationsAsync(CancellationToken cancellationToken = default)
+    {
+        var overview = await GetAllocationOverviewAsync(cancellationToken);
+        return Result<IReadOnlyList<FundingAllocationDto>>.Success(overview.Data?.Allocations ?? new List<FundingAllocationDto>());
+    }
+
+    public async Task<Result<FundingAllocationDto>> CreateAllocationAsync(
+        CreateFundingAllocationDto dto,
+        string? officerName,
+        CancellationToken cancellationToken = default)
+    {
+        var overview = await GetAllocationOverviewAsync(cancellationToken);
+        var available = overview.Data?.AvailableUnallocatedMonetary ?? 0m;
+
+        var donation = await FindDonationByIdOrCodeAsync(dto.SourceReference, cancellationToken);
+        if (donation == null)
+        {
+            return Result<FundingAllocationDto>.Failure($"Verified source donation '{dto.SourceReference}' was not found.");
+        }
+
+        if (donation.Status < 1)
+        {
+            return Result<FundingAllocationDto>.Failure("Only Verified donations can be allocated.");
+        }
+
+        if (donation.Status >= 2)
+        {
+            return Result<FundingAllocationDto>.Failure($"Donation '{dto.SourceReference}' is already {(donation.Status == 2 ? "Allocated" : "Dispatched")}.");
+        }
+
+        if (donation.DonationType == 0 && dto.Amount > available)
+        {
+            return Result<FundingAllocationDto>.Failure($"Cannot allocate LKR {dto.Amount:N0}: exceeds available verified unallocated balance (LKR {available:N0}).");
+        }
+
+        var officer = string.IsNullOrWhiteSpace(officerName) ? "Funding Officer" : officerName;
+        donation.Status = 2;
+        donation.TargetDistrict = dto.TargetHubOrDepot.Trim();
+        donation.VerifiedBy = officer;
+        donation.LastModifiedBy = $"{officer} (allocated): {dto.Purpose.Trim()} — {dto.AuthorizedNote}".Trim();
+        donation.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var updatedList = await GetAllocationsAsync(cancellationToken);
+        var created = updatedList.Data?.FirstOrDefault(a => a.Id == FormatDonationCode(donation.Id));
+        return Result<FundingAllocationDto>.Success(created!, $"Allocation for {FormatDonationCode(donation.Id)} approved.");
+    }
+
+    public async Task<Result<FundingAllocationDto>> ApproveAllocationAsync(
         string id,
         ApproveFundingAllocationDto dto,
         string? officerName,
         CancellationToken cancellationToken = default)
     {
-        var alloc = InMemAllocations.FirstOrDefault(x => x.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-        if (alloc == null)
+        var officer = string.IsNullOrWhiteSpace(officerName) ? "Funding Officer" : officerName;
+        var coSigner = string.IsNullOrWhiteSpace(dto.SecondarySignature)
+            ? officer
+            : $"{officer} & {dto.SecondarySignature.Trim()}";
+
+        var donation = await FindDonationByIdOrCodeAsync(id, cancellationToken);
+        if (donation != null)
         {
-            return Task.FromResult(Result<FundingAllocationDto>.Failure($"Allocation '{id}' not found."));
+            if (donation.Status < 1)
+            {
+                return Result<FundingAllocationDto>.Failure("Donation must be Verified before allocation approval.");
+            }
+            if (donation.Status >= 2)
+            {
+                if (donation.Status == 2)
+                {
+                    donation.Status = 3;
+                    donation.LastModifiedBy = $"{coSigner} (dispatched): {dto.AuthorizedNote}";
+                    donation.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+                else
+                {
+                    return Result<FundingAllocationDto>.Failure($"Allocation '{id}' is already Dispatched.");
+                }
+            }
+            else
+            {
+                donation.Status = 2;
+                donation.VerifiedBy = coSigner;
+                donation.LastModifiedBy = $"{coSigner} (dual-approved): {dto.AuthorizedNote}";
+                donation.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            var list = await GetAllocationsAsync(cancellationToken);
+            var updated = list.Data?.FirstOrDefault(a => a.Id == FormatDonationCode(donation.Id));
+            return Result<FundingAllocationDto>.Success(updated!, $"Allocation {FormatDonationCode(donation.Id)} co-signed and updated.");
         }
 
-        alloc.Status = "Approved";
-        alloc.CoSignedBy = officerName ?? "Malini Wijeratne (Funding Officer)";
-        alloc.CoSignedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm");
-        alloc.AuthorizedNote = dto.AuthorizedNote;
+        if (Guid.TryParse(id, out var raGuid))
+        {
+            var ra = await _context.ResourceAllocations.FirstOrDefaultAsync(r => r.Id == raGuid, cancellationToken);
+            if (ra != null)
+            {
+                ra.DispatchStatus = ra.DispatchStatus == 0 ? 1 : 2;
+                if (ra.DispatchStatus == 2) ra.DispatchedAt = DateTime.UtcNow;
+                ra.LastModifiedBy = coSigner;
+                ra.Notes = string.IsNullOrWhiteSpace(ra.Notes) ? dto.AuthorizedNote : $"{ra.Notes} | {dto.AuthorizedNote}";
+                ra.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync(cancellationToken);
 
-        return Task.FromResult(Result<FundingAllocationDto>.Success(alloc, $"Allocation {alloc.AllocationCode} co-signed and approved."));
+                var list = await GetAllocationsAsync(cancellationToken);
+                var updated = list.Data?.FirstOrDefault(a => a.Id == ra.Id.ToString());
+                return Result<FundingAllocationDto>.Success(updated!, "Resource allocation co-signed and updated.");
+            }
+        }
+
+        return Result<FundingAllocationDto>.Failure($"Allocation '{id}' not found.");
     }
 
-    public Task<Result<IReadOnlyList<SuspiciousFlagDto>>> GetSuspiciousFlagsAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<SuspiciousFlagDto>>> GetSuspiciousFlagsAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(Result<IReadOnlyList<SuspiciousFlagDto>>.Success(InMemFlags));
+        var donations = await _context.Donations
+            .AsNoTracking()
+            .OrderByDescending(d => d.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<SuspiciousFlagDto>>.Success(BuildFlagsFromDonations(donations));
     }
 
-    public Task<Result<SuspiciousFlagDto>> ResolveSuspiciousFlagAsync(
+    public async Task<Result<SuspiciousFlagDto>> ResolveSuspiciousFlagAsync(
         string id,
         ResolveSuspiciousFlagDto dto,
         string? officerName,
         CancellationToken cancellationToken = default)
     {
-        var flag = InMemFlags.FirstOrDefault(x => x.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-        if (flag == null)
+        if (string.IsNullOrWhiteSpace(dto.ResolutionNotes))
         {
-            return Task.FromResult(Result<SuspiciousFlagDto>.Failure($"Flag '{id}' not found."));
+            return Result<SuspiciousFlagDto>.Failure("A human decision reason is mandatory.");
         }
 
-        flag.Status = dto.Action.ToLowerInvariant() == "clear" ? "Cleared" : "Escalated";
-        flag.ResolvedBy = officerName ?? "Funding Officer";
-        flag.ResolvedAt = DateTime.UtcNow;
+        var donations = await _context.Donations.ToListAsync(cancellationToken);
+        var donation = donations.FirstOrDefault(d =>
+            $"FLG-{d.Id.ToString("N")[..4].ToUpperInvariant()}".Equals(id, StringComparison.OrdinalIgnoreCase)
+            || FormatDonationCode(d.Id).Equals(id, StringComparison.OrdinalIgnoreCase)
+            || (Guid.TryParse(id, out var g) && d.Id == g));
 
-        return Task.FromResult(Result<SuspiciousFlagDto>.Success(flag, $"Flag {id} marked as {flag.Status}."));
+        if (donation == null)
+        {
+            return Result<SuspiciousFlagDto>.Failure($"Flagged record '{id}' was not found.");
+        }
+
+        var officer = string.IsNullOrWhiteSpace(officerName) ? "Funding Officer" : officerName;
+        var action = dto.Action.Trim().ToLowerInvariant();
+
+        switch (action)
+        {
+            case "clear":
+                donation.Status = Math.Max(1, donation.Status);
+                donation.AuditHash = "[CLEARED]";
+                donation.ReceivedAt ??= DateTime.UtcNow;
+                break;
+
+            case "investigate":
+                donation.Status = 0;
+                donation.AuditHash = "[INVESTIGATING]";
+                break;
+
+            case "escalate":
+                donation.Status = 0;
+                donation.AuditHash = "[ESCALATED]";
+                break;
+
+            case "reject":
+                donation.Status = -1;
+                donation.AuditHash = "[REJECTED]";
+                break;
+
+            default:
+                return Result<SuspiciousFlagDto>.Failure($"Unsupported flag decision '{dto.Action}'.");
+        }
+
+        donation.VerifiedBy = officer;
+        donation.LastModifiedBy = $"{officer} ({action}): {dto.ResolutionNotes.Trim()}";
+        donation.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var updatedFlag = BuildFlagsFromDonations(new[] { donation }).FirstOrDefault()
+            ?? new SuspiciousFlagDto
+            {
+                Id = $"FLG-{donation.Id.ToString("N")[..4].ToUpperInvariant()}",
+                RecordId = FormatDonationCode(donation.Id),
+                DonationGuid = donation.Id,
+                DonorOrg = donation.DonorName,
+                Status = action == "clear" ? "Cleared" : action == "reject" ? "Rejected" : action == "escalate" ? "Escalated" : "Under Investigation",
+                DecisionReason = donation.LastModifiedBy,
+                ResolvedBy = officer,
+                ResolvedAt = DateTime.UtcNow
+            };
+
+        return Result<SuspiciousFlagDto>.Success(updatedFlag, $"Human decision '{updatedFlag.Status}' recorded for {updatedFlag.RecordId}.");
+    }
+
+    public async Task<Result<TransparencyReportDto>> GetTransparencyReportAsync(
+        string? search = null,
+        string? crisisId = null,
+        string? status = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        CancellationToken cancellationToken = default)
+    {
+        var donations = await _context.Donations
+            .AsNoTracking()
+            .Include(d => d.CrisisEvent)
+            .OrderByDescending(d => d.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        IEnumerable<Donation> filtered = donations;
+
+        if (!string.IsNullOrWhiteSpace(crisisId) && !crisisId.Equals("all", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Guid.TryParse(crisisId, out var cGuid))
+            {
+                filtered = filtered.Where(d => d.CrisisEventId == cGuid);
+            }
+            else
+            {
+                filtered = filtered.Where(d =>
+                    (d.CrisisEvent != null && d.CrisisEvent.Title.Contains(crisisId, StringComparison.OrdinalIgnoreCase)) ||
+                    (d.TargetDistrict != null && d.TargetDistrict.Contains(crisisId, StringComparison.OrdinalIgnoreCase)));
+            }
+        }
+
+        if (fromDate.HasValue)
+        {
+            filtered = filtered.Where(d => d.CreatedAt >= fromDate.Value);
+        }
+
+        if (toDate.HasValue)
+        {
+            filtered = filtered.Where(d => d.CreatedAt <= toDate.Value.AddDays(1));
+        }
+
+        var mapped = filtered.Select(MapDonationToRecordDto).AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(status) && !status.Equals("all", StringComparison.OrdinalIgnoreCase))
+        {
+            mapped = mapped.Where(r => r.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var q = search.Trim().ToLowerInvariant();
+            mapped = mapped.Where(r =>
+                r.Id.ToLowerInvariant().Contains(q) ||
+                r.DonorOrg.ToLowerInvariant().Contains(q) ||
+                r.Source.ToLowerInvariant().Contains(q) ||
+                r.AllocationTarget.ToLowerInvariant().Contains(q));
+        }
+
+        var finalRecords = mapped.ToList();
+        var campaigns = (await GetCampaignsAsync(cancellationToken)).Data?.ToList() ?? new List<FundingCampaignDto>();
+        var allocations = (await GetAllocationsAsync(cancellationToken)).Data?.ToList() ?? new List<FundingAllocationDto>();
+
+        var report = new TransparencyReportDto
+        {
+            TotalVerifiedMonetary = finalRecords.Where(r => r.Type == "Monetary" && (r.Status == "Verified" || r.Status == "Allocated" || r.Status == "Dispatched")).Sum(r => r.RawValue),
+            TotalPendingMonetary = finalRecords.Where(r => r.Type == "Monetary" && (r.Status == "Pending" || r.Status == "Flagged")).Sum(r => r.RawValue),
+            TotalMaterialUnits = (int)finalRecords.Where(r => r.Type == "Material" && r.Status != "Rejected").Sum(r => r.RawValue),
+            VerifiedCount = finalRecords.Count(r => r.Status == "Verified" || r.Status == "Allocated" || r.Status == "Dispatched"),
+            PendingCount = finalRecords.Count(r => r.Status == "Pending" || r.Status == "Flagged"),
+            RejectedCount = finalRecords.Count(r => r.Status == "Rejected"),
+            AllocatedCount = finalRecords.Count(r => r.Status == "Allocated"),
+            DispatchedCount = finalRecords.Count(r => r.Status == "Dispatched"),
+            TotalAllocatedAmount = finalRecords.Where(r => r.Type == "Monetary" && (r.Status == "Allocated" || r.Status == "Dispatched")).Sum(r => r.RawValue),
+            HasExpenditureTracking = false,
+            CampaignSummaries = campaigns,
+            AllocationSummaries = allocations,
+            Records = finalRecords
+        };
+
+        return Result<TransparencyReportDto>.Success(report);
     }
 }
-

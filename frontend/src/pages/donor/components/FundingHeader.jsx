@@ -7,7 +7,7 @@ export const FundingHeader = ({
   setSearchQuery,
   officer,
   onOpenNotifications,
-  unreadCount = 5
+  unreadCount = 0
 }) => {
   const getTabLabel = (tab) => {
     switch (tab) {
@@ -78,11 +78,11 @@ export const FundingHeader = ({
         </div>
       </header>
 
-      {/* Coursework Prototype Banner (Soft Pale Green) */}
+      {/* Operational Role-Scope Banner */}
       <div className="fo-prototype-banner">
         <ShieldCheck size={14} className="fo-banner-shield" />
         <span>
-          <strong>Coursework prototype</strong> &nbsp;All records, AI results and transactions are fictional demonstration data. Actions are local UI simulations.
+          <strong>Role-Scoped Live Workspace</strong> &nbsp;Connected to HumanitarianCrisisDb. Payment gateway credentials and unrelated personal data are excluded.
         </span>
       </div>
     </div>

@@ -1,21 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { donorService } from '../../services/donorService';
 
-// Data
-import {
-  FUNDING_OFFICER_USER,
-  INITIAL_METRICS,
-  PRIORITY_ATTENTION_ITEMS,
-  CONNECTED_WORKFLOW_STEPS,
-  INITIAL_RECENT_ACTIVITY,
-  DONOR_MANAGEMENT_RECORDS,
-  CAMPAIGNS_DATA,
-  ALLOCATIONS_EXPENDITURE_DATA,
-  SUSPICIOUS_FLAGS_DATA,
-  TRANSPARENCY_REPORTS_DATA
-} from './data/fundingOfficerData';
+import { FUNDING_OFFICER_USER } from './data/fundingOfficerData';
 
 // Layout & Navigation Components
 import { FundingSidebar } from './components/FundingSidebar';
@@ -26,7 +14,7 @@ import { CreateRecordModal } from './components/modals/CreateRecordModal';
 import { DualApprovalModal } from './components/modals/DualApprovalModal';
 import { ReceiptPreviewModal } from './components/modals/ReceiptPreviewModal';
 
-// Dedicated Views
+// Dedicated Views (Distinct per module)
 import { FundingDashboardView } from './views/FundingDashboardView';
 import { DonorManagementView } from './views/DonorManagementView';
 import { DonationRecordsView } from './views/DonationRecordsView';
@@ -35,33 +23,51 @@ import { AllocationExpenditureView } from './views/AllocationExpenditureView';
 import { SuspiciousFlagReviewView } from './views/SuspiciousFlagReviewView';
 import { TransparencyReportsView } from './views/TransparencyReportsView';
 
-// Styles
 import './DonorFundingOfficer.css';
 
 export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) => {
   const navigate = useNavigate();
 
-  // Navigation State
+  // Navigation & UI State
   const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [dutyActive, setDutyActive] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
 
-  // Core Data State
-  const [officer, setOfficer] = useState(FUNDING_OFFICER_USER);
-  const [metrics, setMetrics] = useState(INITIAL_METRICS);
-  const [priorityItems, setPriorityItems] = useState(PRIORITY_ATTENTION_ITEMS);
-  const [workflowSteps, setWorkflowSteps] = useState(CONNECTED_WORKFLOW_STEPS);
-  const [recentActivity, setRecentActivity] = useState(INITIAL_RECENT_ACTIVITY);
-  const [records, setRecords] = useState(DONOR_MANAGEMENT_RECORDS);
-  const [campaigns, setCampaigns] = useState(CAMPAIGNS_DATA);
-  const [allocations, setAllocations] = useState(ALLOCATIONS_EXPENDITURE_DATA);
-  const [flags, setFlags] = useState(SUSPICIOUS_FLAGS_DATA);
-  const [reports, setReports] = useState(TRANSPARENCY_REPORTS_DATA);
+  // Logged-in / Officer State
+  const [officer] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('user') || 'null');
+      if (stored?.fullName) {
+        const initials = stored.fullName.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+        return { ...FUNDING_OFFICER_USER, fullName: stored.fullName, shortName: initials, role: stored.role || 'Funding Officer' };
+      }
+    } catch {
+      // ignore parse error
+    }
+    return FUNDING_OFFICER_USER;
+  });
+
+  // Live Backend State
+  const [metrics, setMetrics] = useState(null);
+  const [priorityItems, setPriorityItems] = useState([]);
+  const [workflowSteps, setWorkflowSteps] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [openFlagsCount, setOpenFlagsCount] = useState(0);
+
+  const [donorProfiles, setDonorProfiles] = useState([]);
+  const [records, setRecords] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
+  const [allocationOverview, setAllocationOverview] = useState(null);
+  const [allocations, setAllocations] = useState([]);
+  const [flags, setFlags] = useState([]);
+  const [reportData, setReportData] = useState(null);
 
   // Selected item IDs
-  const [selectedRecordId, setSelectedRecordId] = useState('DON-2048');
-  const [selectedCampaignId, setSelectedCampaignId] = useState('CMP-101');
-  const [selectedAllocationId, setSelectedAllocationId] = useState('ALC-301');
+  const [selectedRecordId, setSelectedRecordId] = useState(null);
+  const [selectedCampaignId, setSelectedCampaignId] = useState(null);
+  const [selectedAllocationId, setSelectedAllocationId] = useState(null);
 
   // Modals & Feedback State
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -71,78 +77,103 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
   const [targetReceiptRecord, setTargetReceiptRecord] = useState(null);
   const [toast, setToast] = useState(null);
 
-  // Helper Toast
-  const triggerToast = (message, type = 'success') => {
+  const triggerToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
-    setTimeout(() => {
-      setToast(null);
-    }, 3800);
-  };
-
-  // Load live data from Donor Backend API
-  useEffect(() => {
-    let isMounted = true;
-
-    async function fetchDonorBackendData() {
-      try {
-        const [dashRes, recordsRes, campRes, allocRes, flagsRes] = await Promise.allSettled([
-          donorService.getDashboard(),
-          donorService.getDonorRecords(),
-          donorService.getCampaigns(),
-          donorService.getAllocations(),
-          donorService.getSuspiciousFlags()
-        ]);
-
-        if (!isMounted) return;
-
-        if (dashRes.status === 'fulfilled' && dashRes.value?.succeeded && dashRes.value.data) {
-          const d = dashRes.value.data;
-          if (d.metrics) setMetrics(d.metrics);
-          if (d.priorityAttentionItems?.length) setPriorityItems(d.priorityAttentionItems);
-          if (d.connectedWorkflowSteps?.length) setWorkflowSteps(d.connectedWorkflowSteps);
-          if (d.recentActivity?.length) setRecentActivity(d.recentActivity);
-        }
-
-        if (recordsRes.status === 'fulfilled' && recordsRes.value?.succeeded && recordsRes.value.data?.length) {
-          setRecords(recordsRes.value.data);
-          setSelectedRecordId(recordsRes.value.data[0].id);
-        }
-
-        if (campRes.status === 'fulfilled' && campRes.value?.succeeded && campRes.value.data?.length) {
-          setCampaigns(campRes.value.data);
-        }
-
-        if (allocRes.status === 'fulfilled' && allocRes.value?.succeeded && allocRes.value.data?.length) {
-          setAllocations(allocRes.value.data);
-        }
-
-        if (flagsRes.status === 'fulfilled' && flagsRes.value?.succeeded && flagsRes.value.data?.length) {
-          setFlags(flagsRes.value.data);
-        }
-      } catch (err) {
-        console.warn('Donor backend fetch note: Running in resilient demo mode', err);
-      }
-    }
-
-    fetchDonorBackendData();
-
-    return () => {
-      isMounted = false;
-    };
+    setTimeout(() => setToast(null), 4000);
   }, []);
 
-  // Sign out handler
-  const handleSignOut = () => {
-    triggerToast('Signing out of Funding Officer session...', 'info');
-    setTimeout(() => {
-      navigate('/login');
-    }, 600);
+  const extractError = (err, fallback) => {
+    if (err?.errors?.length) return err.errors.join(' ');
+    if (err?.message) return err.message;
+    return fallback;
   };
 
-  // Create new record handler
+  // Single-source-of-truth refresh across all 7 modules
+  const refreshAllData = useCallback(async (showSpinner = false) => {
+    if (showSpinner) setLoading(true);
+    setApiError(null);
+    try {
+      const [dashRes, donorsRes, recordsRes, campRes, allocRes, flagsRes, reportRes] = await Promise.all([
+        donorService.getDashboard(),
+        donorService.getDonorProfiles(),
+        donorService.getDonorRecords(),
+        donorService.getCampaigns(),
+        donorService.getAllocationOverview(),
+        donorService.getSuspiciousFlags(),
+        donorService.getTransparencyReport()
+      ]);
+
+      if (dashRes?.succeeded && dashRes.data) {
+        const d = dashRes.data;
+        setMetrics({
+          registeredDonors: d.registeredDonors,
+          monetaryRecords: d.monetaryRecords,
+          materialDonations: d.materialDonations,
+          activeCampaigns: d.activeCampaigns,
+          pendingVerification: d.pendingVerification,
+          allocatedBalance: d.allocatedBalance,
+          availableUnallocated: d.availableUnallocated
+        });
+        setPriorityItems(d.priorityAttentionItems || []);
+        setWorkflowSteps(d.connectedWorkflowSteps || []);
+        setRecentActivity(d.recentActivity || []);
+        setOpenFlagsCount(d.openSuspiciousFlagsCount || 0);
+      }
+
+      if (donorsRes?.succeeded) {
+        setDonorProfiles(donorsRes.data || []);
+      }
+
+      if (recordsRes?.succeeded) {
+        const list = recordsRes.data || [];
+        setRecords(list);
+        setSelectedRecordId(prev => prev && list.some(r => r.id === prev) ? prev : (list[0]?.id || null));
+      }
+
+      if (campRes?.succeeded) {
+        const list = campRes.data || [];
+        setCampaigns(list);
+        setSelectedCampaignId(prev => prev && list.some(c => c.id === prev) ? prev : (list[0]?.id || null));
+      }
+
+      if (allocRes?.succeeded && allocRes.data) {
+        setAllocationOverview(allocRes.data);
+        const list = allocRes.data.allocations || [];
+        setAllocations(list);
+        setSelectedAllocationId(prev => prev && list.some(a => a.id === prev) ? prev : (list[0]?.id || null));
+      }
+
+      if (flagsRes?.succeeded) {
+        setFlags(flagsRes.data || []);
+      }
+
+      if (reportRes?.succeeded && reportRes.data) {
+        setReportData(reportRes.data);
+      }
+    } catch (err) {
+      const msg = extractError(err, 'Unable to load live Funding Officer data from backend.');
+      setApiError(msg);
+      triggerToast(msg, 'warning');
+    } finally {
+      if (showSpinner) setLoading(false);
+    }
+  }, [triggerToast]);
+
+  useEffect(() => {
+    refreshAllData(true);
+  }, [refreshAllData]);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    triggerToast('Signed out of Funding Officer session.', 'info');
+    setTimeout(() => navigate('/login'), 400);
+  };
+
+  // Create Donation Record
   const handleCreateRecord = async (newRecord) => {
     try {
-      await donorService.createRecord({
+      const res = await donorService.createRecord({
         donorOrg: newRecord.donorOrg || newRecord.source,
         source: newRecord.source,
         contactPerson: newRecord.contactPerson,
@@ -156,316 +187,280 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
         notes: newRecord.notes || '',
         allocationTarget: newRecord.allocationTarget || 'Unallocated'
       });
-    } catch (e) {
-      console.warn('Backend sync note: Record saved locally', e);
-    }
-
-    setRecords([newRecord, ...records]);
-    setSelectedRecordId(newRecord.id);
-
-    // Update metrics
-    setMetrics(prev => ({
-      ...prev,
-      registeredDonors: {
-        ...prev.registeredDonors,
-        value: (prev.registeredDonors?.value || 0) + 1
+      if (!res?.succeeded) {
+        triggerToast(extractError(res, 'Failed to create donation record.'), 'warning');
+        return;
       }
-    }));
+      await refreshAllData(false);
+      if (res.data?.id) setSelectedRecordId(res.data.id);
+      triggerToast(res.message || 'Donation record created and queued for verification.', 'success');
+    } catch (err) {
+      triggerToast(extractError(err, 'Failed to create donation record (check login/permissions).'), 'warning');
+    }
+  };
 
-    // Add activity
-    const newAct = {
-      id: `ACT-${Date.now()}`,
-      time: 'Just now',
-      recordId: newRecord.id,
-      source: newRecord.source,
-      action: `${newRecord.type} contribution registered into intake ledger`,
-      officer: officer.fullName,
-      amount: newRecord.recordedValue
-    };
-    setRecentActivity([newAct, ...recentActivity]);
+  // Update Donor Profile Verification
+  const handleUpdateDonorVerification = async (donorId, status, auditNote) => {
+    try {
+      const res = await donorService.updateDonorVerification(donorId, { status, auditNote });
+      if (!res?.succeeded) {
+        triggerToast(extractError(res, 'Failed to update donor verification.'), 'warning');
+        return;
+      }
+      await refreshAllData(false);
+      triggerToast(res.message || 'Donor verification updated.', 'success');
+    } catch (err) {
+      triggerToast(extractError(err, 'Failed to update donor verification.'), 'warning');
+    }
+  };
 
-    triggerToast(`Record ${newRecord.id} successfully created and registered!`, 'success');
+  // Process Donation Record Decision
+  const handleProcessDecision = async (id, payload) => {
+    try {
+      const res = await donorService.processDecision(id, payload);
+      if (!res?.succeeded) {
+        triggerToast(extractError(res, 'Failed to record decision.'), 'warning');
+        return;
+      }
+      await refreshAllData(false);
+      triggerToast(res.message || `Decision recorded for ${id}.`, 'success');
+    } catch (err) {
+      triggerToast(extractError(err, 'Failed to record decision.'), 'warning');
+    }
+  };
+
+  // Create Campaign
+  const handleCreateCampaign = async (payload) => {
+    try {
+      const res = await donorService.createCampaign(payload);
+      if (!res?.succeeded) {
+        triggerToast(extractError(res, 'Failed to create campaign.'), 'warning');
+        return;
+      }
+      await refreshAllData(false);
+      triggerToast(res.message || 'Campaign created.', 'success');
+    } catch (err) {
+      triggerToast(extractError(err, 'Failed to create campaign.'), 'warning');
+    }
+  };
+
+  // Update Campaign Status
+  const handleUpdateCampaignStatus = async (id, status) => {
+    try {
+      const res = await donorService.updateCampaignStatus(id, status);
+      if (!res?.succeeded) {
+        triggerToast(extractError(res, 'Failed to update campaign status.'), 'warning');
+        return;
+      }
+      await refreshAllData(false);
+      triggerToast(res.message || `Campaign status updated to ${status}.`, 'success');
+    } catch (err) {
+      triggerToast(extractError(err, 'Failed to update campaign status.'), 'warning');
+    }
+  };
+
+  // Create Allocation
+  const handleCreateAllocation = async (payload) => {
+    try {
+      const res = await donorService.createAllocation(payload);
+      if (!res?.succeeded) {
+        triggerToast(extractError(res, 'Failed to create allocation.'), 'warning');
+        return;
+      }
+      await refreshAllData(false);
+      triggerToast(res.message || 'Allocation approved.', 'success');
+    } catch (err) {
+      triggerToast(extractError(err, 'Failed to create allocation.'), 'warning');
+    }
   };
 
   // Dual Approval Co-signature Handler
   const handleConfirmApproval = async ({ recordId, coSignatory, authorizerNote }) => {
     try {
-      await donorService.approveAllocation(recordId, {
+      const res = await donorService.approveAllocation(recordId, {
         authorizedNote: authorizerNote,
         secondarySignature: coSignatory
       });
-    } catch (e) {
-      console.warn('Backend sync note: Approval recorded locally', e);
-    }
-
-    // Update matching record
-    setRecords(records.map(r => {
-      if (r.id === recordId) {
-        return {
-          ...r,
-          status: 'Allocated',
-          statusColor: '#3d6b4f',
-          statusBg: '#edf2e6',
-          notes: `${r.notes ? r.notes + ' ' : ''}[Dual Approved by ${officer.fullName} & ${coSignatory}]: ${authorizerNote}`
-        };
+      if (!res?.succeeded) {
+        triggerToast(extractError(res, 'Failed to approve allocation.'), 'warning');
+        return;
       }
-      return r;
-    }));
-
-    // Update matching allocation if applicable
-    setAllocations(allocations.map(a => {
-      if (a.id === recordId || a.voucherCode === recordId) {
-        return {
-          ...a,
-          approvalStatus: 'Dual Approved',
-          statusColor: '#10b981',
-          approver2: coSignatory,
-          disbursedAmount: a.allocatedAmount
-        };
-      }
-      return a;
-    }));
-
-    // Remove from priority items if it was ALC-302
-    setPriorityItems(priorityItems.filter(p => p.id !== recordId));
-
-    // Add activity
-    const newAct = {
-      id: `ACT-${Date.now()}`,
-      time: 'Just now',
-      recordId,
-      source: 'HumanAid Emergency Response',
-      action: `Dual authorization completed with ${coSignatory}`,
-      officer: officer.fullName,
-      amount: 'Approved for Dispatch'
-    };
-    setRecentActivity([newAct, ...recentActivity]);
-
-    triggerToast(`Dual authorization completed for ${recordId}! Funds released.`, 'success');
-  };
-
-  // Save Memo Note Handler
-  const handleSaveNote = async (id, noteText) => {
-    try {
-      await donorService.processDecision(id, {
-        action: 'memo-note',
-        decisionReason: noteText,
-        note: noteText
-      });
-    } catch (e) {
-      console.warn('Backend sync note:', e);
-    }
-    setRecords(records.map(r => r.id === id ? { ...r, notes: noteText } : r));
-    setCampaigns(campaigns.map(c => c.id === id ? { ...c, description: noteText } : c));
-    setAllocations(allocations.map(a => a.id === id ? { ...a, auditReference: noteText } : a));
-    triggerToast(`Authorised memorandum saved for ${id}`, 'info');
-  };
-
-  // Request Clarification Handler
-  const handleClarifyRecord = async (rec) => {
-    try {
-      await donorService.processDecision(rec.id, {
-        action: 'request-clarification',
-        decisionReason: 'Secondary audit verification requested',
-        note: 'Awaiting secondary batch certificate / storage temperature logs'
-      });
-    } catch (e) {
-      console.warn('Backend sync note:', e);
-    }
-    triggerToast(`Clarification request dispatched to ${rec.source || rec.id} contact point.`, 'info');
-  };
-
-  // Escalate Record Handler
-  const handleEscalateRecord = async (rec) => {
-    try {
-      await donorService.processDecision(rec.id, {
-        action: 'escalate',
-        decisionReason: 'Anomaly flag escalated to National Command',
-        note: 'Escalated by Funding Officer'
-      });
-    } catch (e) {
-      console.warn('Backend sync note:', e);
-    }
-    triggerToast(`Record ${rec.id || rec.code} escalated to Emergency Coordinator (Amara Chen).`, 'warning');
-  };
-
-  // Open Approval Modal
-  const openApprovalModalFor = (rec) => {
-    setTargetApprovalRecord(rec);
-    setShowApprovalModal(true);
-  };
-
-  // Open Receipt Modal
-  const openReceiptModalFor = (rec) => {
-    setTargetReceiptRecord(rec);
-    setShowReceiptModal(true);
-  };
-
-  // Priority Attention item clicked
-  const handlePriorityClick = (item) => {
-    if (item.relatedTab) {
-      setActiveTab(item.relatedTab);
-      if (item.id === 'DON-2047') {
-        setSelectedRecordId('DON-2047');
-      } else if (item.id === 'CMP-104') {
-        setSelectedCampaignId('CMP-104');
-      }
+      await refreshAllData(false);
+      triggerToast(res.message || `Dual authorization completed for ${recordId}.`, 'success');
+    } catch (err) {
+      triggerToast(extractError(err, 'Failed to approve allocation.'), 'warning');
     }
   };
 
   // Resolve Suspicious Flag
-  const handleResolveFlag = async (flagId, note) => {
+  const handleResolveFlag = async (flagId, action, decisionReason) => {
     try {
-      await donorService.resolveFlag(flagId, {
-        action: 'clear',
-        resolutionNotes: note || 'Resolved by Funding Officer verification'
+      const res = await donorService.resolveFlag(flagId, {
+        action,
+        resolutionNotes: decisionReason
       });
-    } catch (e) {
-      console.warn('Backend sync note:', e);
+      if (!res?.succeeded) {
+        triggerToast(extractError(res, 'Failed to record compliance decision.'), 'warning');
+        return;
+      }
+      await refreshAllData(false);
+      triggerToast(res.message || `Compliance decision recorded for ${flagId}.`, 'success');
+    } catch (err) {
+      triggerToast(extractError(err, 'Failed to record compliance decision.'), 'warning');
     }
-    setFlags(flags.filter(f => f.id !== flagId));
-    setPriorityItems(priorityItems.filter(p => p.id !== 'DON-2047'));
-    triggerToast(`Flag ${flagId} cleared and resolved. Record verified.`, 'success');
   };
 
-  // Export Demo Report
-  const handleExportReport = () => {
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + ["Record,Source,Type,Value,Status,OperationalArea",
-         ...records.map(r => `"${r.id}","${r.source}","${r.type}","${r.recordedValue}","${r.status}","${r.operationalArea}"`)
-        ].join("\n");
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `HumanAid_Funding_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+  // Real Filtered CSV Export
+  const handleExportCsv = (rowsToExport, prefix = 'HumanAid_Funding_Report') => {
+    const dataset = rowsToExport && rowsToExport.length ? rowsToExport : records;
+    if (!dataset.length) {
+      triggerToast('No records available to export.', 'warning');
+      return;
+    }
+    const escape = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+    const header = ['ID', 'Donor', 'CampaignOrSource', 'Type', 'Value', 'Verification', 'Allocation', 'Status', 'CreatedAt'].join(',');
+    const lines = dataset.map(r => [
+      escape(r.id),
+      escape(r.donorOrg),
+      escape(r.source),
+      escape(r.type),
+      escape(r.recordedValue),
+      escape(r.verification),
+      escape(r.allocationTarget),
+      escape(r.status),
+      escape(r.createdAt)
+    ].join(','));
+
+    const blob = new Blob([[header, ...lines].join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${prefix}_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    triggerToast('Demo audit report exported as CSV!', 'success');
+    URL.revokeObjectURL(url);
+    triggerToast(`Exported ${dataset.length} filtered records to CSV.`, 'success');
   };
+
+  const handlePriorityClick = (item) => {
+    if (item.relatedTab) setActiveTab(item.relatedTab);
+    if (item.id) setSelectedRecordId(item.id);
+  };
+
+  const pendingVerificationCount = records.filter(r => r.status === 'Pending' || r.status === 'Flagged').length;
+  const totalUnreadAlerts = openFlagsCount + pendingVerificationCount;
 
   return (
     <div className="fo-portal-container">
-      {/* Left Sidebar (matching Figma) */}
       <FundingSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         dutyActive={dutyActive}
         setDutyActive={setDutyActive}
         officer={officer}
-        pendingReviewCount={records.filter(r => r.status === 'Review').length || 12}
-        suspiciousCount={flags.length}
+        pendingReviewCount={pendingVerificationCount}
+        suspiciousCount={openFlagsCount}
         onSignOut={handleSignOut}
       />
 
-      {/* Main Content Area */}
       <main className="fo-main-content">
-        {/* Top Header (matching Figma) */}
         <FundingHeader
           activeTab={activeTab}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           officer={officer}
-          unreadCount={flags.length}
-          onOpenNotifications={() => setActiveTab('suspicious')}
+          unreadCount={totalUnreadAlerts}
+          onOpenNotifications={() => setActiveTab(openFlagsCount > 0 ? 'suspicious' : 'donations')}
         />
 
-        {/* Tab 1: Funding Dashboard */}
+        {apiError && (
+          <div style={{ margin: '12px 24px 0 24px', padding: '10px 14px', borderRadius: '8px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{apiError}</span>
+            <button className="fo-btn fo-btn-secondary" onClick={() => refreshAllData(true)}>Retry</button>
+          </div>
+        )}
+
         {activeTab === 'dashboard' && (
           <FundingDashboardView
             metrics={metrics}
             priorityItems={priorityItems}
             workflowSteps={workflowSteps}
             recentActivity={recentActivity}
+            loading={loading}
             onNavigateTab={setActiveTab}
             onOpenPriorityItem={handlePriorityClick}
-            onOpenApprovalModal={openApprovalModalFor}
           />
         )}
 
-        {/* Tab 2: Donor Management */}
         {activeTab === 'donors' && (
           <DonorManagementView
-            records={records}
-            selectedRecordId={selectedRecordId}
-            setSelectedRecordId={setSelectedRecordId}
+            donorProfiles={donorProfiles}
+            loading={loading}
+            globalSearch={searchQuery}
+            onUpdateDonorVerification={handleUpdateDonorVerification}
             onOpenCreateRecordModal={() => setShowCreateModal(true)}
-            onOpenApprovalModal={openApprovalModalFor}
-            onOpenReceiptModal={openReceiptModalFor}
-            onExportReport={handleExportReport}
-            onSaveNote={handleSaveNote}
-            onClarifyRecord={handleClarifyRecord}
-            onEscalateRecord={handleEscalateRecord}
           />
         )}
 
-        {/* Tab 3: Donation Records */}
         {activeTab === 'donations' && (
           <DonationRecordsView
             records={records}
             selectedRecordId={selectedRecordId}
             setSelectedRecordId={setSelectedRecordId}
+            loading={loading}
+            globalSearch={searchQuery}
             onOpenCreateRecordModal={() => setShowCreateModal(true)}
-            onOpenApprovalModal={openApprovalModalFor}
-            onOpenReceiptModal={openReceiptModalFor}
-            onExportReport={handleExportReport}
-            onSaveNote={handleSaveNote}
-            onClarifyRecord={handleClarifyRecord}
-            onEscalateRecord={handleEscalateRecord}
+            onOpenReceiptModal={(rec) => { setTargetReceiptRecord(rec); setShowReceiptModal(true); }}
+            onProcessDecision={handleProcessDecision}
+            onExportCsv={handleExportCsv}
           />
         )}
 
-        {/* Tab 4: Campaigns */}
         {activeTab === 'campaigns' && (
           <CampaignsView
             campaigns={campaigns}
             selectedCampaignId={selectedCampaignId}
             setSelectedCampaignId={setSelectedCampaignId}
-            onOpenCreateRecordModal={() => setShowCreateModal(true)}
-            onOpenApprovalModal={openApprovalModalFor}
-            onExportReport={handleExportReport}
-            onSaveNote={handleSaveNote}
-            onClarifyRecord={handleClarifyRecord}
-            onEscalateRecord={handleEscalateRecord}
+            loading={loading}
+            globalSearch={searchQuery}
+            onCreateCampaign={handleCreateCampaign}
+            onUpdateCampaignStatus={handleUpdateCampaignStatus}
           />
         )}
 
-        {/* Tab 5: Allocation & Expenditure */}
         {activeTab === 'allocations' && (
           <AllocationExpenditureView
+            allocationOverview={allocationOverview}
             allocations={allocations}
+            verifiedPendingRecords={records.filter(r => r.status === 'Verified')}
             selectedAllocationId={selectedAllocationId}
             setSelectedAllocationId={setSelectedAllocationId}
-            onOpenCreateRecordModal={() => setShowCreateModal(true)}
-            onOpenApprovalModal={openApprovalModalFor}
-            onExportReport={handleExportReport}
-            onSaveNote={handleSaveNote}
-            onClarifyRecord={handleClarifyRecord}
-            onEscalateRecord={handleEscalateRecord}
+            loading={loading}
+            globalSearch={searchQuery}
+            onCreateAllocation={handleCreateAllocation}
+            onOpenApprovalModal={(alloc) => { setTargetApprovalRecord(alloc); setShowApprovalModal(true); }}
           />
         )}
 
-        {/* Tab 6: Suspicious Flag Review */}
         {activeTab === 'suspicious' && (
           <SuspiciousFlagReviewView
             flags={flags}
+            loading={loading}
             onResolveFlag={handleResolveFlag}
-            onEscalateFlag={handleEscalateRecord}
           />
         )}
 
-        {/* Tab 7: Transparency Reports */}
         {activeTab === 'reports' && (
           <TransparencyReportsView
-            reports={reports}
-            onExportReport={handleExportReport}
+            reportData={reportData}
+            campaigns={campaigns}
+            loading={loading}
+            onExportCsv={handleExportCsv}
           />
         )}
       </main>
 
-      {/* Modals */}
       <CreateRecordModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
@@ -485,7 +480,6 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
         record={targetReceiptRecord}
       />
 
-      {/* Floating Toast Notification */}
       {toast && (
         <div className="fo-toast">
           {toast.type === 'success' && <CheckCircle2 size={16} color="#10b981" />}
@@ -499,4 +493,3 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
 };
 
 export default DonorFundingOfficerPortal;
-

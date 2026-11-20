@@ -162,6 +162,43 @@ public class DonationsController : BaseApiController
     }
 
     /// <summary>
+    /// Retrieves aggregated donor profiles with verification status and contribution history.
+    /// </summary>
+    [HttpGet("donors")]
+    public async Task<ActionResult<Result<IReadOnlyList<DonorProfileDto>>>> GetDonorProfiles(
+        [FromQuery] string? type,
+        [FromQuery] string? status,
+        [FromQuery] string? search,
+        CancellationToken cancellationToken)
+    {
+        var result = await _donationService.GetDonorProfilesAsync(type, status, search, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Updates a donor profile's verification status with a mandatory audit note.
+    /// </summary>
+    [HttpPost("donors/{donorId}/verify")]
+    [Authorize(Roles = "Admin,Coordinator,LogisticsManager")]
+    public async Task<ActionResult<Result<DonorProfileDto>>> UpdateDonorVerification(
+        string donorId,
+        [FromBody] UpdateDonorVerificationDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(Result<DonorProfileDto>.Failure("Invalid donor verification payload."));
+        }
+
+        var result = await _donationService.UpdateDonorVerificationAsync(donorId, dto, CurrentUserName, cancellationToken);
+        if (!result.Succeeded)
+        {
+            return NotFound(result);
+        }
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Retrieves donor directory records with filtering.
     /// </summary>
     [HttpGet("records")]
@@ -190,9 +227,10 @@ public class DonationsController : BaseApiController
     }
 
     /// <summary>
-    /// Creates a new donor contribution / prototype record.
+    /// Creates a new donor contribution record.
     /// </summary>
     [HttpPost("records")]
+    [Authorize(Roles = "Admin,Coordinator,LogisticsManager")]
     public async Task<ActionResult<Result<DonorRecordDto>>> CreateDonorRecord(
         [FromBody] CreateDonorRecordDto dto,
         CancellationToken cancellationToken)
@@ -203,13 +241,15 @@ public class DonationsController : BaseApiController
         }
 
         var result = await _donationService.CreateDonorRecordAsync(dto, CurrentUserName, cancellationToken);
+        if (!result.Succeeded) return BadRequest(result);
         return Ok(result);
     }
 
     /// <summary>
-    /// Submits a review decision (submit-approval, request-clarification, or escalate) on a donor record.
+    /// Submits a review decision (verify, allocate, dispatch, request-clarification, escalate, or reject) on a donation record.
     /// </summary>
     [HttpPost("records/{id}/decision")]
+    [Authorize(Roles = "Admin,Coordinator,LogisticsManager")]
     public async Task<ActionResult<Result<DonorRecordDto>>> ProcessDonorDecision(
         string id,
         [FromBody] DonorDecisionDto dto,
@@ -223,7 +263,9 @@ public class DonationsController : BaseApiController
         var result = await _donationService.ProcessDonorDecisionAsync(id, dto, CurrentUserName, cancellationToken);
         if (!result.Succeeded)
         {
-            return NotFound(result);
+            return result.Errors.Any(e => e.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                ? NotFound(result)
+                : BadRequest(result);
         }
         return Ok(result);
     }
@@ -242,6 +284,7 @@ public class DonationsController : BaseApiController
     /// Creates a new emergency funding campaign.
     /// </summary>
     [HttpPost("campaigns")]
+    [Authorize(Roles = "Admin,Coordinator,LogisticsManager")]
     public async Task<ActionResult<Result<FundingCampaignDto>>> CreateCampaign(
         [FromBody] CreateFundingCampaignDto dto,
         CancellationToken cancellationToken)
@@ -256,6 +299,36 @@ public class DonationsController : BaseApiController
     }
 
     /// <summary>
+    /// Updates the status of an emergency funding campaign (Active, Paused, Completed, Closed).
+    /// </summary>
+    [HttpPatch("campaigns/{id}/status")]
+    [Authorize(Roles = "Admin,Coordinator,LogisticsManager")]
+    public async Task<ActionResult<Result<FundingCampaignDto>>> UpdateCampaignStatus(
+        string id,
+        [FromBody] UpdateCampaignStatusDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(Result<FundingCampaignDto>.Failure("Invalid campaign status payload."));
+        }
+
+        var result = await _donationService.UpdateCampaignStatusAsync(id, dto, cancellationToken);
+        if (!result.Succeeded) return NotFound(result);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves allocation balances (verified, allocated, unallocated) and allocation records.
+    /// </summary>
+    [HttpGet("allocations/overview")]
+    public async Task<ActionResult<Result<AllocationOverviewDto>>> GetAllocationOverview(CancellationToken cancellationToken)
+    {
+        var result = await _donationService.GetAllocationOverviewAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Retrieves emergency resource / financial allocations requiring dual approval.
     /// </summary>
     [HttpGet("allocations")]
@@ -266,9 +339,29 @@ public class DonationsController : BaseApiController
     }
 
     /// <summary>
+    /// Creates a new allocation from a verified donation while guarding against over-allocation.
+    /// </summary>
+    [HttpPost("allocations")]
+    [Authorize(Roles = "Admin,Coordinator,LogisticsManager")]
+    public async Task<ActionResult<Result<FundingAllocationDto>>> CreateAllocation(
+        [FromBody] CreateFundingAllocationDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(Result<FundingAllocationDto>.Failure("Invalid allocation payload."));
+        }
+
+        var result = await _donationService.CreateAllocationAsync(dto, CurrentUserName, cancellationToken);
+        if (!result.Succeeded) return BadRequest(result);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Approves and co-signs an emergency funding allocation.
     /// </summary>
     [HttpPost("allocations/{id}/approve")]
+    [Authorize(Roles = "Admin,Coordinator,LogisticsManager")]
     public async Task<ActionResult<Result<FundingAllocationDto>>> ApproveAllocation(
         string id,
         [FromBody] ApproveFundingAllocationDto dto,
@@ -282,13 +375,15 @@ public class DonationsController : BaseApiController
         var result = await _donationService.ApproveAllocationAsync(id, dto, CurrentUserName, cancellationToken);
         if (!result.Succeeded)
         {
-            return NotFound(result);
+            return result.Errors.Any(e => e.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                ? NotFound(result)
+                : BadRequest(result);
         }
         return Ok(result);
     }
 
     /// <summary>
-    /// Retrieves AI anomaly flags on suspicious donation records.
+    /// Retrieves rule-based anomaly flags on donation records for human officer review.
     /// </summary>
     [HttpGet("suspicious-flags")]
     public async Task<ActionResult<Result<IReadOnlyList<SuspiciousFlagDto>>>> GetSuspiciousFlags(CancellationToken cancellationToken)
@@ -298,9 +393,10 @@ public class DonationsController : BaseApiController
     }
 
     /// <summary>
-    /// Resolves an AI anomaly flag (clear or escalate).
+    /// Records a human officer decision on a flagged donation record (clear, investigate, escalate, reject).
     /// </summary>
     [HttpPost("suspicious-flags/{id}/resolve")]
+    [Authorize(Roles = "Admin,Coordinator,LogisticsManager")]
     public async Task<ActionResult<Result<SuspiciousFlagDto>>> ResolveSuspiciousFlag(
         string id,
         [FromBody] ResolveSuspiciousFlagDto dto,
@@ -314,8 +410,26 @@ public class DonationsController : BaseApiController
         var result = await _donationService.ResolveSuspiciousFlagAsync(id, dto, CurrentUserName, cancellationToken);
         if (!result.Succeeded)
         {
-            return NotFound(result);
+            return result.Errors.Any(e => e.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                ? NotFound(result)
+                : BadRequest(result);
         }
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Generates real-time auditable transparency report metrics and filtered records.
+    /// </summary>
+    [HttpGet("reports")]
+    public async Task<ActionResult<Result<TransparencyReportDto>>> GetTransparencyReport(
+        [FromQuery] string? search,
+        [FromQuery] string? crisisId,
+        [FromQuery] string? status,
+        [FromQuery] DateTime? fromDate,
+        [FromQuery] DateTime? toDate,
+        CancellationToken cancellationToken)
+    {
+        var result = await _donationService.GetTransparencyReportAsync(search, crisisId, status, fromDate, toDate, cancellationToken);
         return Ok(result);
     }
 }
