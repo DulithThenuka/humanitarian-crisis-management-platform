@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Building2, ShieldCheck } from 'lucide-react';
+import { X, Building2, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
@@ -9,34 +9,68 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
     occupied: 0,
     accessibility: 'Step-free access',
     status: 'Operational',
+    contactPhone: '+94 11 234 5678',
     notes: ''
   });
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.facilityName.trim()) return;
+    const facilityName = formData.facilityName.trim();
+    if (!facilityName) {
+      setErrorMsg('Facility or shelter name is required.');
+      return;
+    }
+    const cap = Number(formData.capacity);
+    const occ = Number(formData.occupied) || 0;
 
-    const newId = `SH-${Math.floor(100 + Math.random() * 900)}`;
-    const newShelter = {
-      id: newId,
-      name: `${newId} - ${formData.facilityName}`,
-      facilityName: formData.facilityName,
-      area: formData.area,
-      capacity: Number(formData.capacity),
-      occupied: Number(formData.occupied) || 0,
-      available: Math.max(0, Number(formData.capacity) - (Number(formData.occupied) || 0)),
-      accessibility: formData.accessibility,
-      status: formData.status,
-      statusType: formData.status === 'Operational' ? 'success' : formData.status === 'Near capacity' ? 'warning' : 'critical',
-      guardActive: true,
-      managerContact: 'Authorised Staff (+94 11 000 0000)',
-      notes: formData.notes || 'Registered operational shelter.'
-    };
+    if (cap <= 0) {
+      setErrorMsg('Total capacity must be greater than zero.');
+      return;
+    }
+    if (occ < 0) {
+      setErrorMsg('Current occupancy cannot be negative.');
+      return;
+    }
+    if (occ > cap) {
+      setErrorMsg(`Occupancy (${occ}) cannot exceed total capacity (${cap}).`);
+      return;
+    }
 
-    onSave(newShelter);
-    onClose();
+    setErrorMsg(null);
+    setIsSubmitting(true);
+
+    try {
+      const newId = `SH-${Math.floor(100 + Math.random() * 900)}`;
+      const newShelter = {
+        id: newId,
+        name: `${newId} - ${facilityName}`,
+        facilityName,
+        area: formData.area,
+        capacity: cap,
+        totalCapacity: cap,
+        occupied: occ,
+        currentOccupancy: occ,
+        available: Math.max(0, cap - occ),
+        accessibility: formData.accessibility,
+        status: formData.status,
+        statusType: formData.status === 'Operational' ? 'operational' : formData.status === 'Near capacity' ? 'warning' : 'critical',
+        guardActive: true,
+        contactPhone: formData.contactPhone.trim(),
+        managerContact: formData.contactPhone.trim() || 'Authorised Staff (+94 11 000 0000)',
+        notes: formData.notes.trim() || 'Registered operational shelter.'
+      };
+
+      await onSave(newShelter);
+      onClose();
+    } catch (err) {
+      setErrorMsg(err?.message || 'Error registering shelter facility.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -68,12 +102,32 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
 
         <form onSubmit={handleSubmit}>
           <div className="sh-modal-body">
+            {errorMsg && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: '#fee2e2',
+                  border: '1px solid #f87171',
+                  color: '#991b1b',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  marginBottom: '12px'
+                }}
+              >
+                <AlertCircle size={16} />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
             <div className="sh-form-group">
               <label className="sh-form-label">Facility / Centre Name *</label>
               <input
                 type="text"
                 className="sh-form-input"
-                placeholder="e.g. Kelani Maha Vidyalaya Hall"
+                placeholder="e.g. Kelani Central Maha Vidyalaya Hall"
                 required
                 value={formData.facilityName}
                 onChange={(e) => setFormData({ ...formData, facilityName: e.target.value })}
@@ -82,7 +136,7 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div className="sh-form-group">
-                <label className="sh-form-label">Operational Area</label>
+                <label className="sh-form-label">Operational Area / Sector</label>
                 <select
                   className="sh-form-select"
                   value={formData.area}
@@ -95,16 +149,20 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
                   <option value="Kaduwela">Kaduwela</option>
                   <option value="Malwana">Malwana</option>
                   <option value="Kolonnawa">Kolonnawa</option>
+                  <option value="Galle">Galle</option>
+                  <option value="Matara">Matara</option>
+                  <option value="Kalutara">Kalutara</option>
                 </select>
               </div>
 
               <div className="sh-form-group">
-                <label className="sh-form-label">Total Verified Capacity</label>
+                <label className="sh-form-label">Total Verified Bed Capacity *</label>
                 <input
                   type="number"
                   className="sh-form-input"
-                  min="10"
-                  max="1500"
+                  min="1"
+                  max="5000"
+                  required
                   value={formData.capacity}
                   onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
                 />
@@ -113,18 +171,14 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div className="sh-form-group">
-                <label className="sh-form-label">Accessibility Features</label>
-                <select
-                  className="sh-form-select"
+                <label className="sh-form-label">Accessibility & Features</label>
+                <input
+                  type="text"
+                  className="sh-form-input"
+                  placeholder="e.g. Step-free access, Clean water, Medical triage"
                   value={formData.accessibility}
                   onChange={(e) => setFormData({ ...formData, accessibility: e.target.value })}
-                >
-                  <option value="Step-free access">Step-free access</option>
-                  <option value="Accessible toilets">Accessible toilets</option>
-                  <option value="Family areas">Family areas</option>
-                  <option value="Medical support">Medical support</option>
-                  <option value="Wheelchair ramp">Wheelchair ramp</option>
-                </select>
+                />
               </div>
 
               <div className="sh-form-group">
@@ -142,11 +196,22 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
             </div>
 
             <div className="sh-form-group">
-              <label className="sh-form-label">Initial Authorised Note</label>
+              <label className="sh-form-label">Contact Phone / Authorised Facility Lead</label>
+              <input
+                type="text"
+                className="sh-form-input"
+                placeholder="e.g. +94 11 234 5678"
+                value={formData.contactPhone}
+                onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+              />
+            </div>
+
+            <div className="sh-form-group">
+              <label className="sh-form-label">Operational Instructions & Notes</label>
               <textarea
                 className="sh-form-input"
                 rows="2"
-                placeholder="Operational instructions, entry ramps or triage points..."
+                placeholder="Entry ramps, generator availability, triage wings..."
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               />
@@ -163,16 +228,16 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
               borderRadius: '6px'
             }}>
               <ShieldCheck size={16} />
-              <span>Record will be registered under your staff credentials and synced with central shelter telemetry.</span>
+              <span>Record will be registered in the shared database and synced across Maps, Coordinator, and Capacity surveillance.</span>
             </div>
           </div>
 
           <div className="sh-modal-footer">
-            <button type="button" className="sh-btn-outline" onClick={onClose}>
+            <button type="button" className="sh-btn-outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>
-            <button type="submit" className="sh-btn-primary">
-              Register Facility
+            <button type="submit" className="sh-btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Registering...' : 'Register Facility'}
             </button>
           </div>
         </form>
@@ -181,3 +246,4 @@ export const CreateRecordModal = ({ isOpen, onClose, onSave }) => {
   );
 };
 
+export default CreateRecordModal;

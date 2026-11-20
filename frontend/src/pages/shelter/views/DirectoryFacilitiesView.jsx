@@ -7,18 +7,27 @@ import {
   CheckCircle,
   FileText,
   CornerUpRight,
-  ShieldAlert
+  ShieldAlert,
+  Edit3,
+  UserCheck,
+  Package,
+  Phone,
+  MapPin,
+  RefreshCw
 } from 'lucide-react';
 
 export const DirectoryFacilitiesView = ({
-  shelters,
+  shelters = [],
   selectedShelter,
   onSelectShelter,
   onOpenCreateModal,
   onOpenExportModal,
-  onConfirmAllocation,
+  onOpenEditModal,
+  onOpenAllocateModal,
+  onRequestSupplies,
   onRequestClarification,
-  onEscalate
+  onEscalate,
+  onRefreshData
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -27,32 +36,71 @@ export const DirectoryFacilitiesView = ({
 
   const distinctAreas = Array.from(new Set(shelters.map((s) => s.area).filter(Boolean)));
 
+  const renderFacilityBadges = (facilities) => {
+    if (!facilities) return <span style={{ fontSize: '11px', color: '#94a3b8' }}>Standard</span>;
+    let items = [];
+    if (Array.isArray(facilities)) {
+      items = facilities;
+    } else if (typeof facilities === 'string') {
+      if (facilities.startsWith('[') && facilities.endsWith(']')) {
+        try {
+          items = JSON.parse(facilities);
+        } catch {
+          items = facilities.replace(/[\[\]"]/g, '').split(',');
+        }
+      } else {
+        items = facilities.split(/[,|]/);
+      }
+    }
+    const clean = items.map((i) => String(i).trim()).filter(Boolean);
+    if (clean.length === 0) return <span style={{ fontSize: '11px', color: '#94a3b8' }}>Standard</span>;
+    return (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+        {clean.map((tag, idx) => (
+          <span
+            key={idx}
+            style={{
+              fontSize: '11px',
+              backgroundColor: '#edf4eb',
+              color: '#153322',
+              padding: '2px 7px',
+              borderRadius: '4px',
+              fontWeight: 600,
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   // Filter logic
   const filteredShelters = shelters.filter((s) => {
     const matchesSearch =
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.accessibility.toLowerCase().includes(searchTerm.toLowerCase());
+      (s.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.area || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.accessibility || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'ALL' || s.status === statusFilter;
     const matchesArea = areaFilter === 'ALL' || s.area === areaFilter;
     return matchesSearch && matchesStatus && matchesArea;
   });
 
-  const currentShelter = selectedShelter || shelters[0];
-
-  const handleConfirm = () => {
-    onConfirmAllocation(currentShelter.id, noteText);
-    setNoteText('');
-  };
+  const currentShelter = selectedShelter || filteredShelters[0] || shelters[0];
 
   const handleClarify = () => {
-    onRequestClarification(currentShelter.id, noteText);
-    setNoteText('');
+    if (onRequestClarification && currentShelter) {
+      onRequestClarification(currentShelter.id, noteText);
+      setNoteText('');
+    }
   };
 
   const handleEscalateAction = () => {
-    onEscalate(currentShelter.id, noteText);
-    setNoteText('');
+    if (onEscalate && currentShelter) {
+      onEscalate(currentShelter.id, noteText);
+      setNoteText('');
+    }
   };
 
   return (
@@ -67,6 +115,12 @@ export const DirectoryFacilitiesView = ({
           </p>
         </div>
         <div className="sh-header-actions">
+          {onRefreshData && (
+            <button className="sh-btn-outline" onClick={onRefreshData} title="Sync with database">
+              <RefreshCw size={15} />
+              Sync Directory
+            </button>
+          )}
           <button className="sh-btn-outline" onClick={onOpenExportModal}>
             <Download size={15} />
             Export Directory Report
@@ -125,7 +179,7 @@ export const DirectoryFacilitiesView = ({
             <thead>
               <tr>
                 <th>Shelter</th>
-                <th>Area</th>
+                <th>Area / Sector</th>
                 <th>Capacity</th>
                 <th>Occupied</th>
                 <th>Available</th>
@@ -143,25 +197,37 @@ export const DirectoryFacilitiesView = ({
               ) : (
                 filteredShelters.map((s) => {
                   const isSelected = currentShelter && currentShelter.id === s.id;
+                  const isCritical = s.status === 'Full' || (s.available !== undefined && s.available <= 0);
+                  const isWarning = s.status === 'Near capacity' || (s.available !== undefined && s.available <= 10);
+
                   return (
                     <tr
                       key={s.id}
                       className={isSelected ? 'selected-row' : ''}
                       onClick={() => onSelectShelter(s)}
                     >
-                      <td className="sh-shelter-title-cell">{s.name}</td>
+                      <td className="sh-shelter-title-cell">
+                        <div style={{ fontWeight: 700 }}>{s.name}</div>
+                        {s.contactPhone && (
+                          <div style={{ fontSize: '11px', color: '#657367' }}>{s.contactPhone}</div>
+                        )}
+                      </td>
                       <td>{s.area}</td>
-                      <td>{s.capacity}</td>
+                      <td style={{ fontWeight: 600 }}>{s.capacity}</td>
                       <td>{s.occupied}</td>
-                      <td>{s.available}</td>
-                      <td>{s.accessibility}</td>
+                      <td style={{ fontWeight: 700, color: (s.available ?? 0) <= 5 ? '#b91c1c' : '#15803d' }}>
+                        {s.available}
+                      </td>
+                      <td>
+                        {renderFacilityBadges(s.facilities || s.accessibility)}
+                      </td>
                       <td>
                         <span
-                          className={`sh-badge ${s.status === 'Operational'
-                            ? 'sh-badge-operational'
-                            : s.status === 'Near capacity'
+                          className={`sh-badge ${isCritical
+                            ? 'sh-badge-critical'
+                            : isWarning
                               ? 'sh-badge-warning'
-                              : 'sh-badge-critical'
+                              : 'sh-badge-operational'
                             }`}
                         >
                           <span className="sh-badge-dot" />
@@ -210,15 +276,14 @@ export const DirectoryFacilitiesView = ({
               </div>
               <div className="sh-detail-stat-tile">
                 <div className="sh-detail-stat-label">Available</div>
-                <div className="sh-detail-stat-val">{currentShelter.available}</div>
+                <div className="sh-detail-stat-val" style={{ color: currentShelter.available <= 5 ? '#b91c1c' : '#15803d' }}>
+                  {currentShelter.available}
+                </div>
               </div>
               <div className="sh-detail-stat-tile">
-                <div className="sh-detail-stat-label">Accessibility</div>
-                <div
-                  className="sh-detail-stat-val"
-                  style={{ fontSize: '13px', fontWeight: 700, marginTop: '5px' }}
-                >
-                  {currentShelter.accessibility}
+                <div className="sh-detail-stat-label">Facilities & Amenities</div>
+                <div style={{ marginTop: '6px' }}>
+                  {renderFacilityBadges(currentShelter.facilities || currentShelter.accessibility)}
                 </div>
               </div>
             </div>
@@ -238,27 +303,54 @@ export const DirectoryFacilitiesView = ({
               </div>
             )}
 
+            {/* Fast Management Actions */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '4px' }}>
+              <button
+                className="sh-btn-primary"
+                style={{ padding: '8px 10px', fontSize: '12px' }}
+                disabled={currentShelter.available <= 0}
+                onClick={() => onOpenAllocateModal && onOpenAllocateModal(currentShelter)}
+              >
+                <UserCheck size={14} />
+                Allocate Evacuee
+              </button>
+              <button
+                className="sh-btn-outline"
+                style={{ padding: '8px 10px', fontSize: '12px' }}
+                onClick={() => onRequestSupplies && onRequestSupplies(currentShelter)}
+              >
+                <Package size={14} />
+                Request Supplies
+              </button>
+            </div>
+
+            <button
+              className="sh-btn-outline"
+              style={{ width: '100%', marginTop: '6px', fontSize: '12px', padding: '7px 10px' }}
+              onClick={() => onOpenEditModal && onOpenEditModal(currentShelter)}
+            >
+              <Edit3 size={13} />
+              Edit Shelter Capacity & Amenities
+            </button>
+
             {/* Note & Reason */}
-            <div className="sh-decision-note-box">
+            <div className="sh-decision-note-box" style={{ marginTop: '12px' }}>
               <label className="sh-note-label">Authorised Note / Decision Reason</label>
               <textarea
                 className="sh-note-textarea"
-                placeholder="Avoid unnecessary personal information..."
+                placeholder="Log operational note or coordination justification..."
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
               />
             </div>
 
-            {/* Action Buttons */}
+            {/* Triage Review Buttons */}
             <div className="sh-action-stack">
-              <button className="sh-btn-confirm-full" onClick={handleConfirm}>
-                Confirm allocation
-              </button>
               <button className="sh-btn-secondary-full" onClick={handleClarify}>
                 Request clarification
               </button>
               <button className="sh-btn-secondary-full" onClick={handleEscalateAction}>
-                Escalate
+                Escalate to Coordinator
               </button>
             </div>
           </div>
@@ -268,3 +360,4 @@ export const DirectoryFacilitiesView = ({
   );
 };
 
+export default DirectoryFacilitiesView;

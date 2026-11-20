@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { shelterService } from '../../services/shelterService';
@@ -18,17 +18,10 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-// Data
+// Default metadata
 import {
   SHELTER_MANAGER_USER,
-  INITIAL_METRICS,
-  PRIORITY_ATTENTION_ITEMS,
-  CONNECTED_ASSISTANCE_WORKFLOW,
-  INITIAL_RECENT_ACTIVITY,
-  INITIAL_SHELTERS_DATA,
-  PLACEMENT_ALLOCATIONS_DATA,
-  RESOURCE_REQUESTS_DATA,
-  SHELTER_REPORTS_DATA
+  CONNECTED_ASSISTANCE_WORKFLOW
 } from './data/shelterData';
 
 // Views
@@ -41,9 +34,12 @@ import { ShelterReportsView } from './views/ShelterReportsView';
 
 // Modals
 import { CreateRecordModal } from './components/CreateRecordModal';
+import { EditShelterModal } from './components/EditShelterModal';
+import { CreatePlacementModal } from './components/CreatePlacementModal';
+import { TransferPlacementModal } from './components/TransferPlacementModal';
+import { CreateResourceRequestModal } from './components/CreateResourceRequestModal';
 import { ExportReportModal } from './components/ExportReportModal';
 import { ReviewActionModal } from './components/ReviewActionModal';
-import { CreateResourceRequestModal } from './components/CreateResourceRequestModal';
 
 // Styles
 import './ShelterManager.css';
@@ -56,7 +52,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
   // Navigation State
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  // Reactively sync activeTab with URL route and props
+  // Sync activeTab with URL route and props
   useEffect(() => {
     if (initialTab) {
       setActiveTab(initialTab);
@@ -77,7 +73,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
     }
   }, [initialTab, location.pathname]);
 
-  // Core Data States
+  // Current User State
   const [currentUser, setCurrentUser] = useState(() => {
     if (user?.name || user?.fullName) {
       return {
@@ -90,117 +86,57 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
     }
     return SHELTER_MANAGER_USER;
   });
-  const [metrics, setMetrics] = useState(INITIAL_METRICS);
-  const [shelters, setShelters] = useState(INITIAL_SHELTERS_DATA);
-  const [selectedShelterId, setSelectedShelterId] = useState('SH-008');
-  const [priorityItems, setPriorityItems] = useState(PRIORITY_ATTENTION_ITEMS);
+
+  // Core Data States (Initialized safely as empty or defaults)
+  const [shelters, setShelters] = useState([]);
+  const [selectedShelterId, setSelectedShelterId] = useState(null);
+  const [metrics, setMetrics] = useState({
+    registeredShelters: 0,
+    operationalShelters: 0,
+    currentOccupancy: 0,
+    acrossSites: 0,
+    remainingCapacity: 0,
+    nearCapacityCount: 0,
+    supplyShortages: 0,
+    criticalShortages: 0,
+    admissionsToday: 0,
+    transfersToday: 0
+  });
+  const [priorityItems, setPriorityItems] = useState([]);
   const [workflowSteps, setWorkflowSteps] = useState(CONNECTED_ASSISTANCE_WORKFLOW);
-  const [recentActivity, setRecentActivity] = useState(INITIAL_RECENT_ACTIVITY);
-  const [placements, setPlacements] = useState(PLACEMENT_ALLOCATIONS_DATA);
-  const [resourceRequests, setResourceRequests] = useState(RESOURCE_REQUESTS_DATA);
-  const [reportsData, setReportsData] = useState(SHELTER_REPORTS_DATA);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [placements, setPlacements] = useState([]);
+  const [intakeQueue, setIntakeQueue] = useState([]);
+  const [resourceRequests, setResourceRequests] = useState([]);
+  const [reportsData, setReportsData] = useState({
+    dailySummary: {
+      totalAdmissions: 0,
+      discharges: 0,
+      occupancyRateAverage: '0%',
+      safetyCompliantShelters: 0,
+      pendingSafetyInspections: 0
+    },
+    areaOccupancies: []
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Live Backend Data Fetching with Graceful Fallback
-  useEffect(() => {
-    let isMounted = true;
-    const fetchShelterData = async () => {
-      try {
-        const res = await shelterService.getAll();
-        if (isMounted && res?.succeeded && res?.data && res.data.length > 0) {
-          const mapped = res.data.map((s) => ({
-            id: s.id,
-            name: s.name,
-            facilityName: s.facilityName || s.name,
-            area: s.area || s.district || 'Western Province',
-            capacity: s.totalCapacity || s.capacity || 200,
-            occupied: s.currentOccupancy ?? s.occupied ?? 0,
-            available: s.availableCapacity ?? s.available ?? Math.max(0, (s.totalCapacity || 200) - (s.currentOccupancy || 0)),
-            accessibility: s.facilities || s.accessibility || 'Step-free access',
-            status: s.status || 'Operational',
-            statusType: s.statusType || (s.status === 'Full' ? 'critical' : s.status === 'Near capacity' ? 'warning' : 'success'),
-            guardActive: s.guardActive ?? true,
-            managerContact: s.contactPhone || s.managerContact || 'Authorised Staff (+94 11 000 0000)',
-            notes: s.notes || 'Verified operational relief location.'
-          }));
-          setShelters(mapped);
-          if (mapped[0]) setSelectedShelterId(mapped[0].id);
-        }
-      } catch {
-        // Fallback to initial prototype data
-      }
-
-      try {
-        const dashRes = await shelterService.getDashboard();
-        if (isMounted && dashRes?.succeeded && dashRes?.data) {
-          if (dashRes.data.metrics) setMetrics(dashRes.data.metrics);
-          if (dashRes.data.priorityItems?.length > 0) setPriorityItems(dashRes.data.priorityItems);
-          if (dashRes.data.workflowSteps?.length > 0) setWorkflowSteps(dashRes.data.workflowSteps);
-          if (dashRes.data.recentActivity?.length > 0) setRecentActivity(dashRes.data.recentActivity);
-        }
-      } catch {
-        // Fallback
-      }
-
-      try {
-        const plcRes = await shelterService.getPlacements();
-        if (isMounted && plcRes?.succeeded && plcRes?.data && plcRes.data.length > 0) {
-          setPlacements(plcRes.data.map((p) => ({
-            id: p.allocationCode || p.id,
-            evacueeName: p.evacueeName,
-            headOfFamily: p.headOfFamily,
-            partySize: p.partySize,
-            assignedShelter: p.assignedShelter,
-            shelterId: p.shelterId,
-            accessibilityNeeded: p.accessibilityNeeded,
-            specialNotes: p.specialNotes,
-            status: p.status,
-            statusType: p.statusType,
-            allocatedAt: p.allocatedAt
-          })));
-        }
-      } catch {
-        // Fallback
-      }
-
-      try {
-        const resReqRes = await shelterService.getResourceRequests();
-        if (isMounted && resReqRes?.succeeded && resReqRes?.data && resReqRes.data.length > 0) {
-          setResourceRequests(resReqRes.data.map((r) => ({
-            id: r.requestCode || r.id,
-            shelterId: r.shelterId,
-            shelterName: r.shelterName,
-            itemCategory: r.itemCategory,
-            requestedQuantity: r.requestedQuantity,
-            urgency: r.urgency,
-            urgencyType: r.urgencyType,
-            status: r.status,
-            statusType: r.statusType,
-            requestedBy: r.requestedBy,
-            eta: r.eta
-          })));
-        }
-      } catch {
-        // Fallback
-      }
-
-      try {
-        const repRes = await shelterService.getReports();
-        if (isMounted && repRes?.succeeded && repRes?.data) {
-          setReportsData(repRes.data);
-        }
-      } catch {
-        // Fallback
-      }
-    };
-
-    fetchShelterData();
-    return () => { isMounted = false; };
-  }, []);
-
-  // Modals
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // Modals State
+  const [isCreateShelterModalOpen, setIsCreateShelterModalOpen] = useState(false);
+  const [editModalState, setEditModalState] = useState({ isOpen: false, shelter: null });
+  const [placementModalState, setPlacementModalState] = useState({
+    isOpen: false,
+    intakeItem: null,
+    targetShelterId: null
+  });
+  const [transferModalState, setTransferModalState] = useState({
+    isOpen: false,
+    placement: null
+  });
+  const [resourceModalState, setResourceModalState] = useState({
+    isOpen: false,
+    targetShelterId: null
+  });
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
   const [reviewModalState, setReviewModalState] = useState({
     isOpen: false,
     actionType: 'allocation',
@@ -209,15 +145,120 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
 
   // Toast
   const [toastMessage, setToastMessage] = useState(null);
-
   const showToast = (message) => {
     setToastMessage(message);
     setTimeout(() => {
       setToastMessage(null);
-    }, 4000);
+    }, 4500);
   };
 
-  // Selected Shelter
+  // Authoritative Data Fetching & Synchronization
+  const refreshAllShelterData = useCallback(async () => {
+    try {
+      // 1. Fetch all shelters
+      const shelterRes = await shelterService.getAll();
+      let liveShelters = [];
+      if (shelterRes?.succeeded && shelterRes?.data) {
+        liveShelters = shelterRes.data.map((s) => ({
+          id: s.id,
+          name: s.name,
+          facilityName: s.facilityName || s.name,
+          area: s.area || s.district || 'Western Province',
+          capacity: s.totalCapacity ?? s.capacity ?? 100,
+          totalCapacity: s.totalCapacity ?? s.capacity ?? 100,
+          occupied: s.currentOccupancy ?? s.occupied ?? 0,
+          currentOccupancy: s.currentOccupancy ?? s.occupied ?? 0,
+          available: s.availableCapacity ?? s.available ?? Math.max(0, (s.totalCapacity || 100) - (s.currentOccupancy || 0)),
+          accessibility: s.facilities || s.accessibility || 'Step-free access',
+          facilities: s.facilities || s.accessibility || '',
+          status: s.status || 'Operational',
+          statusType: s.statusType || (s.status === 'Full' ? 'critical' : s.status === 'Near capacity' ? 'warning' : 'operational'),
+          guardActive: s.guardActive ?? true,
+          contactPhone: s.contactPhone || s.managerContact || '',
+          managerContact: s.contactPhone || s.managerContact || 'Authorised Staff (+94 11 000 0000)',
+          notes: s.notes || 'Verified operational relief location.',
+          isActive: s.isActive ?? true
+        }));
+        setShelters(liveShelters);
+        if (!selectedShelterId && liveShelters[0]) {
+          setSelectedShelterId(liveShelters[0].id);
+        }
+      }
+
+      // 2. Fetch dashboard telemetry & KPIs
+      const dashRes = await shelterService.getDashboard();
+      if (dashRes?.succeeded && dashRes?.data) {
+        if (dashRes.data.metrics) setMetrics(dashRes.data.metrics);
+        if (dashRes.data.priorityItems) setPriorityItems(dashRes.data.priorityItems);
+        if (dashRes.data.workflowSteps?.length > 0) setWorkflowSteps(dashRes.data.workflowSteps);
+        if (dashRes.data.recentActivity) setRecentActivity(dashRes.data.recentActivity);
+      }
+
+      // 3. Fetch placements
+      const plcRes = await shelterService.getPlacements();
+      if (plcRes?.succeeded && plcRes?.data) {
+        setPlacements(plcRes.data.map((p) => ({
+          id: p.allocationCode || p.id,
+          rawId: p.id,
+          evacueeName: p.evacueeName,
+          headOfFamily: p.headOfFamily,
+          partySize: p.partySize,
+          assignedShelter: p.assignedShelter,
+          shelterId: p.shelterId,
+          accessibilityNeeded: p.accessibilityNeeded,
+          specialNotes: p.specialNotes,
+          status: p.status,
+          statusType: p.statusType,
+          allocatedAt: p.allocatedAt,
+          checkInDate: p.checkInDate,
+          checkOutDate: p.checkOutDate
+        })));
+      }
+
+      // 4. Fetch family intake queue
+      const intakeRes = await shelterService.getIntakeQueue();
+      if (intakeRes?.succeeded && intakeRes?.data) {
+        setIntakeQueue(intakeRes.data);
+      }
+
+      // 5. Fetch resource requests
+      const resReqRes = await shelterService.getResourceRequests();
+      if (resReqRes?.succeeded && resReqRes?.data) {
+        setResourceRequests(resReqRes.data.map((r) => ({
+          id: r.requestCode || r.id,
+          rawId: r.id,
+          shelterId: r.shelterId,
+          shelterName: r.shelterName,
+          itemCategory: r.itemCategory,
+          requestedQuantity: r.requestedQuantity,
+          urgency: r.urgency,
+          urgencyType: r.urgencyType,
+          status: r.status,
+          statusType: r.statusType,
+          requestedBy: r.requestedBy,
+          eta: r.eta,
+          notes: r.notes
+        })));
+      }
+
+      // 6. Fetch reports analytics
+      const repRes = await shelterService.getReports();
+      if (repRes?.succeeded && repRes?.data) {
+        setReportsData(repRes.data);
+      }
+    } catch (err) {
+      console.error('Error synchronizing shelter data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedShelterId]);
+
+  // Initial load
+  useEffect(() => {
+    refreshAllShelterData();
+  }, [refreshAllShelterData]);
+
+  // Selected Shelter Object
   const selectedShelter =
     shelters.find((s) => s.id === selectedShelterId) || shelters[0];
 
@@ -231,7 +272,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
     reports: 'Shelter Reports'
   };
 
-  // Handlers
+  // Handlers for Modals & Actions
   const handleSelectPriorityItem = (item) => {
     if (item.targetShelterId) {
       setSelectedShelterId(item.targetShelterId);
@@ -247,97 +288,21 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
     }
   };
 
-  // Open the Confirmation Action Modal (matching Figma)
-  const handleOpenReviewAction = (shelterId, actionType = 'allocation') => {
-    const target = shelters.find((s) => s.id === shelterId) || selectedShelter;
-    setReviewModalState({
+  // Open Edit Modal for a Shelter
+  const handleOpenEditShelter = (shelter) => {
+    setEditModalState({
       isOpen: true,
-      actionType,
-      shelter: target
+      shelter: shelter || selectedShelter
     });
   };
 
-  // Execute the Reviewed Action
-  const handleExecuteReviewedAction = async ({ shelterId, actionType, reason }) => {
-    const target = shelters.find((s) => s.id === shelterId) || selectedShelter;
-    if (!target) return;
-
-    const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-    // Invoke backend shelter action API if shelterId is valid Guid/string
-    try {
-      if (shelterId && String(shelterId).length > 10) {
-        await shelterService.executeAction(shelterId, { actionType, reason });
-      }
-    } catch {
-      // Local state update proceeds smoothly
-    }
-
-    if (actionType === 'allocation') {
-      if (target.available <= 0) {
-        showToast(`Warning: ${target.name} has 0 spaces available! Cannot confirm allocation without overflow.`);
-        return;
-      }
-
-      // Decrement available, increment occupied
-      const updated = shelters.map((s) => {
-        if (s.id === shelterId) {
-          const newOccupied = s.occupied + 1;
-          const newAvailable = Math.max(0, s.capacity - newOccupied);
-          const newStatus = newAvailable === 0 ? 'Full' : newAvailable <= 10 ? 'Near capacity' : 'Operational';
-          return {
-            ...s,
-            occupied: newOccupied,
-            available: newAvailable,
-            status: newStatus
-          };
-        }
-        return s;
-      });
-
-      setShelters(updated);
-
-      const newLog = {
-        id: `ACT-${Date.now()}`,
-        time: timeStr,
-        title: `${target.name} - ${target.area}`,
-        action: `Allocation confirmed by ${currentUser.name}: "${reason}"`,
-        shelterId
-      };
-      setRecentActivity([newLog, ...recentActivity.slice(0, 4)]);
-
-      setMetrics((prev) => ({
-        ...prev,
-        currentOccupancy: prev.currentOccupancy + 1,
-        remainingCapacity: Math.max(0, prev.remainingCapacity - 1),
-        admissionsToday: prev.admissionsToday + 1
-      }));
-
-      showToast(`Action confirmed: Allocation committed for ${target.name} (Audit logged)`);
-    } else if (actionType === 'clarification') {
-      const newLog = {
-        id: `ACT-${Date.now()}`,
-        time: timeStr,
-        title: `${target.name} - Clarification Request`,
-        action: `Clarification requested: "${reason}"`,
-        shelterId
-      };
-      setRecentActivity([newLog, ...recentActivity.slice(0, 4)]);
-      showToast(`Clarification request sent to Triage for ${target.facilityName}`);
-    } else if (actionType === 'escalation') {
-      const newLog = {
-        id: `ACT-${Date.now()}`,
-        time: timeStr,
-        title: `${target.name} - Priority Escalation`,
-        action: `Escalated by ${currentUser.name}: "${reason}"`,
-        shelterId
-      };
-      setRecentActivity([newLog, ...recentActivity.slice(0, 4)]);
-      showToast(`Record escalated to Emergency Coordinator with high priority`);
-    }
+  // Save Edited Shelter
+  const handleShelterEdited = async (updated) => {
+    showToast(`Shelter "${updated.name}" updated successfully.`);
+    await refreshAllShelterData();
   };
 
+  // Save New Shelter
   const handleSaveNewShelter = async (newShelter) => {
     try {
       const res = await shelterService.create({
@@ -349,26 +314,84 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         status: newShelter.status,
         notes: newShelter.notes
       });
-      if (res?.succeeded && res?.data) {
-        newShelter.id = res.data.id;
-      }
-    } catch {
-      // Local fallback preserves prototype record
+      showToast(`Operational shelter registered: ${newShelter.name}`);
+      await refreshAllShelterData();
+      if (res?.data?.id) setSelectedShelterId(res.data.id);
+    } catch (err) {
+      showToast(`Error creating shelter: ${err?.message || 'Failed'}`);
     }
-    setShelters([newShelter, ...shelters]);
-    setSelectedShelterId(newShelter.id);
-    setMetrics((prev) => ({
-      ...prev,
-      registeredShelters: prev.registeredShelters + 1,
-      operationalShelters: prev.operationalShelters + 1,
-      remainingCapacity: prev.remainingCapacity + newShelter.capacity
-    }));
-    showToast(`Operational shelter registered: ${newShelter.name}`);
   };
 
+  // Open Placement Modal
+  const handleOpenPlacementModal = (intakeOrShelter = null) => {
+    if (intakeOrShelter && intakeOrShelter.citizenName) {
+      // Opening for an intake request
+      setPlacementModalState({
+        isOpen: true,
+        intakeItem: intakeOrShelter,
+        targetShelterId: null
+      });
+    } else if (intakeOrShelter && intakeOrShelter.capacity !== undefined) {
+      // Opening for a specific shelter
+      setPlacementModalState({
+        isOpen: true,
+        intakeItem: null,
+        targetShelterId: intakeOrShelter.id
+      });
+    } else {
+      setPlacementModalState({
+        isOpen: true,
+        intakeItem: null,
+        targetShelterId: selectedShelterId
+      });
+    }
+  };
+
+  // Placement created
+  const handlePlacementSuccess = async (placed) => {
+    showToast(`Evacuee placement committed for ${placed.personName || 'household'}. Audit logged.`);
+    await refreshAllShelterData();
+  };
+
+  // Open Transfer Modal
+  const handleOpenTransferModal = (placement) => {
+    setTransferModalState({
+      isOpen: true,
+      placement
+    });
+  };
+
+  // Transfer completed
+  const handleTransferSuccess = async (transferred) => {
+    showToast(`Evacuee transferred successfully. Bed capacities rebalanced.`);
+    await refreshAllShelterData();
+  };
+
+  // Discharge placement
+  const handleDischargePlacement = async (placementId) => {
+    try {
+      const targetPlc = placements.find((p) => p.id === placementId || p.rawId === placementId);
+      const idToUse = targetPlc?.rawId || placementId;
+      await shelterService.updatePlacementStatus(idToUse, { status: 'Discharged' });
+      showToast(`Placement discharged. Bed spaces released back to shelter inventory.`);
+      await refreshAllShelterData();
+    } catch (err) {
+      showToast(`Error discharging placement: ${err?.message || 'Failed'}`);
+    }
+  };
+
+  // Open Supply Requisition Modal
+  const handleOpenResourceModal = (targetShelter = null) => {
+    setResourceModalState({
+      isOpen: true,
+      targetShelterId: targetShelter?.id || selectedShelterId
+    });
+  };
+
+  // Save Supply Requisition
   const handleSaveResourceRequest = async (requestData) => {
     try {
-      const res = await shelterService.createResourceRequest({
+      await shelterService.createResourceRequest({
         shelterId: requestData.shelterId,
         itemCategory: requestData.itemCategory,
         quantity: requestData.quantity,
@@ -376,23 +399,47 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         priority: requestData.urgency === 'Critical' ? 3 : requestData.urgency === 'High' ? 2 : requestData.urgency === 'Medium' ? 1 : 0,
         notes: requestData.notes
       });
-      const createdItem = res?.data || {
-        id: `SRR-${Math.floor(200 + Math.random() * 800)}`,
-        shelterId: requestData.shelterId,
-        shelterName: shelters.find((s) => s.id === requestData.shelterId)?.name || 'Shelter Facility',
-        itemCategory: requestData.itemCategory,
-        requestedQuantity: `${requestData.quantity} ${requestData.unit}`,
-        urgency: requestData.urgency,
-        urgencyType: requestData.urgency === 'Critical' ? 'critical' : requestData.urgency === 'High' ? 'warning' : 'info',
-        status: 'Pending',
-        statusType: 'info',
-        requestedBy: currentUser.name,
-        eta: 'In Review with Central Logistics'
-      };
-      setResourceRequests((prev) => [createdItem, ...prev]);
       showToast(`Requisition submitted for ${requestData.itemCategory} (${requestData.quantity} ${requestData.unit})`);
+      await refreshAllShelterData();
     } catch (err) {
       showToast(`Error submitting request: ${err?.message || 'Failed to submit'}`);
+    }
+  };
+
+  // Update Supply Requisition Status (Dispatch, Delivered, Cancel)
+  const handleUpdateResourceStatus = async (requestId, dispatchStatus) => {
+    try {
+      const targetReq = resourceRequests.find((r) => r.id === requestId || r.rawId === requestId);
+      const idToUse = targetReq?.rawId || requestId;
+      await shelterService.updateResourceRequestStatus(idToUse, { dispatchStatus });
+      const statusName = dispatchStatus === 1 ? 'Dispatched' : dispatchStatus === 2 ? 'Delivered' : 'Cancelled';
+      showToast(`Requisition status updated: ${statusName}`);
+      await refreshAllShelterData();
+    } catch (err) {
+      showToast(`Error updating requisition: ${err?.message || 'Failed'}`);
+    }
+  };
+
+  // Open the Review Action Modal
+  const handleOpenReviewAction = (shelterId, actionType = 'allocation') => {
+    const target = shelters.find((s) => s.id === shelterId) || selectedShelter;
+    setReviewModalState({
+      isOpen: true,
+      actionType,
+      shelter: target
+    });
+  };
+
+  // Execute Reviewed Action
+  const handleExecuteReviewedAction = async ({ shelterId, actionType, reason }) => {
+    try {
+      if (shelterId) {
+        await shelterService.executeAction(shelterId, { actionType, reason });
+      }
+      showToast(`Action executed: ${actionType.toUpperCase()} logged for audit trail.`);
+      await refreshAllShelterData();
+    } catch (err) {
+      showToast(`Action failed: ${err?.message || 'Could not complete action'}`);
     }
   };
 
@@ -461,7 +508,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
                   <Home size={17} />
                   <span>Directory & Facilities</span>
                 </div>
-                <span className="sh-nav-badge">4</span>
+                <span className="sh-nav-badge">{shelters.length}</span>
               </button>
             </li>
 
@@ -486,6 +533,11 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
                   <CheckSquare size={17} />
                   <span>Placement Allocations</span>
                 </div>
+                {intakeQueue.length > 0 && (
+                  <span className="sh-nav-badge" style={{ backgroundColor: '#f59e0b', color: '#fff' }}>
+                    {intakeQueue.length}
+                  </span>
+                )}
               </button>
             </li>
 
@@ -498,6 +550,11 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
                   <Package size={17} />
                   <span>Resource Requests</span>
                 </div>
+                {resourceRequests.filter(r => r.status === 'Approved' || r.status === 'Pending').length > 0 && (
+                  <span className="sh-nav-badge">
+                    {resourceRequests.filter(r => r.status === 'Approved' || r.status === 'Pending').length}
+                  </span>
+                )}
               </button>
             </li>
 
@@ -543,13 +600,11 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
       <div className="sh-main-wrapper">
         {/* Top Navbar */}
         <header className="sh-top-navbar">
-          {/* Breadcrumbs */}
           <div className="sh-top-breadcrumbs">
             <span className="sh-breadcrumb-portal">Shelter Manager Portal</span>
             <span className="sh-breadcrumb-current">{tabTitles[activeTab]}</span>
           </div>
 
-          {/* Search Box */}
           <div className="sh-top-search-box">
             <Search size={16} color="#657367" />
             <input
@@ -559,7 +614,6 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
             />
           </div>
 
-          {/* Top Right Items */}
           <div className="sh-top-right-group">
             <div className="sh-active-op-chip">
               <span className="sh-op-indicator-dot" />
@@ -568,11 +622,11 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
 
             <button
               className="sh-bell-btn"
-              onClick={() => showToast('3 priority shelter notifications logged')}
+              onClick={() => showToast(`${metrics.nearCapacityCount || 0} shelters near capacity. Telemetry live.`)}
               title="Notifications"
             >
               <Bell size={18} />
-              <span className="sh-bell-badge">{currentUser.notificationCount}</span>
+              <span className="sh-bell-badge">{metrics.nearCapacityCount || 0}</span>
             </button>
 
             <div className="sh-top-user-pill">
@@ -587,15 +641,16 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
 
         {/* Workspace Body */}
         <main className="sh-content-body">
-          {/* Render Active View */}
           {activeTab === 'dashboard' && (
             <ShelterDashboardView
               metrics={metrics}
               priorityItems={priorityItems}
+              shelters={shelters}
               workflowSteps={workflowSteps}
               recentActivity={recentActivity}
               onNavigateTab={(tab) => setActiveTab(tab)}
               onSelectPriorityItem={handleSelectPriorityItem}
+              onRefresh={refreshAllShelterData}
             />
           )}
 
@@ -604,11 +659,14 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
               shelters={shelters}
               selectedShelter={selectedShelter}
               onSelectShelter={(s) => setSelectedShelterId(s.id)}
-              onOpenCreateModal={() => setIsCreateModalOpen(true)}
+              onOpenCreateModal={() => setIsCreateShelterModalOpen(true)}
               onOpenExportModal={() => setIsExportModalOpen(true)}
-              onConfirmAllocation={(id) => handleOpenReviewAction(id, 'allocation')}
+              onOpenEditModal={handleOpenEditShelter}
+              onOpenAllocateModal={handleOpenPlacementModal}
+              onRequestSupplies={handleOpenResourceModal}
               onRequestClarification={(id) => handleOpenReviewAction(id, 'clarification')}
               onEscalate={(id) => handleOpenReviewAction(id, 'escalation')}
+              onRefreshData={refreshAllShelterData}
             />
           )}
 
@@ -617,48 +675,42 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
               shelters={shelters}
               selectedShelter={selectedShelter}
               onSelectShelter={(s) => setSelectedShelterId(s.id)}
-              onOpenCreateModal={() => setIsCreateModalOpen(true)}
+              onOpenCreateModal={() => setIsCreateShelterModalOpen(true)}
               onOpenExportModal={() => setIsExportModalOpen(true)}
-              onConfirmAllocation={(id) => handleOpenReviewAction(id, 'allocation')}
-              onRequestClarification={(id) => handleOpenReviewAction(id, 'clarification')}
-              onEscalate={(id) => handleOpenReviewAction(id, 'escalation')}
+              onOpenEditModal={handleOpenEditShelter}
+              onOpenAllocateModal={handleOpenPlacementModal}
+              onRefreshData={refreshAllShelterData}
             />
           )}
 
           {activeTab === 'placements' && (
             <PlacementAllocationsView
               shelters={shelters}
-              selectedShelter={selectedShelter}
               placements={placements}
-              onSelectShelter={(s) => setSelectedShelterId(s.id)}
-              onOpenCreateModal={() => setIsCreateModalOpen(true)}
+              intakeQueue={intakeQueue}
+              metrics={metrics}
+              onOpenCreatePlacementModal={handleOpenPlacementModal}
+              onOpenTransferModal={handleOpenTransferModal}
               onOpenExportModal={() => setIsExportModalOpen(true)}
-              onConfirmAllocation={(id) => handleOpenReviewAction(id, 'allocation')}
-              onRequestClarification={(id) => handleOpenReviewAction(id, 'clarification')}
-              onEscalate={(id) => handleOpenReviewAction(id, 'escalation')}
+              onDischargePlacement={handleDischargePlacement}
+              onRefreshData={refreshAllShelterData}
             />
           )}
 
           {activeTab === 'resources' && (
             <ResourceRequestsView
               shelters={shelters}
-              selectedShelter={selectedShelter}
               resourceRequests={resourceRequests}
-              onSelectShelter={(s) => setSelectedShelterId(s.id)}
-              onOpenCreateModal={() => setIsCreateModalOpen(true)}
+              onRequestSupplies={() => handleOpenResourceModal(null)}
               onOpenExportModal={() => setIsExportModalOpen(true)}
-              onConfirmAllocation={(id) => handleOpenReviewAction(id, 'allocation')}
-              onRequestClarification={(id) => handleOpenReviewAction(id, 'clarification')}
-              onEscalate={(id) => handleOpenReviewAction(id, 'escalation')}
-              onRequestSupplies={(shelter) => {
-                if (shelter?.id) setSelectedShelterId(shelter.id);
-                setIsResourceModalOpen(true);
-              }}
+              onUpdateStatus={handleUpdateResourceStatus}
+              onRefreshData={refreshAllShelterData}
             />
           )}
 
           {activeTab === 'reports' && (
             <ShelterReportsView
+              shelters={shelters}
               reportData={reportsData}
               onOpenExportModal={() => setIsExportModalOpen(true)}
             />
@@ -666,7 +718,7 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         </main>
       </div>
 
-      {/* Action Review Confirmation Modal Card (Figma Match) */}
+      {/* Review Confirmation Modal Card */}
       <ReviewActionModal
         isOpen={reviewModalState.isOpen}
         actionType={reviewModalState.actionType}
@@ -675,11 +727,48 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         onConfirm={handleExecuteReviewedAction}
       />
 
-      {/* Operational Record Registration Modal */}
+      {/* Create Shelter Modal */}
       <CreateRecordModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        isOpen={isCreateShelterModalOpen}
+        onClose={() => setIsCreateShelterModalOpen(false)}
         onSave={handleSaveNewShelter}
+      />
+
+      {/* Edit Shelter Modal */}
+      <EditShelterModal
+        isOpen={editModalState.isOpen}
+        shelter={editModalState.shelter}
+        onClose={() => setEditModalState({ isOpen: false, shelter: null })}
+        onSuccess={handleShelterEdited}
+      />
+
+      {/* Allocate Evacuee Placement Modal */}
+      <CreatePlacementModal
+        isOpen={placementModalState.isOpen}
+        shelters={shelters}
+        intakeQueue={intakeQueue}
+        preselectedIntake={placementModalState.intakeItem}
+        preselectedShelterId={placementModalState.targetShelterId}
+        onClose={() => setPlacementModalState({ isOpen: false, intakeItem: null, targetShelterId: null })}
+        onSuccess={handlePlacementSuccess}
+      />
+
+      {/* Transfer Placement Modal */}
+      <TransferPlacementModal
+        isOpen={transferModalState.isOpen}
+        placement={transferModalState.placement}
+        shelters={shelters}
+        onClose={() => setTransferModalState({ isOpen: false, placement: null })}
+        onSuccess={handleTransferSuccess}
+      />
+
+      {/* Shelter Resource Request Modal */}
+      <CreateResourceRequestModal
+        isOpen={resourceModalState.isOpen}
+        onClose={() => setResourceModalState({ isOpen: false, targetShelterId: null })}
+        shelters={shelters}
+        currentShelterId={resourceModalState.targetShelterId}
+        onSave={handleSaveResourceRequest}
       />
 
       {/* Export Report Modal */}
@@ -687,15 +776,6 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         onExportComplete={(msg) => showToast(msg)}
-      />
-
-      {/* Shelter Resource Request Modal */}
-      <CreateResourceRequestModal
-        isOpen={isResourceModalOpen}
-        onClose={() => setIsResourceModalOpen(false)}
-        shelters={shelters}
-        currentShelterId={selectedShelterId}
-        onSave={handleSaveResourceRequest}
       />
 
       {/* Interactive Toast Notifications */}

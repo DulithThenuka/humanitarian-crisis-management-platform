@@ -151,6 +151,16 @@ public class SheltersController : BaseApiController
     }
 
     /// <summary>
+    /// Gets pending citizen family intake queue awaiting shelter placement.
+    /// </summary>
+    [HttpGet("intake-queue")]
+    public async Task<ActionResult<Result<IReadOnlyList<ShelterIntakeQueueItemDto>>>> GetIntakeQueue(CancellationToken cancellationToken = default)
+    {
+        var result = await _shelterService.GetIntakeQueueAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Creates an evacuee placement allocation record.
     /// </summary>
     [HttpPost("placements")]

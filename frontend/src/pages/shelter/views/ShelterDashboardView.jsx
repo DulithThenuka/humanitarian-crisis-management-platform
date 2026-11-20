@@ -4,21 +4,22 @@ import {
   Users,
   Bed,
   CheckCircle2,
-  AlertTriangle,
   Send,
   BarChart2,
   ChevronRight,
   ShieldCheck,
-  Check
+  RefreshCw
 } from 'lucide-react';
 
 export const ShelterDashboardView = ({
-  metrics,
-  priorityItems,
-  workflowSteps,
-  recentActivity,
-  onNavigateTab,
-  onSelectPriorityItem
+  metrics = {},
+  priorityItems = [],
+  shelters = [],
+  workflowSteps = [],
+  recentActivity = [],
+  onNavigateTab = () => {},
+  onSelectPriorityItem = () => {},
+  onRefresh
 }) => {
   return (
     <>
@@ -32,9 +33,15 @@ export const ShelterDashboardView = ({
           </p>
         </div>
         <div className="sh-header-actions">
+          {onRefresh && (
+            <button className="sh-btn-outline" onClick={onRefresh} title="Sync with database">
+              <RefreshCw size={15} />
+              Refresh Telemetry
+            </button>
+          )}
           <button
             className="sh-btn-primary"
-            onClick={() => onNavigateTab('directory')}
+            onClick={() => onNavigateTab && onNavigateTab('directory')}
           >
             Open Directory & Facilities
           </button>
@@ -99,8 +106,8 @@ export const ShelterDashboardView = ({
               <Send size={16} />
             </div>
           </div>
-          <div className="sh-metric-value">{metrics.supplyShortages ?? 3}</div>
-          <div className="sh-metric-subtext">{metrics.criticalShortages ?? 1} high priority</div>
+          <div className="sh-metric-value">{metrics.supplyShortages ?? 0}</div>
+          <div className="sh-metric-subtext">{metrics.criticalShortages ?? 0} high priority</div>
         </div>
 
         {/* 6. Operational Status */}
@@ -116,7 +123,7 @@ export const ShelterDashboardView = ({
         </div>
       </div>
 
-      {/* Middle Row: Priority Attention & Connected Assistance Workflow */}
+      {/* Middle Row: Priority Attention & Facility Capacity Surveillance */}
       <div className="sh-two-col-grid">
         {/* Priority Attention */}
         <div className="sh-section-box">
@@ -127,54 +134,107 @@ export const ShelterDashboardView = ({
           <div className="sh-section-box-subtitle">Role-scoped records requiring review</div>
 
           <div className="sh-priority-list">
-            {priorityItems.map((item) => (
-              <div
-                key={item.id}
-                className="sh-priority-item"
-                onClick={() => onSelectPriorityItem(item)}
-              >
-                <div className="sh-priority-left">
-                  <div className="sh-num-circle">{item.id}</div>
-                  <div>
-                    <h4 className="sh-priority-title">{item.title}</h4>
-                    <p className="sh-priority-subtitle">{item.subtitle}</p>
+            {priorityItems.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '28px 12px', color: '#6f8576', fontSize: '12px' }}>
+                <CheckCircle2 size={24} color="#15803d" style={{ margin: '0 auto 8px auto', display: 'block' }} />
+                All operational sectors stable. No urgent capacity bottlenecks or pending requisitions.
+              </div>
+            ) : (
+              priorityItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="sh-priority-item"
+                  onClick={() => onSelectPriorityItem && onSelectPriorityItem(item)}
+                >
+                  <div className="sh-priority-left">
+                    <div className="sh-num-circle">{item.id}</div>
+                    <div>
+                      <h4 className="sh-priority-title">{item.title}</h4>
+                      <p className="sh-priority-subtitle">{item.subtitle}</p>
+                    </div>
+                  </div>
+                  <div className="sh-priority-right">
+                    <span className={`sh-badge sh-badge-${item.badge}`}>
+                      <span className="sh-badge-dot" />
+                      {item.badgeText}
+                    </span>
+                    <ChevronRight size={16} color="#8ca393" />
                   </div>
                 </div>
-                <div className="sh-priority-right">
-                  <span className={`sh-badge sh-badge-${item.badge}`}>
-                    <span className="sh-badge-dot" />
-                    {item.badgeText}
-                  </span>
-                  <ChevronRight size={16} color="#8ca393" />
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
-        {/* Connected Assistance Workflow */}
+        {/* Live Facility Capacity Surveillance */}
         <div className="sh-section-box">
           <div className="sh-section-box-header">
-            <h2 className="sh-section-box-title">Connected assistance workflow</h2>
+            <h2 className="sh-section-box-title">Facility Capacity Surveillance</h2>
+            <button
+              onClick={() => onNavigateTab('capacity')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#15803d',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <span>View All</span>
+              <ChevronRight size={14} />
+            </button>
           </div>
-          <div className="sh-section-box-subtitle">Role-specific handoffs and automated tracking</div>
+          <div className="sh-section-box-subtitle">Live bed space availability across operational facilities</div>
 
-          <div className="sh-workflow-steps">
-            {workflowSteps.map((step) => (
-              <div key={step.step} className="sh-workflow-step">
-                {step.status === 'completed' ? (
-                  <div className="sh-step-indicator-done">
-                    <CheckCircle2 size={20} />
-                  </div>
-                ) : (
-                  <div className="sh-step-indicator-num">{step.step}</div>
-                )}
-                <div>
-                  <h4 className="sh-workflow-title">{step.title}</h4>
-                  <p className="sh-workflow-sub">{step.description}</p>
-                </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
+            {shelters.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '24px', color: '#6f8576', fontSize: '12px' }}>
+                Connecting to shelter telemetry...
               </div>
-            ))}
+            ) : (
+              shelters.slice(0, 4).map((s) => {
+                const cap = s.capacity || 1;
+                const occ = s.occupied || 0;
+                const avail = s.available ?? Math.max(0, cap - occ);
+                const rate = Math.min(100, Math.round((occ / cap) * 100));
+                const barColor = avail === 0 ? '#ef4444' : avail <= 10 ? '#f59e0b' : '#22c55e';
+
+                return (
+                  <div
+                    key={s.id}
+                    style={{
+                      padding: '10px 12px',
+                      backgroundColor: '#fafbf9',
+                      border: '1px solid #e3eae0',
+                      borderRadius: '6px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => onNavigateTab('capacity')}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                      <span style={{ fontWeight: 700, fontSize: '12.5px', color: '#183526' }}>{s.name}</span>
+                      <span style={{ fontWeight: 700, fontSize: '11.5px', color: barColor }}>
+                        {avail} beds free ({rate}%)
+                      </span>
+                    </div>
+                    <div style={{ height: '6px', backgroundColor: '#e2e9e0', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${rate}%`,
+                          backgroundColor: barColor,
+                          borderRadius: '3px'
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
@@ -187,15 +247,21 @@ export const ShelterDashboardView = ({
             <h2 className="sh-section-box-title">Recent activity</h2>
           </div>
           <div className="sh-activity-timeline" style={{ marginTop: '12px' }}>
-            {recentActivity.map((act) => (
-              <div key={act.id} className="sh-activity-row">
-                <span className="sh-activity-time">{act.time}</span>
-                <div className="sh-activity-content">
-                  <h4 className="sh-activity-title">{act.title}</h4>
-                  <p className="sh-activity-sub">{act.action}</p>
-                </div>
+            {recentActivity.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '24px 12px', color: '#6f8576', fontSize: '12px' }}>
+                No recent shelter activity logged. Telemetry connected to live database.
               </div>
-            ))}
+            ) : (
+              recentActivity.map((act) => (
+                <div key={act.id} className="sh-activity-row">
+                  <span className="sh-activity-time">{act.time}</span>
+                  <div className="sh-activity-content">
+                    <h4 className="sh-activity-title">{act.title}</h4>
+                    <p className="sh-activity-sub">{act.action}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -220,4 +286,7 @@ export const ShelterDashboardView = ({
     </>
   );
 };
+
+export default ShelterDashboardView;
+
 

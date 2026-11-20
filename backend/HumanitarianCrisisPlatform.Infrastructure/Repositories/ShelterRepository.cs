@@ -154,4 +154,24 @@ public class ShelterRepository : Repository<Shelter>, IShelterRepository
         _context.Entry(allocation).State = EntityState.Modified;
         return Task.CompletedTask;
     }
+
+    public async Task<IReadOnlyList<AssistanceRequest>> GetPendingIntakeRequestsAsync(CancellationToken cancellationToken = default)
+    {
+        var categoryFilter = new[] { "shelter", "evacuat", "housing", "displacement" };
+        var query = _context.AssistanceRequests
+            .Include(r => r.Requestor)
+            .Where(r => r.Status != HumanitarianCrisisPlatform.Domain.Enums.RequestStatus.Resolved &&
+                        r.Status != HumanitarianCrisisPlatform.Domain.Enums.RequestStatus.Closed &&
+                        !_context.ShelterAllocations.Any(a => a.AssistanceRequestId == r.Id && a.CheckOutDate == null))
+            .AsNoTracking()
+            .AsQueryable();
+
+        var list = await query.ToListAsync(cancellationToken);
+        return list
+            .Where(r => categoryFilter.Any(cat => (r.Category ?? "").Contains(cat, StringComparison.OrdinalIgnoreCase)) ||
+                        categoryFilter.Any(cat => (r.Description ?? "").Contains(cat, StringComparison.OrdinalIgnoreCase)))
+            .OrderByDescending(r => r.Urgency)
+            .ThenByDescending(r => r.CreatedAt)
+            .ToList();
+    }
 }
