@@ -1,5 +1,14 @@
-import React, { useState } from 'react';
-import { Search, Plus, ChevronRight, ShieldCheck, HeartHandshake, Clock, Package } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { 
+  Search, 
+  Plus, 
+  ChevronRight, 
+  ShieldCheck, 
+  HeartHandshake, 
+  Clock, 
+  Package,
+  RotateCcw
+} from 'lucide-react';
 
 export const SuppliersDonationsView = ({
   suppliers = [],
@@ -8,17 +17,79 @@ export const SuppliersDonationsView = ({
 }) => {
   const [activeSubtab, setActiveSubtab] = useState('suppliers');
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [dateRange, setDateRange] = useState('All');
 
-  const filteredSuppliers = suppliers.filter(s => {
-    const matchesSearch = 
-      s.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.categories.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'All' || s.status.toLowerCase() === statusFilter.toLowerCase();
-    return matchesSearch && matchesStatus;
-  });
+  // Dynamically extract unique categories from supplier records
+  const dynamicCategories = useMemo(() => {
+    const catMap = new Map();
+    // Common baseline categories
+    const defaults = ['Water', 'Medicine', 'Hygiene', 'Blankets', 'Shelter', 'Emergency kits'];
+    defaults.forEach(c => catMap.set(c.toLowerCase(), c));
+
+    suppliers.forEach(s => {
+      if (s.categories) {
+        const parts = Array.isArray(s.categories) 
+          ? s.categories 
+          : String(s.categories).split(',');
+        parts.forEach(p => {
+          const trimmed = p.trim();
+          if (trimmed) {
+            const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+            if (!catMap.has(formatted.toLowerCase())) {
+              catMap.set(formatted.toLowerCase(), formatted);
+            }
+          }
+        });
+      }
+    });
+
+    return Array.from(catMap.values());
+  }, [suppliers]);
+
+  // Combined search, status, category, and date filtering
+  const filteredSuppliers = useMemo(() => {
+    return suppliers.filter(s => {
+      const term = searchTerm.toLowerCase().trim();
+      const catText = Array.isArray(s.categories) ? s.categories.join(' ') : (s.categories || '');
+      
+      const matchesSearch = !term ||
+        (s.id && s.id.toLowerCase().includes(term)) ||
+        (s.name && s.name.toLowerCase().includes(term)) ||
+        catText.toLowerCase().includes(term) ||
+        (s.contactRef && s.contactRef.toLowerCase().includes(term));
+
+      const matchesStatus = statusFilter === 'All' || 
+        (s.status && s.status.toLowerCase() === statusFilter.toLowerCase());
+
+      const matchesCategory = categoryFilter === 'All' || 
+        catText.toLowerCase().includes(categoryFilter.toLowerCase());
+
+      let matchesDate = true;
+      if (dateRange !== 'All' && s.lastDelivery) {
+        const delLower = s.lastDelivery.toLowerCase();
+        if (dateRange === 'Today') {
+          matchesDate = delLower.includes('today') || delLower.includes('18 feb');
+        } else if (dateRange === 'This Week') {
+          matchesDate = delLower.includes('today') || delLower.includes('feb') || delLower.includes('this week');
+        } else if (dateRange === 'This Month') {
+          matchesDate = delLower.includes('feb') || delLower.includes('today') || delLower.includes('this month');
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesCategory && matchesDate;
+    });
+  }, [suppliers, searchTerm, statusFilter, categoryFilter, dateRange]);
+
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setCategoryFilter('All');
+    setStatusFilter('All');
+    setDateRange('All');
+  };
+
+  const isFiltered = searchTerm !== '' || categoryFilter !== 'All' || statusFilter !== 'All' || dateRange !== 'All';
 
   // Dynamic KPI Calculations based on supplier records and inbound contributions
   const verifiedBase = suppliers.filter(s => s.status?.toLowerCase() === 'verified').length;
@@ -135,7 +206,9 @@ export const SuppliersDonationsView = ({
             cursor: 'pointer'
           }}
         >
-          Suppliers <span style={{ fontSize: '11px', color: '#738075', marginLeft: '4px' }}>12</span>
+          Suppliers <span style={{ fontSize: '11px', color: '#738075', marginLeft: '4px' }}>
+            {isFiltered ? `${filteredSuppliers.length} of ${suppliers.length}` : suppliers.length}
+          </span>
         </button>
         <button
           onClick={() => setActiveSubtab('donated')}
@@ -169,13 +242,13 @@ export const SuppliersDonationsView = ({
         </button>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter Bar with Category Dropdown Filter */}
       <div className="rm-filter-bar">
         <div className="rm-filter-search">
           <Search size={14} className="rm-search-icon" />
           <input
             type="text"
-            placeholder="Search suppliers..."
+            placeholder="Search supplier, category or reference..."
             className="rm-search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -183,6 +256,21 @@ export const SuppliersDonationsView = ({
         </div>
 
         <div className="rm-filter-selects">
+          {/* Dynamic Category Filter */}
+          <select 
+            className="rm-select"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+          >
+            <option value="All">All Categories</option>
+            {dynamicCategories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          {/* Status Filter */}
           <select 
             className="rm-select"
             value={statusFilter}
@@ -193,6 +281,7 @@ export const SuppliersDonationsView = ({
             <option value="Review">Review</option>
           </select>
 
+          {/* Date Range Filter */}
           <select 
             className="rm-select"
             value={dateRange}
@@ -203,6 +292,20 @@ export const SuppliersDonationsView = ({
             <option value="This Week">This Week</option>
             <option value="This Month">This Month</option>
           </select>
+
+          {/* Reset Filters Shortcut (if active filters) */}
+          {isFiltered && (
+            <button
+              type="button"
+              className="rm-btn rm-btn-secondary"
+              onClick={handleResetFilters}
+              style={{ padding: '6px 12px', fontSize: '11.5px' }}
+              title="Reset all active filters"
+            >
+              <RotateCcw size={12} />
+              <span>Reset</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -221,33 +324,83 @@ export const SuppliersDonationsView = ({
             </tr>
           </thead>
           <tbody>
-            {filteredSuppliers.map((s) => (
-              <tr key={s.id} onClick={() => onSelectSupplier && onSelectSupplier(s)}>
-                <td>
-                  <span style={{ fontWeight: 700, color: '#162e20' }}>{s.id}</span>
-                </td>
-                <td>
-                  <span style={{ fontWeight: 600, color: '#162e20' }}>{s.name}</span>
-                </td>
-                <td>
-                  <span style={{ color: '#405044' }}>{s.categories}</span>
-                </td>
-                <td>
-                  <span style={{ color: '#405044' }}>{s.contactRef}</span>
-                </td>
-                <td>
-                  <span className={`rm-status-badge ${s.statusBadge || s.status.toLowerCase()}`}>
-                    ● {s.status}
-                  </span>
-                </td>
-                <td>
-                  <span style={{ color: '#738075' }}>{s.lastDelivery}</span>
-                </td>
-                <td>
-                  <ChevronRight size={14} color="#738075" />
+            {filteredSuppliers.length > 0 ? (
+              filteredSuppliers.map((s) => (
+                <tr 
+                  key={s.id} 
+                  onClick={() => onSelectSupplier && onSelectSupplier(s)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <td>
+                    <span style={{ fontWeight: 700, color: '#162e20' }}>{s.id}</span>
+                  </td>
+                  <td>
+                    <span style={{ fontWeight: 600, color: '#162e20' }}>{s.name}</span>
+                  </td>
+                  <td>
+                    <span style={{ color: '#405044' }}>{s.categories}</span>
+                  </td>
+                  <td>
+                    <span style={{ color: '#405044' }}>{s.contactRef}</span>
+                  </td>
+                  <td>
+                    <span className={`rm-status-badge ${s.statusBadge || s.status.toLowerCase()}`}>
+                      ● {s.status}
+                    </span>
+                  </td>
+                  <td>
+                    <span style={{ color: '#738075' }}>{s.lastDelivery}</span>
+                  </td>
+                  <td>
+                    <ChevronRight size={14} color="#738075" />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              /* Clean Empty State Message with Reset Filters Button */
+              <tr>
+                <td colSpan={7} style={{ padding: 0 }}>
+                  <div style={{
+                    padding: '48px 24px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#fafcf9'
+                  }}>
+                    <div style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '50%',
+                      backgroundColor: '#edf4ec',
+                      color: '#1e3d2c',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '14px'
+                    }}>
+                      <Search size={20} />
+                    </div>
+                    <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 700, color: '#162e20' }}>
+                      No matching suppliers found
+                    </h4>
+                    <p style={{ margin: '0 0 18px 0', fontSize: '12.5px', color: '#657367', maxWidth: '380px', lineHeight: 1.5 }}>
+                      No supplier records matched your current query and filter selections. Clear or reset your filters to view all approved network suppliers.
+                    </p>
+                    <button
+                      type="button"
+                      className="rm-btn rm-btn-secondary"
+                      onClick={handleResetFilters}
+                      style={{ fontSize: '12px', padding: '7px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <RotateCcw size={13} />
+                      <span>Reset filters</span>
+                    </button>
+                  </div>
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
