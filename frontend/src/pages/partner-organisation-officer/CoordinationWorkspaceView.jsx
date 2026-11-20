@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ShieldCheck, Send, MessageSquare, Clock, RefreshCw } from 'lucide-react';
 import { incidentService } from '../../services/incidentService';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { formatShortCode, formatDateTime, getApiErrorMessage } from './partnerOfficerUtils';
 
 export const CoordinationWorkspaceView = ({
@@ -68,6 +69,12 @@ export const CoordinationWorkspaceView = ({
       loadIncidentThread(selectedIncidentId);
     }
   }, [selectedIncidentId, canAccessIncidents, loadIncidentThread]);
+
+  useRealtimeRefresh(
+    ['incidents'],
+    () => loadIncidentThread(selectedIncidentId),
+    { enabled: Boolean(selectedIncidentId && canAccessIncidents) }
+  );
 
   const selectedIncident = incidents.find((i) => (i.backendId || i.id) === selectedIncidentId) || null;
   const selectedRequest = requests.find((r) => r.id === selectedRequestId) || null;

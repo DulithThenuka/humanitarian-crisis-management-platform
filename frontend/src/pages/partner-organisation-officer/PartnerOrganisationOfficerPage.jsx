@@ -22,6 +22,7 @@ import {
 
 import './PartnerOfficerStyles.css';
 import { useAuth } from '../../context/AuthContext';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { partnerService } from '../../services/partnerService';
 import { requestService } from '../../services/requestService';
 import { crisisService } from '../../services/crisisService';
@@ -160,6 +161,12 @@ export const PartnerOrganisationOfficerPage = ({ initialActiveTab = 'dashboard' 
       setLoading(false);
     }
   }, [isAuthenticated, token, refreshPortalData]);
+
+  const { connected: realtimeConnected } = useRealtimeRefresh(
+    ['partners', 'assistancerequests', 'crises', 'alerts', 'incidents'],
+    refreshPortalData,
+    { enabled: Boolean(isAuthenticated && token) }
+  );
 
   const selectedPartner = useMemo(() => {
     return partners.find((p) => p.id === selectedPartnerId) || partners[0] || null;
@@ -572,7 +579,19 @@ export const PartnerOrganisationOfficerPage = ({ initialActiveTab = 'dashboard' 
                 title="View operational notifications"
               >
                 <div className="po-op-info">
-                  <span className="po-op-label">Active operation</span>
+                  <span className="po-op-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <span
+                      style={{
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        backgroundColor: realtimeConnected ? '#16a34a' : '#d97706',
+                        display: 'inline-block'
+                      }}
+                      title={realtimeConnected ? 'Real-time sync connected' : 'Reconnecting real-time sync...'}
+                    />
+                    Active operation
+                  </span>
                   <span className="po-op-value">{activeCrisisTitle}</span>
                 </div>
                 <div className="po-op-bell">

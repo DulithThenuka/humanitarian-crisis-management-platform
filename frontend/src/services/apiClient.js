@@ -78,7 +78,28 @@ apiClient.interceptors.request.use(
 );
 
 apiClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    const method = (response.config?.method || '').toUpperCase();
+    const url = response.config?.url || '';
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && !url.toLowerCase().includes('/auth/')) {
+      const cleanPath = url.replace(/^\/+/, '');
+      const domain = cleanPath.split('/')[0]?.toLowerCase() || '*';
+      const evt = { type: 'data-changed', domain, method, path: url, timestamp: new Date().toISOString() };
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('humanaid:local-mutation', { detail: evt }));
+        if (typeof BroadcastChannel !== 'undefined') {
+          try {
+            const ch = new BroadcastChannel('humanaid-realtime');
+            ch.postMessage(evt);
+            ch.close();
+          } catch {
+            // Ignore BroadcastChannel errors
+          }
+        }
+      }
+    }
+    return response.data;
+  },
   (error) => {
     if (error.response?.status === 401) {
       const reqUrl = (error.config?.url || '').toLowerCase();
