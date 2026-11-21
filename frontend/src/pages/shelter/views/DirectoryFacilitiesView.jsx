@@ -13,7 +13,7 @@ import {
   Package,
   Phone,
   MapPin,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 
 export const DirectoryFacilitiesView = ({
@@ -27,7 +27,7 @@ export const DirectoryFacilitiesView = ({
   onRequestSupplies,
   onRequestClarification,
   onEscalate,
-  onRefreshData
+  onRefreshData,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');

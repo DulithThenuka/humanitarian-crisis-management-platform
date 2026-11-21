@@ -18,4 +18,6 @@ public interface IAIDecisionService
     Task<Result<WorkspaceServiceResultDto>> ExecuteWorkspaceServiceAsync(string serviceId, ExecuteWorkspaceServiceDto input, CancellationToken cancellationToken = default);
     Task<DecisionTraceDetailDto?> GetDecisionTraceAsync(string caseId, CancellationToken cancellationToken = default);
     Task<Result<SupervisorNoteDto>> AddSupervisorNoteAsync(string caseId, AddSupervisorNoteDto dto, Guid authorId, string authorName, string authorRole, CancellationToken cancellationToken = default);
+    Task<Result<AIDiagnosticResultDto>> RunDiagnosticAsync(CancellationToken cancellationToken = default);
+    Task<Result<AITelemetryDto>> GetTelemetryMetricsAsync(CancellationToken cancellationToken = default);
 }

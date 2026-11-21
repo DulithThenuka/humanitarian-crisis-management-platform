@@ -6,7 +6,9 @@ using HumanitarianCrisisPlatform.Application.Interfaces.Services;
 
 namespace HumanitarianCrisisPlatform.API.Controllers;
 
-[Authorize(Roles = "Coordinator,Emergency Coordinator,EmergencyCoordinator,CaseManager,Incident / Case Manager,IncidentManager,Admin,System Administrator,SystemAdministrator")]
+[Authorize(Roles = "Coordinator,Emergency Coordinator,EmergencyCoordinator,CaseManager,Incident / Case Manager,IncidentManager,Admin,Administrator,System Administrator,SystemAdministrator,LogisticsManager,ShelterManager")]
+[Route("api/aireview")]
+[Route("api/ai-review")]
 public class AIReviewController : BaseApiController
 {
     private readonly IAIDecisionService _aiService;
@@ -21,6 +23,21 @@ public class AIReviewController : BaseApiController
     {
         var status = await _aiService.GetProviderStatusAsync(cancellationToken);
         return Ok(Result<AIProviderStatusDto>.Success(status));
+    }
+
+    [HttpGet("diagnostic")]
+    [HttpPost("diagnostic")]
+    public async Task<ActionResult<Result<AIDiagnosticResultDto>>> RunDiagnostic(CancellationToken cancellationToken)
+    {
+        var result = await _aiService.RunDiagnosticAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("telemetry")]
+    public async Task<ActionResult<Result<AITelemetryDto>>> GetTelemetry(CancellationToken cancellationToken)
+    {
+        var result = await _aiService.GetTelemetryMetricsAsync(cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("overview")]

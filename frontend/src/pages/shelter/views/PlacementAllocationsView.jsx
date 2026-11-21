@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   Phone,
   MapPin,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import { shelterService } from '../../../services/shelterService';
 
@@ -27,7 +27,7 @@ export const PlacementAllocationsView = ({
   onOpenTransferModal,
   onOpenExportModal,
   onDischargePlacement,
-  onRefreshData
+  onRefreshData,
 }) => {
   const [activeTab, setActiveTab] = useState('active'); // 'active', 'intake', 'history'
   const [searchTerm, setSearchTerm] = useState('');

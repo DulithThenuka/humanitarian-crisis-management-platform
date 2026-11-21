@@ -8,7 +8,7 @@ import {
   BarChart2,
   ChevronRight,
   ShieldCheck,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 
 export const ShelterDashboardView = ({
@@ -19,7 +19,7 @@ export const ShelterDashboardView = ({
   recentActivity = [],
   onNavigateTab = () => {},
   onSelectPriorityItem = () => {},
-  onRefresh
+  onRefresh,
 }) => {
   return (
     <>
