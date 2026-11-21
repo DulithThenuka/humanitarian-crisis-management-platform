@@ -674,7 +674,12 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
             />
           )}
 
-          {activeTab === 'help' && <HelpSupportView showToast={showToast} />}
+          {activeTab === 'help' && (
+            <HelpSupportView
+              showToast={showToast}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+            />
+          )}
         </div>
       </main>
 
