@@ -73,8 +73,8 @@
    1. Left Sidebar - HumanAid Deep Pine Theme
    ========================================================= */
 .vol-sidebar {
-  width: 260px;
-  min-width: 260px;
+  width: 290px;
+  min-width: 290px;
   background-color: var(--vol-sidebar-bg);
   background-image: none;
   color: #ffffff;
@@ -129,15 +129,15 @@
 
 /* User Card with Duty Switcher */
 .vol-user-card {
-  margin: 14px 0;
-  padding: 10px 12px;
+  margin: 20px 0 24px 0;
+  padding: 12px 14px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 16px;
 }
 
 .vol-user-card-info {
@@ -145,11 +145,12 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
+  flex: 1;
 }
 
 .vol-user-avatar {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #ffffff;
   color: #0c192e;
@@ -164,17 +165,21 @@
 .vol-user-role-label {
   font-size: 9.5px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--vol-sidebar-muted);
+  margin-bottom: 3px;
 }
 
 .vol-user-role-name {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 2px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 .vol-user-person-name {
@@ -183,15 +188,17 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.25;
 }
 
 /* Toggle Switch */
 .vol-toggle-switch {
   position: relative;
   display: inline-block;
-  width: 38px;
-  height: 22px;
+  width: 36px;
+  height: 20px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .vol-toggle-switch input {
@@ -209,19 +216,28 @@
   bottom: 0;
   background-color: rgba(255, 255, 255, 0.2);
   transition: 0.2s;
-  border-radius: 22px;
+  border-radius: 20px;
 }
 
 .vol-toggle-slider:before {
   position: absolute;
   content: "";
-  height: 16px;
-  width: 16px;
+  height: 14px;
+  width: 14px;
   left: 3px;
   bottom: 3px;
   background-color: white;
   transition: 0.2s;
   border-radius: 50%;
+}
+
+.vol-toggle-switch input:checked + .vol-toggle-slider {
+  background-color: #ffffff;
+}
+
+.vol-toggle-switch input:checked + .vol-toggle-slider:before {
+  transform: translateX(16px);
+  background-color: #0c192e;
 }
 
 .vol-toggle-switch input:checked + .vol-toggle-slider {
