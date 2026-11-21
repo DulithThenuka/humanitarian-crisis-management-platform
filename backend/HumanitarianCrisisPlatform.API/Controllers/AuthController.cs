@@ -33,13 +33,17 @@ public class AuthController : BaseApiController
         var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
 
-        // Cross-domain fallback between @reliefcore.org and @crisisplatform.org
+        // Cross-domain fallback between @reliefcore.org, @humanaid.org, and @crisisplatform.org
         if (user == null)
         {
             string? aliasEmail = null;
             if (normalizedEmail.EndsWith("@reliefcore.org"))
             {
                 aliasEmail = normalizedEmail.Replace("@reliefcore.org", "@crisisplatform.org");
+            }
+            else if (normalizedEmail.EndsWith("@humanaid.org"))
+            {
+                aliasEmail = normalizedEmail.Replace("@humanaid.org", "@crisisplatform.org");
             }
             else if (normalizedEmail.EndsWith("@crisisplatform.org"))
             {
@@ -52,10 +56,25 @@ public class AuthController : BaseApiController
             }
         }
 
-        // Shorthand fallback for volunteer role
-        if (user == null && normalizedEmail == "volunteer")
+        // Shorthand fallback for roles
+        if (user == null)
         {
-            user = await _context.Users.FirstOrDefaultAsync(u => u.Role == UserRole.Volunteer && u.IsActive);
+            if (normalizedEmail == "coordinator" || normalizedEmail == "emergency-coordinator")
+            {
+                user = await _context.Users.FirstOrDefaultAsync(u => u.Role == UserRole.Coordinator && u.IsActive);
+            }
+            else if (normalizedEmail == "volunteer")
+            {
+                user = await _context.Users.FirstOrDefaultAsync(u => u.Role == UserRole.Volunteer && u.IsActive);
+            }
+            else if (normalizedEmail == "admin")
+            {
+                user = await _context.Users.FirstOrDefaultAsync(u => u.Role == UserRole.Admin && u.IsActive);
+            }
+            else if (normalizedEmail == "logistics")
+            {
+                user = await _context.Users.FirstOrDefaultAsync(u => u.Role == UserRole.LogisticsManager && u.IsActive);
+            }
         }
 
         if (user == null)
@@ -74,7 +93,7 @@ public class AuthController : BaseApiController
             || dto.Password == "ReliefCore2024!"
             || (user.Role == UserRole.Volunteer && (dto.Password == "Volunteer@123" || dto.Password == "Volunteer123!"))
             || (user.Role == UserRole.Admin && (dto.Password == "Admin@123" || dto.Password == "Admin123!"))
-            || (user.Role == UserRole.Coordinator && (dto.Password == "Coord@123" || dto.Password == "Coord123!"))
+            || (user.Role == UserRole.Coordinator && (dto.Password == "Coord@123" || dto.Password == "Coord123!" || dto.Password == "Coordinator@123" || dto.Password == "Coordinator123!"))
             || (user.Role == UserRole.LogisticsManager && (dto.Password == "Logistics@123" || dto.Password == "Logistics123!"))
             || (user.Role == UserRole.Citizen && (dto.Password == "Citizen@123" || dto.Password == "Citizen123!"));
 

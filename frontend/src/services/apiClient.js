@@ -114,7 +114,16 @@ apiClient.interceptors.response.use(
         window.location.href = `/login?redirect=${encodeURIComponent(redirectTarget)}`;
       }
     }
-    return Promise.reject(error.response?.data || error);
+
+    const errPayload = error.response?.data || error;
+    if (errPayload && typeof errPayload === 'object' && error.response?.status) {
+      errPayload.status = error.response.status;
+      errPayload.statusCode = error.response.status;
+      if (!errPayload.message && error.message) {
+        errPayload.message = error.message;
+      }
+    }
+    return Promise.reject(errPayload);
   }
 );
 
