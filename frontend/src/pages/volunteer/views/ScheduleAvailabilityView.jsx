@@ -154,7 +154,7 @@ export const ScheduleAvailabilityView = ({
                     type="checkbox"
                     checked={d.active}
                     onChange={() => handleDayToggle(index)}
-                    style={{ accentColor: '#183526', cursor: 'pointer' }}
+                    style={{ accentColor: '#0c2340', cursor: 'pointer' }}
                   />
                   <span>{d.day}</span>
                 </label>
@@ -189,7 +189,7 @@ export const ScheduleAvailabilityView = ({
                   type="checkbox"
                   checked={cat.checked}
                   onChange={() => handleCategoryToggle(idx)}
-                  style={{ accentColor: '#183526', cursor: 'pointer' }}
+                  style={{ accentColor: '#0c2340', cursor: 'pointer' }}
                 />
                 <span>{cat.name}</span>
               </label>
