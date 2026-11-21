@@ -438,6 +438,7 @@ export const ResourceManagerPortal = () => {
           {activeTab === 'allocations' && (
             <AllocationRequestsView
               requests={allocations}
+              inventoryItems={items}
               showToast={showToast}
               onApprove={handleApproveAllocation}
               onReject={handleRejectAllocation}

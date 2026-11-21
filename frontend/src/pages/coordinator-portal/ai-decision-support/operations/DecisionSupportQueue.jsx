@@ -37,8 +37,9 @@ export const DecisionSupportQueue = ({
     const fetchQueue = async () => {
       try {
         const res = await aiGovernanceService.getQueue();
-        if (isMounted && res?.data?.data) {
-          setLiveQueue(res.data.data);
+        const queue = res?.data?.data ?? res?.data ?? res;
+        if (isMounted && Array.isArray(queue)) {
+          setLiveQueue(queue);
         }
       } catch (err) {
         console.error('Failed to load decision support queue:', err);

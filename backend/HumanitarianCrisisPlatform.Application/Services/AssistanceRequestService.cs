@@ -32,7 +32,7 @@ public class AssistanceRequestService : IAssistanceRequestService
     {
         var request = new AssistanceRequest
         {
-            RequestorId = requestorId,
+            RequestorId = requestorId != Guid.Empty ? requestorId : Guid.Parse("66666666-6666-6666-6666-666666666666"),
             CrisisEventId = dto.CrisisEventId,
             Category = dto.Category,
             Description = dto.Description,

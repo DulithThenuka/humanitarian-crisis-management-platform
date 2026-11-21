@@ -11,11 +11,16 @@ import {
   Sparkles,
   HelpCircle,
   Check,
-  ChevronRight
+  ChevronRight,
+  Loader2,
+  AlertTriangle
 } from 'lucide-react';
-import { ASSISTANCE_CATEGORIES } from '../data/citizenPortalData';
+import { ASSISTANCE_CATEGORIES, INITIAL_CITIZEN_PROFILE } from '../data/citizenPortalData';
+import { requestService } from '../../../services/requestService';
+import { useAuth } from '../../../context/AuthContext';
 
 export const SubmitAssistanceView = ({ onSelectTab, showToast }) => {
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCats, setSelectedCats] = useState(['shelter']);
   const [title, setTitle] = useState('Shelter needed after home flooding');
@@ -26,8 +31,11 @@ export const SubmitAssistanceView = ({ onSelectTab, showToast }) => {
   const [specificNeeds, setSpecificNeeds] = useState(
     'Dry emergency accommodation for 6 people including 2 children and 1 elderly relative.'
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const toggleCategory = (id) => {
+    setErrorMessage(null);
     setSelectedCats((prev) =>
       prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
     );
@@ -54,12 +62,81 @@ export const SubmitAssistanceView = ({ onSelectTab, showToast }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (showToast) {
-      showToast('Assistance request HMR-1043 submitted for priority coordinator review');
+    if (isSubmitting) return;
+
+    if (!selectedCats || selectedCats.length === 0) {
+      setErrorMessage('Please select at least one assistance category.');
+      return;
     }
-    onSelectTab('requests');
+    if (!title.trim()) {
+      setErrorMessage('Please enter a brief title for your request.');
+      return;
+    }
+    const countNum = parseInt(peopleCount, 10);
+    if (isNaN(countNum) || countNum < 1) {
+      setErrorMessage('Number of people affected must be at least 1.');
+      return;
+    }
+    if (!description.trim()) {
+      setErrorMessage('Please describe what happened.');
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsSubmitting(true);
+
+    try {
+      // Map category IDs to descriptive labels
+      const categoryLabels = selectedCats
+        .map((catId) => ASSISTANCE_CATEGORIES.find((c) => c.id === catId)?.label)
+        .filter(Boolean);
+      const category = categoryLabels.length > 0 ? categoryLabels.join(', ') : 'Other Emergency Needs';
+
+      // Build unified description narrative with title and specific needs
+      const narrativeParts = [];
+      if (title.trim()) narrativeParts.push(`[${title.trim()}]`);
+      if (description.trim()) narrativeParts.push(description.trim());
+      if (specificNeeds.trim()) narrativeParts.push(`Specific needs: ${specificNeeds.trim()}`);
+      const fullDescription = narrativeParts.join('\n\n');
+
+      const payload = {
+        category,
+        description: fullDescription,
+        numberOfPeople: countNum,
+        urgency: 1, // PriorityLevel.Medium baseline - existing backend AI re-evaluates urgency
+        address: user?.location || user?.assignedDistrict || INITIAL_CITIZEN_PROFILE.location || null,
+        contactPhone: user?.phone || user?.phoneNumber || INITIAL_CITIZEN_PROFILE.phone || null
+      };
+
+      const response = await requestService.create(payload);
+
+      if (response && (response.succeeded || response.data || response.id)) {
+        const created = response.data || response;
+        const refId = created?.id ? `REQ-${created.id.toString().substring(0, 8).toUpperCase()}` : 'HMR';
+        if (showToast) {
+          showToast(`Assistance request ${refId} submitted successfully for coordinator review`);
+        }
+        onSelectTab('requests');
+      } else {
+        const errDetail = response?.errors?.[0] || response?.message || 'Failed to submit assistance request.';
+        setErrorMessage(errDetail);
+      }
+    } catch (err) {
+      const status = err.response?.status;
+      let errorText;
+      if (status === 401) {
+        errorText = 'Your session has expired. Please sign in again to submit your request.';
+      } else if (status === 403) {
+        errorText = 'Access forbidden. Your account does not have permission to submit assistance requests.';
+      } else {
+        errorText = err.response?.data?.errors?.[0] || err.response?.data?.message || err.message || 'Unable to submit your assistance request. Please try again.';
+      }
+      setErrorMessage(errorText);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -156,6 +233,26 @@ export const SubmitAssistanceView = ({ onSelectTab, showToast }) => {
         {/* Left Form (2/3 width) */}
         <div className="cp-card">
           <form onSubmit={handleSubmit}>
+            {errorMessage && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px 16px',
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  color: '#991b1b',
+                  marginBottom: '18px'
+                }}
+              >
+                <AlertTriangle size={18} style={{ color: '#dc2626', flexShrink: 0 }} />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
             <div>
               <div style={{ fontSize: '13px', fontWeight: 700, color: '#162e20' }}>
                 Assistance categories *
@@ -196,7 +293,10 @@ export const SubmitAssistanceView = ({ onSelectTab, showToast }) => {
                   required
                   className="cp-form-input"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => {
+                    setErrorMessage(null);
+                    setTitle(e.target.value);
+                  }}
                 />
               </div>
 
@@ -208,7 +308,10 @@ export const SubmitAssistanceView = ({ onSelectTab, showToast }) => {
                   required
                   className="cp-form-input"
                   value={peopleCount}
-                  onChange={(e) => setPeopleCount(e.target.value)}
+                  onChange={(e) => {
+                    setErrorMessage(null);
+                    setPeopleCount(e.target.value);
+                  }}
                 />
               </div>
             </div>
@@ -220,7 +323,10 @@ export const SubmitAssistanceView = ({ onSelectTab, showToast }) => {
                 required
                 className="cp-form-textarea"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setErrorMessage(null);
+                  setDescription(e.target.value);
+                }}
               />
             </div>
 
@@ -232,7 +338,10 @@ export const SubmitAssistanceView = ({ onSelectTab, showToast }) => {
                 className="cp-form-textarea"
                 placeholder="Mention urgent dietary, baby items, medical equipment or shelter considerations..."
                 value={specificNeeds}
-                onChange={(e) => setSpecificNeeds(e.target.value)}
+                onChange={(e) => {
+                  setErrorMessage(null);
+                  setSpecificNeeds(e.target.value);
+                }}
               />
             </div>
 
@@ -241,11 +350,24 @@ export const SubmitAssistanceView = ({ onSelectTab, showToast }) => {
                 type="button"
                 onClick={() => onSelectTab('dashboard')}
                 className="cp-btn-secondary"
+                disabled={isSubmitting}
               >
                 Cancel
               </button>
-              <button type="submit" className="cp-btn-primary">
-                Submit Assistance Request
+              <button
+                type="submit"
+                className="cp-btn-primary"
+                disabled={isSubmitting}
+                style={isSubmitting ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
+              >
+                {isSubmitting ? (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <Loader2 size={16} className="animate-spin" />
+                    Submitting Request...
+                  </span>
+                ) : (
+                  'Submit Assistance Request'
+                )}
               </button>
             </div>
           </form>

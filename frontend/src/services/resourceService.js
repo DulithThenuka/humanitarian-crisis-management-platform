@@ -36,6 +36,29 @@ export const resourceService = {
   getAllocations: async (params) => {
     return await apiClient.get('/resources/allocations', { params });
   },
+  matchResources: async ({ inputText, category, relatedCaseNumber }) => {
+    try {
+      return await apiClient.post('/aireview/services/resource-matching/execute', {
+        inputText,
+        category,
+        relatedCaseNumber
+      }, {
+        skipAuthRedirect: true
+      });
+    } catch (err) {
+      // Fallback to Resources controller endpoint if aireview route has specific gateway restriction
+      if (err?.response?.status === 404 || err?.status === 404) {
+        return await apiClient.post('/resources/ai-match', {
+          inputText,
+          category,
+          relatedCaseNumber
+        }, {
+          skipAuthRedirect: true
+        });
+      }
+      throw err;
+    }
+  },
   approveAllocation: async (id, dto) => {
     return await apiClient.post(`/resources/allocations/${id}/approve`, dto);
   },

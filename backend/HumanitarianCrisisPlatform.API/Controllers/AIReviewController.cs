@@ -6,7 +6,7 @@ using HumanitarianCrisisPlatform.Application.Interfaces.Services;
 
 namespace HumanitarianCrisisPlatform.API.Controllers;
 
-[Authorize(Roles = "Coordinator,Emergency Coordinator,EmergencyCoordinator,CaseManager,Incident / Case Manager,IncidentManager,Admin,Administrator,System Administrator,SystemAdministrator,LogisticsManager,ShelterManager")]
+[Authorize(Roles = "Coordinator,Emergency Coordinator,EmergencyCoordinator,CaseManager,Incident / Case Manager,IncidentManager,Admin,Administrator,System Administrator,SystemAdministrator,LogisticsManager,Logistics Manager,ResourceManager,Resource Manager,Relief / Resource Manager,ReliefResourceManager,ShelterManager")]
 [Route("api/aireview")]
 [Route("api/ai-review")]
 public class AIReviewController : BaseApiController
@@ -89,6 +89,7 @@ public class AIReviewController : BaseApiController
     }
 
     [HttpPost("services/{serviceId}/execute")]
+    [Authorize(Roles = "Coordinator,Emergency Coordinator,EmergencyCoordinator,CaseManager,Incident / Case Manager,IncidentManager,Admin,Administrator,System Administrator,SystemAdministrator,LogisticsManager,Logistics Manager,ResourceManager,Resource Manager,Relief / Resource Manager,ReliefResourceManager,ShelterManager")]
     public async Task<ActionResult<Result<WorkspaceServiceResultDto>>> ExecuteWorkspaceService(
         string serviceId,
         [FromBody] ExecuteWorkspaceServiceDto input,

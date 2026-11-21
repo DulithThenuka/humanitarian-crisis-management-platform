@@ -12,7 +12,7 @@ export const API_BASE_URL =
  */
 export const isValidJwtToken = (rawToken) => {
   if (!rawToken || typeof rawToken !== 'string') return false;
-  const trimmed = rawToken.replace(/^Bearer\s+/i, '').trim();
+  const trimmed = rawToken.replace(/^Bearer\s+/i, '').replace(/^["']|["']$/g, '').trim();
   if (!trimmed || trimmed === 'reliefcore-session-token') return false;
 
   const segments = trimmed.split('.');
@@ -24,7 +24,8 @@ export const isValidJwtToken = (rawToken) => {
     const payload = JSON.parse(atob(padded));
     if (payload && typeof payload.exp === 'number') {
       const nowSeconds = Math.floor(Date.now() / 1000);
-      if (payload.exp <= nowSeconds) {
+      // Allow 60 seconds clock skew tolerance aligned with backend JwtSettings
+      if (payload.exp + 60 <= nowSeconds) {
         return false;
       }
     }
@@ -48,9 +49,8 @@ export const getStoredAuthToken = () => {
   const raw = localStorage.getItem('token') || sessionStorage.getItem('token');
   if (!raw) return null;
 
-  const normalized = raw.replace(/^Bearer\s+/i, '').trim();
+  const normalized = raw.replace(/^Bearer\s+/i, '').replace(/^["']|["']$/g, '').trim();
   if (!isValidJwtToken(normalized)) {
-    clearStoredAuth();
     return null;
   }
 
@@ -68,9 +68,18 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = getStoredAuthToken();
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else if (config.headers?.Authorization) {
-      delete config.headers.Authorization;
+      if (config.headers?.set) {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        config.headers = config.headers || {};
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } else if (config.headers) {
+      if (config.headers.delete) {
+        config.headers.delete('Authorization');
+      } else {
+        delete config.headers.Authorization;
+      }
     }
     return config;
   },
@@ -104,14 +113,18 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       const reqUrl = (error.config?.url || '').toLowerCase();
       const isAuthEndpoint = reqUrl.includes('/auth/login') || reqUrl.includes('/auth/register');
+      const isAiAdvisoryEndpoint = reqUrl.includes('/aireview/') || reqUrl.includes('/ai-review/') || reqUrl.includes('/ai-match');
+      const skipRedirect = error.config?.skipAuthRedirect || isAiAdvisoryEndpoint;
       const publicPaths = ['/', '/home', '/landing', '/login', '/signup', '/register', '/bloom', '/map', '/services', '/capabilities', '/emergency-directory'];
       const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
 
-      clearStoredAuth();
+      if (!skipRedirect) {
+        clearStoredAuth();
 
-      if (!isAuthEndpoint && typeof window !== 'undefined' && !publicPaths.includes(currentPath) && !currentPath.startsWith('/login')) {
-        const redirectTarget = `${window.location.pathname}${window.location.search}`;
-        window.location.href = `/login?redirect=${encodeURIComponent(redirectTarget)}`;
+        if (!isAuthEndpoint && typeof window !== 'undefined' && !publicPaths.includes(currentPath) && !currentPath.startsWith('/login')) {
+          const redirectTarget = `${window.location.pathname}${window.location.search}`;
+          window.location.href = `/login?redirect=${encodeURIComponent(redirectTarget)}`;
+        }
       }
     }
 

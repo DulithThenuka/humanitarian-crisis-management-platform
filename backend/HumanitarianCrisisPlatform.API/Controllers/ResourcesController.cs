@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HumanitarianCrisisPlatform.Application.Common.Models;
+using HumanitarianCrisisPlatform.Application.DTOs.AI;
 using HumanitarianCrisisPlatform.Application.DTOs.Resources;
 using HumanitarianCrisisPlatform.Application.Interfaces.Services;
 using HumanitarianCrisisPlatform.Application.Validators;
@@ -212,10 +213,25 @@ public class ResourcesController : BaseApiController
     }
 
     /// <summary>
+    /// Executes AI Resource Matching for pending allocations and requests.
+    /// </summary>
+    [HttpPost("ai-match")]
+    [HttpPost("match")]
+    [Authorize(Roles = "LogisticsManager,Logistics Manager,ResourceManager,Resource Manager,Coordinator,Admin")]
+    public async Task<ActionResult<Result<WorkspaceServiceResultDto>>> MatchResources(
+        [FromBody] ExecuteWorkspaceServiceDto input,
+        [FromServices] IAIDecisionService aiService,
+        CancellationToken cancellationToken)
+    {
+        var result = await aiService.ExecuteWorkspaceServiceAsync("resource-matching", input, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Retrieves resource allocation requests for review.
     /// </summary>
     [HttpGet("allocations")]
-    [Authorize(Roles = "LogisticsManager,Coordinator,Admin")]
+    [Authorize(Roles = "LogisticsManager,Logistics Manager,ResourceManager,Resource Manager,Coordinator,Admin")]
     public async Task<ActionResult<Result<IReadOnlyList<ResourceAllocationRequestDto>>>> GetAllocations(
         [FromQuery] int? status,
         [FromQuery] PriorityLevel? priority,

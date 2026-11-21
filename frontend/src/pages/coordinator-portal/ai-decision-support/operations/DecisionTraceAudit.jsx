@@ -104,10 +104,11 @@ export const DecisionTraceAudit = ({
     const fetchTrace = async () => {
       try {
         const res = await aiGovernanceService.getTrace(caseId);
-        if (isMounted && res?.data?.data) {
-          setTraceData(res.data.data);
-          if (res.data.data.supervisorNotes && res.data.data.supervisorNotes.length > 0) {
-            setIncidentNotes(res.data.data.supervisorNotes);
+        const traceDetail = res?.data?.data ?? res?.data ?? res;
+        if (isMounted && traceDetail && typeof traceDetail === 'object') {
+          setTraceData(traceDetail);
+          if (traceDetail.supervisorNotes && traceDetail.supervisorNotes.length > 0) {
+            setIncidentNotes(traceDetail.supervisorNotes);
           }
         }
       } catch (err) {
@@ -220,8 +221,10 @@ export const DecisionTraceAudit = ({
     try {
       const targetCase = traceData?.caseNumber || caseId;
       const res = await aiGovernanceService.addNote(targetCase, supervisorNoteInput.trim());
-      if (res?.data?.succeeded) {
-        const newNote = res.data.data || {
+      const isSuccess = res?.succeeded ?? res?.data?.succeeded ?? (res && !res.errors?.length);
+      const noteData = res?.data?.data ?? res?.data ?? res;
+      if (isSuccess) {
+        const newNote = (noteData && noteData.text) ? noteData : {
           id: Date.now(),
           author: 'Jane Coordinator',
           role: 'Emergency Coordinator',
