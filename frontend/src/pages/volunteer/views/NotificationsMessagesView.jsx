@@ -123,7 +123,7 @@ export const NotificationsMessagesView = ({
                 Direct communication with assigned operational leads
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#15803d', fontWeight: 600 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#1d4ed8', fontWeight: 600 }}>
               <Phone size={13} />
               <span>+94 77 555 0192</span>
             </div>
@@ -137,12 +137,13 @@ export const NotificationsMessagesView = ({
                 style={{
                   alignSelf: msg.isCoordinator ? 'flex-start' : 'flex-end',
                   maxWidth: '85%',
-                  background: msg.isCoordinator ? '#eef1ea' : '#183526',
-                  color: msg.isCoordinator ? '#1e3328' : '#ffffff',
+                  background: msg.isCoordinator ? '#f1f5f9' : '#0c2340',
+                  color: msg.isCoordinator ? '#0f172a' : '#ffffff',
                   padding: '10px 14px',
                   borderRadius: '10px',
                   fontSize: '12.5px',
-                  lineHeight: 1.4
+                  lineHeight: 1.4,
+                  boxShadow: msg.isCoordinator ? 'none' : '0 1px 3px rgba(12, 35, 64, 0.2)'
                 }}
               >
                 <div style={{ fontSize: '10.5px', opacity: 0.8, marginBottom: '3px', fontWeight: 600 }}>
