@@ -155,44 +155,44 @@ export const AppRoutes = () => {
       {/* ========================================================= */}
       {/* MODULE 2: Emergency Coordinator (/coordinator/*)          */}
       {/* ========================================================= */}
-      <Route path="/coordinator" element={<EmergencyCoordinatorPortal />} />
-      <Route path="/coordinator/portal" element={<EmergencyCoordinatorPortal />} />
-      <Route path="/coordinator/overview" element={<EmergencyCoordinatorPortal initialActiveTab="overview" />} />
-      <Route path="/coordinator/dashboard" element={<DashboardOverviewPage />} />
-      <Route path="/coordinator/cases" element={<EmergencyCoordinatorPortal initialActiveTab="requests" />} />
-      <Route path="/coordinator/cases/:id" element={<EmergencyCoordinatorPortal initialActiveTab="review" />} />
-      <Route path="/coordinator/review" element={<EmergencyCoordinatorPortal initialActiveTab="review" />} />
-      <Route path="/coordinator/review/:id" element={<EmergencyCoordinatorPortal initialActiveTab="review" />} />
-      <Route path="/coordinator/incidents" element={<EmergencyCoordinatorPortal initialActiveTab="crisis" />} />
-      <Route path="/coordinator/crisis" element={<EmergencyCoordinatorPortal initialActiveTab="crisis" />} />
-      <Route path="/coordinator/resources" element={<EmergencyCoordinatorPortal initialActiveTab="resources" />} />
-      <Route path="/coordinator/shelters" element={<EmergencyCoordinatorPortal initialActiveTab="shelters" />} />
-      <Route path="/coordinator/alerts" element={<EmergencyCoordinatorPortal initialActiveTab="alerts" />} />
-      <Route path="/coordinator/reports" element={<EmergencyCoordinatorPortal initialActiveTab="reports" />} />
-      <Route path="/coordinator/history" element={<EmergencyCoordinatorPortal initialActiveTab="history" />} />
-      <Route path="/coordinator/notifications" element={<EmergencyCoordinatorPortal initialActiveTab="notifications" />} />
-      <Route path="/coordinator/settings" element={<EmergencyCoordinatorPortal initialActiveTab="settings" />} />
-      <Route path="/coordinator/ai-support" element={<EmergencyCoordinatorPortal initialActiveTab="ai-support" />} />
-      <Route path="/coordinator/triage" element={<RequestTriagePage />} />
-      <Route path="/coordinator/ai-review" element={<AIDecisionReviewPage />} />
-      <Route path="/coordinator/ai-ops" element={<AIOperationsContainer initialSubView="overview" />} />
-      <Route path="/coordinator/map" element={<DashboardOverviewPage initialTab="map" />} />
-      <Route path="/coordinator/audit" element={<AuditCenterPage />} />
+      <Route path="/coordinator" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal /></ProtectedRoute>} />
+      <Route path="/coordinator/portal" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal /></ProtectedRoute>} />
+      <Route path="/coordinator/overview" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="overview" /></ProtectedRoute>} />
+      <Route path="/coordinator/dashboard" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage /></ProtectedRoute>} />
+      <Route path="/coordinator/cases" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="requests" /></ProtectedRoute>} />
+      <Route path="/coordinator/cases/:id" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="review" /></ProtectedRoute>} />
+      <Route path="/coordinator/review" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="review" /></ProtectedRoute>} />
+      <Route path="/coordinator/review/:id" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="review" /></ProtectedRoute>} />
+      <Route path="/coordinator/incidents" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="crisis" /></ProtectedRoute>} />
+      <Route path="/coordinator/crisis" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="crisis" /></ProtectedRoute>} />
+      <Route path="/coordinator/resources" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="resources" /></ProtectedRoute>} />
+      <Route path="/coordinator/shelters" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="shelters" /></ProtectedRoute>} />
+      <Route path="/coordinator/alerts" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="alerts" /></ProtectedRoute>} />
+      <Route path="/coordinator/reports" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="reports" /></ProtectedRoute>} />
+      <Route path="/coordinator/history" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="history" /></ProtectedRoute>} />
+      <Route path="/coordinator/notifications" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="notifications" /></ProtectedRoute>} />
+      <Route path="/coordinator/settings" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="settings" /></ProtectedRoute>} />
+      <Route path="/coordinator/ai-support" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal initialActiveTab="ai-support" /></ProtectedRoute>} />
+      <Route path="/coordinator/triage" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><RequestTriagePage /></ProtectedRoute>} />
+      <Route path="/coordinator/ai-review" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIDecisionReviewPage /></ProtectedRoute>} />
+      <Route path="/coordinator/ai-ops" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="overview" /></ProtectedRoute>} />
+      <Route path="/coordinator/map" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage initialTab="map" /></ProtectedRoute>} />
+      <Route path="/coordinator/audit" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AuditCenterPage /></ProtectedRoute>} />
 
       {/* Legacy Coordinator Aliases */}
-      <Route path="/dashboard" element={<DashboardOverviewPage />} />
-      <Route path="/emergency-coordinator" element={<EmergencyCoordinatorPortal />} />
-      <Route path="/emergency-coordinator/:tab" element={<EmergencyCoordinatorPortal />} />
-      <Route path="/coordinator/requests" element={<AssistanceRequestsListView />} />
-      <Route path="/coordinator/requests/:id" element={<AssistanceRequestDetailPage />} />
-      <Route path="/requests/:id" element={<AssistanceRequestDetailPage />} />
-      <Route path="/request-detail" element={<AssistanceRequestDetailPage />} />
-      <Route path="/analytics" element={<DashboardOverviewPage />} />
-      <Route path="/reports" element={<DashboardOverviewPage initialTab="reports" />} />
-      <Route path="/notifications" element={<DashboardOverviewPage initialTab="notifications" />} />
-      <Route path="/audit" element={<AuditCenterPage />} />
-      <Route path="/ai-ops" element={<AIOperationsContainer initialSubView="overview" />} />
-      <Route path="/ai-operations" element={<AIOperationsContainer initialSubView="overview" />} />
+      <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage /></ProtectedRoute>} />
+      <Route path="/emergency-coordinator" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal /></ProtectedRoute>} />
+      <Route path="/emergency-coordinator/:tab" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><EmergencyCoordinatorPortal /></ProtectedRoute>} />
+      <Route path="/coordinator/requests" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AssistanceRequestsListView /></ProtectedRoute>} />
+      <Route path="/coordinator/requests/:id" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AssistanceRequestDetailPage /></ProtectedRoute>} />
+      <Route path="/requests/:id" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AssistanceRequestDetailPage /></ProtectedRoute>} />
+      <Route path="/request-detail" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AssistanceRequestDetailPage /></ProtectedRoute>} />
+      <Route path="/analytics" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage /></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage initialTab="reports" /></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><DashboardOverviewPage initialTab="notifications" /></ProtectedRoute>} />
+      <Route path="/audit" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AuditCenterPage /></ProtectedRoute>} />
+      <Route path="/ai-ops" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="overview" /></ProtectedRoute>} />
+      <Route path="/ai-operations" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="overview" /></ProtectedRoute>} />
       <Route path="/ai-workspaces" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="workspace" /></ProtectedRoute>} />
       <Route path="/ai-governance" element={<ProtectedRoute allowedRoles={['Coordinator', 'Admin']}><AIOperationsContainer initialSubView="governance" /></ProtectedRoute>} />
 

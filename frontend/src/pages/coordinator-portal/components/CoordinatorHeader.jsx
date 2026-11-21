@@ -63,7 +63,13 @@ export const CoordinatorHeader = ({
                 <span className="ec-live-dot"></span>LIVE DB CONNECTED
               </span>
             ) : apiError ? (
-              <span className="ec-offline-badge" title={apiError}>DISCONNECTED</span>
+              <span
+                className="ec-offline-badge"
+                style={String(apiError).includes('403') ? { backgroundColor: 'rgba(217, 119, 6, 0.15)', color: '#f59e0b', borderColor: 'rgba(217, 119, 6, 0.3)' } : undefined}
+                title={apiError}
+              >
+                {String(apiError).includes('403') ? 'ACCESS RESTRICTED' : 'DISCONNECTED'}
+              </span>
             ) : null}
           </div>
           <h1 className="ec-header-page-title">{getPageTitle()}</h1>
@@ -129,18 +135,46 @@ export const CoordinatorHeader = ({
 
       {/* 1. Connection Error Banner: Displayed when API fails */}
       {apiError && !isLive && (
-        <div className="ec-connection-error-ribbon" role="alert">
+        <div
+          className="ec-connection-error-ribbon"
+          role="alert"
+          style={String(apiError).includes('403') ? { backgroundColor: 'rgba(217, 119, 6, 0.12)', borderColor: 'rgba(217, 119, 6, 0.35)' } : undefined}
+        >
           <div className="ec-ribbon-msg">
-            <AlertTriangle size={14} color="#dc2626" />
+            <AlertTriangle size={14} color={String(apiError).includes('403') ? '#d97706' : '#dc2626'} />
             <span>
-              <strong>Backend Disconnected:</strong> Unable to connect to HUMANAID API ({apiError}). Showing disconnected state.
+              {String(apiError).includes('403') ? (
+                <>
+                  <strong>Access Restricted (HTTP 403):</strong> {apiError} Please sign in with an Emergency Coordinator account (<code style={{ background: 'rgba(255,255,255,0.15)', padding: '1px 4px', borderRadius: '3px' }}>coordinator@reliefcore.org</code>).
+                </>
+              ) : String(apiError).includes('401') ? (
+                <>
+                  <strong>Session Expired (HTTP 401):</strong> {apiError}
+                </>
+              ) : (
+                <>
+                  <strong>Backend Disconnected:</strong> Unable to connect to HUMANAID API ({apiError}). Showing disconnected state.
+                </>
+              )}
             </span>
           </div>
-          {onRetry && (
-            <button className="ec-ribbon-retry-btn" onClick={onRetry} title="Retry API connection">
-              <RefreshCw size={12} /> Retry Connection
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {(String(apiError).includes('403') || String(apiError).includes('401')) && (
+              <button
+                className="ec-ribbon-retry-btn"
+                onClick={() => navigate('/login?redirect=/coordinator')}
+                title="Sign in with authorized Emergency Coordinator credentials"
+                style={{ backgroundColor: '#2563eb', color: '#ffffff', borderColor: '#3b82f6', cursor: 'pointer' }}
+              >
+                Sign In as Coordinator
+              </button>
+            )}
+            {onRetry && (
+              <button className="ec-ribbon-retry-btn" onClick={onRetry} title="Retry API connection">
+                <RefreshCw size={12} /> Retry Connection
+              </button>
+            )}
+          </div>
         </div>
       )}
 
