@@ -662,14 +662,24 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
               notifications={notifications}
               onMarkAllAsRead={handleMarkAllNotificationsRead}
               showToast={showToast}
+              onNavigateTab={(tab) => setActiveTab(tab)}
             />
           )}
 
           {activeTab === 'profile' && (
-            <MyProfileView user={user} activitySummary={activitySummary} />
+            <MyProfileView
+              user={user}
+              activitySummary={activitySummary}
+              showToast={showToast}
+            />
           )}
 
-          {activeTab === 'help' && <HelpSupportView showToast={showToast} />}
+          {activeTab === 'help' && (
+            <HelpSupportView
+              showToast={showToast}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+            />
+          )}
         </div>
       </main>
 
