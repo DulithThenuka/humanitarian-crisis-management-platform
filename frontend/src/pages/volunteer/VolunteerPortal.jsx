@@ -667,7 +667,11 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
           )}
 
           {activeTab === 'profile' && (
-            <MyProfileView user={user} activitySummary={activitySummary} />
+            <MyProfileView
+              user={user}
+              activitySummary={activitySummary}
+              showToast={showToast}
+            />
           )}
 
           {activeTab === 'help' && <HelpSupportView showToast={showToast} />}
