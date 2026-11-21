@@ -645,6 +645,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
               assignments={assignments}
               onCompleteTask={handleCompleteTask}
               showToast={showToast}
+              onNavigateTab={(tab) => setActiveTab(tab)}
             />
           )}
 
