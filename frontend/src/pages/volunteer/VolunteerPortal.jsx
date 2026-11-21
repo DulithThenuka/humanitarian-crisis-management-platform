@@ -13,6 +13,7 @@ import {
   User,
   LifeBuoy,
   Shield,
+  ShieldCheck,
   MapPin,
   LogOut,
   CheckCircle2,
@@ -510,7 +511,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
         <div className="vol-sidebar-footer">
           <div className="vol-boundary-box">
             <div className="vol-boundary-header">
-              <Shield size={13} />
+              <ShieldCheck size={14} />
               <span>Volunteer prototype</span>
             </div>
             <p className="vol-boundary-text">
