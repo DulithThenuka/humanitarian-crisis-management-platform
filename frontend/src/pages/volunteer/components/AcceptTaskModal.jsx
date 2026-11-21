@@ -61,7 +61,7 @@ export const AcceptTaskModal = ({ opportunity, onClose, onConfirm }) => {
               type="checkbox"
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
-              style={{ accentColor: '#183526', marginTop: '2px' }}
+              style={{ accentColor: '#0c2340', marginTop: '2px' }}
             />
             <span>
               I confirm that I am fit for duty, agree to follow all safety guidelines, and will arrive wearing my HumanAid identification.
