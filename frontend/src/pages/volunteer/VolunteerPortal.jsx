@@ -662,6 +662,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
               notifications={notifications}
               onMarkAllAsRead={handleMarkAllNotificationsRead}
               showToast={showToast}
+              onNavigateTab={(tab) => setActiveTab(tab)}
             />
           )}
 
