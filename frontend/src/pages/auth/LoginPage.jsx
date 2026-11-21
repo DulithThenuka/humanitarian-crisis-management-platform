@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  ArrowRight, 
-  ArrowLeft, 
-  ChevronDown, 
-  ShieldAlert,
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  ArrowLeft,
+  ChevronDown,
   Globe
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -23,31 +22,34 @@ const resolvePostLoginRoute = (role, redirectParam) => {
   }
 
   const normalizedRole = (role || '').toString().trim().toLowerCase();
-  if (normalizedRole === 'admin' || normalizedRole === 'administrator' || normalizedRole.includes('admin')) {
+  if (normalizedRole === 'admin' || normalizedRole === 'administrator' || normalizedRole === '4' || normalizedRole.includes('admin')) {
     return '/admin';
-  }
-  if (normalizedRole === 'casemanager' || normalizedRole === 'incidentmanager' || normalizedRole.includes('case manager')) {
-    return '/case-manager';
-  }
-  if (normalizedRole === 'sheltermanager' || normalizedRole.includes('shelter')) {
-    return '/shelter';
-  }
-  if (normalizedRole === 'logisticsmanager' || normalizedRole.includes('logistics')) {
-    return '/logistics';
   }
   if (normalizedRole === 'volunteercoordinator' || normalizedRole.includes('volunteer coordinator')) {
     return '/volunteer-coordinator';
   }
-  if (normalizedRole === 'volunteer') {
+  if (normalizedRole === 'coordinator' || normalizedRole === '1' || normalizedRole.includes('coordinator')) {
+    return '/coordinator';
+  }
+  if (normalizedRole === 'casemanager' || normalizedRole === 'incidentmanager' || normalizedRole === '8' || normalizedRole.includes('case manager') || normalizedRole.includes('incident')) {
+    return '/case-manager';
+  }
+  if (normalizedRole === 'sheltermanager' || normalizedRole === 'shelteradministrator' || normalizedRole === 'shelteradmin' || normalizedRole === '5' || normalizedRole.includes('shelter')) {
+    return '/shelter';
+  }
+  if (normalizedRole === 'logisticsmanager' || normalizedRole === '2' || normalizedRole.includes('logistics')) {
+    return '/logistics';
+  }
+  if (normalizedRole === 'volunteer' || normalizedRole === '3') {
     return '/volunteer';
   }
-  if (normalizedRole === 'donor' || normalizedRole.includes('funding')) {
+  if (normalizedRole === 'donor' || normalizedRole === '6' || normalizedRole.includes('funding')) {
     return '/donor';
   }
-  if (normalizedRole === 'partner' || normalizedRole.includes('partner')) {
+  if (normalizedRole === 'partner' || normalizedRole === '7' || normalizedRole.includes('partner')) {
     return '/partner-officer';
   }
-  if (normalizedRole === 'citizen') {
+  if (normalizedRole === 'citizen' || normalizedRole === '0') {
     return '/citizen';
   }
   return '/coordinator';
@@ -64,42 +66,6 @@ export const LoginPage = () => {
   const { login } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
-
-  const getRoleDashboardRoute = (role) => {
-    const normalized = String(role || '').toLowerCase();
-    switch (normalized) {
-      case 'admin':
-      case '4':
-        return '/admin';
-      case 'coordinator':
-      case '1':
-        return '/coordinator';
-      case 'logisticsmanager':
-      case '2':
-        return '/logistics';
-      case 'sheltermanager':
-      case 'shelteradministrator':
-      case 'shelteradmin':
-      case '5':
-        return '/shelter';
-      case 'volunteer':
-      case '3':
-        return '/volunteer';
-      case 'incidentmanager':
-      case '8':
-        return '/incident-manager';
-      case 'donor':
-      case '6':
-        return '/donor';
-      case 'partner':
-      case '7':
-        return '/partner';
-      case 'citizen':
-      case '0':
-      default:
-        return '/citizen';
-    }
-  };
   const location = useLocation();
 
   const searchParams = new URLSearchParams(location.search);
@@ -157,7 +123,7 @@ export const LoginPage = () => {
 
       {/* Main Two-Panel Split Layout */}
       <div className="relative z-10 w-full min-h-screen flex flex-col lg:flex-row p-4 lg:p-6 gap-6 items-stretch">
-        
+
         {/* =========================================================
            LEFT PANEL: Hero & Brand Overview (w-[50%] on lg)
            ========================================================= */}
@@ -165,10 +131,10 @@ export const LoginPage = () => {
           {/* Header */}
           <header className="flex items-center justify-between w-full">
             <Link to="/" className="flex items-center gap-3 no-underline group" title="Return to Homepage">
-              <img 
-                src={reliefcoreIcon} 
-                alt="HumanAid Response Coordination" 
-                className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform" 
+              <img
+                src={reliefcoreIcon}
+                alt="HumanAid Response Coordination"
+                className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform"
               />
               <span className="font-semibold text-xl tracking-tight text-white">HumanAid</span>
               <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white/60 ml-1">
@@ -188,9 +154,9 @@ export const LoginPage = () => {
           {/* Hero Center */}
           <main className="flex-1 flex flex-col items-center justify-center text-center py-10 lg:py-14 px-2">
             <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform">
-              <img 
-                src={reliefcoreIcon} 
-                alt="HumanAid Emblem" 
+              <img
+                src={reliefcoreIcon}
+                alt="HumanAid Emblem"
                 className="w-13 h-13 object-contain"
               />
             </div>
@@ -241,8 +207,8 @@ export const LoginPage = () => {
         <section className="w-full lg:w-[50%] liquid-glass-strong rounded-3xl p-6 lg:p-10 flex flex-col justify-between relative min-h-[calc(100vh-3rem)]">
           {/* Top Bar with Language Selector and Back Link */}
           <div className="flex items-center justify-between w-full pb-4">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="liquid-glass rounded-full px-4 py-2 text-xs text-white/70 flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform no-underline"
               title="Return to Homepage"
             >
@@ -269,9 +235,8 @@ export const LoginPage = () => {
                     <button
                       key={lang}
                       type="button"
-                      className={`text-left px-4 py-1.5 text-xs transition-colors cursor-pointer ${
-                        selectedLang === lang ? 'text-white bg-white/15 font-medium' : 'text-white/70 hover:text-white hover:bg-white/10'
-                      }`}
+                      className={`text-left px-4 py-1.5 text-xs transition-colors cursor-pointer ${selectedLang === lang ? 'text-white bg-white/15 font-medium' : 'text-white/70 hover:text-white hover:bg-white/10'
+                        }`}
                       onClick={() => {
                         setSelectedLang(lang);
                         setShowLangMenu(false);
@@ -357,9 +322,9 @@ export const LoginPage = () => {
                   <span className="text-white/70 hover:text-white transition-colors">Remember me</span>
                 </label>
 
-                <a 
-                  href="#forgot-password" 
-                  onClick={handleForgotPassword} 
+                <a
+                  href="#forgot-password"
+                  onClick={handleForgotPassword}
                   className="text-white/70 hover:text-white transition-colors no-underline"
                 >
                   Forgot password?
