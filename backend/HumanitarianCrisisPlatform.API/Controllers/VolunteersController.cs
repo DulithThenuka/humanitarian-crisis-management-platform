@@ -9,7 +9,7 @@ using HumanitarianCrisisPlatform.Application.Interfaces.Services;
 
 namespace HumanitarianCrisisPlatform.API.Controllers;
 
-[Authorize(Roles = "Coordinator,Admin,Volunteer,CaseManager")]
+[Authorize(Roles = "Coordinator,Admin,Volunteer,CaseManager,VolunteerCoordinator")]
 public class VolunteersController : BaseApiController
 {
     private readonly ApplicationDbContext _context;
@@ -35,7 +35,7 @@ public class VolunteersController : BaseApiController
     // 2. Volunteer Directory Endpoints
     // ─────────────────────────────────────────────────────────────────────────────
     [HttpGet]
-    [Authorize(Roles = "Coordinator,Admin,Volunteer,CaseManager")]
+    [Authorize(Roles = "Coordinator,Admin,Volunteer,CaseManager,VolunteerCoordinator")]
     public async Task<ActionResult<Result<IReadOnlyList<VolunteerCoordinatorDto>>>> GetAll(
         [FromQuery] string? search,
         [FromQuery] string? status,
@@ -156,7 +156,7 @@ public class VolunteersController : BaseApiController
     }
 
     [HttpPost("assign")]
-    [Authorize(Roles = "Coordinator,Admin")]
+    [Authorize(Roles = "Coordinator,Admin,VolunteerCoordinator")]
     public async Task<ActionResult<Result<bool>>> AssignTask(
         [FromBody] AssignTaskDto dto,
         CancellationToken cancellationToken = default)

@@ -107,6 +107,17 @@ public static class DatabaseSeeder
                     AssignedDistrict = "Western Province / Colombo Shelters",
                     Role = UserRole.ShelterManager,
                     IsActive = true
+                },
+                new User
+                {
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999999"),
+                    FullName = "Kavindi Rodrigo",
+                    Email = "volunteer.coordinator@reliefcore.org",
+                    PasswordHash = defaultPasswordHash,
+                    PhoneNumber = "+94 77 987 6543",
+                    AssignedDistrict = "Western Province Flood Operations",
+                    Role = UserRole.VolunteerCoordinator,
+                    IsActive = true
                 }
             };
 
@@ -141,6 +152,20 @@ public static class DatabaseSeeder
                     PhoneNumber = "+94 77 123 4567",
                     AssignedDistrict = "Western Province / Colombo Shelters",
                     Role = UserRole.ShelterManager,
+                    IsActive = true
+                });
+            }
+            if (!await context.Users.AnyAsync(u => u.Role == UserRole.VolunteerCoordinator))
+            {
+                context.Users.Add(new User
+                {
+                    Id = Guid.Parse("99999999-9999-9999-9999-999999999999"),
+                    FullName = "Kavindi Rodrigo",
+                    Email = "volunteer.coordinator@reliefcore.org",
+                    PasswordHash = defaultPasswordHash,
+                    PhoneNumber = "+94 77 987 6543",
+                    AssignedDistrict = "Western Province Flood Operations",
+                    Role = UserRole.VolunteerCoordinator,
                     IsActive = true
                 });
             }

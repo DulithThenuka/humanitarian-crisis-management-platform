@@ -313,6 +313,24 @@ export const LandingHomePage = () => {
       ]
     },
     {
+      id: 'volunteer-coordinator',
+      title: 'Volunteer Coordinator',
+      desc: 'Operational dashboard tracking volunteer readiness, task assignments, crisis coordination handoffs, and verification workflows.',
+      path: '/volunteer-coordinator',
+      badge: 'Coordinator HQ',
+      icon: Users,
+      color: '#10b981',
+      featured: 'Volunteer readiness, AI task matching & credential verification',
+      sublinks: [
+        { label: 'Coordinator Cockpit', path: '/volunteer-coordinator' },
+        { label: 'Volunteer Directory', path: '/volunteer-coordinator/directory' },
+        { label: 'Scheduling & Shifts', path: '/volunteer-coordinator/scheduling' },
+        { label: 'AI Matching Engine', path: '/volunteer-coordinator/ai-matching' },
+        { label: 'Activity & Safety', path: '/volunteer-coordinator/activity-safety' },
+        { label: 'Operational Reports', path: '/volunteer-coordinator/reports' }
+      ]
+    },
+    {
       id: 'donor',
       title: 'Donor & Funding Management',
       desc: 'Controlled funding workspace, dual authorization allocations, monetary & in-kind records, transparency tracking, and emergency aid packages.',

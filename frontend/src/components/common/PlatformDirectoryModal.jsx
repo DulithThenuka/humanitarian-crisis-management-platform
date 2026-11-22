@@ -395,6 +395,17 @@ export const PLATFORM_PAGES = [
     highlight: 'Shift Check-in & Missions'
   },
   {
+    id: 'volunteer-coordinator-portal',
+    category: 'Volunteer Management',
+    name: 'Volunteer Coordinator Portal',
+    path: '/volunteer-coordinator',
+    description: 'Operational command dashboard tracking volunteer readiness, task assignments, crisis coordination handoffs, and verification workflows.',
+    badge: 'Module 06',
+    icon: Users,
+    color: '#10b981',
+    highlight: 'Roster Readiness & Verification'
+  },
+  {
     id: 'volunteer-opportunities',
     category: 'Volunteer Management',
     name: 'Volunteer Mission Opportunities',

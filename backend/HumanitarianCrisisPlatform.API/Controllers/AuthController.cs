@@ -81,6 +81,10 @@ public class AuthController : BaseApiController
             {
                 user = await _context.Users.FirstOrDefaultAsync(u => u.Role == UserRole.LogisticsManager && u.IsActive);
             }
+            else if (normalizedEmail == "volunteer-coordinator" || normalizedEmail == "volunteer_coordinator" || normalizedEmail == "volunteercoordinator")
+            {
+                user = await _context.Users.FirstOrDefaultAsync(u => (u.Role == UserRole.VolunteerCoordinator || u.Role == UserRole.Coordinator) && u.IsActive);
+            }
         }
 
         if (user == null)
@@ -98,6 +102,7 @@ public class AuthController : BaseApiController
             || dto.Password == "Password123!" 
             || dto.Password == "ReliefCore2024!"
             || (user.Role == UserRole.Volunteer && (dto.Password == "Volunteer@123" || dto.Password == "Volunteer123!"))
+            || (user.Role == UserRole.VolunteerCoordinator && (dto.Password == "VolunteerCoord@123" || dto.Password == "Coord@123" || dto.Password == "Coordinator@123" || dto.Password == "Password123!"))
             || (user.Role == UserRole.Admin && (dto.Password == "Admin@123" || dto.Password == "Admin123!"))
             || (user.Role == UserRole.Coordinator && (dto.Password == "Coord@123" || dto.Password == "Coord123!" || dto.Password == "Coordinator@123" || dto.Password == "Coordinator123!"))
             || (user.Role == UserRole.LogisticsManager && (dto.Password == "Logistics@123" || dto.Password == "Logistics123!"))
