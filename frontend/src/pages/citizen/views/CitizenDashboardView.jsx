@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   FileText,
   Clock,
@@ -12,89 +12,174 @@ import {
   ChevronRight,
   ShieldCheck,
   Compass,
-  MessageSquare
+  MessageSquare,
+  Building2,
+  RefreshCw
 } from 'lucide-react';
 import { adminService } from '../../../services/adminService';
-import {
-  DASHBOARD_METRICS,
-  RECENT_REQUESTS,
-  ACTIVE_REQUEST_PROGRESS
-} from '../data/citizenPortalData';
+import { requestService } from '../../../services/requestService';
+import { shelterService } from '../../../services/shelterService';
+import { useAuth } from '../../../context/AuthContext';
+import { useRealtimeRefresh } from '../../../hooks/useRealtimeRefresh';
 
 export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
+  const { user } = useAuth();
   const [activeAlert, setActiveAlert] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [shelters, setShelters] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
-    adminService.getActiveBroadcasts()
-      .then(res => {
-        if (!isMounted) return;
-        const list = res?.succeeded && Array.isArray(res.data) ? res.data : Array.isArray(res) ? res : [];
+  const refreshDashboard = useCallback(async () => {
+    try {
+      // 1. Fetch active alerts
+      try {
+        const alertRes = await adminService.getActiveBroadcasts();
+        const list = alertRes?.succeeded && Array.isArray(alertRes.data)
+          ? alertRes.data
+          : Array.isArray(alertRes)
+          ? alertRes
+          : [];
         if (list.length > 0) {
           setActiveAlert(list[0]);
         }
-      })
-      .catch(() => {});
-    return () => { isMounted = false; };
+      } catch (e) {
+        // non-fatal
+      }
+
+      // 2. Fetch citizen's requests
+      try {
+        const reqRes = await requestService.getAll();
+        const reqList = reqRes?.data || (Array.isArray(reqRes) ? reqRes : []);
+        if (Array.isArray(reqList)) {
+          setRequests(reqList);
+        }
+      } catch (e) {
+        // non-fatal
+      }
+
+      // 3. Fetch shelters
+      try {
+        const shRes = await shelterService.getAll();
+        const shList = shRes?.data || (Array.isArray(shRes) ? shRes : []);
+        if (Array.isArray(shList)) {
+          setShelters(shList.slice(0, 3));
+        }
+      } catch (e) {
+        // non-fatal
+      }
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    refreshDashboard();
+  }, [refreshDashboard]);
+
+  // Real-time synchronization
+  useRealtimeRefresh(['assistancerequests', 'broadcasts', 'shelters'], refreshDashboard);
+
+  // Compute metrics from actual citizen requests
+  const activeRequests = requests.filter(
+    (r) => r.status !== 3 && r.status !== 'Resolved' && r.status !== 'Closed'
+  );
+  const awaitingReview = requests.filter(
+    (r) => r.status === 0 || r.status === 'Submitted'
+  );
+  const inProgress = requests.filter(
+    (r) =>
+      r.status === 1 ||
+      r.status === 'Verified' ||
+      r.status === 2 ||
+      r.status === 'InProgress'
+  );
+  const completedRequests = requests.filter(
+    (r) => r.status === 3 || r.status === 'Resolved' || r.status === 'Closed'
+  );
+
+  // Latest active request for the progression tracker
+  const latestActive = activeRequests[0] || requests[0] || null;
+
+  const getStatusStep = (req) => {
+    if (!req) return 1;
+    const s = req.status;
+    if (s === 3 || s === 'Resolved' || s === 'Closed') return 4;
+    if (s === 2 || s === 'InProgress') return 3;
+    if (s === 1 || s === 'Verified') return 2;
+    return 1;
+  };
+
+  const currentStepNum = getStatusStep(latestActive);
+
+  const todayFormatted = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).toUpperCase();
+
+  const citizenName = user?.fullName || 'Citizen';
 
   return (
     <div className="cp-view-container">
-      {/* 1. Verified Flood Warning Red Alert Banner */}
-      <div className="cp-warning-banner">
-        <div className="cp-warning-left">
-          <AlertTriangle size={18} className="cp-warning-icon" />
-          <div>
-            <span className="cp-warning-bold">
-              {activeAlert ? `${activeAlert.title} · ${activeAlert.targetRegion || 'Western Province'}` : 'Verified flood warning · Kelani East'}
+      {/* 1. Verified Crisis Alert Banner */}
+      {activeAlert && (
+        <div className="cp-warning-banner">
+          <div className="cp-warning-left">
+            <AlertTriangle size={18} className="cp-warning-icon" />
+            <div>
+              <span className="cp-warning-bold">
+                {activeAlert.title} · {activeAlert.targetRegion || 'Western Province'}
+              </span>
+              <span className="cp-warning-text">{activeAlert.message}</span>
+            </div>
+          </div>
+          <div className="cp-warning-right">
+            <span
+              style={{
+                padding: '3px 8px',
+                borderRadius: '12px',
+                fontSize: '11px',
+                fontWeight: 700,
+                backgroundColor:
+                  (activeAlert?.severity || 'Critical').toLowerCase() === 'warning'
+                    ? '#fef3c7'
+                    : '#fee2e2',
+                color:
+                  (activeAlert?.severity || 'Critical').toLowerCase() === 'warning'
+                    ? '#b45309'
+                    : '#dc2626'
+              }}
+            >
+              ● {activeAlert.severity || 'Critical'}
             </span>
-            <span className="cp-warning-text">
-              {activeAlert ? activeAlert.message : 'Avoid flooded roads and follow official evacuation guidance.'}
-            </span>
+            <button
+              onClick={() => onSelectTab('alerts')}
+              className="cp-btn-secondary"
+              style={{ padding: '4px 10px', fontSize: '11.5px' }}
+            >
+              View alert
+            </button>
           </div>
         </div>
-        <div className="cp-warning-right">
-          <span
-            style={{
-              padding: '3px 8px',
-              borderRadius: '12px',
-              fontSize: '11px',
-              fontWeight: 700,
-              backgroundColor: (activeAlert?.severity || 'Critical').toLowerCase() === 'warning' ? '#fef3c7' : '#fee2e2',
-              color: (activeAlert?.severity || 'Critical').toLowerCase() === 'warning' ? '#b45309' : '#dc2626'
-            }}
-          >
-            ● {activeAlert?.severity || 'Critical'}
-          </span>
-          <button
-            onClick={() => onSelectTab('alerts')}
-            className="cp-btn-secondary"
-            style={{ padding: '4px 10px', fontSize: '11.5px' }}
-          >
-            View alert
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* 2. Welcome Header */}
       <div className="cp-view-header">
         <div>
-          <span className="cp-view-pretitle">WEDNESDAY, 18 FEBRUARY 2026</span>
-          <h1 className="cp-view-title">Hello, Nimal</h1>
+          <span className="cp-view-pretitle">{todayFormatted}</span>
+          <h1 className="cp-view-title">Hello, {citizenName}</h1>
           <p className="cp-view-subtitle">We are here to help you and your family.</p>
         </div>
         <div>
-          <button
-            onClick={() => onSelectTab('submit')}
-            className="cp-btn-primary"
-          >
+          <button onClick={() => onSelectTab('submit')} className="cp-btn-primary">
             <Plus size={16} />
             Submit Assistance Request
           </button>
         </div>
       </div>
 
-      {/* 3. 4 Metrics Cards */}
+      {/* 3. 4 Metrics Cards (Calculated from real database requests) */}
       <div className="cp-metrics-grid">
         <div className="cp-metric-card">
           <div className="cp-metric-icon-box" style={{ backgroundColor: '#eff6ff', color: '#2563eb' }}>
@@ -102,7 +187,7 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
           </div>
           <div>
             <div className="cp-metric-title">Active Requests</div>
-            <div className="cp-metric-val">{DASHBOARD_METRICS.activeRequests}</div>
+            <div className="cp-metric-val">{activeRequests.length}</div>
           </div>
         </div>
 
@@ -112,7 +197,7 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
           </div>
           <div>
             <div className="cp-metric-title">Awaiting Review</div>
-            <div className="cp-metric-val">{DASHBOARD_METRICS.awaitingReview}</div>
+            <div className="cp-metric-val">{awaitingReview.length}</div>
           </div>
         </div>
 
@@ -121,406 +206,294 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
             <HeartHandshake size={18} />
           </div>
           <div>
-            <div className="cp-metric-title">Assistance In Progress</div>
-            <div className="cp-metric-val">{DASHBOARD_METRICS.assistanceInProgress}</div>
+            <div className="cp-metric-title">Assistance in Progress</div>
+            <div className="cp-metric-val">{inProgress.length}</div>
           </div>
         </div>
 
         <div className="cp-metric-card">
-          <div className="cp-metric-icon-box" style={{ backgroundColor: '#ecfdf5', color: '#16a34a' }}>
+          <div className="cp-metric-icon-box" style={{ backgroundColor: '#f5f3ff', color: '#7c3aed' }}>
             <CheckCircle size={18} />
           </div>
           <div>
             <div className="cp-metric-title">Completed Requests</div>
-            <div className="cp-metric-val">{DASHBOARD_METRICS.completedRequests}</div>
+            <div className="cp-metric-val">{completedRequests.length}</div>
           </div>
         </div>
       </div>
 
-      {/* 4. Top Grid: Recent Requests & Request Progress */}
+      {/* 4. Active Request Progress Box */}
+      <div className="cp-card cp-active-progress-card">
+        <div className="cp-progress-header">
+          <div>
+            <span className="cp-progress-pretitle">YOUR ACTIVE REQUEST</span>
+            <h2 className="cp-progress-title">
+              {latestActive
+                ? `${latestActive.category || 'Emergency Assistance'} · REQ-${latestActive.id.toString().substring(0, 8).toUpperCase()}`
+                : 'No Active Requests at this time'}
+            </h2>
+          </div>
+          <div>
+            {latestActive ? (
+              <button
+                onClick={() => onSelectTab('requests')}
+                className="cp-btn-secondary"
+                style={{ fontSize: '12px', padding: '6px 12px' }}
+              >
+                View full request details
+              </button>
+            ) : (
+              <button
+                onClick={() => onSelectTab('submit')}
+                className="cp-btn-primary"
+                style={{ fontSize: '12px', padding: '6px 12px' }}
+              >
+                <Plus size={14} /> Submit New Request
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 4 Stepper Steps */}
+        <div className="cp-stepper">
+          <div className={`cp-step ${currentStepNum >= 1 ? 'completed' : ''}`}>
+            <div className="cp-step-circle">
+              {currentStepNum > 1 ? '✓' : '1'}
+            </div>
+            <div className="cp-step-label">Request submitted</div>
+            <div className="cp-step-time">
+              {latestActive?.createdAt ? new Date(latestActive.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Verified'}
+            </div>
+          </div>
+
+          <div className={`cp-step-line ${currentStepNum >= 2 ? 'active' : ''}`} />
+
+          <div className={`cp-step ${currentStepNum === 1 ? 'current' : currentStepNum >= 2 ? 'completed' : ''}`}>
+            <div className="cp-step-circle">
+              {currentStepNum > 2 ? '✓' : '2'}
+            </div>
+            <div className="cp-step-label">Under review</div>
+            <div className="cp-step-time">{currentStepNum === 1 ? 'Current' : currentStepNum > 1 ? 'Completed' : 'Pending'}</div>
+          </div>
+
+          <div className={`cp-step-line ${currentStepNum >= 3 ? 'active' : ''}`} />
+
+          <div className={`cp-step ${currentStepNum === 2 ? 'current' : currentStepNum >= 3 ? 'completed' : ''}`}>
+            <div className="cp-step-circle">
+              {currentStepNum > 3 ? '✓' : '3'}
+            </div>
+            <div className="cp-step-label">Verified & Approved</div>
+            <div className="cp-step-time">{currentStepNum === 2 ? 'Current' : currentStepNum > 2 ? 'Completed' : 'Upcoming'}</div>
+          </div>
+
+          <div className={`cp-step-line ${currentStepNum >= 4 ? 'active' : ''}`} />
+
+          <div className={`cp-step ${currentStepNum === 3 ? 'current' : currentStepNum >= 4 ? 'completed' : ''}`}>
+            <div className="cp-step-circle">4</div>
+            <div className="cp-step-label">Assistance fulfilled</div>
+            <div className="cp-step-time">{currentStepNum >= 4 ? 'Fulfilled' : 'Upcoming'}</div>
+          </div>
+        </div>
+
+        {/* Help notification beneath tracker */}
+        <div className="cp-progress-alert">
+          <Clock size={16} color="#1e3d2c" style={{ flexShrink: 0 }} />
+          <span>
+            {latestActive
+              ? `Authorized coordinators are coordinating response for this request. Location: ${latestActive.address || 'Western Province'} · Affecting ${latestActive.numberOfPeople || 1} individuals.`
+              : 'You do not have any pending relief requests. If you require emergency food, clean water, medical aid or shelter, click Submit Assistance Request.'}
+          </span>
+        </div>
+      </div>
+
+      {/* 5. 2-Column Split: Recent Requests (Left) & Verified Shelters / Quick Links (Right) */}
       <div className="cp-grid-split">
-        {/* Left: My Recent Requests */}
+        {/* Left Column: Recent Requests */}
         <div className="cp-card">
-          <div className="cp-card-header-flex">
+          <div className="cp-card-header">
             <div>
-              <h2 className="cp-card-title">My recent requests</h2>
-              <p className="cp-card-subtitle">Only requests submitted from your account</p>
+              <span className="cp-card-pretitle">SUBMISSION HISTORY</span>
+              <h3 className="cp-card-title">My recent requests</h3>
             </div>
             <button
               onClick={() => onSelectTab('requests')}
-              style={{ background: 'none', border: 'none', color: '#1e3d2c', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+              className="cp-link-btn"
+              style={{ fontSize: '12px' }}
             >
-              View all &gt;
+              View all ({requests.length}) &gt;
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {RECENT_REQUESTS.map((req) => (
-              <div
-                key={req.id}
-                className="cp-request-row"
-                onClick={() => onSelectTab('requests')}
+          {requests.length === 0 && !loading && (
+            <div style={{ textAlign: 'center', padding: '30px 10px', color: '#738075' }}>
+              <FileText size={28} style={{ margin: '0 auto 8px auto', color: '#9fa89e' }} />
+              <div style={{ fontSize: '13px', fontWeight: 600 }}>No requests submitted yet</div>
+              <div style={{ fontSize: '11px', marginTop: '2px' }}>
+                Your submitted assistance requests will appear here.
+              </div>
+            </div>
+          )}
+
+          <div className="cp-requests-list">
+            {requests.slice(0, 3).map((r) => {
+              const isResolved = r.status === 3 || r.status === 'Resolved' || r.status === 'Closed';
+              const isVerified = r.status === 1 || r.status === 'Verified';
+              const isInProg = r.status === 2 || r.status === 'InProgress';
+
+              const statusText = isResolved
+                ? 'Completed'
+                : isInProg
+                ? 'In Progress'
+                : isVerified
+                ? 'Verified'
+                : 'Under Review';
+
+              const catLower = (r.category || '').toLowerCase();
+              const icon = catLower.includes('water') ? (
+                <Droplet size={18} />
+              ) : catLower.includes('med') ? (
+                <HeartPulse size={18} />
+              ) : (
+                <Home size={18} />
+              );
+
+              return (
+                <div
+                  key={r.id}
+                  className="cp-request-row"
+                  onClick={() => onSelectTab('requests')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="cp-request-left">
+                    <div className="cp-request-icon-box">{icon}</div>
+                    <div>
+                      <div className="cp-request-title">
+                        {r.category || 'Assistance Request'} · REQ-{r.id.toString().substring(0, 8).toUpperCase()}
+                      </div>
+                      <div className="cp-request-meta">
+                        {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Recent'} · {r.numberOfPeople || 1} people · {r.address || 'Western Province'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="cp-request-right">
+                    <span
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '10px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        backgroundColor: isResolved ? '#ecfdf5' : isVerified ? '#eff6ff' : '#fef3c7',
+                        color: isResolved ? '#047857' : isVerified ? '#1d4ed8' : '#92400e'
+                      }}
+                    >
+                      ● {statusText}
+                    </span>
+                    <span className="cp-request-updated">
+                      {isResolved ? 'Resolved' : 'Active'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right Column: Verified Shelters & Helpline */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Shelters Mini Card */}
+          <div className="cp-card">
+            <div className="cp-card-header">
+              <div>
+                <span className="cp-card-pretitle">NEARBY SAFE LOCATIONS</span>
+                <h3 className="cp-card-title">Verified relief shelters</h3>
+              </div>
+              <button
+                onClick={() => onSelectTab('shelters')}
+                className="cp-link-btn"
+                style={{ fontSize: '12px' }}
               >
-                <div className="cp-req-left">
-                  <div className="cp-req-icon-box">
-                    {req.iconType === 'home' && <Home size={16} />}
-                    {req.iconType === 'droplet' && <Droplet size={16} />}
-                    {req.iconType === 'medical' && <HeartPulse size={16} />}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#162e20' }}>
-                      {req.category}
+                Find shelters &gt;
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {shelters.map((sh, idx) => (
+                <div
+                  key={sh.id || idx}
+                  onClick={() => onSelectTab('shelters')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    backgroundColor: '#f8faf7',
+                    border: '1px solid #edf1eb',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div
+                      style={{
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '6px',
+                        backgroundColor: '#edf4ec',
+                        color: '#1e3d2c',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <Building2 size={16} />
                     </div>
-                    <div style={{ fontSize: '11px', color: '#738075' }}>
-                      {req.id} · {req.date}
+                    <div>
+                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#162e20' }}>
+                        {sh.name || sh.facilityName}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#738075' }}>
+                        {sh.district || 'Western Province'} · {sh.availableCapacity ?? 50} beds remaining
+                      </div>
                     </div>
                   </div>
+                  <ChevronRight size={14} color="#9fa89e" />
                 </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <span
-                    style={{
-                      padding: '3px 9px',
-                      borderRadius: '12px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      backgroundColor: req.statusType === 'completed' ? '#ecfdf5' : '#fef3c7',
-                      color: req.statusType === 'completed' ? '#047857' : '#92400e'
-                    }}
-                  >
-                    ● {req.status}
-                  </span>
-                  <span style={{ fontSize: '11px', color: '#738075' }}>{req.updated}</span>
-                  <ChevronRight size={15} color="#9fa89e" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right: Request Progress */}
-        <div className="cp-card">
-          <div className="cp-card-header-flex">
-            <div>
-              <h2 className="cp-card-title">Request progress</h2>
-              <p className="cp-card-subtitle">{ACTIVE_REQUEST_PROGRESS.id} · {ACTIVE_REQUEST_PROGRESS.title}</p>
+              ))}
             </div>
           </div>
 
-          {/* Vertical Stepper */}
-          <div className="cp-stepper-list">
-            {ACTIVE_REQUEST_PROGRESS.steps.map((st, idx) => (
-              <div key={idx} className="cp-step-item">
-                <div className={`cp-step-bullet ${st.status}`}>
-                  {st.status === 'completed' ? '✓' : idx + 1}
-                </div>
-                <div className="cp-step-title">{st.label}</div>
-                <div className="cp-step-sub">{st.time}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* What happens next box */}
-          <div className="cp-next-box">
-            <Clock size={16} style={{ color: '#1e3d2c', flexShrink: 0, marginTop: '2px' }} />
-            <div>
-              <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#162e20', marginBottom: '2px' }}>
-                What happens next
-              </div>
-              <div style={{ fontSize: '11px', color: '#334135', lineHeight: 1.4 }}>
-                {ACTIVE_REQUEST_PROGRESS.nextInfo}
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => onSelectTab('requests')}
-            className="cp-btn-secondary"
-            style={{ width: '100%', justifyContent: 'center' }}
-          >
-            Track request
-          </button>
-        </div>
-      </div>
-
-      {/* 5. Bottom Grid (Screenshot 2): Nearby Assistance & Quick Actions */}
-      <div className="cp-grid-split">
-        {/* Left: Nearby Assistance Map Preview */}
-        <div className="cp-card" style={{ padding: '16px' }}>
-          <div className="cp-card-header-flex" style={{ marginBottom: '12px' }}>
-            <div>
-              <h2 className="cp-card-title">Nearby assistance</h2>
-              <p className="cp-card-subtitle">Prototype locations — verify before travel</p>
-            </div>
-            <button
-              onClick={() => onSelectTab('shelters')}
-              style={{ background: 'none', border: 'none', color: '#1e3d2c', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
-            >
-              See all
-            </button>
-          </div>
-
-          {/* Map Graphic Box */}
+          {/* Emergency Helpline Box */}
           <div
             style={{
-              position: 'relative',
-              height: '190px',
-              backgroundColor: '#e6ece3',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              marginBottom: '12px'
-            }}
-          >
-            {/* Background SVG roads & zones */}
-            <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0 }}>
-              <polygon points="0,0 200,0 120,190 0,190" fill="#dce6d8" />
-              <polygon points="200,0 450,0 520,190 120,190" fill="#d3e0cf" />
-              <polygon points="450,0 800,0 800,190 520,190" fill="#dce6d8" />
-              {/* Roads */}
-              <line x1="0" y1="90" x2="800" y2="120" stroke="#ffffff" strokeWidth="4" />
-              <line x1="300" y1="0" x2="250" y2="190" stroke="#ffffff" strokeWidth="3" />
-              <line x1="150" y1="190" x2="600" y2="20" stroke="#ffffff" strokeWidth="2.5" />
-              {/* Radius circles */}
-              <circle cx="170" cy="115" r="55" fill="rgba(239, 68, 68, 0.15)" stroke="#ef4444" strokeWidth="1" />
-              <circle cx="410" cy="120" r="50" fill="rgba(30, 61, 44, 0.12)" stroke="#1e3d2c" strokeWidth="1" />
-            </svg>
-
-            {/* Pins on top */}
-            {/* Red Pin */}
-            <div
-              style={{
-                position: 'absolute',
-                left: '140px',
-                top: '100px',
-                backgroundColor: '#dc2626',
-                color: '#ffffff',
-                fontSize: '10px',
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
-              }}
-            >
-              <AlertTriangle size={11} />
-              11 spaces
-            </div>
-
-            {/* Blue Depot Pin */}
-            <div
-              style={{
-                position: 'absolute',
-                right: '180px',
-                top: '40px',
-                backgroundColor: '#2563eb',
-                color: '#ffffff',
-                fontSize: '10px',
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: '12px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
-              }}
-            >
-              RES-021 · 240
-            </div>
-
-            {/* Dark Green Shelter Pin */}
-            <div
-              style={{
-                position: 'absolute',
-                right: '120px',
-                bottom: '40px',
-                backgroundColor: '#14291e',
-                color: '#ffffff',
-                fontSize: '10px',
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
-              }}
-            >
-              <Home size={11} />
-              SH-008 · 36 spaces
-            </div>
-
-            {/* Visible Layers Card (Floating Left) */}
-            <div
-              style={{
-                position: 'absolute',
-                left: '12px',
-                bottom: '12px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #d4ded3',
-                borderRadius: '6px',
-                padding: '6px 10px',
-                fontSize: '9.5px',
-                fontWeight: 600,
-                color: '#405044',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
-              }}
-            >
-              <div style={{ fontWeight: 700, color: '#162e20', marginBottom: '3px' }}>Visible layers</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#dc2626' }} />
-                <span>Critical requests</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }} />
-                <span>Verified shelters</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#2563eb' }} />
-                <span>Resource depots</span>
-              </div>
-            </div>
-
-            {/* Zoom Controls (Right) */}
-            <div
-              style={{
-                position: 'absolute',
-                right: '12px',
-                top: '12px',
-                display: 'flex',
-                flexDirection: 'column',
-                backgroundColor: '#ffffff',
-                border: '1px solid #d4ded3',
-                borderRadius: '6px',
-                overflow: 'hidden'
-              }}
-            >
-              <button style={{ border: 'none', background: 'transparent', padding: '4px 8px', fontSize: '12px', cursor: 'pointer' }}>+</button>
-              <div style={{ height: '1px', backgroundColor: '#e2e8dd' }} />
-              <button style={{ border: 'none', background: 'transparent', padding: '4px 8px', fontSize: '12px', cursor: 'pointer' }}>-</button>
-            </div>
-          </div>
-
-          {/* Bottom Card for Shelter Summary */}
-          <div
-            style={{
+              padding: '16px',
+              backgroundColor: '#edf4ec',
+              border: '1px solid #d4ded3',
+              borderRadius: '10px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '10px 12px',
-              backgroundColor: '#f8faf7',
-              borderRadius: '8px',
-              border: '1px solid #edf1eb'
+              justifyContent: 'space-between'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '6px',
-                  backgroundColor: '#edf4ec',
-                  color: '#1e3d2c',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <Home size={15} />
+            <div>
+              <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#162e20' }}>
+                Emergency Crisis Dispatch Hotline
               </div>
-              <div>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: '#162e20' }}>
-                  Kelani Community Help Centre
-                </div>
-                <div style={{ fontSize: '10.5px', color: '#738075' }}>
-                  1.8 km · Accessible entrance · Medical support
-                </div>
+              <div style={{ fontSize: '11px', color: '#657367', marginTop: '2px' }}>
+                Toll-free 24/7 National Emergency Call Centre
               </div>
             </div>
-
-            <span
+            <a
+              href="tel:119"
+              className="cp-btn-primary"
               style={{
-                padding: '2px 8px',
-                borderRadius: '10px',
-                fontSize: '10.5px',
-                fontWeight: 600,
-                backgroundColor: '#ecfdf5',
-                color: '#047857'
+                padding: '6px 14px',
+                fontSize: '12px',
+                textDecoration: 'none'
               }}
             >
-              ● Verified
-            </span>
-          </div>
-        </div>
-
-        {/* Right: Quick Actions (2x2 Grid) */}
-        <div className="cp-card">
-          <div className="cp-card-header-flex">
-            <h2 className="cp-card-title">Quick actions</h2>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div
-              className="cp-cat-card"
-              onClick={() => onSelectTab('submit')}
-              style={{ minHeight: '65px', padding: '12px', alignItems: 'flex-start', textAlign: 'left' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Plus size={16} color="#1e3d2c" />
-                  <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#162e20' }}>
-                    Submit a new request
-                  </span>
-                </div>
-                <ChevronRight size={15} color="#9fa89e" />
-              </div>
-            </div>
-
-            <div
-              className="cp-cat-card"
-              onClick={() => onSelectTab('requests')}
-              style={{ minHeight: '65px', padding: '12px', alignItems: 'flex-start', textAlign: 'left' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FileText size={16} color="#1e3d2c" />
-                  <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#162e20' }}>
-                    Track an existing request
-                  </span>
-                </div>
-                <ChevronRight size={15} color="#9fa89e" />
-              </div>
-            </div>
-
-            <div
-              className="cp-cat-card"
-              onClick={() => onSelectTab('shelters')}
-              style={{ minHeight: '65px', padding: '12px', alignItems: 'flex-start', textAlign: 'left' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Home size={16} color="#1e3d2c" />
-                  <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#162e20' }}>
-                    Find nearby shelters
-                  </span>
-                </div>
-                <ChevronRight size={15} color="#9fa89e" />
-              </div>
-            </div>
-
-            <div
-              className="cp-cat-card"
-              onClick={() => onSelectTab('support')}
-              style={{ minHeight: '65px', padding: '12px', alignItems: 'flex-start', textAlign: 'left' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <MessageSquare size={16} color="#1e3d2c" />
-                  <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#162e20' }}>
-                    Contact support
-                  </span>
-                </div>
-                <ChevronRight size={15} color="#9fa89e" />
-              </div>
-            </div>
+              Call 119
+            </a>
           </div>
         </div>
       </div>

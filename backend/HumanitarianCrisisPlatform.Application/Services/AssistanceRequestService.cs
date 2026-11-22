@@ -75,12 +75,14 @@ public class AssistanceRequestService : IAssistanceRequestService
     public async Task<Result<IReadOnlyList<AssistanceRequestResponseDto>>> GetAllAsync(
         RequestStatus? status = null,
         PriorityLevel? urgency = null,
+        Guid? requestorId = null,
         CancellationToken cancellationToken = default)
     {
         var items = await _repository.GetAllAsync(cancellationToken);
         var query = items.AsEnumerable();
         if (status.HasValue) query = query.Where(r => r.Status == status.Value);
         if (urgency.HasValue) query = query.Where(r => r.Urgency == urgency.Value);
+        if (requestorId.HasValue && requestorId.Value != Guid.Empty) query = query.Where(r => r.RequestorId == requestorId.Value);
         return Result<IReadOnlyList<AssistanceRequestResponseDto>>.Success(query.Select(MapToDto).ToList());
     }
 

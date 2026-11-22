@@ -23,6 +23,10 @@ const normalizeUserObject = (payload, token) => {
     name: fullName,
     initials,
     email: payload.email || '',
+    phoneNumber: payload.phoneNumber || payload.phone || '',
+    phone: payload.phoneNumber || payload.phone || '',
+    assignedDistrict: payload.assignedDistrict || payload.location || '',
+    location: payload.assignedDistrict || payload.location || '',
     role: payload.role || 'CaseManager',
     expiresAt: payload.expiresAt || null,
     token

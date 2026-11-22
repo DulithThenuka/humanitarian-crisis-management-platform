@@ -115,6 +115,8 @@ public class AuthController : BaseApiController
             UserId = user.Id,
             FullName = user.FullName,
             Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
             Role = user.Role.ToString(),
             ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }, "Login successful"));
@@ -191,6 +193,8 @@ public class AuthController : BaseApiController
             UserId = user.Id,
             FullName = user.FullName,
             Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
             Role = user.Role.ToString(),
             ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }, "Registration successful"));
@@ -212,9 +216,55 @@ public class AuthController : BaseApiController
             UserId = user.Id,
             FullName = user.FullName,
             Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
             Role = user.Role.ToString(),
             ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }));
+    }
+
+    [Authorize]
+    [HttpPut("me")]
+    public async Task<ActionResult<Result<AuthResponseDto>>> UpdateCurrentUser([FromBody] UpdateProfileRequestDto dto)
+    {
+        if (CurrentUserId == Guid.Empty)
+        {
+            return Unauthorized(Result<AuthResponseDto>.Failure("User is not authenticated."));
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == CurrentUserId);
+        if (user == null)
+        {
+            return NotFound(Result<AuthResponseDto>.Failure("Authenticated user profile could not be found."));
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.FullName))
+        {
+            user.FullName = dto.FullName.Trim();
+        }
+        if (dto.PhoneNumber != null)
+        {
+            user.PhoneNumber = dto.PhoneNumber.Trim();
+        }
+        if (dto.AssignedDistrict != null)
+        {
+            user.AssignedDistrict = dto.AssignedDistrict.Trim();
+        }
+
+        user.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return Ok(Result<AuthResponseDto>.Success(new AuthResponseDto
+        {
+            Token = JwtSettings.NormalizeBearerToken(Request.Headers.Authorization.ToString()) ?? string.Empty,
+            UserId = user.Id,
+            FullName = user.FullName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
+            Role = user.Role.ToString(),
+            ExpiresAt = _tokenGenerator.GetExpirationUtc()
+        }, "Profile updated successfully"));
     }
 
     [HttpPost("logout")]

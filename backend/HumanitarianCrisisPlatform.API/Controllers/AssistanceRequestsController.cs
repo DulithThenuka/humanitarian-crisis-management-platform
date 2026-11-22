@@ -26,9 +26,15 @@ public class AssistanceRequestsController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<Result<IReadOnlyList<AssistanceRequestResponseDto>>>> GetAll(
         [FromQuery] RequestStatus? status,
-        [FromQuery] PriorityLevel? urgency)
+        [FromQuery] PriorityLevel? urgency,
+        [FromQuery] Guid? requestorId)
     {
-        var result = await _service.GetAllAsync(status, urgency);
+        if (User.IsInRole("Citizen") && CurrentUserId != Guid.Empty)
+        {
+            requestorId = CurrentUserId;
+        }
+
+        var result = await _service.GetAllAsync(status, urgency, requestorId);
         return Ok(result);
     }
 

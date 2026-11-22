@@ -18,6 +18,7 @@ import {
 import { adminService } from '../../../services/adminService';
 import { homeService } from '../../../services/homeService';
 import { EMERGENCY_ALERTS_LIST } from '../data/citizenPortalData';
+import { useRealtimeRefresh } from '../../../hooks/useRealtimeRefresh';
 
 const formatAlertTime = (dateStr) => {
   if (!dateStr) return 'Verified';
@@ -113,6 +114,8 @@ export const EmergencyAlertsView = ({ showToast }) => {
   useEffect(() => {
     fetchAlerts();
   }, []);
+
+  useRealtimeRefresh(['broadcasts', 'alerts'], fetchAlerts);
 
   const normalizedAlerts = useMemo(() => {
     return (broadcasts || []).map((b) => {
