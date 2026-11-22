@@ -19,6 +19,14 @@ import {
 } from 'lucide-react';
 import { requestService } from '../../../services/requestService';
 import { useRealtimeRefresh } from '../../../hooks/useRealtimeRefresh';
+import {
+  safeString,
+  safeLower,
+  safeUpper,
+  normalizeUrgency,
+  normalizeRequestStatus,
+  formatRequestId
+} from '../utils/citizenDataUtils';
 
 export const MyRequestsView = ({ onSelectTab, showToast }) => {
   const [requestsList, setRequestsList] = useState([]);
@@ -37,9 +45,10 @@ export const MyRequestsView = ({ onSelectTab, showToast }) => {
       const raw = res?.data || (Array.isArray(res) ? res : []);
       if (Array.isArray(raw)) {
         const mapped = raw.map((r, idx) => {
-          const isCompleted = r.status === 3 || r.status === 'Resolved' || r.status === 'Closed';
-          const isVerified = r.status === 1 || r.status === 'Verified';
-          const isInProgress = r.status === 2 || r.status === 'InProgress';
+          const normStatus = normalizeRequestStatus(r?.status);
+          const isCompleted = normStatus === 'Resolved' || normStatus === 'Closed';
+          const isVerified = normStatus === 'Verified';
+          const isInProgress = normStatus === 'InProgress';
 
           const statusLabel = isCompleted
             ? 'Completed & Resolved'
@@ -50,25 +59,17 @@ export const MyRequestsView = ({ onSelectTab, showToast }) => {
             : 'Submitted & In Review';
 
           const statusType = isCompleted ? 'completed' : isVerified || isInProgress ? 'active' : 'review';
+          const urgencyLabel = normalizeUrgency(r?.urgency ?? r?.priority, 'Medium');
 
-          const urgencyLabel =
-            typeof r.urgency === 'number'
-              ? r.urgency >= 3
-                ? 'High'
-                : r.urgency >= 2
-                ? 'Medium'
-                : 'Low'
-              : r.urgency || 'Medium';
-
-          const dateFormatted = r.createdAt
+          const dateFormatted = r?.createdAt
             ? new Date(r.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
             : 'Recent';
 
           return {
-            id: r.id ? `REQ-${r.id.toString().substring(0, 8).toUpperCase()}` : `REQ-00${idx + 1}`,
-            rawId: r.id,
-            category: r.category || 'Emergency Assistance',
-            title: r.category || 'Emergency Assistance',
+            id: formatRequestId(r?.id, `REQ-00${idx + 1}`),
+            rawId: r?.id,
+            category: safeString(r?.category, 'Emergency Assistance'),
+            title: safeString(r?.category, 'Emergency Assistance'),
             date: dateFormatted,
             createdAt: r.createdAt,
             urgency: urgencyLabel,
@@ -147,17 +148,17 @@ export const MyRequestsView = ({ onSelectTab, showToast }) => {
       if (activeSubtab === 'completed' && !req.isCompleted) return false;
 
       if (categoryFilter !== 'All') {
-        if (!req.category.toLowerCase().includes(categoryFilter.toLowerCase())) {
+        if (!safeLower(req.category).includes(safeLower(categoryFilter))) {
           return false;
         }
       }
 
       if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        const matchId = req.id.toLowerCase().includes(term);
-        const matchCat = req.category.toLowerCase().includes(term);
-        const matchDesc = req.description.toLowerCase().includes(term);
-        const matchLoc = req.location.toLowerCase().includes(term);
+        const term = safeLower(searchTerm);
+        const matchId = safeLower(req.id).includes(term);
+        const matchCat = safeLower(req.category).includes(term);
+        const matchDesc = safeLower(req.description).includes(term);
+        const matchLoc = safeLower(req.location).includes(term);
         if (!matchId && !matchCat && !matchDesc && !matchLoc) return false;
       }
 

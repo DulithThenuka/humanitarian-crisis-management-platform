@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import {
   Search,
   Home,
@@ -18,6 +21,68 @@ import {
 } from 'lucide-react';
 import { shelterService } from '../../../services/shelterService';
 import { useRealtimeRefresh } from '../../../hooks/useRealtimeRefresh';
+import { safeLower, safeString } from '../utils/citizenDataUtils';
+
+// Fix Leaflet Default Icon issue in Vite
+delete L.Icon.Default.prototype._getIconUrl;
+
+const MapController = ({ center, zoom }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center && Array.isArray(center) && center.length === 2 && !isNaN(center[0]) && !isNaN(center[1])) {
+      map.flyTo(center, zoom || 13, { duration: 0.8 });
+    }
+  }, [center, zoom, map]);
+  return null;
+};
+
+const createShelterDivIcon = (shelter, isSelected) => {
+  const isOperational = shelter.statusType === 'operational' || shelter.availableCapacity > 0;
+  const bg = isSelected ? '#064e3b' : isOperational ? '#1e3d2c' : '#dc2626';
+  const beds = shelter.availableCapacity;
+  return L.divIcon({
+    className: 'cp-leaflet-marker',
+    html: `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transform: translate(-50%, -100%);
+        pointer-events: auto;
+        cursor: pointer;
+      ">
+        <div style="
+          padding: 4px 9px;
+          border-radius: 12px;
+          font-size: 11px;
+          font-weight: 700;
+          background-color: ${bg};
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          box-shadow: ${isSelected ? '0 0 0 3px #10b981, 0 4px 12px rgba(0,0,0,0.35)' : '0 2px 6px rgba(0,0,0,0.25)'};
+          white-space: nowrap;
+          border: 1.5px solid #ffffff;
+        ">
+          <span>🏠</span>
+          <span>${beds} beds</span>
+        </div>
+        <div style="
+          width: 0;
+          height: 0;
+          border-left: 5px solid transparent;
+          border-right: 5px solid transparent;
+          border-top: 6px solid ${bg};
+          margin-top: -1px;
+        "></div>
+      </div>
+    `,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+    popupAnchor: [0, -32]
+  });
+};
 
 export const FindSheltersView = ({ showToast }) => {
   const [sheltersList, setSheltersList] = useState([]);
@@ -65,7 +130,7 @@ export const FindSheltersView = ({ showToast }) => {
           const isOperational = s.status === 'Operational' || (availCap > 0 && s.status !== 'Full');
           const tags = parseTags(s);
 
-          const nameLower = (s.name || s.facilityName || '').toLowerCase();
+          const nameLower = safeLower(s.name || s.facilityName);
           const iconType = nameLower.includes('school') || nameLower.includes('college')
             ? 'school'
             : nameLower.includes('civic') || nameLower.includes('center') || nameLower.includes('hall')
@@ -117,18 +182,18 @@ export const FindSheltersView = ({ showToast }) => {
   const filteredShelters = useMemo(() => {
     return sheltersList.filter((sh) => {
       if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        const matchName = sh.name.toLowerCase().includes(term);
-        const matchDist = sh.district.toLowerCase().includes(term);
-        const matchAddr = sh.address.toLowerCase().includes(term);
-        const matchTags = (sh.tags || []).some((t) => t.toLowerCase().includes(term));
+        const term = safeLower(searchTerm);
+        const matchName = safeLower(sh.name).includes(term);
+        const matchDist = safeLower(sh.district).includes(term);
+        const matchAddr = safeLower(sh.address).includes(term);
+        const matchTags = (sh.tags || []).some((t) => safeLower(t).includes(term));
         if (!matchName && !matchDist && !matchAddr && !matchTags) return false;
       }
 
       if (serviceFilter !== 'All') {
-        const sf = serviceFilter.toLowerCase();
+        const sf = safeLower(serviceFilter);
         const hasService = (sh.tags || []).some((t) => {
-          const tLow = t.toLowerCase();
+          const tLow = safeLower(t);
           if (sf === 'water') return tLow.includes('water') || tLow.includes('drinking');
           if (sf === 'medical') return tLow.includes('medical') || tLow.includes('first aid') || tLow.includes('doctor');
           if (sf === 'shelter') return tLow.includes('shelter') || tLow.includes('accommodation') || tLow.includes('bed');
@@ -138,9 +203,9 @@ export const FindSheltersView = ({ showToast }) => {
       }
 
       if (accessFilter !== 'All') {
-        const af = accessFilter.toLowerCase();
+        const af = safeLower(accessFilter);
         const hasAccess = (sh.tags || []).some((t) => {
-          const tLow = t.toLowerCase();
+          const tLow = safeLower(t);
           if (af === 'stepfree') return tLow.includes('access') || tLow.includes('ramp') || tLow.includes('step-free');
           if (af === 'elderly') return tLow.includes('elderly') || tLow.includes('senior') || tLow.includes('support');
           return tLow.includes(af);
@@ -344,164 +409,130 @@ export const FindSheltersView = ({ showToast }) => {
           gap: '20px'
         }}
       >
-        {/* Map Canvas (Shown in Split or Map mode) */}
+        {/* Real Interactive Leaflet Map Canvas (Shown in Split or Map mode) */}
         {(viewMode === 'split' || viewMode === 'map') && (
           <div
-            className="cp-card"
+            className="cp-card cp-shelter-map-card"
             style={{
               position: 'relative',
-              minHeight: viewMode === 'map' ? '600px' : '520px',
-              backgroundColor: '#e4ece1',
-              overflow: 'hidden',
+              minHeight: viewMode === 'map' ? '620px' : '540px',
+              height: viewMode === 'map' ? '620px' : '560px',
               padding: 0,
+              overflow: 'hidden',
               border: '1px solid #cbd8c8'
             }}
           >
             {/* Top Bar on Map */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '12px',
-                left: '12px',
-                zIndex: 10,
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                border: '1px solid #d4ded3',
-                fontSize: '11.5px',
-                fontWeight: 700,
-                color: '#162e20',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
-              }}
-            >
+            <div className="cp-map-overlay-badge">
               <Compass size={14} color="#1e3d2c" />
-              <span>Western Province Emergency Relief Zone</span>
+              <span>Western Province Relief Grid · {filteredShelters.length} Verified Centres</span>
             </div>
 
-            {/* Background SVG Grid & Features */}
-            <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0 }}>
-              <defs>
-                <pattern id="shelterGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#d5e2d1" strokeWidth="0.8" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#shelterGrid)" />
-
-              {/* Waterway / Flood Zone Accent */}
-              <path
-                d="M 0,220 Q 200,280 400,240 T 900,260"
-                fill="none"
-                stroke="#b8d4e4"
-                strokeWidth="18"
-                strokeLinecap="round"
+            {/* Real Interactive Leaflet Map */}
+            <MapContainer
+              center={[6.9271, 79.8612]}
+              zoom={12}
+              scrollWheelZoom={true}
+              style={{ width: '100%', height: '100%', zIndex: 1 }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <path
-                d="M 120,0 Q 220,240 180,520"
-                fill="none"
-                stroke="#cce0cc"
-                strokeWidth="12"
+              <MapController
+                center={
+                  selectedShelter && !isNaN(selectedShelter.latitude) && !isNaN(selectedShelter.longitude)
+                    ? [selectedShelter.latitude, selectedShelter.longitude]
+                    : null
+                }
+                zoom={14}
               />
-            </svg>
-
-            {/* Interactive Pins for Filtered Shelters */}
-            <div style={{ position: 'absolute', inset: '40px 30px', pointerEvents: 'none' }}>
-              {filteredShelters.map((sh, idx) => {
-                const pinX = 15 + ((idx * 28 + (sh.name.length * 11)) % 70);
-                const pinY = 20 + ((idx * 24 + (sh.district.length * 9)) % 65);
+              {filteredShelters.map((sh) => {
+                const lat = Number(sh.latitude) || 6.9271;
+                const lng = Number(sh.longitude) || 79.8612;
                 const isSelected = selectedShelter?.id === sh.id;
 
                 return (
-                  <div
+                  <Marker
                     key={sh.id}
-                    onClick={() => handleShelterClick(sh)}
-                    style={{
-                      position: 'absolute',
-                      left: `${pinX}%`,
-                      top: `${pinY}%`,
-                      transform: 'translate(-50%, -50%)',
-                      pointerEvents: 'auto',
-                      cursor: 'pointer',
-                      zIndex: isSelected ? 20 : 12,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      transition: 'transform 0.2s ease'
+                    position={[lat, lng]}
+                    icon={createShelterDivIcon(sh, isSelected)}
+                    eventHandlers={{
+                      click: () => {
+                        setSelectedShelter(sh);
+                        if (showToast) {
+                          showToast(`Selected ${sh.name}`);
+                        }
+                      }
                     }}
                   >
-                    <div
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '16px',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        backgroundColor: isSelected
-                          ? '#064e3b'
-                          : sh.statusType === 'operational'
-                          ? '#1e3d2c'
-                          : '#dc2626',
-                        color: '#ffffff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        boxShadow: isSelected
-                          ? '0 0 0 3px #10b981, 0 4px 12px rgba(0,0,0,0.3)'
-                          : '0 3px 8px rgba(0,0,0,0.2)'
-                      }}
-                    >
-                      <Home size={12} />
-                      <span>{sh.availableCapacity} beds</span>
-                    </div>
-                    <div
-                      style={{
-                        width: '2px',
-                        height: '6px',
-                        backgroundColor: '#1e3d2c'
-                      }}
-                    />
-                    <div
-                      style={{
-                        fontSize: '10px',
-                        fontWeight: 600,
-                        color: '#162e20',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        padding: '1px 5px',
-                        borderRadius: '4px',
-                        marginTop: '2px',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {sh.name}
-                    </div>
-                  </div>
+                    <Popup className="cp-shelter-leaflet-popup">
+                      <div style={{ minWidth: '220px', padding: '4px' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '8px',
+                            marginBottom: '6px'
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: '10px',
+                              fontWeight: 700,
+                              padding: '2px 7px',
+                              borderRadius: '8px',
+                              backgroundColor: sh.statusType === 'operational' ? '#ecfdf5' : '#fef2f2',
+                              color: sh.statusType === 'operational' ? '#047857' : '#b91c1c'
+                            }}
+                          >
+                            ● {sh.status}
+                          </span>
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#1e3d2c' }}>
+                            {sh.availableCapacity} beds left
+                          </span>
+                        </div>
+                        <h4 style={{ margin: '4px 0 2px 0', fontSize: '13px', fontWeight: 700, color: '#162e20' }}>
+                          {sh.name}
+                        </h4>
+                        <p style={{ margin: '0 0 6px 0', fontSize: '11px', color: '#657367' }}>
+                          {sh.address} · {sh.district}
+                        </p>
+                        <div style={{ fontSize: '11px', color: '#405044', marginBottom: '8px' }}>
+                          <strong>Occupancy:</strong> {sh.currentOccupancy} / {sh.totalCapacity} beds
+                        </div>
+                        <button
+                          onClick={() => setSelectedShelter(sh)}
+                          style={{
+                            width: '100%',
+                            padding: '6px 10px',
+                            backgroundColor: '#1e3d2c',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '11.5px',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          View Full Details & Intake
+                        </button>
+                      </div>
+                    </Popup>
+                  </Marker>
                 );
               })}
-            </div>
+            </MapContainer>
 
             {/* Bottom Map Legend */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '12px',
-                left: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.92)',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                fontSize: '10.5px',
-                color: '#405044',
-                display: 'flex',
-                gap: '12px',
-                border: '1px solid #d4ded3'
-              }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#1e3d2c' }} />
+            <div className="cp-map-legend">
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span className="cp-legend-dot green" />
                 Operational
               </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#dc2626' }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span className="cp-legend-dot red" />
                 At Capacity
               </span>
             </div>

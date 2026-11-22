@@ -14,13 +14,24 @@ import {
   Compass,
   MessageSquare,
   Building2,
-  RefreshCw
+  RefreshCw,
+  Info
 } from 'lucide-react';
 import { adminService } from '../../../services/adminService';
 import { requestService } from '../../../services/requestService';
 import { shelterService } from '../../../services/shelterService';
 import { useAuth } from '../../../context/AuthContext';
 import { useRealtimeRefresh } from '../../../hooks/useRealtimeRefresh';
+import {
+  safeString,
+  safeLower,
+  safeUpper,
+  normalizeUrgency,
+  getUrgencyCssClass,
+  normalizeRequestStatus,
+  getRequestStatusDetails,
+  formatRequestId
+} from '../utils/citizenDataUtils';
 
 export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
   const { user } = useAuth();
@@ -28,8 +39,11 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
   const [requests, setRequests] = useState([]);
   const [shelters, setShelters] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   const refreshDashboard = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
     try {
       // 1. Fetch active alerts
       try {
@@ -54,7 +68,8 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
           setRequests(reqList);
         }
       } catch (e) {
-        // non-fatal
+        console.error('Failed to load citizen assistance requests:', e);
+        setLoadError('Unable to synchronize recent assistance requests from dispatch.');
       }
 
       // 3. Fetch shelters
@@ -79,37 +94,28 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
   // Real-time synchronization
   useRealtimeRefresh(['assistancerequests', 'broadcasts', 'shelters'], refreshDashboard);
 
-  // Compute metrics from actual citizen requests
-  const activeRequests = requests.filter(
-    (r) => r.status !== 3 && r.status !== 'Resolved' && r.status !== 'Closed'
-  );
-  const awaitingReview = requests.filter(
-    (r) => r.status === 0 || r.status === 'Submitted'
-  );
-  const inProgress = requests.filter(
-    (r) =>
-      r.status === 1 ||
-      r.status === 'Verified' ||
-      r.status === 2 ||
-      r.status === 'InProgress'
-  );
-  const completedRequests = requests.filter(
-    (r) => r.status === 3 || r.status === 'Resolved' || r.status === 'Closed'
-  );
+  // Compute metrics with safe enum/status normalization
+  const activeRequests = requests.filter((r) => {
+    const s = normalizeRequestStatus(r?.status);
+    return s !== 'Resolved' && s !== 'Closed';
+  });
+  const awaitingReview = requests.filter((r) => {
+    const s = normalizeRequestStatus(r?.status);
+    return s === 'Submitted';
+  });
+  const inProgress = requests.filter((r) => {
+    const s = normalizeRequestStatus(r?.status);
+    return s === 'Verified' || s === 'InProgress';
+  });
+  const completedRequests = requests.filter((r) => {
+    const s = normalizeRequestStatus(r?.status);
+    return s === 'Resolved' || s === 'Closed';
+  });
 
   // Latest active request for the progression tracker
   const latestActive = activeRequests[0] || requests[0] || null;
-
-  const getStatusStep = (req) => {
-    if (!req) return 1;
-    const s = req.status;
-    if (s === 3 || s === 'Resolved' || s === 'Closed') return 4;
-    if (s === 2 || s === 'InProgress') return 3;
-    if (s === 1 || s === 'Verified') return 2;
-    return 1;
-  };
-
-  const currentStepNum = getStatusStep(latestActive);
+  const latestActiveStatusDetails = latestActive ? getRequestStatusDetails(latestActive.status) : null;
+  const currentStepNum = latestActiveStatusDetails ? latestActiveStatusDetails.step : 1;
 
   const todayFormatted = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -118,7 +124,7 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
     year: 'numeric'
   }).toUpperCase();
 
-  const citizenName = user?.fullName || 'Citizen';
+  const citizenName = safeString(user?.fullName, 'Citizen');
 
   return (
     <div className="cp-view-container">
@@ -129,9 +135,9 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
             <AlertTriangle size={18} className="cp-warning-icon" />
             <div>
               <span className="cp-warning-bold">
-                {activeAlert.title} · {activeAlert.targetRegion || 'Western Province'}
+                {safeString(activeAlert.title, 'Emergency Advisory')} · {safeString(activeAlert.targetRegion, 'Western Province')}
               </span>
-              <span className="cp-warning-text">{activeAlert.message}</span>
+              <span className="cp-warning-text">{safeString(activeAlert.message)}</span>
             </div>
           </div>
           <div className="cp-warning-right">
@@ -142,16 +148,16 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
                 fontSize: '11px',
                 fontWeight: 700,
                 backgroundColor:
-                  (activeAlert?.severity || 'Critical').toLowerCase() === 'warning'
+                  safeLower(activeAlert?.severity, 'critical') === 'warning'
                     ? '#fef3c7'
                     : '#fee2e2',
                 color:
-                  (activeAlert?.severity || 'Critical').toLowerCase() === 'warning'
+                  safeLower(activeAlert?.severity, 'critical') === 'warning'
                     ? '#b45309'
                     : '#dc2626'
               }}
             >
-              ● {activeAlert.severity || 'Critical'}
+              ● {safeString(activeAlert.severity, 'Critical')}
             </span>
             <button
               onClick={() => onSelectTab('alerts')}
@@ -161,6 +167,36 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
               View alert
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Network Alert (If request service failed) */}
+      {loadError && (
+        <div
+          style={{
+            padding: '12px 16px',
+            backgroundColor: '#fffbeb',
+            border: '1px solid #fde68a',
+            borderRadius: '10px',
+            color: '#92400e',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '20px',
+            fontSize: '12.5px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertTriangle size={16} />
+            <span>{loadError}</span>
+          </div>
+          <button
+            onClick={refreshDashboard}
+            className="cp-btn-secondary"
+            style={{ padding: '4px 10px', fontSize: '11px' }}
+          >
+            Retry Sync
+          </button>
         </div>
       )}
 
@@ -225,11 +261,20 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
       {/* 4. Active Request Progress Box */}
       <div className="cp-card cp-active-progress-card">
         <div className="cp-progress-header">
-          <div>
-            <span className="cp-progress-pretitle">YOUR ACTIVE REQUEST</span>
+          <div className="cp-progress-header-info">
+            <div className="cp-progress-meta-tag">
+              <span className="cp-progress-pretitle">YOUR ACTIVE REQUEST</span>
+              {latestActive && latestActiveStatusDetails && (
+                <span
+                  className={`cp-status-pill ${latestActiveStatusDetails.statusPillClass}`}
+                >
+                  ● {latestActiveStatusDetails.label}
+                </span>
+              )}
+            </div>
             <h2 className="cp-progress-title">
               {latestActive
-                ? `${latestActive.category || 'Emergency Assistance'} · REQ-${latestActive.id.toString().substring(0, 8).toUpperCase()}`
+                ? `${safeString(latestActive.category, 'Emergency Assistance')} · ${formatRequestId(latestActive.id)}`
                 : 'No Active Requests at this time'}
             </h2>
           </div>
@@ -238,7 +283,7 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
               <button
                 onClick={() => onSelectTab('requests')}
                 className="cp-btn-secondary"
-                style={{ fontSize: '12px', padding: '6px 12px' }}
+                style={{ fontSize: '12px', padding: '6px 14px' }}
               >
                 View full request details
               </button>
@@ -246,7 +291,7 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
               <button
                 onClick={() => onSelectTab('submit')}
                 className="cp-btn-primary"
-                style={{ fontSize: '12px', padding: '6px 12px' }}
+                style={{ fontSize: '12px', padding: '6px 14px' }}
               >
                 <Plus size={14} /> Submit New Request
               </button>
@@ -254,15 +299,57 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
           </div>
         </div>
 
+        {/* Request Hierarchy & Metadata Strip */}
+        {latestActive && (
+          <div className="cp-progress-detail-strip">
+            <div className="cp-detail-chip">
+              <span className="cp-detail-label">SUBMITTED</span>
+              <span className="cp-detail-val">
+                {latestActive.createdAt
+                  ? new Date(latestActive.createdAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })
+                  : 'Recently'}
+              </span>
+            </div>
+            <div className="cp-detail-chip">
+              <span className="cp-detail-label">URGENCY</span>
+              <span
+                className={`cp-urgency-val ${getUrgencyCssClass(latestActive.urgency ?? latestActive.priority)}`}
+              >
+                {normalizeUrgency(latestActive.urgency ?? latestActive.priority, 'Normal')}
+              </span>
+            </div>
+            <div className="cp-detail-chip">
+              <span className="cp-detail-label">AFFECTED</span>
+              <span className="cp-detail-val">
+                {latestActive.numberOfPeople || 1} individuals
+              </span>
+            </div>
+            <div className="cp-detail-chip">
+              <span className="cp-detail-label">LOCATION</span>
+              <span className="cp-detail-val">
+                {safeString(latestActive.address, 'Western Province')}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* 4 Stepper Steps */}
         <div className="cp-stepper">
           <div className={`cp-step ${currentStepNum >= 1 ? 'completed' : ''}`}>
             <div className="cp-step-circle">
-              {currentStepNum > 1 ? '✓' : '1'}
+              {currentStepNum > 1 ? <CheckCircle size={18} /> : '1'}
             </div>
-            <div className="cp-step-label">Request submitted</div>
-            <div className="cp-step-time">
-              {latestActive?.createdAt ? new Date(latestActive.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Verified'}
+            <div className="cp-step-content">
+              <div className="cp-step-label">Request submitted</div>
+              <div className="cp-step-time">
+                {latestActive?.createdAt
+                  ? new Date(latestActive.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                  : 'Logged'}
+              </div>
             </div>
           </div>
 
@@ -270,28 +357,42 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
 
           <div className={`cp-step ${currentStepNum === 1 ? 'current' : currentStepNum >= 2 ? 'completed' : ''}`}>
             <div className="cp-step-circle">
-              {currentStepNum > 2 ? '✓' : '2'}
+              {currentStepNum > 2 ? <CheckCircle size={18} /> : '2'}
             </div>
-            <div className="cp-step-label">Under review</div>
-            <div className="cp-step-time">{currentStepNum === 1 ? 'Current' : currentStepNum > 1 ? 'Completed' : 'Pending'}</div>
+            <div className="cp-step-content">
+              <div className="cp-step-label">Under review</div>
+              <div className="cp-step-time">
+                {currentStepNum === 1 ? 'In Progress' : currentStepNum > 1 ? 'Completed' : 'Pending'}
+              </div>
+            </div>
           </div>
 
           <div className={`cp-step-line ${currentStepNum >= 3 ? 'active' : ''}`} />
 
           <div className={`cp-step ${currentStepNum === 2 ? 'current' : currentStepNum >= 3 ? 'completed' : ''}`}>
             <div className="cp-step-circle">
-              {currentStepNum > 3 ? '✓' : '3'}
+              {currentStepNum > 3 ? <CheckCircle size={18} /> : '3'}
             </div>
-            <div className="cp-step-label">Verified & Approved</div>
-            <div className="cp-step-time">{currentStepNum === 2 ? 'Current' : currentStepNum > 2 ? 'Completed' : 'Upcoming'}</div>
+            <div className="cp-step-content">
+              <div className="cp-step-label">Verified & Approved</div>
+              <div className="cp-step-time">
+                {currentStepNum === 2 ? 'In Progress' : currentStepNum > 2 ? 'Completed' : 'Upcoming'}
+              </div>
+            </div>
           </div>
 
           <div className={`cp-step-line ${currentStepNum >= 4 ? 'active' : ''}`} />
 
           <div className={`cp-step ${currentStepNum === 3 ? 'current' : currentStepNum >= 4 ? 'completed' : ''}`}>
-            <div className="cp-step-circle">4</div>
-            <div className="cp-step-label">Assistance fulfilled</div>
-            <div className="cp-step-time">{currentStepNum >= 4 ? 'Fulfilled' : 'Upcoming'}</div>
+            <div className="cp-step-circle">
+              {currentStepNum >= 4 ? <CheckCircle size={18} /> : '4'}
+            </div>
+            <div className="cp-step-content">
+              <div className="cp-step-label">Assistance fulfilled</div>
+              <div className="cp-step-time">
+                {currentStepNum >= 4 ? 'Fulfilled' : 'Upcoming'}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -300,7 +401,7 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
           <Clock size={16} color="#1e3d2c" style={{ flexShrink: 0 }} />
           <span>
             {latestActive
-              ? `Authorized coordinators are coordinating response for this request. Location: ${latestActive.address || 'Western Province'} · Affecting ${latestActive.numberOfPeople || 1} individuals.`
+              ? `Authorized crisis coordinators are actively coordinating response for this request. Location: ${safeString(latestActive.address, 'Western Province')} · Affecting ${latestActive.numberOfPeople || 1} individuals.`
               : 'You do not have any pending relief requests. If you require emergency food, clean water, medical aid or shelter, click Submit Assistance Request.'}
           </span>
         </div>
@@ -336,19 +437,8 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
 
           <div className="cp-requests-list">
             {requests.slice(0, 3).map((r) => {
-              const isResolved = r.status === 3 || r.status === 'Resolved' || r.status === 'Closed';
-              const isVerified = r.status === 1 || r.status === 'Verified';
-              const isInProg = r.status === 2 || r.status === 'InProgress';
-
-              const statusText = isResolved
-                ? 'Completed'
-                : isInProg
-                ? 'In Progress'
-                : isVerified
-                ? 'Verified'
-                : 'Under Review';
-
-              const catLower = (r.category || '').toLowerCase();
+              const statusDetails = getRequestStatusDetails(r?.status);
+              const catLower = safeLower(r?.category);
               const icon = catLower.includes('water') ? (
                 <Droplet size={18} />
               ) : catLower.includes('med') ? (
@@ -366,31 +456,28 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
                 >
                   <div className="cp-request-left">
                     <div className="cp-request-icon-box">{icon}</div>
-                    <div>
+                    <div className="cp-request-info">
                       <div className="cp-request-title">
-                        {r.category || 'Assistance Request'} · REQ-{r.id.toString().substring(0, 8).toUpperCase()}
+                        {safeString(r.category, 'Assistance Request')} · {formatRequestId(r.id)}
                       </div>
                       <div className="cp-request-meta">
-                        {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Recent'} · {r.numberOfPeople || 1} people · {r.address || 'Western Province'}
+                        {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Recent'} · {r.numberOfPeople || 1} people · {safeString(r.address, 'Western Province')}
                       </div>
                     </div>
                   </div>
 
                   <div className="cp-request-right">
                     <span
+                      className="cp-request-status-badge"
                       style={{
-                        padding: '3px 8px',
-                        borderRadius: '10px',
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        backgroundColor: isResolved ? '#ecfdf5' : isVerified ? '#eff6ff' : '#fef3c7',
-                        color: isResolved ? '#047857' : isVerified ? '#1d4ed8' : '#92400e'
+                        backgroundColor: statusDetails.badgeBg,
+                        color: statusDetails.badgeColor
                       }}
                     >
-                      ● {statusText}
+                      ● {statusDetails.label}
                     </span>
                     <span className="cp-request-updated">
-                      {isResolved ? 'Resolved' : 'Active'}
+                      {statusDetails.isCompleted ? 'Resolved' : 'Active'}
                     </span>
                   </div>
                 </div>
@@ -421,39 +508,19 @@ export const CitizenDashboardView = ({ onSelectTab, showToast }) => {
               {shelters.map((sh, idx) => (
                 <div
                   key={sh.id || idx}
+                  className="cp-shelter-mini-card"
                   onClick={() => onSelectTab('shelters')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    backgroundColor: '#f8faf7',
-                    border: '1px solid #edf1eb',
-                    cursor: 'pointer'
-                  }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div
-                      style={{
-                        width: '30px',
-                        height: '30px',
-                        borderRadius: '6px',
-                        backgroundColor: '#edf4ec',
-                        color: '#1e3d2c',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
+                  <div className="cp-shelter-mini-left">
+                    <div className="cp-shelter-mini-icon">
                       <Building2 size={16} />
                     </div>
-                    <div>
-                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#162e20' }}>
-                        {sh.name || sh.facilityName}
+                    <div className="cp-shelter-mini-info">
+                      <div className="cp-shelter-mini-title">
+                        {safeString(sh.name || sh.facilityName, 'Relief Shelter')}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#738075' }}>
-                        {sh.district || 'Western Province'} · {sh.availableCapacity ?? 50} beds remaining
+                      <div className="cp-shelter-mini-meta">
+                        {safeString(sh.district, 'Western Province')} · {sh.availableCapacity ?? 50} beds remaining
                       </div>
                     </div>
                   </div>

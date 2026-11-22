@@ -19,6 +19,7 @@ import { adminService } from '../../../services/adminService';
 import { homeService } from '../../../services/homeService';
 import { EMERGENCY_ALERTS_LIST } from '../data/citizenPortalData';
 import { useRealtimeRefresh } from '../../../hooks/useRealtimeRefresh';
+import { safeLower, safeString } from '../utils/citizenDataUtils';
 
 const formatAlertTime = (dateStr) => {
   if (!dateStr) return 'Verified';
@@ -119,19 +120,19 @@ export const EmergencyAlertsView = ({ showToast }) => {
 
   const normalizedAlerts = useMemo(() => {
     return (broadcasts || []).map((b) => {
-      const severity = b.severity || 'Advisory';
-      const sevLower = severity.toLowerCase();
+      const severity = safeString(b.severity, 'Advisory');
+      const sevLower = safeLower(severity, 'advisory');
       const isEmergency = sevLower === 'emergency' || sevLower === 'critical';
       const isWarning = sevLower === 'warning' || sevLower === 'high';
       const severityType = isEmergency ? 'critical' : isWarning ? 'warning' : 'info';
       const borderAccent = isEmergency ? '#dc2626' : isWarning ? '#f59e0b' : '#2563eb';
 
+      const statusLower = safeLower(b.status);
       const isArchived =
         b.isActive === false ||
-        (typeof b.status === 'string' &&
-          (b.status.toLowerCase().includes('archive') ||
-            b.status.toLowerCase().includes('resolve') ||
-            b.status.toLowerCase().includes('de-escalat')));
+        statusLower.includes('archive') ||
+        statusLower.includes('resolve') ||
+        statusLower.includes('de-escalat');
 
       return {
         id: b.id?.toString() || `alt-${Math.random()}`,
@@ -190,13 +191,13 @@ export const EmergencyAlertsView = ({ showToast }) => {
     else if (activeTab === 'past') list = pastAlerts;
 
     if (!searchQuery.trim()) return list;
-    const q = searchQuery.toLowerCase();
+    const q = safeLower(searchQuery);
     return list.filter(
       (a) =>
-        a.title.toLowerCase().includes(q) ||
-        a.description.toLowerCase().includes(q) ||
-        a.location.toLowerCase().includes(q) ||
-        a.sentBy.toLowerCase().includes(q)
+        safeLower(a.title).includes(q) ||
+        safeLower(a.description).includes(q) ||
+        safeLower(a.location).includes(q) ||
+        safeLower(a.sentBy).includes(q)
     );
   }, [activeTab, criticalAlerts, highAlerts, announcementAlerts, pastAlerts, searchQuery]);
 
