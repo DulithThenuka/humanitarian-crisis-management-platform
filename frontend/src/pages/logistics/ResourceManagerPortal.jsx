@@ -65,27 +65,37 @@ export const ResourceManagerPortal = () => {
     }, 3500);
   }, []);
 
+  // Helper to safely unwrap backend Result<T> payloads whether Axios interceptor returns response.data or raw response
+  const unwrapApiData = (res) => {
+    if (!res) return null;
+    if (res.succeeded !== undefined) return res.succeeded ? res.data : null;
+    if (res.data?.succeeded !== undefined) return res.data.succeeded ? res.data.data : null;
+    if (res.data !== undefined) return res.data;
+    return res;
+  };
+
   // Fetch all backend telemetry
   const fetchLiveData = useCallback(async () => {
     try {
       // 1. Overview Telemetry
       const overviewRes = await resourceService.getOverview().catch(() => null);
-      if (overviewRes?.data?.succeeded && overviewRes.data.data) {
-        const d = overviewRes.data.data;
+      const d = unwrapApiData(overviewRes);
+      if (d && (d.totalResources !== undefined || d.totalCategories !== undefined)) {
         setMetrics({
-          totalResources: { value: d.totalResources.toLocaleString(), sub: `Across ${d.totalCategories} categories` },
-          availableStock: { value: Math.round(d.availableStock).toLocaleString(), sub: `${d.availablePercentage} of total` },
-          lowStockWarnings: { value: String(d.lowStockWarnings), sub: `${d.criticalShortages} critical shortages` },
-          pendingAllocations: { value: String(d.pendingAllocations), sub: `${d.highPriorityPending} high priority` },
-          approvedAllocations: { value: String(d.approvedAllocations), sub: `${Math.round(d.approvedUnits)} units` },
-          dispatchedDelivered: { value: `${d.dispatchedCount} / ${d.deliveredCount}`, sub: 'Separate stages' }
+          totalResources: { value: (d.totalResources || 0).toLocaleString(), sub: `Across ${d.totalCategories || 0} categories` },
+          availableStock: { value: Math.round(d.availableStock || 0).toLocaleString(), sub: `${d.availablePercentage || '0%'} of total` },
+          lowStockWarnings: { value: String(d.lowStockWarnings || 0), sub: `${d.criticalShortages || 0} critical shortages` },
+          pendingAllocations: { value: String(d.pendingAllocations || 0), sub: `${d.highPriorityPending || 0} high priority` },
+          approvedAllocations: { value: String(d.approvedAllocations || 0), sub: `${Math.round(d.approvedUnits || 0)} units` },
+          dispatchedDelivered: { value: `${d.dispatchedCount || 0} / ${d.deliveredCount || 0}`, sub: 'Separate stages' }
         });
       }
 
       // 2. Inventory Items
       const invRes = await resourceService.getInventory().catch(() => null);
-      if (invRes?.data?.succeeded && Array.isArray(invRes.data.data) && invRes.data.data.length > 0) {
-        setItems(invRes.data.data.map(i => ({
+      const invData = unwrapApiData(invRes);
+      if (Array.isArray(invData) && invData.length > 0) {
+        setItems(invData.map(i => ({
           id: i.code || `RES-${i.id.substring(0, 6).toUpperCase()}`,
           rawId: i.id,
           name: i.name,
@@ -101,8 +111,9 @@ export const ResourceManagerPortal = () => {
 
       // 3. Allocations
       const allocRes = await resourceService.getAllocations().catch(() => null);
-      if (allocRes?.data?.succeeded && Array.isArray(allocRes.data.data) && allocRes.data.data.length > 0) {
-        setAllocations(allocRes.data.data.map(a => ({
+      const allocData = unwrapApiData(allocRes);
+      if (Array.isArray(allocData) && allocData.length > 0) {
+        setAllocations(allocData.map(a => ({
           id: a.code || `RAR-${a.id.substring(0, 6).toUpperCase()}`,
           rawId: a.id,
           item: a.item,
@@ -121,8 +132,9 @@ export const ResourceManagerPortal = () => {
 
       // 4. Dispatches
       const dispRes = await resourceService.getDispatches().catch(() => null);
-      if (dispRes?.data?.succeeded && Array.isArray(dispRes.data.data) && dispRes.data.data.length > 0) {
-        setDispatches(dispRes.data.data.map(d => ({
+      const dispData = unwrapApiData(dispRes);
+      if (Array.isArray(dispData) && dispData.length > 0) {
+        setDispatches(dispData.map(d => ({
           id: d.code || `DSP-${d.id.substring(0, 6).toUpperCase()}`,
           rawId: d.id,
           title: d.title,
@@ -141,8 +153,9 @@ export const ResourceManagerPortal = () => {
 
       // 5. Suppliers
       const supRes = await resourceService.getSuppliers().catch(() => null);
-      if (supRes?.data?.succeeded && Array.isArray(supRes.data.data) && supRes.data.data.length > 0) {
-        setSuppliers(supRes.data.data.map(s => ({
+      const supData = unwrapApiData(supRes);
+      if (Array.isArray(supData) && supData.length > 0) {
+        setSuppliers(supData.map(s => ({
           id: s.code || `SUP-${s.id.substring(0, 6).toUpperCase()}`,
           rawId: s.id,
           name: s.name,
@@ -156,8 +169,9 @@ export const ResourceManagerPortal = () => {
 
       // 6. Stock Alerts
       const altRes = await resourceService.getAlerts().catch(() => null);
-      if (altRes?.data?.succeeded && Array.isArray(altRes.data.data) && altRes.data.data.length > 0) {
-        setAlerts(altRes.data.data.map(alt => ({
+      const altData = unwrapApiData(altRes);
+      if (Array.isArray(altData) && altData.length > 0) {
+        setAlerts(altData.map(alt => ({
           id: alt.id,
           resourceId: alt.resourceId,
           item: alt.item,
@@ -176,8 +190,9 @@ export const ResourceManagerPortal = () => {
 
       // 7. Duty Status
       const dutyRes = await resourceService.getDutyStatus().catch(() => null);
-      if (dutyRes?.data?.succeeded && dutyRes.data.data) {
-        setOnDuty(dutyRes.data.data.isOnDuty);
+      const dutyData = unwrapApiData(dutyRes);
+      if (dutyData && dutyData.isOnDuty !== undefined) {
+        setOnDuty(dutyData.isOnDuty);
       }
     } catch {
       // Prototype data remains visible if backend is unreachable
@@ -222,7 +237,7 @@ export const ResourceManagerPortal = () => {
         storageLocation: item.storageLocation,
         minimumThreshold: item.threshold || 100
       });
-      if (res?.data?.succeeded) {
+      if (res?.succeeded || res?.data?.succeeded) {
         fetchLiveData();
       }
     } catch {
@@ -241,7 +256,7 @@ export const ResourceManagerPortal = () => {
         categories: supplier.categories,
         contactRef: supplier.contactRef
       });
-      if (res?.data?.succeeded) {
+      if (res?.succeeded || res?.data?.succeeded) {
         showToast(`Supplier "${supplier.name}" added to approved network`);
         fetchLiveData();
         return;

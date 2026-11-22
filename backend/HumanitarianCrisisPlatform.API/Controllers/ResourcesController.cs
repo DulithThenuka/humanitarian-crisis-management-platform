@@ -10,7 +10,6 @@ using HumanitarianCrisisPlatform.Domain.Enums;
 namespace HumanitarianCrisisPlatform.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
 [Route("api/resources")]
 public class ResourcesController : BaseApiController
 {

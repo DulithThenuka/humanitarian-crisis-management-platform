@@ -1,15 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, Plus, Home, Droplet, Eye } from 'lucide-react';
 import { MY_REQUESTS_LIST } from '../data/citizenPortalData';
+import { requestService } from '../../../services/requestService';
 
 export const MyRequestsView = ({ onSelectTab, showToast }) => {
+  const [requestsList, setRequestsList] = useState(MY_REQUESTS_LIST);
   const [activeSubtab, setActiveSubtab] = useState('active');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [selectedRequest, setSelectedRequest] = useState(null);
 
-  const filteredRequests = MY_REQUESTS_LIST.filter((req) => {
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMyRequests = async () => {
+      try {
+        const res = await requestService.getAll();
+        const raw = res?.data || (Array.isArray(res) ? res : []);
+        if (Array.isArray(raw) && raw.length > 0 && isMounted) {
+          const mapped = raw.map((r, idx) => {
+            const isCompleted = r.status === 3 || r.status === 'Resolved' || r.status === 'Closed';
+            const statusLabel = r.status === 1 || r.status === 'Verified'
+              ? 'Verified & In Progress'
+              : r.status === 2 || r.status === 'InProgress'
+              ? 'In Progress'
+              : isCompleted
+              ? 'Completed & Resolved'
+              : 'Submitted & In Triage';
+            const statusType = isCompleted ? 'completed' : 'active';
+
+            return {
+              id: r.id ? `REQ-${r.id.toString().substring(0, 8).toUpperCase()}` : `REQ-00${idx + 1}`,
+              rawId: r.id,
+              title: r.category || 'Emergency Assistance',
+              date: r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : 'Today',
+              urgency: typeof r.urgency === 'number' ? (r.urgency >= 3 ? 'High' : r.urgency >= 2 ? 'Medium' : 'Low') : (r.urgency || 'High'),
+              status: statusLabel,
+              statusType,
+              location: r.address || 'Western Province',
+              familyCount: r.numberOfPeople || 1,
+              description: r.description || 'Emergency assistance requested via citizen portal.',
+              trackingSteps: [
+                { title: 'Request Submitted', date: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Today', done: true },
+                { title: 'AI Triage & Classification', date: 'Automated', done: true },
+                { title: 'Coordinator Verification', date: r.status >= 1 ? 'Approved' : 'Pending', done: r.status >= 1 },
+                { title: 'Logistics Resource Allocation', date: r.status >= 2 ? 'Allocated' : 'Pending', done: r.status >= 2 },
+                { title: 'Field Relief Dispatch', date: isCompleted ? 'Fulfilled' : 'Scheduled', done: isCompleted }
+              ]
+            };
+          });
+          setRequestsList(mapped);
+        }
+      } catch {
+        // Fallback to baseline
+      }
+    };
+    fetchMyRequests();
+    return () => { isMounted = false; };
+  }, []);
+
+  const filteredRequests = requestsList.filter((req) => {
     if (activeSubtab === 'active' && req.statusType === 'completed') return false;
     if (activeSubtab === 'completed' && req.statusType !== 'completed') return false;
 
@@ -71,7 +121,7 @@ export const MyRequestsView = ({ onSelectTab, showToast }) => {
             borderBottom: activeSubtab === 'active' ? '2.5px solid #1e3d2c' : '2.5px solid transparent'
           }}
         >
-          Active Requests (2)
+          Active Requests ({requestsList.filter(r => r.statusType === 'active').length})
         </button>
 
         <button
@@ -87,7 +137,7 @@ export const MyRequestsView = ({ onSelectTab, showToast }) => {
             borderBottom: activeSubtab === 'completed' ? '2.5px solid #1e3d2c' : '2.5px solid transparent'
           }}
         >
-          Completed Requests (3)
+          Completed Requests ({requestsList.filter(r => r.statusType === 'completed').length})
         </button>
 
         <button

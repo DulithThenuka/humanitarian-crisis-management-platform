@@ -427,6 +427,29 @@
   transform: translateY(-1px);
 }
 
+.adm-ss-btn-outline {
+  height: 36px;
+  padding: 0 14px;
+  background-color: #ffffff;
+  color: #3d6b4f;
+  border: 1px solid #c7dbc0;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.adm-ss-btn-outline:hover {
+  background-color: #f4f6f2;
+  border-color: #3d6b4f;
+  color: #244431;
+}
+
 /* ---------------------------------------------------------
    4. Cards, Layout Grids & Panels
    --------------------------------------------------------- */

@@ -308,6 +308,33 @@ export const AdminUsersView = ({
     setResetModal((prev) => ({ ...prev, newPassword: pwd }));
   };
 
+  const handleDeleteUser = (user) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete User Account',
+      message: `Are you sure you want to permanently delete the account for ${user.fullName} (${user.email})? This action cannot be undone.`,
+      action: async () => {
+        try {
+          const res = await adminService.deleteUser(user.id);
+          if (res?.succeeded !== false) {
+            updateUsersList((prev) =>
+              (Array.isArray(prev) ? prev : []).filter((u) => u.id !== user.id)
+            );
+            if (typeof loadData === 'function') loadData();
+            if (typeof onUserCountChange === 'function') {
+              onUserCountChange(-1);
+            }
+            if (showToast) showToast(`User ${user.fullName} deleted successfully.`);
+          } else {
+            if (showToast) showToast(res?.errors?.[0] || 'Failed to delete user account.', 'error');
+          }
+        } catch {
+          if (showToast) showToast('Failed to communicate with authentication service.', 'error');
+        }
+      }
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* 1. KPI Row for Users */}
@@ -568,6 +595,19 @@ export const AdminUsersView = ({
                             title={u.isActive ? 'Deactivate Account' : 'Activate Account'}
                           >
                             {u.isActive ? <Lock size={14} /> : <Unlock size={14} />}
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteUser(u)}
+                            disabled={isCurrent}
+                            className={`p-1.5 rounded-md transition ${
+                              isCurrent
+                                ? 'opacity-30 cursor-not-allowed text-slate-400'
+                                : 'hover:bg-rose-50 text-slate-400 hover:text-rose-600'
+                            }`}
+                            title={isCurrent ? 'Cannot delete active session account' : 'Delete Account'}
+                          >
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>
