@@ -9,4 +9,5 @@ public interface IAIServiceClient
     Task<AIPriorityEvaluationDto> ClassifyUrgencyAsync(string text, string category, CancellationToken cancellationToken = default);
     Task<DuplicateDetectionResultDto> DetectDuplicateAsync(string text, IEnumerable<string> existingCases, CancellationToken cancellationToken = default);
     Task<WorkspaceServiceResultDto> ExecuteServiceAsync(string serviceId, ExecuteWorkspaceServiceDto input, object? databaseContext = null, CancellationToken cancellationToken = default);
+    Task<AssistantChatResponseDto> GenerateAssistantChatAsync(AssistantChatRequestDto request, CancellationToken cancellationToken = default);
 }

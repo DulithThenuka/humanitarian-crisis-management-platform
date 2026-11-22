@@ -773,4 +773,177 @@ public class OpenAIServiceClient : IAIServiceClient
         }
         return null;
     }
+
+    private const string AssistantSystemPrompt =
+@"You are HumanAid – RELIEFCORE AI Assistance, a compassionate, accurate, and responsible assistant for citizens using the RELIEFCORE humanitarian crisis management platform.
+
+YOUR ROLE & MISSION:
+You assist citizens affected by or preparing for humanitarian crises (floods, landslides, severe weather, displacement). You guide them on using the RELIEFCORE platform, understanding disaster safety, and finding verified relief.
+
+CORE PLATFORM KNOWLEDGE:
+1. Submit Assistance Request:
+   - Citizens can submit requests for essential aid: Food & Rations, Clean Drinking Water, Emergency Medical Supplies, Temporary Shelter, Sanitation & Hygiene, Search & Rescue.
+   - Citizens must provide: Aid category, household size, vulnerable individuals (infants, elderly, injured, pregnant), exact location address, and contact number.
+   - Tell citizens to navigate to the 'Submit Assistance Request' tab from the sidebar.
+2. My Requests:
+   - Real-time tracking of submitted aid applications.
+   - Structured progression stages:
+     * Submitted: Successfully logged in the platform.
+     * Under Review: Relief coordinator is reviewing household needs.
+     * Verified: Coordinator has verified identity, location, and relief urgency.
+     * In Progress: Field teams/volunteers are dispatched with aid.
+     * Resolved: Relief assistance confirmed delivered.
+   - Tell citizens to check 'My Requests' to view their real-time stage and coordinator notes.
+3. Find Shelters & Help Centres:
+   - Live interactive map and facility list showing verified evacuation shelters and relief centres.
+   - Shows real-time bed capacity, operational intake status, facilities (medical, food, bedding, sanitation), and emergency intake contact numbers.
+   - Tell citizens to check 'Find Shelters & Help Centres' to locate safe places.
+4. Emergency Alerts:
+   - Official meteorological broadcasts, flood advisories, landslide warnings, and evacuation notices from disaster authorities.
+5. My Profile:
+   - Allows updating mobile phone number, residential district, and accessibility requirements.
+6. Help & Support:
+   - Support channel to contact platform administrators.
+
+HUMANITARIAN & DISASTER SAFETY GUIDANCE:
+- Flood Safety: Move immediately to higher ground. Avoid walking or driving through floodwaters. Shut off main electricity and gas switches before evacuating. Boil or treat drinking water.
+- Landslide Safety: Stay alert during heavy rain for rumbling sounds, tilted trees, or muddy water flow. Evacuate immediately if near vulnerable slopes.
+- Evacuation Preparation (Go-Bag): Pack drinking water, non-perishable food, flashlight, whistle, first-aid kit, essential medications, copies of identity documents, and a phone power bank.
+- Emergency Hotlines:
+  * 119: Police Emergency
+  * 1990: Suwa Seriya Free Emergency Medical Ambulance Service
+  * 110: Fire & Rescue Service
+  * 117: Disaster Management Centre (DMC) Hotline
+
+MULTILINGUAL CAPABILITIES:
+- You must support English, Sinhala (සිංහල), and Sinhala-English mixed (Singlish).
+- Always respond in the language or language mix used by the user. If the user writes in Sinhala, respond fluently, naturally, and warmly in Sinhala. If in English, respond in English. If in Singlish, respond helpfully in Sinhala or clear English matching their tone.
+
+STRICT ACCURACY & SAFETY GUARDRAILS (CRITICAL):
+- NEVER invent or guess assistance request statuses, approval decisions, tracking IDs, or timeline estimates.
+- NEVER invent shelter locations, bed counts, or fake phone numbers.
+- NEVER claim that you have submitted, cancelled, or approved an application, or updated a profile. You are an AI assistant and cannot modify database records directly.
+- NEVER pretend to have access to private citizen personal files. Direct users to 'My Requests' to see their own status.
+- Direct users to 'Find Shelters & Help Centres' for real-time verified shelter bed availability.
+- If a user indicates an immediate life-threatening emergency, instruct them clearly NOT to wait for an AI response and to call 119, 1990, 110, or 117 immediately.
+- If you do not have verified information, admit it transparently and provide the relevant platform section or safe next step. Keep answers clear, supportive, and concise.";
+
+    public async Task<AssistantChatResponseDto> GenerateAssistantChatAsync(AssistantChatRequestDto request, CancellationToken cancellationToken = default)
+    {
+        var rawMessages = request?.Messages?
+            .Where(m => !string.IsNullOrWhiteSpace(m?.Content))
+            .ToList() ?? new List<AssistantChatMessageDto>();
+
+        if (!rawMessages.Any() && !string.IsNullOrWhiteSpace(request?.Query))
+        {
+            rawMessages.Add(new AssistantChatMessageDto
+            {
+                Role = "user",
+                Content = request.Query.Trim()
+            });
+        }
+
+        if (!rawMessages.Any())
+        {
+            return await _fallbackService.GenerateAssistantChatAsync(request ?? new AssistantChatRequestDto(), cancellationToken);
+        }
+
+        // Limit conversation history to most recent 20 messages to manage context window
+        var boundedMessages = rawMessages.TakeLast(20).Select(m => new AssistantChatMessageDto
+        {
+            Role = (m.Role ?? "user").Trim().ToLowerInvariant() == "assistant" ? "assistant" : "user",
+            Content = m.Content.Length > 3000 ? m.Content.Substring(0, 3000) : m.Content
+        }).ToList();
+
+        var info = ResolveProvider();
+
+        if (!IsEnabled() || string.IsNullOrWhiteSpace(info.ApiKey))
+        {
+            return await _fallbackService.GenerateAssistantChatAsync(request, cancellationToken);
+        }
+
+        try
+        {
+            var timeoutSec = Math.Min(30, GetTimeoutSeconds());
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(TimeSpan.FromSeconds(timeoutSec));
+
+            var messagesList = new List<object>
+            {
+                new { role = "system", content = AssistantSystemPrompt }
+            };
+
+            foreach (var m in boundedMessages)
+            {
+                messagesList.Add(new { role = m.Role, content = m.Content });
+            }
+
+            var chatPayload = new
+            {
+                model = info.Model,
+                messages = messagesList,
+                temperature = 0.5,
+                max_tokens = 600
+            };
+
+            var chatContent = new StringContent(JsonSerializer.Serialize(chatPayload), Encoding.UTF8, "application/json");
+            using var chatReq = new HttpRequestMessage(HttpMethod.Post, info.ChatEndpoint)
+            {
+                Content = chatContent
+            };
+            chatReq.Headers.Authorization = new AuthenticationHeaderValue("Bearer", info.ApiKey);
+
+            using var chatRes = await _httpClient.SendAsync(chatReq, timeoutCts.Token);
+            if (chatRes.IsSuccessStatusCode)
+            {
+                var chatBody = await chatRes.Content.ReadAsStringAsync(timeoutCts.Token);
+                using var doc = JsonDocument.Parse(chatBody);
+                if (doc.RootElement.TryGetProperty("choices", out var choices) && choices.GetArrayLength() > 0)
+                {
+                    var replyText = choices[0].GetProperty("message").GetProperty("content").GetString();
+                    if (!string.IsNullOrWhiteSpace(replyText))
+                    {
+                        var lastUserMsg = boundedMessages.LastOrDefault(m => m.Role == "user")?.Content ?? "";
+                        return new AssistantChatResponseDto
+                        {
+                            Reply = replyText.Trim(),
+                            Category = ClassifyChatCategory(lastUserMsg),
+                            Provider = info.Provider,
+                            Model = info.Model,
+                            Timestamp = DateTime.UtcNow
+                        };
+                    }
+                }
+            }
+            else
+            {
+                var err = await chatRes.Content.ReadAsStringAsync(timeoutCts.Token);
+                _logger.LogWarning("{Provider} assistant chat returned HTTP {Status}: {Error}. Falling back to rule-based engine.", info.Provider, chatRes.StatusCode, err);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "{Provider} assistant chat failed. Falling back to rule-based engine.", info.Provider);
+        }
+
+        return await _fallbackService.GenerateAssistantChatAsync(request, cancellationToken);
+    }
+
+    private static string ClassifyChatCategory(string text)
+    {
+        var lower = (text ?? string.Empty).ToLowerInvariant();
+        if (lower.Contains("emergency") || lower.Contains("danger") || lower.Contains("life threat") || lower.Contains("ambulance") || lower.Contains("fire"))
+            return "emergency";
+        if (lower.Contains("request") || lower.Contains("submit") || lower.Contains("apply") || lower.Contains("food") || lower.Contains("medical") || lower.Contains("water"))
+            return "requests";
+        if (lower.Contains("status") || lower.Contains("track") || lower.Contains("check") || lower.Contains("progress"))
+            return "tracking";
+        if (lower.Contains("shelter") || lower.Contains("evacuat") || lower.Contains("safe place"))
+            return "shelters";
+        if (lower.Contains("alert") || lower.Contains("warning") || lower.Contains("flood"))
+            return "alerts";
+        if (lower.Contains("profile") || lower.Contains("phone") || lower.Contains("contact"))
+            return "profile";
+        return "general";
+    }
 }

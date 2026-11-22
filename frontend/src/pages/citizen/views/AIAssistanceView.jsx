@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, Send, ShieldAlert, AlertTriangle, ChevronRight, RotateCcw, Loader2 } from 'lucide-react';
 import { AI_SUGGESTIONS } from '../data/citizenPortalData';
 import { useAuth } from '../../../context/AuthContext';
@@ -17,45 +17,68 @@ export const AIAssistanceView = ({ onSelectTab, showToast }) => {
   ]);
   const [inputVal, setInputVal] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
 
   const handleSend = async (textToSend) => {
-    const query = textToSend || inputVal;
-    if (!query.trim() || isLoading) return;
+    const query = (textToSend || inputVal || '').trim();
+    if (!query || isLoading) return;
 
-    const userMsg = { id: Date.now(), sender: 'user', text: query.trim() };
-    setMessages((prev) => [...prev, userMsg]);
+    const userMsg = { id: Date.now(), sender: 'user', text: query };
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setInputVal('');
     setIsLoading(true);
 
+    // Build multi-turn context from current session messages
+    const conversationHistory = updatedMessages
+      .filter((m) => m.text && !m.isError)
+      .map((m) => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text
+      }));
+
     try {
-      const response = await apiClient.post('/ai/assistant', { query: query.trim() });
+      const response = await apiClient.post('/ai/assistant', {
+        query: query,
+        messages: conversationHistory
+      });
+
       const data = response?.data?.data || response?.data || response;
-      const reply = data?.reply || 'You can submit assistance requests via the "Submit Assistance Request" tab and check updates under "My Requests".';
+      const reply =
+        data?.reply ||
+        'I can assist you with submitting requests, locating shelters, or tracking your current relief applications.';
 
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, sender: 'ai', text: reply }
+        {
+          id: Date.now() + 1,
+          sender: 'ai',
+          text: reply,
+          provider: data?.provider
+        }
       ]);
     } catch (err) {
-      // Fallback helpful guidance if network hiccup occurs
-      let fallback =
-        'You can submit a relief request through the "Submit Assistance Request" tab. Enter your needs, location, and household size, and an authorized coordinator will review it.';
-      const q = query.toLowerCase();
-      if (q.includes('status') || q.includes('check') || q.includes('track')) {
-        fallback =
-          'To check your request status, navigate to "My Requests". You can view real-time stage updates such as Under Review, Verified, or Assistance In Progress.';
-      } else if (q.includes('shelter') || q.includes('evacuat')) {
-        fallback =
-          'You can explore verified shelters in the "Find Shelters & Help Centres" section, where operational capacity and intake contact details are displayed.';
-      } else if (q.includes('emergency') || q.includes('danger') || q.includes('immediate')) {
-        fallback =
-          'WARNING: If you or someone else is in immediate life-threatening danger, contact 119 / 110 / 1990 Suwa Seriya immediately. The Assistant cannot dispatch rescue teams directly.';
-      }
-
+      console.error('AI chat failed:', err?.message);
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, sender: 'ai', text: fallback }
+        {
+          id: Date.now() + 1,
+          sender: 'ai',
+          text: 'I am temporarily experiencing connection issues with the AI assistance service. Please try again shortly or navigate directly using the sidebar options. If facing an emergency, call 119 or 1990 immediately.',
+          isError: true
+        }
       ]);
+      if (showToast) {
+        showToast('Unable to connect to AI Assistant. Please retry.', 'error');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -69,6 +92,8 @@ export const AIAssistanceView = ({ onSelectTab, showToast }) => {
         text: `Hello ${citizenName}. I can provide guidance on navigating the HumanAid platform, submitting crisis relief requests, tracking application status, and finding emergency evacuation shelters. I cannot approve assistance or dispatch emergency rescue.`
       }
     ]);
+    setInputVal('');
+    setIsLoading(false);
   };
 
   return (
@@ -208,7 +233,7 @@ export const AIAssistanceView = ({ onSelectTab, showToast }) => {
                     }}
                   >
                     <Sparkles size={10} color="#1e3d2c" />
-                    AI Platform Guidance
+                    AI Platform Guidance {m.provider ? `(${m.provider})` : ''}
                   </div>
                 )}
                 <div
@@ -217,8 +242,11 @@ export const AIAssistanceView = ({ onSelectTab, showToast }) => {
                     borderRadius: '10px',
                     fontSize: '13px',
                     lineHeight: '1.5',
-                    backgroundColor: m.sender === 'user' ? '#1e3d2c' : '#f0f4ee',
-                    color: m.sender === 'user' ? '#ffffff' : '#162e20'
+                    backgroundColor: m.sender === 'user' ? '#1e3d2c' : m.isError ? '#fef2f2' : '#f0f4ee',
+                    color: m.sender === 'user' ? '#ffffff' : m.isError ? '#991b1b' : '#162e20',
+                    border: m.isError ? '1px solid #fecaca' : 'none',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
                   }}
                 >
                   {m.text}
@@ -227,11 +255,22 @@ export const AIAssistanceView = ({ onSelectTab, showToast }) => {
             ))}
 
             {isLoading && (
-              <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '8px', color: '#657367', fontSize: '12px' }}>
+              <div
+                style={{
+                  alignSelf: 'flex-start',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#657367',
+                  fontSize: '12px',
+                  padding: '4px 0'
+                }}
+              >
                 <Loader2 size={14} className="animate-spin" />
-                Thinking...
+                HumanAid Assistant is thinking...
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input Footer */}
@@ -251,7 +290,12 @@ export const AIAssistanceView = ({ onSelectTab, showToast }) => {
               value={inputVal}
               disabled={isLoading}
               onChange={(e) => setInputVal(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
             />
             <button
               onClick={() => handleSend()}
@@ -276,7 +320,7 @@ export const AIAssistanceView = ({ onSelectTab, showToast }) => {
               {AI_SUGGESTIONS.map((q, idx) => (
                 <div
                   key={idx}
-                  onClick={() => handleSend(q)}
+                  onClick={() => !isLoading && handleSend(q)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -286,7 +330,8 @@ export const AIAssistanceView = ({ onSelectTab, showToast }) => {
                     fontSize: '12.5px',
                     fontWeight: 500,
                     color: '#243328',
-                    cursor: 'pointer'
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    opacity: isLoading ? 0.6 : 1
                   }}
                 >
                   <span>{q}</span>
