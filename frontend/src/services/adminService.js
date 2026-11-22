@@ -163,6 +163,33 @@ export const adminService = {
 
   reseedDemoData: async () => {
     return await apiClient.post('/admin/maintenance/reseed');
+  },
+
+  /**
+   * 11. Registration Notifications & Citizen / Volunteer Inspection
+   */
+  getNotifications: async () => {
+    return await apiClient.get('/admin/notifications');
+  },
+
+  getUnreadNotificationsCount: async () => {
+    return await apiClient.get('/admin/notifications/unread-count');
+  },
+
+  markNotificationAsRead: async (id) => {
+    return await apiClient.post(`/admin/notifications/${id}/mark-read`);
+  },
+
+  markAllNotificationsAsRead: async () => {
+    return await apiClient.post('/admin/notifications/mark-all-read');
+  },
+
+  getRegistrationDetails: async (userId) => {
+    return await apiClient.get(`/admin/registration-details/${userId}`);
+  },
+
+  verifyVolunteerRegistration: async (userId, notes = '') => {
+    return await apiClient.post(`/admin/volunteers/${userId}/verify`, { notes });
   }
 };
 

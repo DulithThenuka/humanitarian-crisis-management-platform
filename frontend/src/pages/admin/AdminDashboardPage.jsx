@@ -89,6 +89,7 @@ import AdminBroadcastsView from './components/AdminBroadcastsView';
 import AdminHealthView from './components/AdminHealthView';
 import AdminAuditView from './components/AdminAuditView';
 import AdminMapView from './components/AdminMapView';
+import AdminNotificationsView from './components/AdminNotificationsView';
 
 // Default Telemetry Stats - aligned with live HumanitarianCrisisDb database baseline
 const DEFAULT_STATS = {
@@ -606,7 +607,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
     } else if (p.includes('/admin/maps')) {
       setActiveTab('maps');
     } else if (p.includes('/admin/notifications')) {
-      setActiveTab('broadcasts');
+      setActiveTab('notifications');
     } else if (p.includes('/admin/reports')) {
       setActiveTab('reports');
     } else if (p.includes('/admin/audit')) {
@@ -626,6 +627,7 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [toast, setToast] = useState(null);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   // Selected Item Modal / Inspector States
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -803,6 +805,17 @@ export const AdminDashboardPage = ({ initialTab = 'dashboard' }) => {
       }
     } catch {
       // Keep rich fallback
+    }
+
+    try {
+      const notifsRes = await adminService.getNotifications();
+      const notifsList = notifsRes?.data || (Array.isArray(notifsRes) ? notifsRes : []);
+      if (Array.isArray(notifsList)) {
+        const unread = notifsList.filter(n => !n.isRead).length;
+        setUnreadNotificationsCount(unread);
+      }
+    } catch {
+      // Keep existing unread count
     }
 
     // Load authoritative crises from crisisService
@@ -1772,7 +1785,7 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
     { id: 'maps', label: 'Maps', icon: MapPin, hasChevron: true },
     { id: 'health', label: 'System Health', icon: Activity, hasChevron: false },
     { id: 'audit', label: 'Audit Logs', icon: ShieldCheck, hasChevron: false },
-    { id: 'notifications', label: 'Notifications', icon: Bell, hasChevron: false, badge: '3' },
+    { id: 'notifications', label: 'Notifications', icon: Bell, hasChevron: false, badge: unreadNotificationsCount > 0 ? String(unreadNotificationsCount) : null },
     { id: 'reports', label: 'Reports & Analytics', icon: FileBarChart, hasChevron: false },
     { id: 'settings', label: 'Settings', icon: Settings, hasChevron: false }
   ];
@@ -2001,10 +2014,10 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
             <button
               className="adm-ss-bell-btn"
               onClick={() => setActiveTab('notifications')}
-              title="3 Operational Notifications"
+              title={`${unreadNotificationsCount} Operational Notifications`}
             >
               <Bell size={18} />
-              <span className="adm-ss-bell-dot"></span>
+              {unreadNotificationsCount > 0 && <span className="adm-ss-bell-dot">{unreadNotificationsCount}</span>}
             </button>
 
             <div className="adm-ss-profile-pill" onClick={() => setActiveTab('settings')}>
@@ -4350,13 +4363,12 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
           )}
 
           {/* =====================================================
-             VIEW: SYSTEM NOTIFICATIONS & EMERGENCY BROADCASTS
+             VIEW: SYSTEM NOTIFICATIONS & REGISTRATION RADAR
              ===================================================== */}
           {activeTab === 'notifications' && (
-            <AdminBroadcastsView
+            <AdminNotificationsView
               showToast={showToast}
-              onRefresh={loadData}
-              currentUser={authUser}
+              onRefreshBadge={loadData}
             />
           )}
 
