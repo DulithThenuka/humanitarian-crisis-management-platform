@@ -122,6 +122,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   const [selectedOppForDetail, setSelectedOppForDetail] = useState(null);
   const [selectedOppForAccept, setSelectedOppForAccept] = useState(null);
   const [selectedAssignmentAction, setSelectedAssignmentAction] = useState(null);
+  const [selectedTaskForProgress, setSelectedTaskForProgress] = useState(null);
   const [isUpdateAvailOpen, setIsUpdateAvailOpen] = useState(false);
 
   // Toast
@@ -149,10 +150,27 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   // Authoritative Database Synchronization
   const refreshVolunteerData = useCallback(async () => {
     try {
+      // 0. Sync logged-in volunteer profile if available
+      try {
+        const myProfileRes = await volunteerService.getMyProfile();
+        const profile = myProfileRes?.data || myProfileRes;
+        if (profile?.id) {
+          setUser((prev) => ({
+            ...prev,
+            volunteerGuid: profile.id,
+            volunteerId: profile.volunteerCode || prev.volunteerId,
+            serviceArea: profile.serviceArea || prev.serviceArea,
+            dutyStatus: profile.isAvailable !== undefined ? profile.isAvailable : prev.dutyStatus
+          }));
+        }
+      } catch (e) {
+        // Fallback gracefully
+      }
+
       // 1. Fetch live assignments from backend API
       const assignRes = await volunteerService.getAssignments();
       const rawAssignments = assignRes?.data || assignRes;
-      if (Array.isArray(rawAssignments) && rawAssignments.length > 0) {
+      if (Array.isArray(rawAssignments)) {
         const mapped = rawAssignments.map((a) => {
           const isOffered = a.assignmentStatus === 0;
           const isAccepted = a.assignmentStatus === 1;
@@ -179,18 +197,24 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
             ? 'open'
             : 'history';
 
+          const codeStr = a.caseNumber || (a.volunteerCode ? `${a.volunteerCode}-${a.id.substring(0, 4)}` : a.id);
+
           return {
-            id: a.volunteerCode ? `${a.volunteerCode}-${a.id.substring(0, 4)}` : a.id,
+            id: codeStr,
             rawId: a.id,
             taskTitle: a.taskDescription || 'Humanitarian Field Shift',
             assigned: a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : 'Today',
             deadline: a.shiftTime || '18:00',
             location: a.serviceArea || 'Kelani East',
-            coordinator: a.volunteerName || 'Authorised Coordinator',
-            priority: isOffered ? 'High' : 'Medium',
+            coordinator: a.coordinatorName || 'Maya Fernando',
+            priority: a.priority || (isOffered ? 'High' : 'Medium'),
             status,
+            statusType: a.statusType,
+            assignmentStatus: a.assignmentStatus,
             nextAction,
             actionType,
+            caseNumber: a.caseNumber,
+            caseCategory: a.caseCategory,
             details: a.notes || a.taskDescription || 'Coordinate relief operation support with authorized on-site team.'
           };
         });
@@ -216,19 +240,20 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
         // Update upcoming assignments
         const upcoming = active[0] || mapped[0];
         if (upcoming) {
+          const parts = upcoming.assigned !== 'Today' ? upcoming.assigned.split(' ') : ['19', 'FEB'];
           setUpcomingAssignment({
             id: upcoming.id,
             rawId: upcoming.rawId,
             title: upcoming.taskTitle,
             code: `${upcoming.id} - ${upcoming.location} - ${upcoming.deadline}`,
-            day: '19',
-            month: 'FEB',
+            day: parts[0] || '19',
+            month: (parts[1] || 'FEB').toUpperCase(),
             dateStr: upcoming.assigned,
             time: upcoming.deadline,
-            reportingBy: 'Today - 18:00',
+            reportingBy: `Today - ${upcoming.deadline}`,
             location: upcoming.location,
             area: upcoming.location,
-            tags: ['Logistics', 'Field Ops', 'Priority'],
+            tags: [upcoming.caseCategory || 'Logistics', 'Field Ops', upcoming.priority || 'Priority'],
             coordinator: upcoming.coordinator,
             coordinatorPhone: '+94 77 555 0192',
             description: upcoming.details,
@@ -247,7 +272,32 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
               iconType: 'truck'
             }))
           );
+        } else {
+          setUpcomingAssignment(null);
+          setUpcomingList([]);
         }
+
+        // Authoritatively filter available opportunities so accepted/active/completed shifts do not reappear on refresh
+        const assignedTaskTitles = new Set(
+          rawAssignments.map((a) => (a.taskDescription || '').toLowerCase().trim())
+        );
+        const assignedCaseNumbers = new Set(
+          rawAssignments
+            .map((a) => {
+              if (a.caseNumber) return a.caseNumber.toLowerCase().trim();
+              const match = (a.notes || '').match(/Incident:\s*([^\|]+)/i);
+              return match ? match[1].toLowerCase().trim() : '';
+            })
+            .filter(Boolean)
+        );
+
+        setOpportunities(
+          INITIAL_OPPORTUNITIES.filter(
+            (opp) =>
+              !assignedTaskTitles.has((opp.title || '').toLowerCase().trim()) &&
+              !assignedCaseNumbers.has((opp.id || '').toLowerCase().trim())
+          )
+        );
       }
 
       // 2. Fetch live dashboard telemetry
@@ -277,34 +327,45 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   // Handlers for Persisted Database Operations
   const handleAcceptTask = async (opp) => {
     try {
-      await volunteerService.assignShift({
-        volunteerId: user.volunteerGuid || user.id || '00000000-0000-0000-0000-000000000000',
-        shiftTime: opp.date || '08:30-13:30',
+      const payload = {
+        volunteerId: user.volunteerGuid || authUser?.volunteerGuid || authUser?.id || user.id || '00000000-0000-0000-0000-000000000000',
+        shiftTime: opp.shift || opp.date || '08:30-13:30',
         shiftTask: opp.title,
-        note: opp.description
-      });
-    } catch (e) {
-      console.warn('Backend shift assignment warning:', e);
-    }
+        assignmentStatus: 1, // Immediately mark accepted
+        note: `Incident: ${opp.id} | Loc: ${opp.location} | Priority: ${opp.priority} | Category: ${opp.category} | Shift Window: ${opp.shift || opp.date}${opp.description ? ` | ${opp.description}` : ''}`
+      };
 
-    setOpportunities((prev) => prev.filter((o) => o.id !== opp.id));
-    showToast(`Task accepted: ${opp.title}. Added to My Assignments.`);
-    await refreshVolunteerData();
+      const res = await volunteerService.assignShift(payload);
+      const resData = res?.data || res;
+
+      if (resData && resData.succeeded === false) {
+        showToast(resData.message || 'Failed to accept task.');
+        return;
+      }
+
+      setOpportunities((prev) => prev.filter((o) => o.id !== opp.id));
+      showToast(`Task accepted: ${opp.title}. Added to My Assignments.`);
+      await refreshVolunteerData();
+    } catch (e) {
+      console.error('Backend shift assignment error:', e);
+      const errMsg = e.response?.data?.message || e.message || 'Failed to accept task.';
+      showToast(errMsg);
+    }
   };
 
-  const handleAssignmentResponse = async (taskId, action) => {
+  const handleAssignmentResponse = async (taskId, action, reason) => {
     const target = assignments.find((a) => a.id === taskId || a.rawId === taskId);
     const idToUse = target?.rawId || taskId;
 
     try {
       if (action === 'Accept') {
-        if (target?.rawId) {
+        if (idToUse) {
           await volunteerService.acceptAssignment(idToUse);
         }
         showToast(`Assignment ${taskId} accepted.`);
       } else if (action === 'Decline') {
-        if (target?.rawId) {
-          await volunteerService.releaseAssignment(idToUse, { reason: 'Volunteer declined assignment' });
+        if (idToUse) {
+          await volunteerService.releaseAssignment(idToUse, { reason: reason || 'Volunteer declined assignment' });
         }
         showToast(`Assignment ${taskId} declined.`);
       }
@@ -316,15 +377,15 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   };
 
   const handleCompleteTask = async (task, { loggedHours, shiftNotes } = {}) => {
-    const idToUse = task.rawId || task.id;
+    const idToUse = task?.rawId || task?.id;
     try {
-      if (task.rawId) {
+      if (idToUse) {
         await volunteerService.completeAssignment(idToUse, {
-          reason: shiftNotes || `Logged ${loggedHours} hours`,
-          hours: loggedHours
+          reason: shiftNotes || `Logged ${loggedHours || 3} hours`,
+          note: shiftNotes || `Logged ${loggedHours || 3} hours`
         });
       }
-      showToast(`Task ${task.id} marked as completed! Shift hours logged.`);
+      showToast(`Task ${task?.id || ''} marked as completed! Shift hours logged.`);
       await refreshVolunteerData();
     } catch (err) {
       showToast(`Error completing task: ${err?.message || 'Failed'}`);
@@ -602,7 +663,13 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
               notifications={notifications}
               activitySummary={activitySummary}
               user={user}
-              onNavigateTab={setActiveTab}
+              onNavigateTab={(tab) => {
+                if (tab === 'progress') {
+                  const inProg = assignments.find((a) => a.status === 'Accepted') || assignments[0];
+                  if (inProg) setSelectedTaskForProgress(inProg);
+                }
+                setActiveTab(tab);
+              }}
               onRefreshData={refreshVolunteerData}
               onViewAssignment={(item) => {
                 const found =
@@ -636,7 +703,14 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
           {activeTab === 'assignments' && (
             <MyAssignmentsView
               assignments={assignments}
-              onActionClick={(item) => setSelectedAssignmentAction(item)}
+              onActionClick={(item) => {
+                if (item.actionType === 'open') {
+                  setSelectedTaskForProgress(item);
+                  setActiveTab('progress');
+                } else {
+                  setSelectedAssignmentAction(item);
+                }
+              }}
               onRefreshData={refreshVolunteerData}
             />
           )}
@@ -644,9 +718,15 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
           {activeTab === 'progress' && (
             <TaskProgressView
               assignments={assignments}
+              selectedTask={selectedTaskForProgress}
+              onAcceptTask={handleAssignmentResponse}
+              onDeclineTask={handleAssignmentResponse}
               onCompleteTask={handleCompleteTask}
               showToast={showToast}
-              onNavigateTab={(tab) => setActiveTab(tab)}
+              onNavigateTab={(tab) => {
+                if (tab !== 'progress') setSelectedTaskForProgress(null);
+                setActiveTab(tab);
+              }}
             />
           )}
 
@@ -708,6 +788,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
           onClose={() => setSelectedAssignmentAction(null)}
           onRespondAction={handleAssignmentResponse}
           onOpenTaskProgress={(task) => {
+            setSelectedTaskForProgress(task || selectedAssignmentAction);
             setActiveTab('progress');
           }}
         />

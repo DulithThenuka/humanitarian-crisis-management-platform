@@ -295,13 +295,13 @@ export const AppRoutes = () => {
       {/* Volunteer Backward-Compatible Aliases */}
       <Route path="/volunteers" element={<Navigate to="/volunteer" replace />} />
       <Route path="/volunteers/portal" element={<Navigate to="/volunteer" replace />} />
-      <Route path="/volunteer-admin" element={<VolunteerPortal initialTab="overview" />} />
-      <Route path="/volunteer-admin/dashboard" element={<VolunteerPortal initialTab="overview" />} />
-      <Route path="/volunteer-manager" element={<VolunteerPortal initialTab="overview" />} />
-      <Route path="/volunteer-manager/dashboard" element={<VolunteerPortal initialTab="overview" />} />
-      <Route path="/volunteer-manager/*" element={<VolunteerPortal initialTab="overview" />} />
-      <Route path="/volunteer-management" element={<VolunteerPortal initialTab="overview" />} />
-      <Route path="/volunteers/manager" element={<VolunteerPortal initialTab="overview" />} />
+      <Route path="/volunteer-admin" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-admin/dashboard" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-manager" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-manager/dashboard" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-manager/*" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteer-management" element={<VolunteerCoordinatorPortal />} />
+      <Route path="/volunteers/manager" element={<VolunteerCoordinatorPortal />} />
       <Route path="/volunteers/dashboard" element={<VolunteerPortal initialTab="overview" />} />
       <Route path="/volunteers/roster" element={<VolunteerPortal initialTab="schedule" />} />
       <Route path="/volunteers/assignments" element={<VolunteerPortal initialTab="assignments" />} />

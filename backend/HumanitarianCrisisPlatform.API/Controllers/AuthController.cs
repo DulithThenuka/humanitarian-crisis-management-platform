@@ -162,9 +162,11 @@ public class AuthController : BaseApiController
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
                 Skills = "First Aid, Community Logistics, Emergency Search",
-                Availability = "Immediate",
+                Availability = "Available",
                 IsAvailable = true,
-                MaxTravelDistance = 25
+                MaxTravelDistance = 25,
+                CreatedBy = "Area: Kelani East | Verif: Pending",
+                CreatedAt = DateTime.UtcNow
             };
             _context.Volunteers.Add(volunteer);
         }

@@ -25,7 +25,7 @@ const resolvePostLoginRoute = (role, redirectParam) => {
   if (normalizedRole === 'admin' || normalizedRole === 'administrator' || normalizedRole === '4' || normalizedRole.includes('admin')) {
     return '/admin';
   }
-  if (normalizedRole === 'volunteercoordinator' || normalizedRole.includes('volunteer coordinator')) {
+  if (normalizedRole === 'volunteercoordinator' || normalizedRole.includes('volunteer coordinator') || normalizedRole === 'volunteermanager' || normalizedRole.includes('volunteer manager')) {
     return '/volunteer-coordinator';
   }
   if (normalizedRole === 'coordinator' || normalizedRole === '1' || normalizedRole.includes('coordinator')) {

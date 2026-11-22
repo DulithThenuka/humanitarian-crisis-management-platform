@@ -7,6 +7,9 @@ export const volunteerService = {
   },
 
   // 2. Volunteer Directory
+  getMyProfile: async () => {
+    return await apiClient.get('/volunteers/me');
+  },
   getAll: async (params = {}) => {
     return await apiClient.get('/volunteers', { params });
   },
@@ -21,6 +24,9 @@ export const volunteerService = {
   },
   updateVolunteer: async (id, data) => {
     return await apiClient.put(`/volunteers/${id}`, data);
+  },
+  deleteVolunteer: async (id) => {
+    return await apiClient.delete(`/volunteers/${id}`);
   },
   verifyVolunteer: async (id, data = {}) => {
     return await apiClient.post(`/volunteers/${id}/verify`, data);

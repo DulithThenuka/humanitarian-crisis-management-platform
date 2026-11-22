@@ -110,19 +110,20 @@ export const VolunteerCoordinatorPortal = () => {
   );
 
   // Derived metrics from live dashboard data
+  const m = dashboardData?.metrics || dashboardData;
   const metrics = {
-    registeredVolunteers: dashboardData?.registeredVolunteers ?? volunteers.length,
-    registeredSub: dashboardData?.registeredSub || 'Active field responders',
-    verificationPending: dashboardData?.verificationPending ?? volunteers.filter((v) => v.verification === 'Pending').length,
-    verificationSub: dashboardData?.verificationSub || 'Background check required',
-    availableNow: dashboardData?.availableNow ?? volunteers.filter((v) => v.status === 'Eligible').length,
-    availableSub: dashboardData?.availableSub || 'Ready for rapid dispatch',
-    activeAssignments: dashboardData?.activeAssignments ?? volunteers.filter((v) => v.status === 'Assigned').length,
-    activeSub: dashboardData?.activeSub || 'Deployed to emergency tasks',
-    unfilledTasks: dashboardData?.unfilledTasks ?? 0,
-    unfilledSub: dashboardData?.unfilledSub || 'Urgent responder needs',
-    completedActivities: dashboardData?.completedActivities ?? 0,
-    completedSub: dashboardData?.completedSub || 'Successfully fulfilled operations'
+    registeredVolunteers: m?.registeredVolunteers ?? volunteers.length,
+    registeredSub: m?.registeredSub || 'Active field responders',
+    verificationPending: m?.verificationPending ?? volunteers.filter((v) => v.verification === 'Pending').length,
+    verificationSub: m?.verificationSub || 'Background check required',
+    availableNow: m?.availableNow ?? volunteers.filter((v) => v.status === 'Eligible').length,
+    availableSub: m?.availableSub || 'Ready for rapid dispatch',
+    activeAssignments: m?.activeAssignments ?? volunteers.filter((v) => v.status === 'Assigned').length,
+    activeSub: m?.activeSub || 'Deployed to emergency tasks',
+    unfilledTasks: m?.unfilledTasks ?? 0,
+    unfilledSub: m?.unfilledSub || 'Urgent responder needs',
+    completedActivities: m?.completedActivities ?? 0,
+    completedSub: m?.completedSub || 'Successfully fulfilled operations'
   };
 
   const priorityItems = dashboardData?.priorityItems || [];
@@ -132,18 +133,46 @@ export const VolunteerCoordinatorPortal = () => {
   // Handlers for real database transactions
   const handleCreateVolunteer = async (newRecord) => {
     const payload = {
+      name: newRecord.name,
       fullName: newRecord.name,
       email: newRecord.email,
       phoneNumber: newRecord.phone,
+      phone: newRecord.phone,
       skills: newRecord.skills,
       serviceArea: newRecord.serviceArea,
       availability: newRecord.availability,
+      verification: newRecord.verification,
       verificationStatus: newRecord.verification,
       status: newRecord.status,
       notes: newRecord.notes
     };
 
     await volunteerService.createVolunteer(payload);
+    await loadPortalData(true);
+  };
+
+  const handleUpdateVolunteer = async (volunteerId, updatedRecord) => {
+    const payload = {
+      name: updatedRecord.name || updatedRecord.fullName,
+      fullName: updatedRecord.name || updatedRecord.fullName,
+      email: updatedRecord.email,
+      phoneNumber: updatedRecord.phone || updatedRecord.phoneNumber,
+      phone: updatedRecord.phone || updatedRecord.phoneNumber,
+      skills: updatedRecord.skills,
+      serviceArea: updatedRecord.serviceArea,
+      availability: updatedRecord.availability,
+      verification: updatedRecord.verification,
+      verificationStatus: updatedRecord.verification,
+      status: updatedRecord.status,
+      notes: updatedRecord.notes
+    };
+
+    await volunteerService.updateVolunteer(volunteerId, payload);
+    await loadPortalData(true);
+  };
+
+  const handleDeleteVolunteer = async (volunteerId) => {
+    await volunteerService.deleteVolunteer(volunteerId);
     await loadPortalData(true);
   };
 
@@ -160,10 +189,11 @@ export const VolunteerCoordinatorPortal = () => {
   };
 
   const handleConfirmAssignment = async (volunteerId, note) => {
-    // Verifies and activates volunteer
+    // Verifies and activates volunteer in SQL Server
     const payload = {
       action: 'Verify',
-      note: note || 'Verified by Coordinator',
+      reason: note || 'Verified and activated by Coordinator',
+      note: note || 'Verified and activated by Coordinator',
       serviceArea: 'Kelani East'
     };
 
@@ -172,18 +202,19 @@ export const VolunteerCoordinatorPortal = () => {
   };
 
   const handleCompleteAssignment = async (assignmentIdOrVolunteerId, note) => {
-    await volunteerService.completeAssignment(assignmentIdOrVolunteerId, { note });
+    await volunteerService.completeAssignment(assignmentIdOrVolunteerId, { note, reason: note });
     await loadPortalData(true);
   };
 
   const handleReleaseAssignment = async (assignmentIdOrVolunteerId, note) => {
-    await volunteerService.releaseAssignment(assignmentIdOrVolunteerId, { note });
+    await volunteerService.releaseAssignment(assignmentIdOrVolunteerId, { note, reason: note });
     await loadPortalData(true);
   };
 
   const handleRequestClarification = async (volunteerId, note) => {
     const payload = {
       action: 'Clarify',
+      reason: note || 'Clarification requested by Coordinator',
       note: note || 'Clarification requested by Coordinator'
     };
 
@@ -194,6 +225,7 @@ export const VolunteerCoordinatorPortal = () => {
   const handleEscalate = async (volunteerId, note) => {
     const payload = {
       action: 'Escalate',
+      reason: note || 'Escalation raised by Coordinator',
       note: note || 'Escalation raised by Coordinator'
     };
 
@@ -518,6 +550,8 @@ export const VolunteerCoordinatorPortal = () => {
                   onConfirmAssignment={handleConfirmAssignment}
                   onRequestClarification={handleRequestClarification}
                   onEscalate={handleEscalate}
+                  onUpdateVolunteer={handleUpdateVolunteer}
+                  onDeleteVolunteer={handleDeleteVolunteer}
                   onOpenCreateModal={() => setIsCreateModalOpen(true)}
                   onOpenExportModal={() => setIsExportModalOpen(true)}
                 />

@@ -45,6 +45,16 @@ public class VolunteersController : BaseApiController
         var result = await _volunteerService.GetAllVolunteersAsync(search, status, serviceArea, cancellationToken);
         return result.Succeeded ? Ok(result) : BadRequest(result);
     }
+    [HttpGet("me")]
+    public async Task<ActionResult<Result<VolunteerCoordinatorDto>>> GetMyProfile(CancellationToken cancellationToken)
+    {
+        if (CurrentUserId == Guid.Empty)
+            return Unauthorized(Result<VolunteerCoordinatorDto>.Failure("User is not authenticated."));
+
+        var result = await _volunteerService.GetVolunteerByIdAsync(CurrentUserId, cancellationToken);
+        return result.Succeeded ? Ok(result) : NotFound(result);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<Result<VolunteerCoordinatorDto>>> GetById(Guid id, CancellationToken cancellationToken)
     {
@@ -68,6 +78,16 @@ public class VolunteersController : BaseApiController
         CancellationToken cancellationToken)
     {
         var result = await _volunteerService.UpdateVolunteerAsync(id, dto, CurrentUserName, cancellationToken);
+        return result.Succeeded ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Coordinator,Admin")]
+    public async Task<ActionResult<Result<bool>>> Delete(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _volunteerService.DeleteVolunteerAsync(id, CurrentUserName, cancellationToken);
         return result.Succeeded ? Ok(result) : BadRequest(result);
     }
 
@@ -111,7 +131,13 @@ public class VolunteersController : BaseApiController
         [FromQuery] Guid? volunteerId,
         CancellationToken cancellationToken)
     {
-        var result = await _volunteerService.GetAssignmentsAsync(status, area, volunteerId, cancellationToken);
+        var targetVolunteerId = volunteerId;
+        if (!targetVolunteerId.HasValue && User.IsInRole("Volunteer") && CurrentUserId != Guid.Empty)
+        {
+            targetVolunteerId = CurrentUserId;
+        }
+
+        var result = await _volunteerService.GetAssignmentsAsync(status, area, targetVolunteerId, cancellationToken);
         return result.Succeeded ? Ok(result) : BadRequest(result);
     }
 
@@ -120,6 +146,11 @@ public class VolunteersController : BaseApiController
         [FromBody] AssignShiftRequestDto dto,
         CancellationToken cancellationToken)
     {
+        if (dto.VolunteerId == Guid.Empty && CurrentUserId != Guid.Empty)
+        {
+            dto.VolunteerId = CurrentUserId;
+        }
+
         var result = await _volunteerService.AssignShiftAsync(dto, CurrentUserName, cancellationToken);
         return result.Succeeded ? Ok(result) : BadRequest(result);
     }

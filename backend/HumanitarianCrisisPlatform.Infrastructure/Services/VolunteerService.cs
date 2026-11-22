@@ -223,6 +223,32 @@ public class VolunteerService : IVolunteerService
         string? serviceArea = null,
         CancellationToken cancellationToken = default)
     {
+        // 1. Auto-sync any Users with Role == UserRole.Volunteer who do not yet have a Volunteer record
+        var existingVolunteerUserIds = await _context.Volunteers.Select(v => v.UserId).ToListAsync(cancellationToken);
+        var missingUsers = await _context.Users
+            .Where(u => u.Role == UserRole.Volunteer && !existingVolunteerUserIds.Contains(u.Id))
+            .ToListAsync(cancellationToken);
+
+        if (missingUsers.Any())
+        {
+            foreach (var user in missingUsers)
+            {
+                var newVol = new Volunteer
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    User = user,
+                    Skills = "First Aid, Community Logistics, Emergency Search",
+                    Availability = "Available",
+                    IsAvailable = true,
+                    CreatedAt = user.CreatedAt,
+                    CreatedBy = $"Area: {user.AssignedDistrict ?? "Kelani East"} | Verif: Pending"
+                };
+                await _context.Volunteers.AddAsync(newVol, cancellationToken);
+            }
+            await _unitOfWork.CommitAsync(cancellationToken);
+        }
+
         var volunteers = await _context.Volunteers
             .Include(v => v.User)
             .Include(v => v.Assignments)
@@ -239,12 +265,14 @@ public class VolunteerService : IVolunteerService
                 v.FullName.ToLower().Contains(q) ||
                 v.Skills.ToLower().Contains(q) ||
                 v.ServiceArea.ToLower().Contains(q) ||
-                v.Email.ToLower().Contains(q)).ToList();
+                v.Email.ToLower().Contains(q) ||
+                (v.PhoneNumber != null && v.PhoneNumber.ToLower().Contains(q))).ToList();
         }
 
         if (!string.IsNullOrWhiteSpace(status) && !status.Equals("All", StringComparison.OrdinalIgnoreCase))
         {
-            dtoList = dtoList.Where(v => v.Status.Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
+            dtoList = dtoList.Where(v => v.Status.Equals(status, StringComparison.OrdinalIgnoreCase) ||
+                                         v.StatusType.Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
         if (!string.IsNullOrWhiteSpace(serviceArea) &&
@@ -262,7 +290,7 @@ public class VolunteerService : IVolunteerService
         var v = await _context.Volunteers
             .Include(x => x.User)
             .Include(x => x.Assignments)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == id || x.UserId == id, cancellationToken);
 
         if (v == null)
             return Result<VolunteerCoordinatorDto>.Failure("Volunteer record not found.");
@@ -275,35 +303,66 @@ public class VolunteerService : IVolunteerService
         string createdBy,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(dto.Name))
+        var name = !string.IsNullOrWhiteSpace(dto.FullName) ? dto.FullName.Trim() : dto.Name?.Trim();
+        if (string.IsNullOrWhiteSpace(name))
             return Result<VolunteerCoordinatorDto>.Failure("Volunteer name is required.");
 
         var email = !string.IsNullOrWhiteSpace(dto.Email)
             ? dto.Email.Trim().ToLower()
-            : $"{dto.Name.Trim().ToLower().Replace(" ", ".")}_{Guid.NewGuid().ToString()[..4]}@crisisplatform.org";
+            : $"{name.ToLower().Replace(" ", ".")}_{Guid.NewGuid().ToString()[..4]}@crisisplatform.org";
 
-        // Check if user email already exists
-        if (await _context.Users.AnyAsync(u => u.Email == email, cancellationToken))
+        // Check if user with this email already exists
+        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        User user;
+        if (existingUser != null)
         {
-            email = $"{dto.Name.Trim().ToLower().Replace(" ", ".")}_{Guid.NewGuid().ToString()[..6]}@crisisplatform.org";
+            var existingVolunteer = await _context.Volunteers.FirstOrDefaultAsync(v => v.UserId == existingUser.Id, cancellationToken);
+            if (existingVolunteer != null)
+            {
+                var updateDto = new UpdateVolunteerRequestDto
+                {
+                    FullName = name,
+                    Skills = dto.Skills,
+                    ServiceArea = dto.ServiceArea,
+                    Availability = dto.Availability,
+                    Verification = dto.Verification,
+                    Status = dto.Status,
+                    Notes = dto.Notes
+                };
+                return await UpdateVolunteerAsync(existingVolunteer.Id, updateDto, createdBy, cancellationToken);
+            }
+            user = existingUser;
+            user.Role = UserRole.Volunteer;
+            user.FullName = name;
+            if (!string.IsNullOrWhiteSpace(dto.PhoneNumber ?? dto.Phone))
+                user.PhoneNumber = (dto.PhoneNumber ?? dto.Phone)!.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.ServiceArea))
+                user.AssignedDistrict = dto.ServiceArea.Trim();
+        }
+        else
+        {
+            user = new User
+            {
+                Id = Guid.NewGuid(),
+                FullName = name,
+                Email = email,
+                PhoneNumber = (dto.PhoneNumber ?? dto.Phone)?.Trim() ?? "+94 77 000 0000",
+                AssignedDistrict = dto.ServiceArea?.Trim() ?? "Kelani East",
+                PasswordHash = PasswordHasher.HashPassword("Volunteer@123"),
+                Role = UserRole.Volunteer,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = createdBy
+            };
+            await _context.Users.AddAsync(user, cancellationToken);
         }
 
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            FullName = dto.Name.Trim(),
-            Email = email,
-            PhoneNumber = dto.PhoneNumber?.Trim() ?? "+94 77 000 0000",
-            PasswordHash = PasswordHasher.HashPassword("Volunteer@123"),
-            Role = UserRole.Volunteer,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow,
-            CreatedBy = createdBy
-        };
-
         var serviceArea = !string.IsNullOrWhiteSpace(dto.ServiceArea) ? dto.ServiceArea.Trim() : "Kelani East";
-        var verification = !string.IsNullOrWhiteSpace(dto.Verification) ? dto.Verification.Trim() : "Verified";
-        var isAvailable = (dto.Status ?? "Eligible").Equals("Eligible", StringComparison.OrdinalIgnoreCase);
+        var verification = !string.IsNullOrWhiteSpace(dto.Verification)
+            ? dto.Verification.Trim()
+            : (!string.IsNullOrWhiteSpace(dto.VerificationStatus) ? dto.VerificationStatus.Trim() : "Verified");
+        var status = !string.IsNullOrWhiteSpace(dto.Status) ? dto.Status.Trim() : "Eligible";
+        var isAvailable = status.Equals("Eligible", StringComparison.OrdinalIgnoreCase);
 
         var volunteer = new Volunteer
         {
@@ -317,11 +376,10 @@ public class VolunteerService : IVolunteerService
             Longitude = 79.9190m,
             MaxTravelDistance = 25.0m,
             CreatedAt = DateTime.UtcNow,
-            CreatedBy = $"Area: {serviceArea} | Verif: {verification}",
+            CreatedBy = $"Area: {serviceArea} | Verif: {verification} | Status: {status}",
             LastModifiedBy = dto.Notes
         };
 
-        await _context.Users.AddAsync(user, cancellationToken);
         await _context.Volunteers.AddAsync(volunteer, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
 
@@ -337,7 +395,7 @@ public class VolunteerService : IVolunteerService
         var volunteer = await _context.Volunteers
             .Include(v => v.User)
             .Include(v => v.Assignments)
-            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(v => v.Id == id || v.UserId == id, cancellationToken);
 
         if (volunteer == null)
             return Result<VolunteerCoordinatorDto>.Failure("Volunteer record not found.");
@@ -345,19 +403,90 @@ public class VolunteerService : IVolunteerService
         if (dto.Skills != null) volunteer.Skills = dto.Skills.Trim();
         if (dto.Availability != null) volunteer.Availability = dto.Availability.Trim();
         if (dto.IsAvailable.HasValue) volunteer.IsAvailable = dto.IsAvailable.Value;
+        else if (dto.Status != null)
+        {
+            volunteer.IsAvailable = dto.Status.Equals("Eligible", StringComparison.OrdinalIgnoreCase);
+        }
 
         var currentArea = ExtractServiceArea(volunteer.CreatedBy) ?? "Kelani East";
         var currentVerif = IsPendingVerification(volunteer) ? "Pending" : "Verified";
+        var currentStatus = !string.IsNullOrWhiteSpace(dto.Status)
+            ? dto.Status.Trim()
+            : (ExtractStatus(volunteer.CreatedBy) ?? (volunteer.IsAvailable ? "Eligible" : "Review"));
 
-        if (dto.ServiceArea != null) currentArea = dto.ServiceArea.Trim();
-        if (dto.Verification != null) currentVerif = dto.Verification.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.ServiceArea)) currentArea = dto.ServiceArea.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.Verification)) currentVerif = dto.Verification.Trim();
+        else if (!string.IsNullOrWhiteSpace(dto.VerificationStatus)) currentVerif = dto.VerificationStatus.Trim();
 
-        volunteer.CreatedBy = $"Area: {currentArea} | Verif: {currentVerif}";
+        volunteer.CreatedBy = $"Area: {currentArea} | Verif: {currentVerif} | Status: {currentStatus}";
         if (dto.Notes != null) volunteer.LastModifiedBy = dto.Notes.Trim();
         volunteer.UpdatedAt = DateTime.UtcNow;
 
+        // Update related User entity fields
+        if (volunteer.User != null)
+        {
+            var newName = dto.FullName ?? dto.Name;
+            if (!string.IsNullOrWhiteSpace(newName)) volunteer.User.FullName = newName.Trim();
+
+            if (!string.IsNullOrWhiteSpace(dto.Email)) volunteer.User.Email = dto.Email.Trim().ToLowerInvariant();
+
+            var newPhone = dto.PhoneNumber ?? dto.Phone;
+            if (!string.IsNullOrWhiteSpace(newPhone)) volunteer.User.PhoneNumber = newPhone.Trim();
+
+            volunteer.User.AssignedDistrict = currentArea;
+            volunteer.User.UpdatedAt = DateTime.UtcNow;
+        }
+
         await _unitOfWork.CommitAsync(cancellationToken);
         return Result<VolunteerCoordinatorDto>.Success(MapToCoordinatorDto(volunteer), "Volunteer updated successfully");
+    }
+
+    public async Task<Result<bool>> DeleteVolunteerAsync(
+        Guid id,
+        string deletedBy,
+        CancellationToken cancellationToken = default)
+    {
+        var volunteer = await _context.Volunteers
+            .Include(v => v.User)
+            .Include(v => v.Assignments)
+            .FirstOrDefaultAsync(v => v.Id == id || v.UserId == id, cancellationToken);
+
+        if (volunteer == null)
+            return Result<bool>.Failure("Volunteer record not found.");
+
+        // Check if there are assignments
+        if (volunteer.Assignments != null && volunteer.Assignments.Any())
+        {
+            // Soft delete to respect SQL Server FK constraint (DeleteBehavior.Restrict)
+            volunteer.IsAvailable = false;
+            var currentArea = ExtractServiceArea(volunteer.CreatedBy) ?? "Kelani East";
+            volunteer.CreatedBy = $"Area: {currentArea} | Verif: Deactivated";
+            volunteer.LastModifiedBy = $"Deactivated by {deletedBy} on {DateTime.UtcNow:yyyy-MM-dd HH:mm}";
+            volunteer.UpdatedAt = DateTime.UtcNow;
+
+            if (volunteer.User != null)
+            {
+                volunteer.User.IsActive = false;
+                volunteer.User.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _unitOfWork.CommitAsync(cancellationToken);
+            return Result<bool>.Success(true, $"Volunteer has active/historical assignments and was safely deactivated in the database.");
+        }
+        else
+        {
+            // No assignments - safe to remove volunteer record from database
+            _context.Volunteers.Remove(volunteer);
+
+            if (volunteer.User != null)
+            {
+                volunteer.User.IsActive = false;
+                volunteer.User.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _unitOfWork.CommitAsync(cancellationToken);
+            return Result<bool>.Success(true, "Volunteer record permanently removed from the database.");
+        }
     }
 
     public async Task<Result<bool>> VerifyVolunteerAsync(
@@ -374,7 +503,7 @@ public class VolunteerService : IVolunteerService
             return Result<bool>.Failure("Volunteer record not found.");
 
         var currentArea = ExtractServiceArea(volunteer.CreatedBy) ?? "Kelani East";
-        volunteer.CreatedBy = $"Area: {currentArea} | Verif: Verified";
+        volunteer.CreatedBy = $"Area: {currentArea} | Verif: Verified | Status: Eligible";
         volunteer.IsAvailable = true;
         volunteer.UpdatedAt = DateTime.UtcNow;
 
@@ -401,7 +530,8 @@ public class VolunteerService : IVolunteerService
             return Result<bool>.Failure("Volunteer record not found.");
 
         var currentArea = ExtractServiceArea(volunteer.CreatedBy) ?? "Kelani East";
-        volunteer.CreatedBy = $"Area: {currentArea} | Verif: Pending";
+        volunteer.CreatedBy = $"Area: {currentArea} | Verif: Pending | Status: Review";
+        volunteer.IsAvailable = false;
         volunteer.UpdatedAt = DateTime.UtcNow;
 
         var note = !string.IsNullOrWhiteSpace(dto.Reason) ? dto.Reason.Trim() : "Clarification requested";
@@ -443,24 +573,33 @@ public class VolunteerService : IVolunteerService
         Guid? volunteerId = null,
         CancellationToken cancellationToken = default)
     {
-        var assignments = await _context.VolunteerAssignments
+        var query = _context.VolunteerAssignments
             .Include(a => a.Volunteer)
             .ThenInclude(v => v!.User)
             .Include(a => a.AssistanceRequest)
-            .OrderByDescending(a => a.CreatedAt)
-            .ToListAsync(cancellationToken);
-
-        var list = assignments.Select(MapToAssignmentDetailDto).ToList();
+            .AsQueryable();
 
         if (volunteerId.HasValue && volunteerId.Value != Guid.Empty)
         {
-            list = list.Where(a => a.VolunteerId == volunteerId.Value).ToList();
+            var vid = volunteerId.Value;
+            query = query.Where(a => a.VolunteerId == vid || (a.Volunteer != null && a.Volunteer.UserId == vid));
         }
 
         if (!string.IsNullOrWhiteSpace(status) && !status.Equals("All", StringComparison.OrdinalIgnoreCase))
         {
-            list = list.Where(a => a.Status.Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (status.Equals("Assigned", StringComparison.OrdinalIgnoreCase) || status.Equals("Offered", StringComparison.OrdinalIgnoreCase))
+                query = query.Where(a => a.AssignmentStatus == 0);
+            else if (status.Equals("InProgress", StringComparison.OrdinalIgnoreCase) || status.Equals("Accepted", StringComparison.OrdinalIgnoreCase))
+                query = query.Where(a => a.AssignmentStatus == 1);
+            else if (status.Equals("Completed", StringComparison.OrdinalIgnoreCase))
+                query = query.Where(a => a.AssignmentStatus == 2);
+            else if (status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) || status.Equals("Declined", StringComparison.OrdinalIgnoreCase))
+                query = query.Where(a => a.AssignmentStatus == 3);
         }
+
+        var assignments = await query.OrderByDescending(a => a.CreatedAt).ToListAsync(cancellationToken);
+
+        var list = assignments.Select(MapToAssignmentDetailDto).ToList();
 
         if (!string.IsNullOrWhiteSpace(area) &&
             !area.Equals("All", StringComparison.OrdinalIgnoreCase) &&
@@ -480,7 +619,7 @@ public class VolunteerService : IVolunteerService
         var volunteer = await _context.Volunteers
             .Include(v => v.User)
             .Include(v => v.Assignments)
-            .FirstOrDefaultAsync(v => v.Id == dto.VolunteerId, cancellationToken);
+            .FirstOrDefaultAsync(v => v.Id == dto.VolunteerId || v.UserId == dto.VolunteerId, cancellationToken);
 
         if (volunteer == null)
             return Result<VolunteerAssignmentDetailDto>.Failure("Volunteer does not exist.");
@@ -488,17 +627,15 @@ public class VolunteerService : IVolunteerService
         if (IsPendingVerification(volunteer))
             return Result<VolunteerAssignmentDetailDto>.Failure("Volunteer verification is pending review. Please verify volunteer credentials before assigning shifts.");
 
-        // Check availability conflict
-        var existingActive = volunteer.Assignments.FirstOrDefault(a => a.AssignmentStatus == 0 || a.AssignmentStatus == 1);
-        if (existingActive != null)
+        // Check if duplicate assignment for the same active task
+        var duplicate = volunteer.Assignments.FirstOrDefault(a => 
+            (a.AssignmentStatus == 0 || a.AssignmentStatus == 1) && 
+            !string.IsNullOrWhiteSpace(dto.ShiftTask) &&
+            a.TaskDescription.Equals(dto.ShiftTask.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (duplicate != null)
         {
             return Result<VolunteerAssignmentDetailDto>.Failure(
-                $"Schedule conflict prevented: Volunteer {FormatVolunteerCode(volunteer.Id)} already has an active shift '{existingActive.TaskDescription}'.");
-        }
-
-        if (!volunteer.IsAvailable)
-        {
-            return Result<VolunteerAssignmentDetailDto>.Failure("Volunteer is currently marked unavailable.");
+                $"Volunteer {FormatVolunteerCode(volunteer.Id)} is already assigned to active shift '{duplicate.TaskDescription}'.");
         }
 
         var assignment = new VolunteerAssignment
@@ -508,7 +645,7 @@ public class VolunteerService : IVolunteerService
             Volunteer = volunteer,
             AssistanceRequestId = dto.AssistanceRequestId,
             TaskDescription = dto.ShiftTask.Trim(),
-            AssignmentStatus = 0, // Assigned
+            AssignmentStatus = dto.AssignmentStatus ?? 1, // Default 1 (Accepted) for accepted shifts
             StartTime = DateTime.UtcNow,
             Notes = $"Shift Window: {dto.ShiftTime} | Task: {dto.ShiftTask}" + (!string.IsNullOrWhiteSpace(dto.Note) ? $" | Reason: {dto.Note}" : ""),
             CreatedBy = assignedBy,
@@ -516,7 +653,7 @@ public class VolunteerService : IVolunteerService
         };
 
         // Update volunteer availability
-        volunteer.IsAvailable = false;
+        volunteer.IsAvailable = true;
         volunteer.Availability = dto.ShiftTime;
         volunteer.UpdatedAt = DateTime.UtcNow;
 
@@ -550,6 +687,13 @@ public class VolunteerService : IVolunteerService
         assignment.Notes = $"{assignment.Notes} | Accepted by {acceptedBy}".Trim(' ', '|');
         assignment.LastModifiedBy = acceptedBy;
         assignment.UpdatedAt = DateTime.UtcNow;
+
+        if (assignment.Volunteer != null)
+        {
+            assignment.Volunteer.IsAvailable = false;
+            assignment.Volunteer.Availability = "On Duty";
+            assignment.Volunteer.UpdatedAt = DateTime.UtcNow;
+        }
 
         await _unitOfWork.CommitAsync(cancellationToken);
         return Result<bool>.Success(true, "Assignment accepted successfully.");
@@ -1160,6 +1304,7 @@ public class VolunteerService : IVolunteerService
     {
         var activeAssign = v.Assignments?.FirstOrDefault(a => a.AssignmentStatus == 0 || a.AssignmentStatus == 1);
         var isPending = IsPendingVerification(v);
+        var explicitStatus = ExtractStatus(v.CreatedBy);
 
         string status;
         string statusType;
@@ -1170,6 +1315,24 @@ public class VolunteerService : IVolunteerService
             status = "Assigned";
             statusType = "assigned";
             currentShift = activeAssign.TaskDescription;
+        }
+        else if (!string.IsNullOrWhiteSpace(explicitStatus))
+        {
+            if (explicitStatus.Equals("Assigned", StringComparison.OrdinalIgnoreCase))
+            {
+                status = "Assigned";
+                statusType = "assigned";
+            }
+            else if (explicitStatus.Equals("Eligible", StringComparison.OrdinalIgnoreCase))
+            {
+                status = "Eligible";
+                statusType = "eligible";
+            }
+            else
+            {
+                status = "Review";
+                statusType = "review";
+            }
         }
         else if (isPending)
         {
@@ -1241,6 +1404,46 @@ public class VolunteerService : IVolunteerService
             if (match.Success) shiftTime = match.Groups[1].Value.Trim();
         }
 
+        string? priority = null;
+        if (a.AssistanceRequest != null)
+        {
+            priority = a.AssistanceRequest.Urgency.ToString();
+        }
+        else if (a.Notes != null && a.Notes.Contains("Priority:", StringComparison.OrdinalIgnoreCase))
+        {
+            var pMatch = Regex.Match(a.Notes, @"Priority:\s*([^\|]+)");
+            if (pMatch.Success) priority = pMatch.Groups[1].Value.Trim();
+        }
+
+        string? caseNum = null;
+        if (a.Notes != null && a.Notes.Contains("Incident:", StringComparison.OrdinalIgnoreCase))
+        {
+            var iMatch = Regex.Match(a.Notes, @"Incident:\s*([^\|]+)");
+            if (iMatch.Success) caseNum = iMatch.Groups[1].Value.Trim();
+        }
+        else if (a.AssistanceRequestId.HasValue)
+        {
+            caseNum = $"REQ-{a.AssistanceRequestId.Value.ToString().Substring(0, 4).ToUpper()}";
+        }
+
+        string? caseCat = a.AssistanceRequest?.Category;
+        if (string.IsNullOrWhiteSpace(caseCat) && a.Notes != null && a.Notes.Contains("Category:", StringComparison.OrdinalIgnoreCase))
+        {
+            var cMatch = Regex.Match(a.Notes, @"Category:\s*([^\|]+)");
+            if (cMatch.Success) caseCat = cMatch.Groups[1].Value.Trim();
+        }
+
+        var serviceArea = ExtractServiceArea(a.Volunteer?.CreatedBy);
+        if (string.IsNullOrWhiteSpace(serviceArea) && a.Notes != null && a.Notes.Contains("Loc:", StringComparison.OrdinalIgnoreCase))
+        {
+            var lMatch = Regex.Match(a.Notes, @"Loc:\s*([^\|]+)");
+            if (lMatch.Success) serviceArea = lMatch.Groups[1].Value.Trim();
+        }
+
+        var coordinator = !string.IsNullOrWhiteSpace(a.CreatedBy) && !a.CreatedBy.Equals("System", StringComparison.OrdinalIgnoreCase)
+            ? a.CreatedBy
+            : "Maya Fernando (Field Coordinator)";
+
         return new VolunteerAssignmentDetailDto
         {
             Id = a.Id,
@@ -1248,7 +1451,7 @@ public class VolunteerService : IVolunteerService
             VolunteerCode = FormatVolunteerCode(a.VolunteerId),
             VolunteerName = a.Volunteer?.User?.FullName ?? "Volunteer",
             VolunteerSkills = FormatSkills(a.Volunteer?.Skills),
-            ServiceArea = ExtractServiceArea(a.Volunteer?.CreatedBy) ?? "Kelani East",
+            ServiceArea = serviceArea ?? "Kelani East",
             AssistanceRequestId = a.AssistanceRequestId,
             TaskDescription = a.TaskDescription,
             ShiftTime = shiftTime,
@@ -1258,7 +1461,11 @@ public class VolunteerService : IVolunteerService
             StartTime = a.StartTime,
             EndTime = a.EndTime,
             Notes = a.Notes,
-            CreatedAt = a.CreatedAt
+            CreatedAt = a.CreatedAt,
+            CoordinatorName = coordinator,
+            Priority = priority ?? "High",
+            CaseNumber = caseNum,
+            CaseCategory = caseCat ?? "Emergency Response"
         };
     }
 
@@ -1268,6 +1475,8 @@ public class VolunteerService : IVolunteerService
             return true;
         if (v.CreatedBy != null && v.CreatedBy.Equals("Pending", StringComparison.OrdinalIgnoreCase))
             return true;
+        if (v.CreatedBy != null && v.CreatedBy.Contains("Verif: Verified", StringComparison.OrdinalIgnoreCase))
+            return false;
         if (v.User != null && !v.User.IsActive)
             return true;
         return false;
@@ -1283,6 +1492,14 @@ public class VolunteerService : IVolunteerService
         if (createdBy.Contains("Biyagama", StringComparison.OrdinalIgnoreCase)) return "Biyagama North";
         if (createdBy.Contains("Central", StringComparison.OrdinalIgnoreCase)) return "Central Depot";
         if (createdBy.Contains("Niyagama", StringComparison.OrdinalIgnoreCase)) return "Niyagama North";
+        return null;
+    }
+
+    private static string? ExtractStatus(string? createdBy)
+    {
+        if (string.IsNullOrWhiteSpace(createdBy)) return null;
+        var match = Regex.Match(createdBy, @"Status:\s*([^\|]+)");
+        if (match.Success) return match.Groups[1].Value.Trim();
         return null;
     }
 

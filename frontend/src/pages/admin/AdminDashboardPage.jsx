@@ -1512,7 +1512,9 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
     try {
       const payload = {
         name: newVolunteer.fullName.trim(),
+        fullName: newVolunteer.fullName.trim(),
         email: newVolunteer.email.trim(),
+        phone: newVolunteer.phoneNumber,
         phoneNumber: newVolunteer.phoneNumber,
         skills: newVolunteer.skills,
         serviceArea: newVolunteer.district,

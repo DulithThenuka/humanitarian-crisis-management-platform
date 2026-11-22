@@ -8,9 +8,12 @@ import {
   HelpCircle,
   AlertTriangle,
   AlertCircle,
-  Loader2
+  Loader2,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { OPERATIONAL_AREAS } from '../data/coordinatorData';
+import { EditVolunteerModal } from '../components/EditVolunteerModal';
 
 /* ─── Shared Action Modal ─── */
 const ActionModal = ({
@@ -230,6 +233,8 @@ export const VolunteerDirectoryView = ({
   onConfirmAssignment,
   onRequestClarification,
   onEscalate,
+  onUpdateVolunteer,
+  onDeleteVolunteer,
   onOpenCreateModal,
   onOpenExportModal,
   loading = false
@@ -245,6 +250,10 @@ export const VolunteerDirectoryView = ({
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [clarifyModalOpen, setClarifyModalOpen] = useState(false);
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [volunteerToEdit, setVolunteerToEdit] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [volunteerToDelete, setVolunteerToDelete] = useState(null);
 
   const [successBanner, setSuccessBanner] = useState(null);
   const [errorBanner, setErrorBanner] = useState(null);
@@ -255,22 +264,31 @@ export const VolunteerDirectoryView = ({
   const filteredVolunteers = useMemo(() => {
     return volunteers.filter((vol) => {
       const q = searchTerm.toLowerCase();
+      const code = (vol.volunteerCode || vol.id || '').toLowerCase();
+      const name = (vol.fullName || vol.name || '').toLowerCase();
+      const email = (vol.email || '').toLowerCase();
+      const skills = (vol.skills || '').toLowerCase();
+      const area = (vol.serviceArea || '').toLowerCase();
+      const phone = (vol.phoneNumber || vol.phone || '').toLowerCase();
+
       const matchesSearch =
         !q ||
-        (vol.id && vol.id.toLowerCase().includes(q)) ||
-        (vol.name && vol.name.toLowerCase().includes(q)) ||
-        (vol.skills && vol.skills.toLowerCase().includes(q)) ||
-        (vol.serviceArea && vol.serviceArea.toLowerCase().includes(q));
+        code.includes(q) ||
+        name.includes(q) ||
+        email.includes(q) ||
+        skills.includes(q) ||
+        area.includes(q) ||
+        phone.includes(q);
 
       const matchesStatus =
         statusFilter === 'All' ||
-        vol.status === statusFilter ||
-        vol.statusType === statusFilter.toLowerCase();
+        (vol.status && vol.status.toLowerCase() === statusFilter.toLowerCase()) ||
+        (vol.statusType && vol.statusType.toLowerCase() === statusFilter.toLowerCase());
 
       const matchesArea =
         areaFilter === 'All' ||
         areaFilter === 'All operational areas' ||
-        vol.serviceArea === areaFilter;
+        (vol.serviceArea && vol.serviceArea.toLowerCase() === areaFilter.toLowerCase());
 
       return matchesSearch && matchesStatus && matchesArea;
     });
@@ -294,7 +312,7 @@ export const VolunteerDirectoryView = ({
       await onConfirmAssignment(selectedVolunteer.id, reason || authorizedNote);
       setConfirmModalOpen(false);
       setAuthorizedNote('');
-      showBanner(`Operational verification & assignment successfully saved for ${selectedVolunteer.id} (${selectedVolunteer.name}). Database updated.`);
+      showBanner(`Operational verification & assignment successfully saved for ${selectedVolunteer.volunteerCode || selectedVolunteer.id} (${selectedVolunteer.fullName || selectedVolunteer.name}). Database updated.`);
     } catch (err) {
       showError(err.message || 'Failed to update volunteer record in database.');
     } finally {
@@ -309,7 +327,7 @@ export const VolunteerDirectoryView = ({
       await onRequestClarification(selectedVolunteer.id, reason || authorizedNote);
       setClarifyModalOpen(false);
       setAuthorizedNote('');
-      showBanner(`Clarification request saved for ${selectedVolunteer.id}. Record set to Review in database.`);
+      showBanner(`Clarification request saved for ${selectedVolunteer.volunteerCode || selectedVolunteer.id}. Record set to Review in database.`);
     } catch (err) {
       showError(err.message || 'Failed to request clarification.');
     } finally {
@@ -324,9 +342,36 @@ export const VolunteerDirectoryView = ({
       await onEscalate(selectedVolunteer.id, reason || authorizedNote);
       setEscalateModalOpen(false);
       setAuthorizedNote('');
-      showBanner(`Record ${selectedVolunteer.id} escalated to District Emergency Ops Command. Audit record persisted.`);
+      showBanner(`Record ${selectedVolunteer.volunteerCode || selectedVolunteer.id} escalated to District Emergency Ops Command. Audit record persisted.`);
     } catch (err) {
       showError(err.message || 'Failed to escalate record.');
+    } finally {
+      setIsActionSubmitting(false);
+    }
+  };
+
+  const handleEditSave = async (id, updatedData) => {
+    if (!onUpdateVolunteer) return;
+    try {
+      await onUpdateVolunteer(id, updatedData);
+      setEditModalOpen(false);
+      setVolunteerToEdit(null);
+      showBanner(`Volunteer ${updatedData.fullName || updatedData.name || id} updated successfully in SQL Server database.`);
+    } catch (err) {
+      showError(err.message || 'Failed to update volunteer record in database.');
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!volunteerToDelete || !onDeleteVolunteer) return;
+    setIsActionSubmitting(true);
+    try {
+      await onDeleteVolunteer(volunteerToDelete.id);
+      setDeleteModalOpen(false);
+      showBanner(`Volunteer record ${volunteerToDelete.volunteerCode || volunteerToDelete.id} successfully processed in database.`);
+      setVolunteerToDelete(null);
+    } catch (err) {
+      showError(err.message || 'Failed to delete volunteer record.');
     } finally {
       setIsActionSubmitting(false);
     }
@@ -375,6 +420,35 @@ export const VolunteerDirectoryView = ({
         confirmLabel="Escalate Record"
         confirmBg="#dc2626"
         confirmHoverBg="#b91c1c"
+      />
+
+      {/* Delete / Deactivate Action Modal */}
+      <ActionModal
+        isOpen={deleteModalOpen}
+        onCancel={() => {
+          setDeleteModalOpen(false);
+          setVolunteerToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        isSubmitting={isActionSubmitting}
+        icon={<Trash2 size={20} style={{ color: '#dc2626' }} />}
+        iconBg="#fef2f2"
+        title={`Delete / Deactivate Volunteer: ${volunteerToDelete?.volunteerCode || volunteerToDelete?.id}`}
+        subtitle={`Permanently removes this record from the database if there are no assignments, or safely deactivates the profile to protect foreign key integrity and audit logs.`}
+        confirmLabel="Confirm Delete / Deactivate"
+        confirmBg="#dc2626"
+        confirmHoverBg="#b91c1c"
+      />
+
+      {/* Edit Volunteer Modal */}
+      <EditVolunteerModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setVolunteerToEdit(null);
+        }}
+        volunteer={volunteerToEdit}
+        onUpdateVolunteer={handleEditSave}
       />
 
       {/* 1. Header */}
@@ -495,18 +569,20 @@ export const VolunteerDirectoryView = ({
             <thead>
               <tr>
                 <th>Volunteer Ref</th>
+                <th>Volunteer Name</th>
                 <th>Verified Skills</th>
                 <th>Service Area</th>
                 <th>Availability</th>
                 <th>Current Shift</th>
                 <th>Verification</th>
                 <th>Status</th>
+                <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '36px', color: '#657367' }}>
+                  <td colSpan="9" style={{ textAlign: 'center', padding: '36px', color: '#657367' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                       <Loader2 size={16} className="vc-spin" />
                       Loading volunteers from SQL Server...
@@ -515,7 +591,7 @@ export const VolunteerDirectoryView = ({
                 </tr>
               ) : filteredVolunteers.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '36px', color: '#657367' }}>
+                  <td colSpan="9" style={{ textAlign: 'center', padding: '36px', color: '#657367' }}>
                     <div>No volunteer records found matching your filters.</div>
                     <button
                       className="vc-btn-outline"
@@ -538,8 +614,9 @@ export const VolunteerDirectoryView = ({
                     onClick={() => setSelectedVolunteerId(vol.id)}
                     style={{ cursor: 'pointer' }}
                   >
-                    <td className="vc-ref-mono">{vol.id}</td>
-                    <td style={{ fontWeight: 600 }}>{vol.skills}</td>
+                    <td className="vc-ref-mono">{vol.volunteerCode || vol.id?.slice(0, 8) || vol.id}</td>
+                    <td style={{ fontWeight: 700, color: '#14291e' }}>{vol.fullName || vol.name || 'Volunteer Member'}</td>
+                    <td style={{ fontWeight: 500 }}>{vol.skills}</td>
                     <td>{vol.serviceArea}</td>
                     <td>{vol.availability}</td>
                     <td style={{ color: vol.currentShift === 'None' ? '#8a9480' : '#2a4a35' }}>
@@ -574,6 +651,34 @@ export const VolunteerDirectoryView = ({
                         {vol.status}
                       </span>
                     </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <div style={{ display: 'inline-flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
+                        <button
+                          className="vc-btn-outline"
+                          style={{ padding: '4px 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          title="Edit Volunteer in SQL Server"
+                          onClick={() => {
+                            setVolunteerToEdit(vol);
+                            setEditModalOpen(true);
+                          }}
+                        >
+                          <Edit size={12} />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          className="vc-btn-outline"
+                          style={{ padding: '4px 8px', fontSize: '11px', color: '#dc2626', borderColor: '#fecaca', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          title="Delete / Deactivate from SQL Server"
+                          onClick={() => {
+                            setVolunteerToDelete(vol);
+                            setDeleteModalOpen(true);
+                          }}
+                        >
+                          <Trash2 size={12} />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}
@@ -584,23 +689,35 @@ export const VolunteerDirectoryView = ({
         {/* Right: Inspector Detail Panel */}
         {selectedVolunteer && (
           <div className="vc-inspector-card">
-            <div className="vc-inspector-ref">{selectedVolunteer.id}</div>
+            <div className="vc-inspector-ref">{selectedVolunteer.volunteerCode || selectedVolunteer.id?.slice(0, 8) || selectedVolunteer.id}</div>
             <div className="vc-inspector-header">
-              <h3 className="vc-inspector-title">{selectedVolunteer.name || selectedVolunteer.skills}</h3>
+              <h3 className="vc-inspector-title">{selectedVolunteer.fullName || selectedVolunteer.name || selectedVolunteer.skills}</h3>
               <span className={`vc-status-pill ${selectedVolunteer.statusType || selectedVolunteer.status?.toLowerCase() || 'eligible'}`}>
                 {selectedVolunteer.status}
               </span>
             </div>
-            <div className="vc-inspector-sub">Operational database record · role-scoped</div>
+            <div className="vc-inspector-sub">Operational database record · SQL Server connected</div>
 
             <div className="vc-inspector-grid">
               <div>
-                <div className="vc-grid-key">Skills</div>
-                <div className="vc-grid-val">{selectedVolunteer.skills}</div>
+                <div className="vc-grid-key">Full Name</div>
+                <div className="vc-grid-val" style={{ fontWeight: 600 }}>{selectedVolunteer.fullName || selectedVolunteer.name || 'N/A'}</div>
+              </div>
+              <div>
+                <div className="vc-grid-key">Email</div>
+                <div className="vc-grid-val">{selectedVolunteer.email || 'N/A'}</div>
+              </div>
+              <div>
+                <div className="vc-grid-key">Contact / Phone</div>
+                <div className="vc-grid-val">{selectedVolunteer.phoneNumber || selectedVolunteer.phone || 'N/A'}</div>
               </div>
               <div>
                 <div className="vc-grid-key">Service area</div>
                 <div className="vc-grid-val">{selectedVolunteer.serviceArea}</div>
+              </div>
+              <div>
+                <div className="vc-grid-key">Verified Skills</div>
+                <div className="vc-grid-val">{selectedVolunteer.skills}</div>
               </div>
               <div>
                 <div className="vc-grid-key">Availability</div>
@@ -613,10 +730,6 @@ export const VolunteerDirectoryView = ({
               <div>
                 <div className="vc-grid-key">Verification</div>
                 <div className="vc-grid-val">{selectedVolunteer.verification}</div>
-              </div>
-              <div>
-                <div className="vc-grid-key">Contact / Ref</div>
-                <div className="vc-grid-val">{selectedVolunteer.phone || selectedVolunteer.id}</div>
               </div>
             </div>
 
@@ -650,6 +763,31 @@ export const VolunteerDirectoryView = ({
             </div>
 
             <div className="vc-inspector-actions">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                <button
+                  className="vc-btn-primary"
+                  style={{ justifyContent: 'center' }}
+                  onClick={() => {
+                    setVolunteerToEdit(selectedVolunteer);
+                    setEditModalOpen(true);
+                  }}
+                >
+                  <Edit size={14} />
+                  <span>Edit Details</span>
+                </button>
+                <button
+                  className="vc-btn-outline"
+                  style={{ justifyContent: 'center', color: '#dc2626', borderColor: '#fecaca' }}
+                  onClick={() => {
+                    setVolunteerToDelete(selectedVolunteer);
+                    setDeleteModalOpen(true);
+                  }}
+                >
+                  <Trash2 size={14} />
+                  <span>Delete / Deactivate</span>
+                </button>
+              </div>
+
               <button
                 className="vc-btn-primary"
                 style={{ width: '100%', justifyContent: 'center' }}

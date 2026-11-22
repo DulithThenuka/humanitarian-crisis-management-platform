@@ -137,8 +137,8 @@ export const MyAssignmentsView = ({
             ) : (
               filteredAssignments.map((row) => (
                 <tr key={row.id}>
-                  <td className="vol-task-id-mono">{row.id}</td>
-                  <td style={{ fontWeight: 600 }}>{row.taskTitle}</td>
+                  <td className="vol-task-id-mono" style={{ cursor: 'pointer' }} onClick={() => onActionClick(row)} title="View task details">{row.id}</td>
+                  <td style={{ fontWeight: 600, cursor: 'pointer' }} onClick={() => onActionClick(row)} title="View task details">{row.taskTitle}</td>
                   <td style={{ color: '#657367' }}>{row.assigned}</td>
                   <td style={{ color: '#4a5b4a', fontWeight: 500 }}>{row.deadline}</td>
                   <td>{row.location}</td>
