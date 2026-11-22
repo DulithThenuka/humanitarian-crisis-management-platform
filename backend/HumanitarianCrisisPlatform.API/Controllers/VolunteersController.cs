@@ -35,7 +35,7 @@ public class VolunteersController : BaseApiController
     // 2. Volunteer Directory Endpoints
     // ─────────────────────────────────────────────────────────────────────────────
     [HttpGet]
-    [Authorize(Roles = "Coordinator,Admin")]
+    [Authorize(Roles = "Coordinator,Admin,Volunteer,CaseManager")]
     public async Task<ActionResult<Result<IReadOnlyList<VolunteerCoordinatorDto>>>> GetAll(
         [FromQuery] string? search,
         [FromQuery] string? status,
@@ -45,6 +45,14 @@ public class VolunteersController : BaseApiController
         var result = await _volunteerService.GetAllVolunteersAsync(search, status, serviceArea, cancellationToken);
         return result.Succeeded ? Ok(result) : BadRequest(result);
     }
+
+    [HttpGet("me")]
+    public async Task<ActionResult<Result<VolunteerCoordinatorDto>>> GetCurrentVolunteer(CancellationToken cancellationToken)
+    {
+        var result = await _volunteerService.GetVolunteerByIdAsync(CurrentUserId, cancellationToken);
+        return result.Succeeded ? Ok(result) : NotFound(result);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<Result<VolunteerCoordinatorDto>>> GetById(Guid id, CancellationToken cancellationToken)
     {

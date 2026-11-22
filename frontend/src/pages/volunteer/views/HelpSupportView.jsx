@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   X
 } from 'lucide-react';
+import volunteerService from '../../../services/volunteerService';
 
 export const HelpSupportView = ({ showToast, onNavigateTab }) => {
   const [relatedTask, setRelatedTask] = useState('VOL-009 - Supply Distribution');
@@ -15,26 +16,49 @@ export const HelpSupportView = ({ showToast, onNavigateTab }) => {
   const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
   const [safetyDetails, setSafetyDetails] = useState('');
 
-  const handleSupportSubmit = (e) => {
+  const handleSupportSubmit = async (e) => {
     e.preventDefault();
     if (!message.trim()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await volunteerService.recordScopedUpdate({
+        type: 'support',
+        details: `[${topic}] ${relatedTask}: ${message.trim()}`,
+        serviceArea: 'Kelani East'
+      });
       setMessage('');
       if (showToast) {
         showToast('Support request sent to authorized field response team.');
       }
-    }, 400);
+    } catch (err) {
+      if (showToast) {
+        showToast(`Failed to send support request: ${err?.message || 'Error'}`);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSafetySubmit = (e) => {
+  const handleSafetySubmit = async (e) => {
     e.preventDefault();
-    setIsSafetyModalOpen(false);
-    setSafetyDetails('');
-    if (showToast) {
-      showToast('Urgent safety concern logged. Operational coordinator notified.');
+    if (!safetyDetails.trim()) return;
+
+    try {
+      await volunteerService.recordScopedUpdate({
+        type: 'safety',
+        details: `SAFETY ALERT: ${safetyDetails.trim()}`,
+        serviceArea: 'Kelani East'
+      });
+      setIsSafetyModalOpen(false);
+      setSafetyDetails('');
+      if (showToast) {
+        showToast('Urgent safety concern logged. Operational coordinator notified.');
+      }
+    } catch (err) {
+      if (showToast) {
+        showToast(`Failed to log safety concern: ${err?.message || 'Error'}`);
+      }
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CheckCircle2,
   AlertCircle,
@@ -6,19 +6,34 @@ import {
   ChevronDown,
   Check
 } from 'lucide-react';
+import volunteerService from '../../../services/volunteerService';
 
-export const MyProfileView = ({ user, activitySummary, showToast }) => {
+export const MyProfileView = ({ user, activitySummary, showToast, onSaveProfile }) => {
   // State for editable profile fields matching Figma specification
   const [formData, setFormData] = useState({
     displayName: user?.name || 'Nadeesha Perera',
     email: user?.email || 'nadeesha.perera@example.test',
-    serviceArea: 'Kelani East and nearby areas',
-    availability: 'Available',
-    skills: 'Logistics, Supply Distribution, Community Support',
+    phone: user?.phone || '+94 77 123 4567',
+    serviceArea: user?.serviceArea || 'Kelani East and nearby areas',
+    availability: user?.availability || 'Available',
+    skills: user?.skills ? (Array.isArray(user.skills) ? user.skills.join(', ') : user.skills) : 'Logistics, Supply Distribution, Community Support',
     training: 'Community first aid course — volunteer provided',
     emergencyContactPreference: 'Stored securely',
     preferredCategory: 'Logistics and Distribution'
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        displayName: user.name || prev.displayName,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone,
+        serviceArea: user.serviceArea || prev.serviceArea,
+        skills: user.skills ? (Array.isArray(user.skills) ? user.skills.join(', ') : user.skills) : prev.skills
+      }));
+    }
+  }, [user]);
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -29,15 +44,35 @@ export const MyProfileView = ({ user, activitySummary, showToast }) => {
     }));
   };
 
-  const handleSaveChanges = (e) => {
+  const handleSaveChanges = async (e) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      if (showToast) {
-        showToast('Volunteer profile and service preferences saved.');
+    try {
+      if (onSaveProfile) {
+        await onSaveProfile(formData);
+      } else {
+        const idToUse = user?.volunteerGuid || user?.id;
+        if (idToUse) {
+          await volunteerService.updateVolunteer(idToUse, {
+            fullName: formData.displayName,
+            email: formData.email,
+            phoneNumber: formData.phone,
+            serviceArea: formData.serviceArea,
+            skills: formData.skills,
+            availability: formData.availability
+          });
+        }
+        if (showToast) {
+          showToast('Volunteer profile and service preferences saved.');
+        }
       }
-    }, 400);
+    } catch (err) {
+      if (showToast) {
+        showToast(`Failed to save profile: ${err?.message || 'Error'}`);
+      }
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const completedHistory = [

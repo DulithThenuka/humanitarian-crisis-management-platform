@@ -96,24 +96,30 @@ public class VolunteerCoordinatorUserDto
 
 public class CreateVolunteerRequestDto
 {
-    [Required]
-    public string Name { get; set; } = string.Empty;
+    public string? Name { get; set; }
+    public string? FullName { get; set; }
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
     public string? Skills { get; set; } = "Logistics, First Aid";
     public string? ServiceArea { get; set; } = "Kelani East";
     public string? Availability { get; set; } = "Available";
     public string? Verification { get; set; } = "Verified";
+    public string? VerificationStatus { get; set; }
     public string? Status { get; set; } = "Eligible";
     public string? Notes { get; set; }
 }
 
 public class UpdateVolunteerRequestDto
 {
+    public string? Name { get; set; }
+    public string? FullName { get; set; }
+    public string? Email { get; set; }
+    public string? PhoneNumber { get; set; }
     public string? Skills { get; set; }
     public string? ServiceArea { get; set; }
     public string? Availability { get; set; }
     public string? Verification { get; set; }
+    public string? VerificationStatus { get; set; }
     public string? Status { get; set; }
     public string? Notes { get; set; }
     public bool? IsAvailable { get; set; }
@@ -121,9 +127,11 @@ public class UpdateVolunteerRequestDto
 
 public class VolunteerActionRequestDto
 {
-    [Required]
-    public string Reason { get; set; } = string.Empty;
+    public string? Reason { get; set; }
+    public string? Note { get; set; }
     public string? Notes { get; set; }
+    public string? Action { get; set; }
+    public string? ServiceArea { get; set; }
 }
 
 public class VolunteerAssignmentDetailDto

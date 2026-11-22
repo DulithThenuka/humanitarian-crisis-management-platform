@@ -258,7 +258,9 @@ export const VolunteerDirectoryView = ({
       const matchesSearch =
         !q ||
         (vol.id && vol.id.toLowerCase().includes(q)) ||
+        (vol.volunteerCode && vol.volunteerCode.toLowerCase().includes(q)) ||
         (vol.name && vol.name.toLowerCase().includes(q)) ||
+        (vol.fullName && vol.fullName.toLowerCase().includes(q)) ||
         (vol.skills && vol.skills.toLowerCase().includes(q)) ||
         (vol.serviceArea && vol.serviceArea.toLowerCase().includes(q));
 
@@ -586,7 +588,7 @@ export const VolunteerDirectoryView = ({
           <div className="vc-inspector-card">
             <div className="vc-inspector-ref">{selectedVolunteer.id}</div>
             <div className="vc-inspector-header">
-              <h3 className="vc-inspector-title">{selectedVolunteer.name || selectedVolunteer.skills}</h3>
+              <h3 className="vc-inspector-title">{selectedVolunteer.fullName || selectedVolunteer.name || selectedVolunteer.skills}</h3>
               <span className={`vc-status-pill ${selectedVolunteer.statusType || selectedVolunteer.status?.toLowerCase() || 'eligible'}`}>
                 {selectedVolunteer.status}
               </span>

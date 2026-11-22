@@ -262,7 +262,7 @@ public class VolunteerService : IVolunteerService
         var v = await _context.Volunteers
             .Include(x => x.User)
             .Include(x => x.Assignments)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == id || x.UserId == id, cancellationToken);
 
         if (v == null)
             return Result<VolunteerCoordinatorDto>.Failure("Volunteer record not found.");
@@ -275,23 +275,24 @@ public class VolunteerService : IVolunteerService
         string createdBy,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(dto.Name))
+        var name = !string.IsNullOrWhiteSpace(dto.FullName) ? dto.FullName.Trim() : dto.Name?.Trim();
+        if (string.IsNullOrWhiteSpace(name))
             return Result<VolunteerCoordinatorDto>.Failure("Volunteer name is required.");
 
         var email = !string.IsNullOrWhiteSpace(dto.Email)
             ? dto.Email.Trim().ToLower()
-            : $"{dto.Name.Trim().ToLower().Replace(" ", ".")}_{Guid.NewGuid().ToString()[..4]}@crisisplatform.org";
+            : $"{name.Trim().ToLower().Replace(" ", ".")}_{Guid.NewGuid().ToString()[..4]}@crisisplatform.org";
 
         // Check if user email already exists
         if (await _context.Users.AnyAsync(u => u.Email == email, cancellationToken))
         {
-            email = $"{dto.Name.Trim().ToLower().Replace(" ", ".")}_{Guid.NewGuid().ToString()[..6]}@crisisplatform.org";
+            email = $"{name.Trim().ToLower().Replace(" ", ".")}_{Guid.NewGuid().ToString()[..6]}@crisisplatform.org";
         }
 
         var user = new User
         {
             Id = Guid.NewGuid(),
-            FullName = dto.Name.Trim(),
+            FullName = name,
             Email = email,
             PhoneNumber = dto.PhoneNumber?.Trim() ?? "+94 77 000 0000",
             PasswordHash = PasswordHasher.HashPassword("Volunteer@123"),
@@ -302,7 +303,9 @@ public class VolunteerService : IVolunteerService
         };
 
         var serviceArea = !string.IsNullOrWhiteSpace(dto.ServiceArea) ? dto.ServiceArea.Trim() : "Kelani East";
-        var verification = !string.IsNullOrWhiteSpace(dto.Verification) ? dto.Verification.Trim() : "Verified";
+        var verification = !string.IsNullOrWhiteSpace(dto.Verification)
+            ? dto.Verification.Trim()
+            : (!string.IsNullOrWhiteSpace(dto.VerificationStatus) ? dto.VerificationStatus.Trim() : "Verified");
         var isAvailable = (dto.Status ?? "Eligible").Equals("Eligible", StringComparison.OrdinalIgnoreCase);
 
         var volunteer = new Volunteer
@@ -337,10 +340,18 @@ public class VolunteerService : IVolunteerService
         var volunteer = await _context.Volunteers
             .Include(v => v.User)
             .Include(v => v.Assignments)
-            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(v => v.Id == id || v.UserId == id, cancellationToken);
 
         if (volunteer == null)
             return Result<VolunteerCoordinatorDto>.Failure("Volunteer record not found.");
+
+        if (volunteer.User != null)
+        {
+            var updatedName = !string.IsNullOrWhiteSpace(dto.FullName) ? dto.FullName.Trim() : dto.Name?.Trim();
+            if (!string.IsNullOrWhiteSpace(updatedName)) volunteer.User.FullName = updatedName;
+            if (!string.IsNullOrWhiteSpace(dto.Email)) volunteer.User.Email = dto.Email.Trim().ToLower();
+            if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) volunteer.User.PhoneNumber = dto.PhoneNumber.Trim();
+        }
 
         if (dto.Skills != null) volunteer.Skills = dto.Skills.Trim();
         if (dto.Availability != null) volunteer.Availability = dto.Availability.Trim();
@@ -351,6 +362,7 @@ public class VolunteerService : IVolunteerService
 
         if (dto.ServiceArea != null) currentArea = dto.ServiceArea.Trim();
         if (dto.Verification != null) currentVerif = dto.Verification.Trim();
+        else if (dto.VerificationStatus != null) currentVerif = dto.VerificationStatus.Trim();
 
         volunteer.CreatedBy = $"Area: {currentArea} | Verif: {currentVerif}";
         if (dto.Notes != null) volunteer.LastModifiedBy = dto.Notes.Trim();
@@ -368,7 +380,7 @@ public class VolunteerService : IVolunteerService
     {
         var volunteer = await _context.Volunteers
             .Include(v => v.User)
-            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(v => v.Id == id || v.UserId == id, cancellationToken);
 
         if (volunteer == null)
             return Result<bool>.Failure("Volunteer record not found.");
@@ -378,7 +390,9 @@ public class VolunteerService : IVolunteerService
         volunteer.IsAvailable = true;
         volunteer.UpdatedAt = DateTime.UtcNow;
 
-        var note = !string.IsNullOrWhiteSpace(dto.Reason) ? dto.Reason.Trim() : "Credentials verified by coordinator";
+        var note = !string.IsNullOrWhiteSpace(dto.Reason)
+            ? dto.Reason.Trim()
+            : (!string.IsNullOrWhiteSpace(dto.Note) ? dto.Note.Trim() : (!string.IsNullOrWhiteSpace(dto.Notes) ? dto.Notes.Trim() : "Credentials verified by coordinator"));
         volunteer.LastModifiedBy = string.IsNullOrWhiteSpace(volunteer.LastModifiedBy)
             ? $"Verified: {note} ({verifiedBy})"
             : $"{volunteer.LastModifiedBy} | Verified: {note}";
@@ -395,7 +409,7 @@ public class VolunteerService : IVolunteerService
     {
         var volunteer = await _context.Volunteers
             .Include(v => v.User)
-            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(v => v.Id == id || v.UserId == id, cancellationToken);
 
         if (volunteer == null)
             return Result<bool>.Failure("Volunteer record not found.");
@@ -404,7 +418,9 @@ public class VolunteerService : IVolunteerService
         volunteer.CreatedBy = $"Area: {currentArea} | Verif: Pending";
         volunteer.UpdatedAt = DateTime.UtcNow;
 
-        var note = !string.IsNullOrWhiteSpace(dto.Reason) ? dto.Reason.Trim() : "Clarification requested";
+        var note = !string.IsNullOrWhiteSpace(dto.Reason)
+            ? dto.Reason.Trim()
+            : (!string.IsNullOrWhiteSpace(dto.Note) ? dto.Note.Trim() : (!string.IsNullOrWhiteSpace(dto.Notes) ? dto.Notes.Trim() : "Clarification requested"));
         volunteer.LastModifiedBy = string.IsNullOrWhiteSpace(volunteer.LastModifiedBy)
             ? $"Clarification: {note} ({requestedBy})"
             : $"{volunteer.LastModifiedBy} | Clarification: {note}";
@@ -421,12 +437,14 @@ public class VolunteerService : IVolunteerService
     {
         var volunteer = await _context.Volunteers
             .Include(v => v.User)
-            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(v => v.Id == id || v.UserId == id, cancellationToken);
 
         if (volunteer == null)
             return Result<bool>.Failure("Volunteer record not found.");
 
-        var reason = !string.IsNullOrWhiteSpace(dto.Reason) ? dto.Reason.Trim() : "Escalated for senior operations review";
+        var reason = !string.IsNullOrWhiteSpace(dto.Reason)
+            ? dto.Reason.Trim()
+            : (!string.IsNullOrWhiteSpace(dto.Note) ? dto.Note.Trim() : (!string.IsNullOrWhiteSpace(dto.Notes) ? dto.Notes.Trim() : "Escalated for senior operations review"));
         volunteer.LastModifiedBy = $"{volunteer.LastModifiedBy ?? ""} | Escalated: {reason} by {escalatedBy}".Trim(' ', '|');
         volunteer.UpdatedAt = DateTime.UtcNow;
 
@@ -443,19 +461,22 @@ public class VolunteerService : IVolunteerService
         Guid? volunteerId = null,
         CancellationToken cancellationToken = default)
     {
-        var assignments = await _context.VolunteerAssignments
+        var query = _context.VolunteerAssignments
             .Include(a => a.Volunteer)
             .ThenInclude(v => v!.User)
             .Include(a => a.AssistanceRequest)
+            .AsQueryable();
+
+        if (volunteerId.HasValue && volunteerId.Value != Guid.Empty)
+        {
+            query = query.Where(a => a.VolunteerId == volunteerId.Value || (a.Volunteer != null && a.Volunteer.UserId == volunteerId.Value));
+        }
+
+        var assignments = await query
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync(cancellationToken);
 
         var list = assignments.Select(MapToAssignmentDetailDto).ToList();
-
-        if (volunteerId.HasValue && volunteerId.Value != Guid.Empty)
-        {
-            list = list.Where(a => a.VolunteerId == volunteerId.Value).ToList();
-        }
 
         if (!string.IsNullOrWhiteSpace(status) && !status.Equals("All", StringComparison.OrdinalIgnoreCase))
         {
@@ -480,7 +501,7 @@ public class VolunteerService : IVolunteerService
         var volunteer = await _context.Volunteers
             .Include(v => v.User)
             .Include(v => v.Assignments)
-            .FirstOrDefaultAsync(v => v.Id == dto.VolunteerId, cancellationToken);
+            .FirstOrDefaultAsync(v => v.Id == dto.VolunteerId || v.UserId == dto.VolunteerId, cancellationToken);
 
         if (volunteer == null)
             return Result<VolunteerAssignmentDetailDto>.Failure("Volunteer does not exist.");
@@ -535,7 +556,9 @@ public class VolunteerService : IVolunteerService
     {
         var assignment = await _context.VolunteerAssignments
             .Include(a => a.Volunteer)
-            .FirstOrDefaultAsync(a => a.Id == assignmentId, cancellationToken);
+            .FirstOrDefaultAsync(a => a.Id == assignmentId ||
+                (a.Volunteer != null && (a.VolunteerId == assignmentId || a.Volunteer.UserId == assignmentId) && (a.AssignmentStatus == 0 || a.AssignmentStatus == 1)),
+                cancellationToken);
 
         if (assignment == null)
             return Result<bool>.Failure("Assignment record not found.");
@@ -563,7 +586,9 @@ public class VolunteerService : IVolunteerService
     {
         var assignment = await _context.VolunteerAssignments
             .Include(a => a.Volunteer)
-            .FirstOrDefaultAsync(a => a.Id == assignmentId, cancellationToken);
+            .FirstOrDefaultAsync(a => a.Id == assignmentId ||
+                (a.Volunteer != null && (a.VolunteerId == assignmentId || a.Volunteer.UserId == assignmentId) && (a.AssignmentStatus == 0 || a.AssignmentStatus == 1)),
+                cancellationToken);
 
         if (assignment == null)
             return Result<bool>.Failure("Assignment record not found.");
@@ -576,7 +601,8 @@ public class VolunteerService : IVolunteerService
 
         assignment.AssignmentStatus = 2; // Completed
         assignment.EndTime = DateTime.UtcNow;
-        assignment.Notes = $"{assignment.Notes} | Completed: {dto?.Reason ?? "Shift fulfilled"} by {completedBy}".Trim(' ', '|');
+        var reason = !string.IsNullOrWhiteSpace(dto?.Reason) ? dto.Reason : (!string.IsNullOrWhiteSpace(dto?.Note) ? dto.Note : "Shift fulfilled");
+        assignment.Notes = $"{assignment.Notes} | Completed: {reason} by {completedBy}".Trim(' ', '|');
         assignment.LastModifiedBy = completedBy;
         assignment.UpdatedAt = DateTime.UtcNow;
 
@@ -600,7 +626,9 @@ public class VolunteerService : IVolunteerService
     {
         var assignment = await _context.VolunteerAssignments
             .Include(a => a.Volunteer)
-            .FirstOrDefaultAsync(a => a.Id == assignmentId, cancellationToken);
+            .FirstOrDefaultAsync(a => a.Id == assignmentId ||
+                (a.Volunteer != null && (a.VolunteerId == assignmentId || a.Volunteer.UserId == assignmentId) && (a.AssignmentStatus == 0 || a.AssignmentStatus == 1)),
+                cancellationToken);
 
         if (assignment == null)
             return Result<bool>.Failure("Assignment record not found.");
@@ -613,7 +641,8 @@ public class VolunteerService : IVolunteerService
 
         assignment.AssignmentStatus = 3; // Cancelled
         assignment.EndTime = DateTime.UtcNow;
-        assignment.Notes = $"{assignment.Notes} | Released: {dto?.Reason ?? "Assignment cancelled"} by {releasedBy}".Trim(' ', '|');
+        var reason = !string.IsNullOrWhiteSpace(dto?.Reason) ? dto.Reason : (!string.IsNullOrWhiteSpace(dto?.Note) ? dto.Note : "Assignment cancelled");
+        assignment.Notes = $"{assignment.Notes} | Released: {reason} by {releasedBy}".Trim(' ', '|');
         assignment.LastModifiedBy = releasedBy;
         assignment.UpdatedAt = DateTime.UtcNow;
 

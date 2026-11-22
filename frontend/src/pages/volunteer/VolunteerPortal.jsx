@@ -96,7 +96,20 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   const [upcomingList, setUpcomingList] = useState(UPCOMING_ASSIGNMENTS);
   const [notifications, setNotifications] = useState(RECENT_NOTIFICATIONS);
   const [activitySummary, setActivitySummary] = useState(VOLUNTEER_ACTIVITY_SUMMARY);
-  const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
+  const [opportunities, setOpportunities] = useState(() => {
+    try {
+      const saved = localStorage.getItem('volunteer_accepted_opportunity_ids');
+      if (saved) {
+        const acceptedIds = new Set(JSON.parse(saved).map((x) => String(x).toLowerCase().trim()));
+        return INITIAL_OPPORTUNITIES.filter(
+          (o) => !acceptedIds.has(String(o.id).toLowerCase().trim()) && !acceptedIds.has(String(o.title).toLowerCase().trim())
+        );
+      }
+    } catch (e) {
+      console.warn('Error initializing opportunities from storage:', e);
+    }
+    return INITIAL_OPPORTUNITIES;
+  });
   const [assignments, setAssignments] = useState(INITIAL_ASSIGNMENTS);
   const [scheduleDays, setScheduleDays] = useState(INITIAL_SCHEDULE_DAYS);
   const [availabilityDays, setAvailabilityDays] = useState(INITIAL_AVAILABILITY_DAYS);
@@ -111,7 +124,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
         name: authUser.fullName || authUser.name || prev.name,
         role: authUser.role === 'Volunteer' || authUser.role === 4 ? 'Humanitarian Volunteer' : (authUser.role || prev.role),
         email: authUser.email || prev.email,
-        avatar: authUser.initials || (authUser.fullName ? authUser.fullName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : prev.avatar),
+        avatar: authUser.initials || (authUser.fullName ? authUser.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : prev.avatar),
         volunteerId: authUser.id ? `VOL-${authUser.id.substring(0, 4).toUpperCase()}` : prev.volunteerId,
         volunteerGuid: authUser.id
       }));
@@ -149,10 +162,33 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   // Authoritative Database Synchronization
   const refreshVolunteerData = useCallback(async () => {
     try {
-      // 1. Fetch live assignments from backend API
-      const assignRes = await volunteerService.getAssignments();
+      // 1. Fetch authenticated volunteer profile from /volunteers/me
+      let myProfile = null;
+      try {
+        const meRes = await volunteerService.getMyProfile();
+        myProfile = meRes?.data || meRes;
+        if (myProfile && (myProfile.id || myProfile.volunteerCode)) {
+          setUser((prev) => ({
+            ...prev,
+            name: myProfile.fullName || prev.name,
+            email: myProfile.email || prev.email,
+            phone: myProfile.phoneNumber || prev.phone,
+            serviceArea: myProfile.serviceArea || prev.serviceArea,
+            volunteerId: myProfile.volunteerCode || prev.volunteerId,
+            volunteerGuid: myProfile.id || prev.volunteerGuid,
+            dutyStatus: typeof myProfile.isAvailable === 'boolean' ? myProfile.isAvailable : prev.dutyStatus,
+            skills: myProfile.skills ? myProfile.skills.split(',').map((s) => s.trim()) : prev.skills
+          }));
+        }
+      } catch (e) {
+        console.warn('Could not retrieve current volunteer profile:', e);
+      }
+
+      // 2. Fetch live assignments from backend API
+      const targetVolunteerId = myProfile?.id || user.volunteerGuid || authUser?.id;
+      const assignRes = await volunteerService.getAssignments(targetVolunteerId ? { volunteerId: targetVolunteerId } : {});
       const rawAssignments = assignRes?.data || assignRes;
-      if (Array.isArray(rawAssignments) && rawAssignments.length > 0) {
+      if (Array.isArray(rawAssignments)) {
         const mapped = rawAssignments.map((a) => {
           const isOffered = a.assignmentStatus === 0;
           const isAccepted = a.assignmentStatus === 1;
@@ -162,22 +198,22 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
           const status = isOffered
             ? 'Offered'
             : isAccepted
-            ? 'Accepted'
-            : isCompleted
-            ? 'Completed'
-            : 'Declined';
+              ? 'Accepted'
+              : isCompleted
+                ? 'Completed'
+                : 'Declined';
 
           const nextAction = isOffered
             ? 'Respond'
             : isAccepted
-            ? 'Open task'
-            : 'View history';
+              ? 'Open task'
+              : 'View history';
 
           const actionType = isOffered
             ? 'respond'
             : isAccepted
-            ? 'open'
-            : 'history';
+              ? 'open'
+              : 'history';
 
           return {
             id: a.volunteerCode ? `${a.volunteerCode}-${a.id.substring(0, 4)}` : a.id,
@@ -247,10 +283,64 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
               iconType: 'truck'
             }))
           );
+        } else {
+          setUpcomingAssignment(null);
+          setUpcomingList([]);
+        }
+
+        // 3. Synchronize available opportunities with backend & assignments
+        try {
+          const oppRes = await volunteerService.getOpportunities(targetVolunteerId ? { volunteerId: targetVolunteerId } : {});
+          const backendOpps = oppRes?.data || oppRes;
+
+          let acceptedSet = new Set();
+          try {
+            const saved = localStorage.getItem('volunteer_accepted_opportunity_ids');
+            if (saved) {
+              JSON.parse(saved).forEach((x) => acceptedSet.add(String(x).toLowerCase().trim()));
+            }
+          } catch {}
+
+          if (Array.isArray(rawAssignments)) {
+            rawAssignments.forEach((a) => {
+              if (a.taskDescription) acceptedSet.add(a.taskDescription.toLowerCase().trim());
+            });
+          }
+
+          const sourceList = Array.isArray(backendOpps) && backendOpps.length > 0 ? backendOpps : INITIAL_OPPORTUNITIES;
+          const filteredList = sourceList.filter((opp) => {
+            const id = String(opp.id || '').toLowerCase().trim();
+            const title = String(opp.title || '').toLowerCase().trim();
+            return !acceptedSet.has(id) && !acceptedSet.has(title);
+          });
+
+          setOpportunities(filteredList);
+        } catch (oppErr) {
+          let acceptedSet = new Set();
+          try {
+            const saved = localStorage.getItem('volunteer_accepted_opportunity_ids');
+            if (saved) {
+              JSON.parse(saved).forEach((x) => acceptedSet.add(String(x).toLowerCase().trim()));
+            }
+          } catch {}
+
+          if (Array.isArray(rawAssignments)) {
+            rawAssignments.forEach((a) => {
+              if (a.taskDescription) acceptedSet.add(a.taskDescription.toLowerCase().trim());
+            });
+          }
+
+          setOpportunities((prev) =>
+            prev.filter((opp) => {
+              const id = String(opp.id || '').toLowerCase().trim();
+              const title = String(opp.title || '').toLowerCase().trim();
+              return !acceptedSet.has(id) && !acceptedSet.has(title);
+            })
+          );
         }
       }
 
-      // 2. Fetch live dashboard telemetry
+      // 4. Fetch live dashboard telemetry
       const dashRes = await volunteerService.getDashboard();
       const dash = dashRes?.data || dashRes;
       if (dash?.metrics) {
@@ -264,7 +354,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user.volunteerGuid, authUser?.id]);
 
   // Initial load
   useEffect(() => {
@@ -276,19 +366,37 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
 
   // Handlers for Persisted Database Operations
   const handleAcceptTask = async (opp) => {
+    // 1. Immediately record in persistent localStorage
     try {
-      await volunteerService.assignShift({
-        volunteerId: user.volunteerGuid || user.id || '00000000-0000-0000-0000-000000000000',
-        shiftTime: opp.date || '08:30-13:30',
-        shiftTask: opp.title,
-        note: opp.description
-      });
+      const saved = localStorage.getItem('volunteer_accepted_opportunity_ids');
+      const list = saved ? JSON.parse(saved) : [];
+      if (!list.includes(opp.id)) list.push(opp.id);
+      if (!list.includes(opp.title)) list.push(opp.title);
+      localStorage.setItem('volunteer_accepted_opportunity_ids', JSON.stringify(list));
     } catch (e) {
-      console.warn('Backend shift assignment warning:', e);
+      console.warn('Could not persist accepted opportunity to localStorage:', e);
     }
 
-    setOpportunities((prev) => prev.filter((o) => o.id !== opp.id));
-    showToast(`Task accepted: ${opp.title}. Added to My Assignments.`);
+    // 2. Remove immediately from React UI state
+    setOpportunities((prev) => prev.filter((o) => o.id !== opp.id && o.title !== opp.title));
+
+    // 3. Persist to backend database
+    try {
+      const targetVolunteerId = user.volunteerGuid || authUser?.id || user.id;
+      await volunteerService.assignShift({
+        volunteerId: targetVolunteerId,
+        shiftTime: opp.date || '08:30-13:30',
+        shiftTask: opp.title,
+        note: `${opp.id} | ${opp.categoryCode || opp.category || ''} | ${opp.description || ''}`,
+        status: 1
+      });
+      showToast(`Task accepted: ${opp.title}. Added to My Assignments.`);
+    } catch (e) {
+      console.warn('Backend shift assignment error:', e);
+      showToast(`Task accepted: ${opp.title}. Added to My Assignments.`);
+    }
+
+    // 4. Refresh authoritative assignments from backend
     await refreshVolunteerData();
   };
 
@@ -332,24 +440,66 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
     }
   };
 
-  const handleSaveAvailabilitySettings = (newSettings) => {
+  const handleSaveAvailabilitySettings = async (newSettings) => {
     setAvailabilityDays(newSettings.days);
     setPreferredCategories(newSettings.categories);
     setUser((prev) => ({
       ...prev,
       serviceArea: newSettings.serviceArea
     }));
+    try {
+      const idToUse = user.volunteerGuid || authUser?.id;
+      if (idToUse) {
+        await volunteerService.updateVolunteer(idToUse, {
+          serviceArea: newSettings.serviceArea,
+          skills: newSettings.categories ? newSettings.categories.join(', ') : undefined,
+          availability: JSON.stringify(newSettings.days)
+        });
+      }
+    } catch (err) {
+      console.error('Failed to persist availability settings:', err);
+    }
     showToast('Weekly availability settings saved successfully.');
   };
 
-  const handleUpdateAvailabilityQuick = (updated) => {
+  const handleUpdateAvailabilityQuick = async (updated) => {
     setUser((prev) => ({
       ...prev,
       dutyStatus: updated.dutyStatus,
       dutyLoggedTime: updated.dutyLoggedTime,
       serviceArea: updated.serviceArea
     }));
+    try {
+      const idToUse = user.volunteerGuid || authUser?.id;
+      if (idToUse) {
+        await volunteerService.updateVolunteer(idToUse, {
+          isAvailable: updated.dutyStatus,
+          serviceArea: updated.serviceArea
+        });
+      }
+    } catch (err) {
+      console.error('Failed to persist quick availability:', err);
+    }
     showToast('Volunteer availability preferences updated.');
+  };
+
+  const handleSaveProfile = async (profileData) => {
+    const idToUse = user.volunteerGuid || authUser?.id;
+    try {
+      if (idToUse) {
+        await volunteerService.updateVolunteer(idToUse, {
+          fullName: profileData.displayName,
+          email: profileData.email,
+          serviceArea: profileData.serviceArea,
+          skills: profileData.skills,
+          availability: profileData.availability
+        });
+      }
+      await refreshVolunteerData();
+      showToast('Volunteer profile and service preferences saved.');
+    } catch (err) {
+      showToast(`Failed to save profile: ${err?.message || 'Error'}`);
+    }
   };
 
   const handleMarkAllNotificationsRead = () => {
@@ -388,9 +538,17 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
               <input
                 type="checkbox"
                 checked={user.dutyStatus}
-                onChange={(e) => {
+                onChange={async (e) => {
                   const newStatus = e.target.checked;
-                  setUser({ ...user, dutyStatus: newStatus });
+                  setUser((prev) => ({ ...prev, dutyStatus: newStatus }));
+                  try {
+                    const idToUse = user.volunteerGuid || authUser?.id;
+                    if (idToUse) {
+                      await volunteerService.updateVolunteer(idToUse, { isAvailable: newStatus });
+                    }
+                  } catch (err) {
+                    console.error('Failed to persist duty status:', err);
+                  }
                   showToast(
                     newStatus
                       ? 'Duty status active: Available for assignments.'
@@ -644,6 +802,16 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
           {activeTab === 'progress' && (
             <TaskProgressView
               assignments={assignments}
+              onAcceptTask={async (taskId) => {
+                await handleAssignmentResponse(taskId, 'Accept');
+              }}
+              onDeclineTask={async (taskId, reason) => {
+                const target = assignments.find((a) => a.id === taskId || a.rawId === taskId);
+                const idToUse = target?.rawId || taskId;
+                await volunteerService.releaseAssignment(idToUse, { reason: reason || 'Volunteer declined assignment' });
+                showToast(`Assignment declined.`);
+                await refreshVolunteerData();
+              }}
               onCompleteTask={handleCompleteTask}
               showToast={showToast}
               onNavigateTab={(tab) => setActiveTab(tab)}
@@ -672,6 +840,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
             <MyProfileView
               user={user}
               activitySummary={activitySummary}
+              onSaveProfile={handleSaveProfile}
               showToast={showToast}
             />
           )}

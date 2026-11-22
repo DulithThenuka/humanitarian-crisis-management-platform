@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft,
   CheckSquare,
@@ -7,17 +7,28 @@ import {
   Send,
   X
 } from 'lucide-react';
+import volunteerService from '../../../services/volunteerService';
 
 export const TaskProgressView = ({
   assignments = [],
+  onAcceptTask,
+  onDeclineTask,
   onCompleteTask,
   showToast,
   onNavigateTab
 }) => {
+  const currentTask = assignments.find((a) => a.status === 'Accepted' || a.status === 'Offered') || assignments[0];
+
   // Task data matching the Figma task details & progress specification
-  const [taskStatus, setTaskStatus] = useState('Offered'); // 'Offered' | 'Accepted' | 'Declined'
+  const [taskStatus, setTaskStatus] = useState(currentTask?.status || 'Offered'); // 'Offered' | 'Accepted' | 'Declined'
   const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
+
+  useEffect(() => {
+    if (currentTask?.status) {
+      setTaskStatus(currentTask.status);
+    }
+  }, [currentTask]);
 
   const [checklist, setChecklist] = useState([
     { id: 1, text: 'Checked in with team lead', checked: true },
@@ -41,19 +52,43 @@ export const TaskProgressView = ({
 
   const progressPercent = calculateProgress();
 
-  const handleAcceptAssignment = () => {
-    setTaskStatus('Accepted');
-    if (showToast) {
-      showToast('Assignment VOL-009 accepted. Reporting to Kelani East Distribution Point.');
+  const handleAcceptAssignment = async () => {
+    try {
+      const idToUse = currentTask?.rawId || currentTask?.id;
+      if (onAcceptTask && idToUse) {
+        await onAcceptTask(idToUse);
+      } else if (currentTask?.rawId) {
+        await volunteerService.acceptAssignment(currentTask.rawId);
+      }
+      setTaskStatus('Accepted');
+      if (showToast) {
+        showToast(`Assignment ${currentTask?.id || 'VOL-009'} accepted. Reporting to location.`);
+      }
+    } catch (err) {
+      if (showToast) {
+        showToast(`Failed to accept assignment: ${err?.message || 'Error'}`);
+      }
     }
   };
 
-  const handleDeclineSubmit = (e) => {
+  const handleDeclineSubmit = async (e) => {
     e.preventDefault();
-    setTaskStatus('Declined');
-    setIsDeclineModalOpen(false);
-    if (showToast) {
-      showToast('Assignment declined. Coordinator Maya Fernando notified.');
+    try {
+      const idToUse = currentTask?.rawId || currentTask?.id;
+      if (onDeclineTask && idToUse) {
+        await onDeclineTask(idToUse, declineReason);
+      } else if (currentTask?.rawId) {
+        await volunteerService.releaseAssignment(currentTask.rawId, { reason: declineReason || 'Declined by volunteer' });
+      }
+      setTaskStatus('Declined');
+      setIsDeclineModalOpen(false);
+      if (showToast) {
+        showToast('Assignment declined.');
+      }
+    } catch (err) {
+      if (showToast) {
+        showToast(`Failed to decline assignment: ${err?.message || 'Error'}`);
+      }
     }
   };
 

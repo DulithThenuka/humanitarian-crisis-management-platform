@@ -13,6 +13,9 @@ export const volunteerService = {
   getAllVolunteers: async (params = {}) => {
     return await apiClient.get('/volunteers', { params });
   },
+  getMyProfile: async () => {
+    return await apiClient.get('/volunteers/me');
+  },
   getVolunteerById: async (id) => {
     return await apiClient.get(`/volunteers/${id}`);
   },

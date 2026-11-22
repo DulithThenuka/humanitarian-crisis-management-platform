@@ -231,20 +231,20 @@
   border-radius: 50%;
 }
 
-.vol-toggle-switch input:checked + .vol-toggle-slider {
+.vol-toggle-switch input:checked+.vol-toggle-slider {
   background-color: #ffffff;
 }
 
-.vol-toggle-switch input:checked + .vol-toggle-slider:before {
+.vol-toggle-switch input:checked+.vol-toggle-slider:before {
   transform: translateX(16px);
   background-color: #0c192e;
 }
 
-.vol-toggle-switch input:checked + .vol-toggle-slider {
+.vol-toggle-switch input:checked+.vol-toggle-slider {
   background-color: #ffffff;
 }
 
-.vol-toggle-switch input:checked + .vol-toggle-slider:before {
+.vol-toggle-switch input:checked+.vol-toggle-slider:before {
   transform: translateX(16px);
   background-color: #0c192e;
 }
@@ -1740,6 +1740,7 @@
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -1753,12 +1754,15 @@
   .vol-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .vol-two-col-grid {
     grid-template-columns: 1fr;
   }
+
   .vol-opportunities-grid {
     grid-template-columns: 1fr;
   }
+
   .vol-schedule-grid-layout {
     grid-template-columns: 1fr;
   }
@@ -1768,18 +1772,22 @@
   .vol-portal-container {
     flex-direction: column;
   }
+
   .vol-sidebar {
     width: 100%;
     height: auto;
     position: relative;
   }
+
   .vol-stats-grid {
     grid-template-columns: 1fr;
   }
+
   .vol-feature-content-row {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .vol-feature-right {
     align-items: flex-start;
   }

@@ -111,34 +111,36 @@ export const VolunteerCoordinatorPortal = () => {
 
   // Derived metrics from live dashboard data
   const metrics = {
-    registeredVolunteers: dashboardData?.registeredVolunteers ?? volunteers.length,
-    registeredSub: dashboardData?.registeredSub || 'Active field responders',
-    verificationPending: dashboardData?.verificationPending ?? volunteers.filter((v) => v.verification === 'Pending').length,
-    verificationSub: dashboardData?.verificationSub || 'Background check required',
-    availableNow: dashboardData?.availableNow ?? volunteers.filter((v) => v.status === 'Eligible').length,
-    availableSub: dashboardData?.availableSub || 'Ready for rapid dispatch',
-    activeAssignments: dashboardData?.activeAssignments ?? volunteers.filter((v) => v.status === 'Assigned').length,
-    activeSub: dashboardData?.activeSub || 'Deployed to emergency tasks',
-    unfilledTasks: dashboardData?.unfilledTasks ?? 0,
-    unfilledSub: dashboardData?.unfilledSub || 'Urgent responder needs',
-    completedActivities: dashboardData?.completedActivities ?? 0,
-    completedSub: dashboardData?.completedSub || 'Successfully fulfilled operations'
+    registeredVolunteers: dashboardData?.metrics?.registeredVolunteers ?? dashboardData?.registeredVolunteers ?? volunteers.length,
+    registeredSub: dashboardData?.metrics?.registeredSub ?? dashboardData?.registeredSub ?? 'Active field responders',
+    verificationPending: dashboardData?.metrics?.verificationPending ?? dashboardData?.verificationPending ?? volunteers.filter((v) => v.verification === 'Pending').length,
+    verificationSub: dashboardData?.metrics?.verificationSub ?? dashboardData?.verificationSub ?? 'Background check required',
+    availableNow: dashboardData?.metrics?.availableNow ?? dashboardData?.availableNow ?? volunteers.filter((v) => v.status === 'Eligible').length,
+    availableSub: dashboardData?.metrics?.availableSub ?? dashboardData?.availableSub ?? 'Ready for rapid dispatch',
+    activeAssignments: dashboardData?.metrics?.activeAssignments ?? dashboardData?.activeAssignments ?? volunteers.filter((v) => v.status === 'Assigned').length,
+    activeSub: dashboardData?.metrics?.activeSub ?? dashboardData?.activeSub ?? 'Deployed to emergency tasks',
+    unfilledTasks: dashboardData?.metrics?.unfilledTasks ?? dashboardData?.unfilledTasks ?? 0,
+    unfilledSub: dashboardData?.metrics?.unfilledSub ?? dashboardData?.unfilledSub ?? 'Urgent responder needs',
+    completedActivities: dashboardData?.metrics?.completedActivities ?? dashboardData?.completedActivities ?? 0,
+    completedSub: dashboardData?.metrics?.completedSub ?? dashboardData?.completedSub ?? 'Successfully fulfilled operations'
   };
 
-  const priorityItems = dashboardData?.priorityItems || [];
-  const workflowSteps = dashboardData?.workflowSteps || [];
-  const recentActivity = dashboardData?.recentActivity || [];
+  const priorityItems = dashboardData?.priorityItems ?? dashboardData?.priorityAttentionItems ?? [];
+  const workflowSteps = dashboardData?.workflowSteps ?? dashboardData?.coordinationWorkflowSteps ?? [];
+  const recentActivity = dashboardData?.recentActivity ?? [];
 
   // Handlers for real database transactions
   const handleCreateVolunteer = async (newRecord) => {
     const payload = {
-      fullName: newRecord.name,
+      name: newRecord.name || newRecord.fullName,
+      fullName: newRecord.name || newRecord.fullName,
       email: newRecord.email,
-      phoneNumber: newRecord.phone,
+      phoneNumber: newRecord.phone || newRecord.phoneNumber,
       skills: newRecord.skills,
       serviceArea: newRecord.serviceArea,
       availability: newRecord.availability,
-      verificationStatus: newRecord.verification,
+      verification: newRecord.verification || newRecord.verificationStatus,
+      verificationStatus: newRecord.verification || newRecord.verificationStatus,
       status: newRecord.status,
       notes: newRecord.notes
     };
@@ -163,6 +165,7 @@ export const VolunteerCoordinatorPortal = () => {
     // Verifies and activates volunteer
     const payload = {
       action: 'Verify',
+      reason: note || 'Verified by Coordinator',
       note: note || 'Verified by Coordinator',
       serviceArea: 'Kelani East'
     };
@@ -172,18 +175,19 @@ export const VolunteerCoordinatorPortal = () => {
   };
 
   const handleCompleteAssignment = async (assignmentIdOrVolunteerId, note) => {
-    await volunteerService.completeAssignment(assignmentIdOrVolunteerId, { note });
+    await volunteerService.completeAssignment(assignmentIdOrVolunteerId, { reason: note || 'Shift fulfilled', note: note || 'Shift fulfilled' });
     await loadPortalData(true);
   };
 
   const handleReleaseAssignment = async (assignmentIdOrVolunteerId, note) => {
-    await volunteerService.releaseAssignment(assignmentIdOrVolunteerId, { note });
+    await volunteerService.releaseAssignment(assignmentIdOrVolunteerId, { reason: note || 'Assignment cancelled', note: note || 'Assignment cancelled' });
     await loadPortalData(true);
   };
 
   const handleRequestClarification = async (volunteerId, note) => {
     const payload = {
       action: 'Clarify',
+      reason: note || 'Clarification requested by Coordinator',
       note: note || 'Clarification requested by Coordinator'
     };
 
@@ -194,6 +198,7 @@ export const VolunteerCoordinatorPortal = () => {
   const handleEscalate = async (volunteerId, note) => {
     const payload = {
       action: 'Escalate',
+      reason: note || 'Escalation raised by Coordinator',
       note: note || 'Escalation raised by Coordinator'
     };
 
