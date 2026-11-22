@@ -202,3 +202,79 @@ public class WorkspaceServiceResultDto
     public List<string> RiskFlags { get; set; } = new();
 }
 
+public class AIDiagnosticResultDto
+{
+    public bool IsOnline { get; set; }
+    public string Provider { get; set; } = "OpenAI";
+    public string Model { get; set; } = "gpt-4o-mini";
+    public int LatencyMs { get; set; }
+    public string Status { get; set; } = "OPTIMAL";
+    public string EndpointUsed { get; set; } = "https://api.openai.com/v1/responses";
+    public string Message { get; set; } = string.Empty;
+    public string? ErrorDetails { get; set; }
+    public bool InferenceVerified { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+}
+
+public class AITelemetryDto
+{
+    public decimal AccuracyRate { get; set; } = 94.2m;
+    public int TotalVerifiedCases { get; set; }
+    public decimal MeanConfidenceScore { get; set; } = 88.4m;
+    public decimal HumanOverrideRate { get; set; } = 5.8m;
+    public int TotalReviewedCases { get; set; }
+    public int TotalOverridesCount { get; set; }
+    public int InferenceLatencyMs { get; set; } = 142;
+    public string ModelName { get; set; } = "gpt-4o-mini";
+    public bool IsConfigured { get; set; }
+    public string ProviderStatus { get; set; } = "CONFIG_REQUIRED";
+    public Dictionary<string, decimal> DistrictFairness { get; set; } = new();
+}
+
+public class AIOperationalDatabaseContext
+{
+    public List<string> ExistingCaseDescriptions { get; set; } = new();
+    public List<AIOperationalShelterSummary> AvailableShelters { get; set; } = new();
+    public List<AIOperationalResourceSummary> AvailableResources { get; set; } = new();
+    public List<AIOperationalVolunteerSummary> AvailableVolunteers { get; set; } = new();
+    public List<AIOperationalCrisisSummary> ActiveCrises { get; set; } = new();
+    public int TotalOpenRequestsCount { get; set; }
+    public int CriticalRequestsCount { get; set; }
+}
+
+public class AIOperationalShelterSummary
+{
+    public string Name { get; set; } = string.Empty;
+    public string District { get; set; } = string.Empty;
+    public int TotalCapacity { get; set; }
+    public int OccupiedBeds { get; set; }
+    public int AvailableBeds { get; set; }
+    public string Facilities { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+}
+
+public class AIOperationalResourceSummary
+{
+    public string Name { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public decimal AvailableQuantity { get; set; }
+    public string Unit { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+}
+
+public class AIOperationalVolunteerSummary
+{
+    public string Id { get; set; } = string.Empty;
+    public string Skills { get; set; } = string.Empty;
+    public string District { get; set; } = string.Empty;
+    public string AvailabilityStatus { get; set; } = string.Empty;
+}
+
+public class AIOperationalCrisisSummary
+{
+    public string Title { get; set; } = string.Empty;
+    public string DisasterType { get; set; } = string.Empty;
+    public string Severity { get; set; } = string.Empty;
+    public string District { get; set; } = string.Empty;
+}
+

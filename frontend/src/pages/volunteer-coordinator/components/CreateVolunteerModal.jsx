@@ -34,7 +34,13 @@ export const CreateVolunteerModal = ({ isOpen, onClose, onCreateVolunteer }) => 
     try {
       await onCreateVolunteer({
         ...formData,
+        fullName: formData.name.trim(),
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        phoneNumber: formData.phone.trim(),
         email: formData.email.trim() || `${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'vol'}${Math.floor(100 + Math.random() * 900)}@reliefcore.local`,
+        verification: formData.verification,
+        verificationStatus: formData.verification,
         statusType: formData.status.toLowerCase()
       });
       onClose();

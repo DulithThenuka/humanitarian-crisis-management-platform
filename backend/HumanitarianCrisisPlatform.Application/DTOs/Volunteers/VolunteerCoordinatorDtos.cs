@@ -96,30 +96,86 @@ public class VolunteerCoordinatorUserDto
 
 public class CreateVolunteerRequestDto
 {
-    public string? Name { get; set; }
-    public string? FullName { get; set; }
+    private string _name = string.Empty;
+    public string Name
+    {
+        get => _name;
+        set => _name = value;
+    }
+    public string? FullName
+    {
+        get => _name;
+        set { if (!string.IsNullOrWhiteSpace(value)) _name = value; }
+    }
     public string? Email { get; set; }
-    public string? PhoneNumber { get; set; }
+    private string? _phone;
+    public string? PhoneNumber
+    {
+        get => _phone;
+        set => _phone = value;
+    }
+    public string? Phone
+    {
+        get => _phone;
+        set { if (!string.IsNullOrWhiteSpace(value)) _phone = value; }
+    }
     public string? Skills { get; set; } = "Logistics, First Aid";
     public string? ServiceArea { get; set; } = "Kelani East";
     public string? Availability { get; set; } = "Available";
-    public string? Verification { get; set; } = "Verified";
-    public string? VerificationStatus { get; set; }
+    private string? _verification = "Verified";
+    public string? Verification
+    {
+        get => _verification;
+        set => _verification = value;
+    }
+    public string? VerificationStatus
+    {
+        get => _verification;
+        set { if (!string.IsNullOrWhiteSpace(value)) _verification = value; }
+    }
     public string? Status { get; set; } = "Eligible";
     public string? Notes { get; set; }
 }
 
 public class UpdateVolunteerRequestDto
 {
-    public string? Name { get; set; }
-    public string? FullName { get; set; }
+    private string? _name;
+    public string? Name
+    {
+        get => _name;
+        set => _name = value;
+    }
+    public string? FullName
+    {
+        get => _name;
+        set { if (!string.IsNullOrWhiteSpace(value)) _name = value; }
+    }
     public string? Email { get; set; }
-    public string? PhoneNumber { get; set; }
+    private string? _phone;
+    public string? PhoneNumber
+    {
+        get => _phone;
+        set => _phone = value;
+    }
+    public string? Phone
+    {
+        get => _phone;
+        set { if (!string.IsNullOrWhiteSpace(value)) _phone = value; }
+    }
     public string? Skills { get; set; }
     public string? ServiceArea { get; set; }
     public string? Availability { get; set; }
-    public string? Verification { get; set; }
-    public string? VerificationStatus { get; set; }
+    private string? _verification;
+    public string? Verification
+    {
+        get => _verification;
+        set => _verification = value;
+    }
+    public string? VerificationStatus
+    {
+        get => _verification;
+        set { if (!string.IsNullOrWhiteSpace(value)) _verification = value; }
+    }
     public string? Status { get; set; }
     public string? Notes { get; set; }
     public bool? IsAvailable { get; set; }
@@ -127,8 +183,17 @@ public class UpdateVolunteerRequestDto
 
 public class VolunteerActionRequestDto
 {
-    public string? Reason { get; set; }
-    public string? Note { get; set; }
+    private string _reason = string.Empty;
+    public string Reason
+    {
+        get => _reason;
+        set => _reason = value;
+    }
+    public string? Note
+    {
+        get => _reason;
+        set { if (!string.IsNullOrWhiteSpace(value) && string.IsNullOrWhiteSpace(_reason)) _reason = value; }
+    }
     public string? Notes { get; set; }
     public string? Action { get; set; }
     public string? ServiceArea { get; set; }
@@ -152,6 +217,10 @@ public class VolunteerAssignmentDetailDto
     public DateTime? EndTime { get; set; }
     public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; }
+    public string? CoordinatorName { get; set; }
+    public string? Priority { get; set; }
+    public string? CaseNumber { get; set; }
+    public string? CaseCategory { get; set; }
 }
 
 public class AssignShiftRequestDto
@@ -167,6 +236,7 @@ public class AssignShiftRequestDto
 
     public Guid? AssistanceRequestId { get; set; }
     public string? Note { get; set; }
+    public int? AssignmentStatus { get; set; }
 }
 
 public class AssignmentActionRequestDto

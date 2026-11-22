@@ -42,18 +42,12 @@ export const RegisterPage = () => {
   const roleOptions = [
     { id: 0, title: 'Citizen / Displaced', icon: Users },
     { id: 3, title: 'Field Volunteer', icon: HeartHandshake },
-    { id: 1, title: 'Coordinator', icon: Shield },
-    { id: 2, title: 'Logistics Manager', icon: Truck },
   ];
 
   const getRoleDescription = (roleId) => {
     switch (Number(roleId)) {
       case 3:
         return 'Receive SAR alerts, check into field shelters, and accept dispatch assignments.';
-      case 1:
-        return 'Access AI triage, command center overview, and humanitarian resource approval.';
-      case 2:
-        return 'Manage regional inventory depots, dispatch convoys, and track emergency stockpiles.';
       case 0:
       default:
         return 'Access high-ground shelters, request rations & medical aid, and track tickets.';
@@ -62,14 +56,8 @@ export const RegisterPage = () => {
 
   const redirectByRole = (role) => {
     const roleStr = (role || '').toString().toLowerCase();
-    if (roleStr === 'casemanager' || roleStr === '5') {
-      navigate('/case-manager');
-    } else if (roleStr === 'volunteer' || roleStr === '3') {
-      navigate('/volunteers/assignments');
-    } else if (roleStr === 'coordinator' || roleStr === '1' || roleStr === 'admin' || roleStr === '4') {
-      navigate('/coordinator/dashboard');
-    } else if (roleStr === 'logisticsmanager' || roleStr === '2') {
-      navigate('/logistics/inventory');
+    if (roleStr === 'volunteer' || roleStr === '3') {
+      navigate('/volunteer');
     } else {
       navigate('/citizen');
     }
@@ -82,13 +70,21 @@ export const RegisterPage = () => {
       showAlert('Please enter your full name', 'warning');
       return;
     }
-    if (!formData.email.trim()) {
-      showAlert('Please enter a valid email address', 'warning');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim() || !emailRegex.test(formData.email.trim())) {
+      showAlert('Please enter a valid email address (e.g. name@domain.com)', 'warning');
       return;
     }
     if (formData.password.length < 6) {
       showAlert('Password must contain at least 6 characters', 'warning');
       return;
+    }
+    if (formData.phoneNumber && formData.phoneNumber.trim().length > 0) {
+      const phoneDigits = formData.phoneNumber.replace(/[^0-9]/g, '');
+      if (phoneDigits.length < 7) {
+        showAlert('Please enter a valid contact phone number', 'warning');
+        return;
+      }
     }
     if (!agreeTerms) {
       showAlert('Please accept data protection & privacy protocols to register', 'warning');
@@ -393,8 +389,6 @@ export const RegisterPage = () => {
                 >
                   <option value={0}>Citizen / Displaced Person</option>
                   <option value={3}>Field Volunteer Responder</option>
-                  <option value={1}>Humanitarian Coordinator</option>
-                  <option value={2}>Logistics & Supply Manager</option>
                 </select>
 
                 {/* Interactive Liquid Glass Role Chips */}

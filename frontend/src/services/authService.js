@@ -10,6 +10,9 @@ export const authService = {
   getCurrentUser: async () => {
     return await apiClient.get('/auth/me');
   },
+  updateProfile: async (userData) => {
+    return await apiClient.put('/auth/me', userData);
+  },
   logout: async () => {
     return await apiClient.post('/auth/logout');
   }

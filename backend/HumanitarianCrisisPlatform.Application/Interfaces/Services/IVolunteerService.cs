@@ -13,6 +13,7 @@ public interface IVolunteerService
     Task<Result<VolunteerCoordinatorDto>> GetVolunteerByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Result<VolunteerCoordinatorDto>> CreateVolunteerAsync(CreateVolunteerRequestDto dto, string createdBy, CancellationToken cancellationToken = default);
     Task<Result<VolunteerCoordinatorDto>> UpdateVolunteerAsync(Guid id, UpdateVolunteerRequestDto dto, string modifiedBy, CancellationToken cancellationToken = default);
+    Task<Result<bool>> DeleteVolunteerAsync(Guid id, string deletedBy, CancellationToken cancellationToken = default);
     Task<Result<bool>> VerifyVolunteerAsync(Guid id, VolunteerActionRequestDto dto, string verifiedBy, CancellationToken cancellationToken = default);
     Task<Result<bool>> RequestClarificationAsync(Guid id, VolunteerActionRequestDto dto, string requestedBy, CancellationToken cancellationToken = default);
     Task<Result<bool>> EscalateVolunteerAsync(Guid id, VolunteerActionRequestDto dto, string escalatedBy, CancellationToken cancellationToken = default);

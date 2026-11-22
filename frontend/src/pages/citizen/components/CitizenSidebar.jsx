@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Plus,
@@ -11,8 +11,10 @@ import {
   HelpCircle,
   Shield,
   ShieldCheck,
+  LogOut,
   ChevronRight
 } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 
 export const CITIZEN_NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -20,13 +22,37 @@ export const CITIZEN_NAV = [
   { id: 'requests', label: 'My Requests', icon: FileText },
   { id: 'alerts', label: 'Emergency Alerts', icon: AlertTriangle },
   { id: 'shelters', label: 'Find Shelters & Help Centres', icon: Building2 },
-  { id: 'notifications', label: 'Notifications', icon: Bell, badge: 3 },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'ai-assistance', label: 'AI Assistance', icon: Sparkles },
   { id: 'profile', label: 'My Profile', icon: User },
   { id: 'support', label: 'Help & Support', icon: HelpCircle }
 ];
 
 export const CitizenSidebar = ({ activeTab, onSelectTab }) => {
+  const { user, logout } = useAuth();
+  const citizenName = user?.fullName || 'Alice Citizen';
+
+  const initials = (citizenName || 'C')
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    try {
+      const userId = user?.id || user?.userId || 'citizen';
+      const stored = localStorage.getItem(`reliefcore_read_notifications_${userId}`);
+      const readIds = new Set(stored ? JSON.parse(stored) : []);
+      setUnreadCount(Math.max(0, 2 - readIds.size));
+    } catch {
+      setUnreadCount(0);
+    }
+  }, [user, activeTab]);
+
   return (
     <aside className="cp-sidebar">
       {/* Brand Header */}
@@ -37,16 +63,21 @@ export const CitizenSidebar = ({ activeTab, onSelectTab }) => {
           </div>
           <div className="cp-brand-text">
             <span className="cp-brand-title">HumanAid</span>
-            <span className="cp-brand-sub">Response coordination</span>
+            <span className="cp-brand-sub">Crisis relief network</span>
           </div>
         </a>
 
         {/* Citizen User Card */}
-        <div className="cp-user-card">
-          <div className="cp-user-avatar">NS</div>
+        <div
+          className="cp-user-card"
+          onClick={() => onSelectTab('profile')}
+          style={{ cursor: 'pointer' }}
+          title="View profile"
+        >
+          <div className="cp-user-avatar">{initials}</div>
           <div className="cp-user-meta">
-            <span className="cp-user-name">Nimal Silva</span>
-            <span className="cp-user-sub">Citizen account</span>
+            <span className="cp-user-name">{citizenName}</span>
+            <span className="cp-user-sub">Verified Citizen</span>
           </div>
         </div>
       </div>
@@ -56,6 +87,8 @@ export const CitizenSidebar = ({ activeTab, onSelectTab }) => {
         {CITIZEN_NAV.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
+          const showBadge = item.id === 'notifications' && unreadCount > 0;
+
           return (
             <button
               key={item.id}
@@ -66,7 +99,7 @@ export const CitizenSidebar = ({ activeTab, onSelectTab }) => {
                 <Icon size={17} />
                 <span>{item.label}</span>
               </div>
-              {item.badge && <span className="cp-nav-badge">{item.badge}</span>}
+              {showBadge && <span className="cp-nav-badge">{unreadCount}</span>}
             </button>
           );
         })}
@@ -77,17 +110,27 @@ export const CitizenSidebar = ({ activeTab, onSelectTab }) => {
         <div className="cp-privacy-box">
           <div className="cp-privacy-header">
             <ShieldCheck size={14} color="#9fa89e" />
-            <span>Your information is protected</span>
+            <span>Secure relief protocol</span>
           </div>
           <p className="cp-privacy-desc">
-            Only authorised teams can access request details.
+            Your contact details are encrypted and protected.
           </p>
         </div>
 
-        <a href="/" className="cp-signout-btn">
-          <ChevronRight size={15} />
+        <button
+          onClick={() => logout()}
+          className="cp-signout-btn"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            width: '100%',
+            textAlign: 'left'
+          }}
+        >
+          <LogOut size={15} />
           <span>Sign out</span>
-        </a>
+        </button>
       </div>
     </aside>
   );

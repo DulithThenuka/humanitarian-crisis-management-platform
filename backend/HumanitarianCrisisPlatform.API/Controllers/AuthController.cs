@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HumanitarianCrisisPlatform.Application.Common.Models;
 using HumanitarianCrisisPlatform.Application.DTOs.Auth;
+using HumanitarianCrisisPlatform.Application.Interfaces.Services;
 using HumanitarianCrisisPlatform.Domain.Entities;
 using HumanitarianCrisisPlatform.Domain.Enums;
 using HumanitarianCrisisPlatform.Infrastructure.Data.Context;
@@ -15,11 +16,16 @@ public class AuthController : BaseApiController
 {
     private readonly ApplicationDbContext _context;
     private readonly JwtTokenGenerator _tokenGenerator;
+    private readonly IAdminNotificationService _notificationService;
 
-    public AuthController(ApplicationDbContext context, JwtTokenGenerator tokenGenerator)
+    public AuthController(
+        ApplicationDbContext context,
+        JwtTokenGenerator tokenGenerator,
+        IAdminNotificationService notificationService)
     {
         _context = context;
         _tokenGenerator = tokenGenerator;
+        _notificationService = notificationService;
     }
 
     [HttpPost("login")]
@@ -109,6 +115,8 @@ public class AuthController : BaseApiController
             UserId = user.Id,
             FullName = user.FullName,
             Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
             Role = user.Role.ToString(),
             ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }, "Login successful"));
@@ -120,6 +128,12 @@ public class AuthController : BaseApiController
         if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password) || string.IsNullOrWhiteSpace(dto.FullName))
         {
             return BadRequest(Result<AuthResponseDto>.Failure("Full name, email, and password are required."));
+        }
+
+        // ROLE SECURITY: Public signup is strictly restricted to Citizen and Field Volunteer
+        if (dto.Role != UserRole.Citizen && dto.Role != UserRole.Volunteer)
+        {
+            return BadRequest(Result<AuthResponseDto>.Failure("Public registration is restricted to Citizen and Field Volunteer roles only. Privileged roles must be provisioned by a System Administrator."));
         }
 
         var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
@@ -141,7 +155,36 @@ public class AuthController : BaseApiController
         };
 
         _context.Users.Add(user);
+
+        // If registered as Field Volunteer, create the volunteer entity for immediate cross-module synchronization
+        if (dto.Role == UserRole.Volunteer)
+        {
+            var volunteer = new Volunteer
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                Skills = "First Aid, Community Logistics, Emergency Search",
+                Availability = "Available",
+                IsAvailable = true,
+                MaxTravelDistance = 25,
+                CreatedBy = "Area: Kelani East | Verif: Pending",
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Volunteers.Add(volunteer);
+        }
+
         await _context.SaveChangesAsync();
+
+        // PERSISTENT ADMIN NOTIFICATION:
+        // Automatically generate a persistent Admin notification for newly registered Citizens and Volunteers
+        try
+        {
+            await _notificationService.AddRegistrationNotificationAsync(user);
+        }
+        catch
+        {
+            // Logging or non-fatal
+        }
 
         var token = _tokenGenerator.GenerateToken(user);
         return Ok(Result<AuthResponseDto>.Success(new AuthResponseDto
@@ -150,6 +193,8 @@ public class AuthController : BaseApiController
             UserId = user.Id,
             FullName = user.FullName,
             Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
             Role = user.Role.ToString(),
             ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }, "Registration successful"));
@@ -171,9 +216,55 @@ public class AuthController : BaseApiController
             UserId = user.Id,
             FullName = user.FullName,
             Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
             Role = user.Role.ToString(),
             ExpiresAt = _tokenGenerator.GetExpirationUtc()
         }));
+    }
+
+    [Authorize]
+    [HttpPut("me")]
+    public async Task<ActionResult<Result<AuthResponseDto>>> UpdateCurrentUser([FromBody] UpdateProfileRequestDto dto)
+    {
+        if (CurrentUserId == Guid.Empty)
+        {
+            return Unauthorized(Result<AuthResponseDto>.Failure("User is not authenticated."));
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == CurrentUserId);
+        if (user == null)
+        {
+            return NotFound(Result<AuthResponseDto>.Failure("Authenticated user profile could not be found."));
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.FullName))
+        {
+            user.FullName = dto.FullName.Trim();
+        }
+        if (dto.PhoneNumber != null)
+        {
+            user.PhoneNumber = dto.PhoneNumber.Trim();
+        }
+        if (dto.AssignedDistrict != null)
+        {
+            user.AssignedDistrict = dto.AssignedDistrict.Trim();
+        }
+
+        user.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return Ok(Result<AuthResponseDto>.Success(new AuthResponseDto
+        {
+            Token = JwtSettings.NormalizeBearerToken(Request.Headers.Authorization.ToString()) ?? string.Empty,
+            UserId = user.Id,
+            FullName = user.FullName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            AssignedDistrict = user.AssignedDistrict,
+            Role = user.Role.ToString(),
+            ExpiresAt = _tokenGenerator.GetExpirationUtc()
+        }, "Profile updated successfully"));
     }
 
     [HttpPost("logout")]

@@ -110,19 +110,20 @@ export const VolunteerCoordinatorPortal = () => {
   );
 
   // Derived metrics from live dashboard data
+  const m = dashboardData?.metrics || dashboardData;
   const metrics = {
-    registeredVolunteers: dashboardData?.metrics?.registeredVolunteers ?? dashboardData?.registeredVolunteers ?? volunteers.length,
-    registeredSub: dashboardData?.metrics?.registeredSub ?? dashboardData?.registeredSub ?? 'Active field responders',
-    verificationPending: dashboardData?.metrics?.verificationPending ?? dashboardData?.verificationPending ?? volunteers.filter((v) => v.verification === 'Pending').length,
-    verificationSub: dashboardData?.metrics?.verificationSub ?? dashboardData?.verificationSub ?? 'Background check required',
-    availableNow: dashboardData?.metrics?.availableNow ?? dashboardData?.availableNow ?? volunteers.filter((v) => v.status === 'Eligible').length,
-    availableSub: dashboardData?.metrics?.availableSub ?? dashboardData?.availableSub ?? 'Ready for rapid dispatch',
-    activeAssignments: dashboardData?.metrics?.activeAssignments ?? dashboardData?.activeAssignments ?? volunteers.filter((v) => v.status === 'Assigned').length,
-    activeSub: dashboardData?.metrics?.activeSub ?? dashboardData?.activeSub ?? 'Deployed to emergency tasks',
-    unfilledTasks: dashboardData?.metrics?.unfilledTasks ?? dashboardData?.unfilledTasks ?? 0,
-    unfilledSub: dashboardData?.metrics?.unfilledSub ?? dashboardData?.unfilledSub ?? 'Urgent responder needs',
-    completedActivities: dashboardData?.metrics?.completedActivities ?? dashboardData?.completedActivities ?? 0,
-    completedSub: dashboardData?.metrics?.completedSub ?? dashboardData?.completedSub ?? 'Successfully fulfilled operations'
+    registeredVolunteers: m?.registeredVolunteers ?? volunteers.length,
+    registeredSub: m?.registeredSub || 'Active field responders',
+    verificationPending: m?.verificationPending ?? volunteers.filter((v) => v.verification === 'Pending').length,
+    verificationSub: m?.verificationSub || 'Background check required',
+    availableNow: m?.availableNow ?? volunteers.filter((v) => v.status === 'Eligible').length,
+    availableSub: m?.availableSub || 'Ready for rapid dispatch',
+    activeAssignments: m?.activeAssignments ?? volunteers.filter((v) => v.status === 'Assigned').length,
+    activeSub: m?.activeSub || 'Deployed to emergency tasks',
+    unfilledTasks: m?.unfilledTasks ?? 0,
+    unfilledSub: m?.unfilledSub || 'Urgent responder needs',
+    completedActivities: m?.completedActivities ?? 0,
+    completedSub: m?.completedSub || 'Successfully fulfilled operations'
   };
 
   const priorityItems = dashboardData?.priorityItems ?? dashboardData?.priorityAttentionItems ?? [];
@@ -136,6 +137,7 @@ export const VolunteerCoordinatorPortal = () => {
       fullName: newRecord.name || newRecord.fullName,
       email: newRecord.email,
       phoneNumber: newRecord.phone || newRecord.phoneNumber,
+      phone: newRecord.phone || newRecord.phoneNumber,
       skills: newRecord.skills,
       serviceArea: newRecord.serviceArea,
       availability: newRecord.availability,
@@ -146,6 +148,31 @@ export const VolunteerCoordinatorPortal = () => {
     };
 
     await volunteerService.createVolunteer(payload);
+    await loadPortalData(true);
+  };
+
+  const handleUpdateVolunteer = async (volunteerId, updatedRecord) => {
+    const payload = {
+      name: updatedRecord.name || updatedRecord.fullName,
+      fullName: updatedRecord.name || updatedRecord.fullName,
+      email: updatedRecord.email,
+      phoneNumber: updatedRecord.phone || updatedRecord.phoneNumber,
+      phone: updatedRecord.phone || updatedRecord.phoneNumber,
+      skills: updatedRecord.skills,
+      serviceArea: updatedRecord.serviceArea,
+      availability: updatedRecord.availability,
+      verification: updatedRecord.verification,
+      verificationStatus: updatedRecord.verification,
+      status: updatedRecord.status,
+      notes: updatedRecord.notes
+    };
+
+    await volunteerService.updateVolunteer(volunteerId, payload);
+    await loadPortalData(true);
+  };
+
+  const handleDeleteVolunteer = async (volunteerId) => {
+    await volunteerService.deleteVolunteer(volunteerId);
     await loadPortalData(true);
   };
 
@@ -162,11 +189,11 @@ export const VolunteerCoordinatorPortal = () => {
   };
 
   const handleConfirmAssignment = async (volunteerId, note) => {
-    // Verifies and activates volunteer
+    // Verifies and activates volunteer in SQL Server
     const payload = {
       action: 'Verify',
-      reason: note || 'Verified by Coordinator',
-      note: note || 'Verified by Coordinator',
+      reason: note || 'Verified and activated by Coordinator',
+      note: note || 'Verified and activated by Coordinator',
       serviceArea: 'Kelani East'
     };
 
@@ -175,12 +202,18 @@ export const VolunteerCoordinatorPortal = () => {
   };
 
   const handleCompleteAssignment = async (assignmentIdOrVolunteerId, note) => {
-    await volunteerService.completeAssignment(assignmentIdOrVolunteerId, { reason: note || 'Shift fulfilled', note: note || 'Shift fulfilled' });
+    await volunteerService.completeAssignment(assignmentIdOrVolunteerId, {
+      reason: note || 'Shift fulfilled',
+      note: note || 'Shift fulfilled'
+    });
     await loadPortalData(true);
   };
 
   const handleReleaseAssignment = async (assignmentIdOrVolunteerId, note) => {
-    await volunteerService.releaseAssignment(assignmentIdOrVolunteerId, { reason: note || 'Assignment cancelled', note: note || 'Assignment cancelled' });
+    await volunteerService.releaseAssignment(assignmentIdOrVolunteerId, {
+      reason: note || 'Assignment cancelled',
+      note: note || 'Assignment cancelled'
+    });
     await loadPortalData(true);
   };
 
@@ -523,6 +556,8 @@ export const VolunteerCoordinatorPortal = () => {
                   onConfirmAssignment={handleConfirmAssignment}
                   onRequestClarification={handleRequestClarification}
                   onEscalate={handleEscalate}
+                  onUpdateVolunteer={handleUpdateVolunteer}
+                  onDeleteVolunteer={handleDeleteVolunteer}
                   onOpenCreateModal={() => setIsCreateModalOpen(true)}
                   onOpenExportModal={() => setIsExportModalOpen(true)}
                 />

@@ -73,6 +73,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAIServiceClient, OpenAIServiceClient>();
         services.AddSingleton<IMappingService, OpenStreetMapService>();
         services.AddScoped<INotificationService, EmailNotificationService>();
+        services.AddSingleton<IAdminNotificationService, AdminNotificationService>();
         services.AddSingleton<IConfiguration>(config);
         services.AddSingleton(_ => new JwtTokenGenerator(config));
 

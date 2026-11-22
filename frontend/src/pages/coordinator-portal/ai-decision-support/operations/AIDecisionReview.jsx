@@ -34,17 +34,18 @@ export const AIDecisionReview = ({
     const fetchCase = async () => {
       try {
         const res = await aiGovernanceService.getCase(caseId);
-        if (isMounted && res?.data?.data) {
-          setCaseData(res.data.data);
-          if (res.data.data.humanDecision) {
-            const decLower = res.data.data.humanDecision.toLowerCase();
+        const caseDetail = res?.data?.data ?? res?.data ?? res;
+        if (isMounted && caseDetail && typeof caseDetail === 'object') {
+          setCaseData(caseDetail);
+          if (caseDetail.humanDecision) {
+            const decLower = caseDetail.humanDecision.toLowerCase();
             if (decLower.includes('modify') || decLower.includes('override')) setSelectedDecision('modify');
             else if (decLower.includes('reject')) setSelectedDecision('reject');
             else if (decLower.includes('defer')) setSelectedDecision('defer');
             else setSelectedDecision('approve');
           }
-          if (res.data.data.decisionReason) {
-            setReviewerNotes(res.data.data.decisionReason);
+          if (caseDetail.decisionReason) {
+            setReviewerNotes(caseDetail.decisionReason);
           }
         }
       } catch (err) {
@@ -79,13 +80,14 @@ export const AIDecisionReview = ({
         overriddenPriority: selectedDecision === 'modify' ? modifiedPriority : null
       });
 
-      if (res?.data?.succeeded) {
+      const isSuccess = res?.succeeded ?? res?.data?.succeeded ?? (res && !res.errors?.length);
+      if (isSuccess) {
         showToast?.(`Audited decision (${selectedDecision.toUpperCase()}) recorded in SQL database for ${targetCaseId}.`, 'success');
         setTimeout(() => {
           onBackToQueue?.();
         }, 700);
       } else {
-        showToast?.(res?.data?.message || 'Failed to record decision.', 'error');
+        showToast?.(res?.message || res?.data?.message || 'Failed to record decision.', 'error');
       }
     } catch (err) {
       const errMsg = err?.response?.data?.message || err?.message || 'Failed to record decision.';

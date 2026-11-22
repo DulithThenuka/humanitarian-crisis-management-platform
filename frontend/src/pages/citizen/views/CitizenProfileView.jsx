@@ -1,37 +1,151 @@
-import React, { useState } from 'react';
-import { ShieldCheck, ChevronRight } from 'lucide-react';
-import { INITIAL_CITIZEN_PROFILE } from '../data/citizenPortalData';
+import React, { useState, useEffect } from 'react';
+import { ShieldCheck, ChevronRight, CheckCircle2, Loader2, User, Phone, MapPin } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
+import { authService } from '../../../services/authService';
 
 export const CitizenProfileView = ({ showToast }) => {
-  const [profile, setProfile] = useState(INITIAL_CITIZEN_PROFILE);
+  const { user, login } = useAuth();
+  const userId = user?.id || user?.userId || 'citizen';
+  const prefsKey = `reliefcore_citizen_prefs_${userId}`;
 
-  const handleSave = () => {
-    if (showToast) {
-      showToast('Citizen profile and household preferences updated successfully');
+  const [fullName, setFullName] = useState(user?.fullName || 'Alice Citizen');
+  const [email, setEmail] = useState(user?.email || 'citizen@crisisplatform.org');
+  const [phone, setPhone] = useState(user?.phoneNumber || user?.phone || '+94 77 123 4567');
+  const [location, setLocation] = useState(user?.assignedDistrict || user?.location || 'Kelani East, Colombo');
+  const [preferredLanguage, setPreferredLanguage] = useState('English');
+  const [contactPreference, setContactPreference] = useState('SMS and phone call');
+  const [householdSize, setHouseholdSize] = useState('4');
+  const [accessibilityRequirements, setAccessibilityRequirements] = useState('Step-free access may be required');
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    // 1. Initialize from auth user
+    if (user) {
+      if (user.fullName) setFullName(user.fullName);
+      if (user.email) setEmail(user.email);
+      if (user.phoneNumber) setPhone(user.phoneNumber);
+      if (user.assignedDistrict) setLocation(user.assignedDistrict);
+    }
+
+    // 2. Load stored household preferences
+    try {
+      const stored = localStorage.getItem(prefsKey);
+      if (stored) {
+        const p = JSON.parse(stored);
+        if (p.preferredLanguage) setPreferredLanguage(p.preferredLanguage);
+        if (p.contactPreference) setContactPreference(p.contactPreference);
+        if (p.householdSize) setHouseholdSize(p.householdSize);
+        if (p.accessibilityRequirements) setAccessibilityRequirements(p.accessibilityRequirements);
+      }
+    } catch {
+      // non-fatal
+    }
+  }, [user, prefsKey]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      // 1. Update database profile via backend API
+      const res = await authService.updateProfile({
+        fullName: fullName.trim(),
+        phoneNumber: phone.trim(),
+        assignedDistrict: location.trim()
+      });
+
+      // Update in-memory auth context user if response returned updated data
+      const updatedUser = {
+        ...(user || {}),
+        fullName: fullName.trim(),
+        name: fullName.trim(),
+        phoneNumber: phone.trim(),
+        phone: phone.trim(),
+        assignedDistrict: location.trim(),
+        location: location.trim()
+      };
+      try {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } catch (e) {}
+
+      // 2. Persist household preferences to localStorage
+      const prefs = {
+        preferredLanguage,
+        contactPreference,
+        householdSize,
+        accessibilityRequirements
+      };
+      localStorage.setItem(prefsKey, JSON.stringify(prefs));
+
+      setSaveSuccess(true);
+      if (showToast) {
+        showToast('Citizen profile and household preferences updated successfully in database');
+      }
+
+      setTimeout(() => setSaveSuccess(false), 4000);
+    } catch (err) {
+      console.error('Failed to update citizen profile:', err);
+      if (showToast) {
+        showToast('Failed to save profile changes. Please try again.');
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleChange = (field, val) => {
-    setProfile((prev) => ({ ...prev, [field]: val }));
-  };
+  const shortName = (fullName || 'Citizen')
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
 
   return (
     <div className="cp-view-container">
       {/* Header */}
       <div className="cp-view-header">
         <div>
-          <span className="cp-view-pretitle">CITIZEN ACCOUNT</span>
+          <span className="cp-view-pretitle">CITIZEN ACCOUNT MANAGEMENT</span>
           <h1 className="cp-view-title">My Profile</h1>
           <p className="cp-view-subtitle">
-            Manage the permitted information used for your assistance requests.
+            Manage your personal contact details, verified address, and emergency assistance preferences.
           </p>
         </div>
         <div>
-          <button onClick={handleSave} className="cp-btn-primary">
-            Save Changes
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="cp-btn-primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+          >
+            {isSaving ? <Loader2 size={16} className="animate-spin" /> : null}
+            {isSaving ? 'Saving Changes...' : 'Save Changes'}
           </button>
         </div>
       </div>
+
+      {saveSuccess && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '12px 16px',
+            backgroundColor: '#ecfdf5',
+            border: '1px solid #a7f3d0',
+            borderRadius: '8px',
+            fontSize: '13px',
+            color: '#065f46',
+            marginBottom: '20px'
+          }}
+        >
+          <CheckCircle2 size={18} style={{ color: '#059669', flexShrink: 0 }} />
+          <span>Profile changes successfully persisted to the database.</span>
+        </div>
+      )}
 
       {/* 2-Column Split */}
       <div className="cp-grid-split" style={{ gridTemplateColumns: '2fr 1fr', gap: '22px' }}>
@@ -51,37 +165,29 @@ export const CitizenProfileView = ({ showToast }) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               <div
                 style={{
-                  width: '48px',
-                  height: '48px',
+                  width: '52px',
+                  height: '52px',
                   borderRadius: '50%',
-                  backgroundColor: '#e5ebe0',
-                  color: '#162e20',
+                  backgroundColor: '#1e3d2c',
+                  color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 800,
-                  fontSize: '16px'
+                  fontSize: '18px'
                 }}
               >
-                {profile.shortName}
+                {shortName}
               </div>
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#162e20', margin: 0 }}>
-                  {profile.fullName}
+                <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#162e20', margin: 0 }}>
+                  {fullName}
                 </h3>
-                <div style={{ fontSize: '11.5px', color: '#657367', marginTop: '2px' }}>
-                  Citizen account · Verified email
+                <div style={{ fontSize: '12px', color: '#657367', marginTop: '2px' }}>
+                  Verified Citizen Account · {email}
                 </div>
               </div>
             </div>
-
-            <button
-              onClick={() => showToast && showToast('Photo upload simulation')}
-              className="cp-btn-secondary"
-              style={{ fontSize: '11.5px', padding: '6px 12px' }}
-            >
-              Change photo
-            </button>
           </div>
 
           {/* Form Fields: 2 Columns */}
@@ -91,19 +197,19 @@ export const CitizenProfileView = ({ showToast }) => {
               <input
                 type="text"
                 className="cp-form-input"
-                value={profile.fullName}
-                onChange={(e) => handleChange('fullName', e.target.value)}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="cp-form-label">Email *</label>
+              <label className="cp-form-label">Email address *</label>
               <input
                 type="text"
                 disabled
                 className="cp-form-input"
                 style={{ backgroundColor: '#f8faf7', color: '#738075', cursor: 'not-allowed' }}
-                value={profile.email}
+                value={email}
               />
             </div>
 
@@ -112,8 +218,8 @@ export const CitizenProfileView = ({ showToast }) => {
               <input
                 type="text"
                 className="cp-form-input"
-                value={profile.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </div>
 
@@ -121,8 +227,8 @@ export const CitizenProfileView = ({ showToast }) => {
               <label className="cp-form-label">Preferred language</label>
               <select
                 className="cp-form-select"
-                value={profile.preferredLanguage}
-                onChange={(e) => handleChange('preferredLanguage', e.target.value)}
+                value={preferredLanguage}
+                onChange={(e) => setPreferredLanguage(e.target.value)}
               >
                 <option value="English">English</option>
                 <option value="Sinhala">සිංහල (Sinhala)</option>
@@ -131,12 +237,12 @@ export const CitizenProfileView = ({ showToast }) => {
             </div>
 
             <div>
-              <label className="cp-form-label">General location</label>
+              <label className="cp-form-label">Residential district / Location</label>
               <input
                 type="text"
                 className="cp-form-input"
-                value={profile.location}
-                onChange={(e) => handleChange('location', e.target.value)}
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
               />
             </div>
 
@@ -144,19 +250,28 @@ export const CitizenProfileView = ({ showToast }) => {
               <label className="cp-form-label">Contact preference</label>
               <select
                 className="cp-form-select"
-                value={profile.contactPreference}
-                onChange={(e) => handleChange('contactPreference', e.target.value)}
+                value={contactPreference}
+                onChange={(e) => setContactPreference(e.target.value)}
               >
                 <option value="SMS and phone call">SMS and phone call</option>
                 <option value="SMS only">SMS only</option>
                 <option value="Phone call only">Phone call only</option>
-                <option value="Email">Email</option>
+                <option value="WhatsApp">WhatsApp</option>
               </select>
             </div>
           </div>
 
           {/* Subheading: Household & Assistance */}
-          <div style={{ fontSize: '11px', fontWeight: 700, color: '#657367', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>
+          <div
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              color: '#657367',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '14px'
+            }}
+          >
             HOUSEHOLD & ASSISTANCE INFORMATION
           </div>
 
@@ -165,9 +280,10 @@ export const CitizenProfileView = ({ showToast }) => {
               <label className="cp-form-label">Household size</label>
               <input
                 type="number"
+                min="1"
                 className="cp-form-input"
-                value={profile.householdSize}
-                onChange={(e) => handleChange('householdSize', e.target.value)}
+                value={householdSize}
+                onChange={(e) => setHouseholdSize(e.target.value)}
               />
             </div>
 
@@ -176,8 +292,9 @@ export const CitizenProfileView = ({ showToast }) => {
               <input
                 type="text"
                 className="cp-form-input"
-                value={profile.accessibilityRequirements}
-                onChange={(e) => handleChange('accessibilityRequirements', e.target.value)}
+                placeholder="e.g. Wheelchair access, infant supplies"
+                value={accessibilityRequirements}
+                onChange={(e) => setAccessibilityRequirements(e.target.value)}
               />
             </div>
           </div>
@@ -192,26 +309,23 @@ export const CitizenProfileView = ({ showToast }) => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 paddingBottom: '16px',
-                borderBottom: '1px solid #edf1eb',
-                cursor: 'pointer'
+                borderBottom: '1px solid #edf1eb'
               }}
-              onClick={() => showToast && showToast('Opening security preferences')}
             >
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#162e20' }}>
-                  Privacy & Security
+                <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#162e20' }}>
+                  Privacy & Data Security
                 </div>
                 <div style={{ fontSize: '11px', color: '#657367', marginTop: '2px' }}>
-                  Password, sessions and notification preferences
+                  Encrypted emergency contact details
                 </div>
               </div>
-              <ChevronRight size={16} color="#9fa89e" />
             </div>
 
             <div
               style={{
                 marginTop: '16px',
-                padding: '12px',
+                padding: '14px',
                 borderRadius: '8px',
                 backgroundColor: '#f8faf7',
                 border: '1px solid #edf1eb',
@@ -220,9 +334,9 @@ export const CitizenProfileView = ({ showToast }) => {
                 alignItems: 'flex-start'
               }}
             >
-              <ShieldCheck size={16} style={{ color: '#1e3d2c', flexShrink: 0, marginTop: '2px' }} />
-              <div style={{ fontSize: '11px', color: '#405044', lineHeight: 1.45 }}>
-                Sensitive details are only used to assess and coordinate your own assistance requests.
+              <ShieldCheck size={18} style={{ color: '#1e3d2c', flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ fontSize: '11.5px', color: '#405044', lineHeight: 1.45 }}>
+                Your personal telephone number and address are strictly restricted to certified emergency response coordinators and dispatched relief volunteers.
               </div>
             </div>
           </div>

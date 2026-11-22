@@ -142,11 +142,13 @@ export const AIOperationsContainer = ({
         ]);
 
         if (isMounted) {
-          if (statusRes?.data?.data) {
-            setProviderStatus(statusRes.data.data);
+          const status = statusRes?.data?.data ?? statusRes?.data ?? statusRes;
+          if (status && (status.isConnected !== undefined || status.provider || status.status)) {
+            setProviderStatus(status);
           }
-          if (queueRes?.data?.data) {
-            setQueueCount(queueRes.data.data.length);
+          const queue = queueRes?.data?.data ?? queueRes?.data ?? queueRes;
+          if (Array.isArray(queue)) {
+            setQueueCount(queue.length);
           }
         }
       } catch (err) {

@@ -299,7 +299,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
             if (saved) {
               JSON.parse(saved).forEach((x) => acceptedSet.add(String(x).toLowerCase().trim()));
             }
-          } catch {}
+          } catch { }
 
           if (Array.isArray(rawAssignments)) {
             rawAssignments.forEach((a) => {
@@ -322,7 +322,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
             if (saved) {
               JSON.parse(saved).forEach((x) => acceptedSet.add(String(x).toLowerCase().trim()));
             }
-          } catch {}
+          } catch { }
 
           if (Array.isArray(rawAssignments)) {
             rawAssignments.forEach((a) => {

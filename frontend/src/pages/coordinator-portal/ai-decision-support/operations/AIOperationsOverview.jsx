@@ -34,8 +34,9 @@ export const AIOperationsOverview = ({
     const fetchOverview = async () => {
       try {
         const res = await aiGovernanceService.getOverview();
-        if (isMounted && res?.data?.data) {
-          setOverviewData(res.data.data);
+        const overview = res?.data?.data ?? res?.data ?? res;
+        if (isMounted && overview && typeof overview === 'object') {
+          setOverviewData(overview);
         }
       } catch (err) {
         console.error('Failed to fetch AI operations overview:', err);

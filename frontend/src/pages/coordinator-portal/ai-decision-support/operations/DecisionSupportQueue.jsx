@@ -37,8 +37,9 @@ export const DecisionSupportQueue = ({
     const fetchQueue = async () => {
       try {
         const res = await aiGovernanceService.getQueue();
-        if (isMounted && res?.data?.data) {
-          setLiveQueue(res.data.data);
+        const queue = res?.data?.data ?? res?.data ?? res;
+        if (isMounted && Array.isArray(queue)) {
+          setLiveQueue(queue);
         }
       } catch (err) {
         console.error('Failed to load decision support queue:', err);
@@ -157,10 +158,33 @@ export const DecisionSupportQueue = ({
   });
 
   const handleExportQueue = () => {
-    showToast?.('Exporting decision support queue (CSV) with cryptographic hashes...', 'info');
-    setTimeout(() => {
-      showToast?.('Queue exported successfully. 36 records saved.', 'success');
-    }, 900);
+    try {
+      const headers = ['Decision ID', 'Related Record', 'Service', 'Recommendation', 'Confidence (%)', 'Priority', 'Review Status', 'Submitted'];
+      const rows = filteredItems.map(i => [
+        `"${i.decisionId || ''}"`,
+        `"${i.relatedRecord || ''}"`,
+        `"${(i.service || '').replace(/"/g, '""')}"`,
+        `"${(i.recommendation || '').replace(/"/g, '""')}"`,
+        `"${i.confidence ?? ''}"`,
+        `"${i.priority || ''}"`,
+        `"${i.reviewStatus || ''}"`,
+        `"${i.submitted || ''}"`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `RELIEFCORE_AI_Decision_Support_Queue_${new Date().toISOString().substring(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast?.(`Decision support queue exported successfully (${filteredItems.length} records saved).`, 'success');
+    } catch (err) {
+      console.error('Export error:', err);
+      showToast?.('Failed to export decision support queue.', 'error');
+    }
   };
 
   return (

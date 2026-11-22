@@ -1,34 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ChevronLeft,
   CheckSquare,
   Square,
   ShieldAlert,
   Send,
-  X
+  X,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  MapPin,
+  Calendar,
+  User,
+  Check
 } from 'lucide-react';
 import volunteerService from '../../../services/volunteerService';
 
 export const TaskProgressView = ({
   assignments = [],
+  selectedTask = null,
   onAcceptTask,
   onDeclineTask,
   onCompleteTask,
   showToast,
   onNavigateTab
 }) => {
-  const currentTask = assignments.find((a) => a.status === 'Accepted' || a.status === 'Offered') || assignments[0];
+  // Determine active task from selectedTask or fallback to the first active/available assignment
+  const activeTask = useMemo(() => {
+    if (selectedTask) return selectedTask;
+    return (
+      assignments.find((a) => a.status === 'Accepted' || a.status === 'In Progress') ||
+      assignments.find((a) => a.status === 'Offered' || a.status === 'Assigned') ||
+      assignments[0] ||
+      null
+    );
+  }, [selectedTask, assignments]);
 
-  // Task data matching the Figma task details & progress specification
-  const [taskStatus, setTaskStatus] = useState(currentTask?.status || 'Offered'); // 'Offered' | 'Accepted' | 'Declined'
+  const [taskStatus, setTaskStatus] = useState(activeTask?.status || 'Offered'); // 'Offered' | 'Accepted' | 'Declined'
   const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
+  const [isCompleting, setIsCompleting] = useState(false);
 
   useEffect(() => {
-    if (currentTask?.status) {
-      setTaskStatus(currentTask.status);
+    if (activeTask?.status) {
+      setTaskStatus(activeTask.status);
     }
-  }, [currentTask]);
+  }, [activeTask]);
 
   const [checklist, setChecklist] = useState([
     { id: 1, text: 'Checked in with team lead', checked: true },
@@ -53,16 +70,17 @@ export const TaskProgressView = ({
   const progressPercent = calculateProgress();
 
   const handleAcceptAssignment = async () => {
+    if (!activeTask) return;
     try {
-      const idToUse = currentTask?.rawId || currentTask?.id;
-      if (onAcceptTask && idToUse) {
-        await onAcceptTask(idToUse);
-      } else if (currentTask?.rawId) {
-        await volunteerService.acceptAssignment(currentTask.rawId);
+      const idToUse = activeTask.rawId || activeTask.id;
+      if (onAcceptTask) {
+        await onAcceptTask(idToUse, 'Accept');
+      } else if (activeTask.rawId) {
+        await volunteerService.acceptAssignment(activeTask.rawId);
       }
       setTaskStatus('Accepted');
       if (showToast) {
-        showToast(`Assignment ${currentTask?.id || 'VOL-009'} accepted. Reporting to location.`);
+        showToast(`Assignment ${activeTask?.id || 'VOL-009'} accepted. Reporting to location.`);
       }
     } catch (err) {
       if (showToast) {
@@ -73,15 +91,16 @@ export const TaskProgressView = ({
 
   const handleDeclineSubmit = async (e) => {
     e.preventDefault();
+    if (!activeTask) return;
     try {
-      const idToUse = currentTask?.rawId || currentTask?.id;
-      if (onDeclineTask && idToUse) {
-        await onDeclineTask(idToUse, declineReason);
-      } else if (currentTask?.rawId) {
-        await volunteerService.releaseAssignment(currentTask.rawId, { reason: declineReason || 'Declined by volunteer' });
+      const idToUse = activeTask.rawId || activeTask.id;
+      setIsDeclineModalOpen(false);
+      if (onDeclineTask) {
+        await onDeclineTask(idToUse, 'Decline', declineReason);
+      } else if (activeTask.rawId) {
+        await volunteerService.releaseAssignment(activeTask.rawId, { reason: declineReason || 'Declined by volunteer' });
       }
       setTaskStatus('Declined');
-      setIsDeclineModalOpen(false);
       if (showToast) {
         showToast('Assignment declined.');
       }
@@ -92,12 +111,87 @@ export const TaskProgressView = ({
     }
   };
 
+  const handleCompleteShift = async () => {
+    if (!activeTask) return;
+    setIsCompleting(true);
+    try {
+      if (onCompleteTask) {
+        await onCompleteTask(activeTask, {
+          loggedHours: 3.5,
+          shiftNotes: `Completed shift task: ${activeTask.taskTitle || 'Field Duty'}. Field relief operation concluded.`
+        });
+      }
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
   const instructions = [
     'Check in with the team lead before handling supplies',
     'Wear the provided identification and safety vest',
     'Do not photograph or record assistance recipients',
     'Stop work and report unsafe conditions immediately'
   ];
+
+  if (!activeTask) {
+    return (
+      <div>
+        <div style={{ marginBottom: '12px' }}>
+          <button
+            type="button"
+            onClick={() => onNavigateTab && onNavigateTab('assignments')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              fontSize: '12.5px',
+              color: '#64748b',
+              cursor: 'pointer',
+              fontFamily: 'inherit'
+            }}
+          >
+            <ChevronLeft size={16} />
+            <span>Back to My Assignments</span>
+          </button>
+        </div>
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8e0',
+            borderRadius: '12px',
+            padding: '48px 24px',
+            textAlign: 'center',
+            maxWidth: '600px',
+            margin: '40px auto'
+          }}
+        >
+          <Clock size={36} style={{ color: '#94a3b8', margin: '0 auto 16px auto' }} />
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: '0 0 8px 0' }}>
+            No Active Task Selected
+          </h2>
+          <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px 0' }}>
+            There are currently no active tasks assigned or selected. You can review available opportunities or inspect your assigned shifts in My Assignments.
+          </p>
+          <button
+            type="button"
+            className="vol-btn-primary"
+            onClick={() => onNavigateTab && onNavigateTab('assignments')}
+            style={{ margin: '0 auto' }}
+          >
+            View My Assignments
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isAccepted = taskStatus === 'Accepted' || taskStatus === 'In Progress';
+  const isCompleted = taskStatus === 'Completed';
+  const isDeclined = taskStatus === 'Declined' || taskStatus === 'Cancelled';
+  const isOffered = taskStatus === 'Offered' || taskStatus === 'Assigned';
 
   return (
     <div>
@@ -156,7 +250,7 @@ export const TaskProgressView = ({
               letterSpacing: '-0.02em'
             }}
           >
-            Emergency Supply Distribution
+            {activeTask.taskTitle}
           </h1>
           <p
             style={{
@@ -165,7 +259,7 @@ export const TaskProgressView = ({
               margin: 0
             }}
           >
-            Kelani East Distribution Point • 19 Feb 2026 • 08:00–12:00
+            {activeTask.location} • {activeTask.assigned} • {activeTask.deadline}
           </p>
         </div>
 
@@ -178,7 +272,7 @@ export const TaskProgressView = ({
               marginBottom: '6px'
             }}
           >
-            VOL-009 • Assigned to your account
+            {activeTask.id} • Assigned to your account
           </div>
           <div
             style={{
@@ -195,14 +289,14 @@ export const TaskProgressView = ({
                 gap: '4px',
                 padding: '3px 10px',
                 borderRadius: '12px',
-                backgroundColor: '#ffedd5',
-                border: '1px solid #fed7aa',
-                color: '#c2410c',
+                backgroundColor: activeTask.priority === 'Critical' ? '#fee2e2' : '#ffedd5',
+                border: `1px solid ${activeTask.priority === 'Critical' ? '#fca5a5' : '#fed7aa'}`,
+                color: activeTask.priority === 'Critical' ? '#b91c1c' : '#c2410c',
                 fontSize: '11px',
                 fontWeight: 700
               }}
             >
-              • High priority
+              • {activeTask.priority} priority
             </span>
             <span
               style={{
@@ -211,20 +305,20 @@ export const TaskProgressView = ({
                 gap: '4px',
                 padding: '3px 10px',
                 borderRadius: '12px',
-                backgroundColor: taskStatus === 'Accepted' ? '#dcfce7' : '#fef9c3',
-                border: `1px solid ${taskStatus === 'Accepted' ? '#bbf7d0' : '#fde047'}`,
-                color: taskStatus === 'Accepted' ? '#15803d' : '#854d0e',
+                backgroundColor: isAccepted ? '#dcfce7' : isCompleted ? '#e0f2fe' : isDeclined ? '#f1f5f9' : '#fef9c3',
+                border: `1px solid ${isAccepted ? '#bbf7d0' : isCompleted ? '#bae6fd' : isDeclined ? '#e2e8f0' : '#fde047'}`,
+                color: isAccepted ? '#15803d' : isCompleted ? '#0369a1' : isDeclined ? '#64748b' : '#854d0e',
                 fontSize: '11px',
                 fontWeight: 700
               }}
             >
-              • {taskStatus}
+              • {activeTask.status}
             </span>
           </div>
         </div>
       </div>
 
-      {/* 3. Main Two-Column Layout (Figma Master-Detail View) */}
+      {/* 3. Main Two-Column Layout */}
       <div
         style={{
           display: 'grid',
@@ -286,7 +380,7 @@ export const TaskProgressView = ({
                   fontWeight: 600
                 }}
               >
-                Deadline 19 Feb • 12:00
+                Deadline {activeTask.deadline}
               </span>
             </div>
 
@@ -299,7 +393,7 @@ export const TaskProgressView = ({
                 margin: '16px 0 20px 0'
               }}
             >
-              Support the authorised distribution team with organising emergency supply kits and guiding recipients through the public collection process.
+              {activeTask.details}
             </p>
 
             {/* Metadata 4-Column Grid */}
@@ -332,7 +426,7 @@ export const TaskProgressView = ({
                     color: '#0f172a'
                   }}
                 >
-                  Kelani East Distribution Point
+                  {activeTask.location}
                 </div>
               </div>
 
@@ -356,7 +450,7 @@ export const TaskProgressView = ({
                     color: '#0f172a'
                   }}
                 >
-                  08:00–12:00
+                  {activeTask.deadline}
                 </div>
               </div>
 
@@ -380,7 +474,7 @@ export const TaskProgressView = ({
                     color: '#0f172a'
                   }}
                 >
-                  Maya Fernando
+                  {activeTask.coordinator}
                 </div>
               </div>
 
@@ -395,7 +489,7 @@ export const TaskProgressView = ({
                     marginBottom: '4px'
                   }}
                 >
-                  REQUIRED SKILLS
+                  CATEGORY
                 </div>
                 <div
                   style={{
@@ -404,7 +498,7 @@ export const TaskProgressView = ({
                     color: '#0f172a'
                   }}
                 >
-                  Logistics, First Aid
+                  {activeTask.caseCategory || 'Field Logistics'}
                 </div>
               </div>
             </div>
@@ -439,7 +533,7 @@ export const TaskProgressView = ({
                   margin: 0
                 }}
               >
-                Prepare and distribute 120 labelled emergency kits under team-lead supervision, with all distribution counts reconciled.
+                Execute authorized humanitarian field operations under coordinator guidance, ensuring crisis-affected citizens receive timely aid and supply counts are reconciled.
               </p>
             </div>
           </div>
@@ -572,7 +666,7 @@ export const TaskProgressView = ({
                 Task progress
               </h3>
               <span style={{ fontSize: '11px', color: '#64748b' }}>
-                {taskStatus}
+                {activeTask.status}
               </span>
             </div>
 
@@ -586,7 +680,7 @@ export const TaskProgressView = ({
                 lineHeight: 1
               }}
             >
-              {progressPercent}%
+              {isCompleted ? 100 : progressPercent}%
             </div>
 
             {/* Progress Bar */}
@@ -603,8 +697,8 @@ export const TaskProgressView = ({
               <div
                 style={{
                   height: '100%',
-                  width: `${progressPercent}%`,
-                  backgroundColor: '#ea580c',
+                  width: `${isCompleted ? 100 : progressPercent}%`,
+                  backgroundColor: isCompleted ? '#16a34a' : '#ea580c',
                   transition: 'width 0.2s ease'
                 }}
               />
@@ -622,16 +716,16 @@ export const TaskProgressView = ({
               {checklist.map((item) => (
                 <div
                   key={item.id}
-                  onClick={() => toggleCheck(item.id)}
+                  onClick={() => !isCompleted && toggleCheck(item.id)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
-                    cursor: 'pointer',
+                    cursor: isCompleted ? 'default' : 'pointer',
                     fontSize: '12px'
                   }}
                 >
-                  {item.checked ? (
+                  {isCompleted || item.checked ? (
                     <CheckSquare
                       size={16}
                       style={{ color: '#0c2340', flexShrink: 0 }}
@@ -644,8 +738,8 @@ export const TaskProgressView = ({
                   )}
                   <span
                     style={{
-                      color: item.checked ? '#0c2340' : '#334155',
-                      fontWeight: item.checked ? 600 : 400,
+                      color: isCompleted || item.checked ? '#0c2340' : '#334155',
+                      fontWeight: isCompleted || item.checked ? 600 : 400,
                       userSelect: 'none'
                     }}
                   >
@@ -657,66 +751,138 @@ export const TaskProgressView = ({
 
             {/* Action Buttons */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={handleAcceptAssignment}
-                disabled={taskStatus === 'Accepted'}
-                style={{
-                  width: '100%',
-                  height: '38px',
-                  borderRadius: '6px',
-                  backgroundColor: '#0c2340',
-                  color: '#ffffff',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  border: 'none',
-                  cursor: taskStatus === 'Accepted' ? 'default' : 'pointer',
-                  opacity: taskStatus === 'Accepted' ? 0.7 : 1,
-                  transition: 'background-color 0.15s ease',
-                  boxShadow: '0 1px 2px rgba(12, 35, 64, 0.2)'
-                }}
-                onMouseEnter={(e) => {
-                  if (taskStatus !== 'Accepted') {
-                    e.currentTarget.style.backgroundColor = '#173d66';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (taskStatus !== 'Accepted') {
-                    e.currentTarget.style.backgroundColor = '#0c2340';
-                  }
-                }}
-              >
-                {taskStatus === 'Accepted'
-                  ? 'Assignment Accepted'
-                  : 'Accept assignment'}
-              </button>
+              {isOffered && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleAcceptAssignment}
+                    style={{
+                      width: '100%',
+                      height: '38px',
+                      borderRadius: '6px',
+                      backgroundColor: '#0c2340',
+                      color: '#ffffff',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      boxShadow: '0 1px 2px rgba(12, 35, 64, 0.2)'
+                    }}
+                  >
+                    <Check size={15} />
+                    <span>Accept Assignment</span>
+                  </button>
 
-              <button
-                type="button"
-                onClick={() => setIsDeclineModalOpen(true)}
-                disabled={taskStatus === 'Declined'}
-                style={{
-                  width: '100%',
-                  height: '38px',
-                  borderRadius: '6px',
-                  backgroundColor: '#dc2626',
-                  color: '#ffffff',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.15s ease',
-                  boxShadow: '0 1px 2px rgba(220, 38, 38, 0.2)'
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = '#b91c1c')
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = '#dc2626')
-                }
-              >
-                Decline with reason
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsDeclineModalOpen(true)}
+                    style={{
+                      width: '100%',
+                      height: '38px',
+                      borderRadius: '6px',
+                      backgroundColor: '#dc2626',
+                      color: '#ffffff',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(220, 38, 38, 0.2)'
+                    }}
+                  >
+                    Decline with reason
+                  </button>
+                </>
+              )}
+
+              {isAccepted && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleCompleteShift}
+                    disabled={isCompleting}
+                    style={{
+                      width: '100%',
+                      height: '38px',
+                      borderRadius: '6px',
+                      backgroundColor: '#15803d',
+                      color: '#ffffff',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      boxShadow: '0 1px 2px rgba(21, 128, 61, 0.2)'
+                    }}
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>{isCompleting ? 'Completing...' : 'Complete Shift & Log Hours'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsDeclineModalOpen(true)}
+                    style={{
+                      width: '100%',
+                      height: '34px',
+                      borderRadius: '6px',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      color: '#b91c1c',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Release / Cancel Shift
+                  </button>
+                </>
+              )}
+
+              {isCompleted && (
+                <div
+                  style={{
+                    backgroundColor: '#dcfce7',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    textAlign: 'center',
+                    fontSize: '12px',
+                    color: '#15803d',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <CheckCircle2 size={20} />
+                  <strong>Shift Completed & Credited</strong>
+                  <span>3.5 service hours logged to your volunteer account.</span>
+                </div>
+              )}
+
+              {isDeclined && (
+                <div
+                  style={{
+                    backgroundColor: '#f1f5f9',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    textAlign: 'center',
+                    fontSize: '12px',
+                    color: '#64748b'
+                  }}
+                >
+                  <strong>Assignment Released</strong>
+                  <div>Coordinator has been notified.</div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -764,7 +930,13 @@ export const TaskProgressView = ({
                   flexShrink: 0
                 }}
               >
-                MF
+                {activeTask.coordinator
+                  .split(' ')
+                  .map((w) => w[0])
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .join('')
+                  .toUpperCase() || 'MF'}
               </div>
               <div>
                 <div
@@ -774,7 +946,7 @@ export const TaskProgressView = ({
                     color: '#0f172a'
                   }}
                 >
-                  Maya Fernando
+                  {activeTask.coordinator}
                 </div>
                 <div
                   style={{
@@ -834,6 +1006,7 @@ export const TaskProgressView = ({
             zIndex: 1000,
             padding: '20px'
           }}
+          onClick={() => setIsDeclineModalOpen(false)}
         >
           <div
             style={{
@@ -844,6 +1017,7 @@ export const TaskProgressView = ({
               padding: '24px',
               boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <div
               style={{
@@ -861,7 +1035,7 @@ export const TaskProgressView = ({
                   margin: 0
                 }}
               >
-                Decline Assignment VOL-009
+                Decline / Release Assignment {activeTask.id}
               </h3>
               <button
                 type="button"
@@ -925,8 +1099,8 @@ export const TaskProgressView = ({
                   <option value="Health / Safety Hazard">
                     Health / Safety Hazard
                   </option>
-                  <option value="Assigned to another task">
-                    Assigned to another task
+                  <option value="Assigned to another urgent task">
+                    Assigned to another urgent task
                   </option>
                 </select>
               </div>

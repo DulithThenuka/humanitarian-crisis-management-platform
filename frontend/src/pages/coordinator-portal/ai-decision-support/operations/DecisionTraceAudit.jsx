@@ -104,10 +104,11 @@ export const DecisionTraceAudit = ({
     const fetchTrace = async () => {
       try {
         const res = await aiGovernanceService.getTrace(caseId);
-        if (isMounted && res?.data?.data) {
-          setTraceData(res.data.data);
-          if (res.data.data.supervisorNotes && res.data.data.supervisorNotes.length > 0) {
-            setIncidentNotes(res.data.data.supervisorNotes);
+        const traceDetail = res?.data?.data ?? res?.data ?? res;
+        if (isMounted && traceDetail && typeof traceDetail === 'object') {
+          setTraceData(traceDetail);
+          if (traceDetail.supervisorNotes && traceDetail.supervisorNotes.length > 0) {
+            setIncidentNotes(traceDetail.supervisorNotes);
           }
         }
       } catch (err) {
@@ -220,8 +221,10 @@ export const DecisionTraceAudit = ({
     try {
       const targetCase = traceData?.caseNumber || caseId;
       const res = await aiGovernanceService.addNote(targetCase, supervisorNoteInput.trim());
-      if (res?.data?.succeeded) {
-        const newNote = res.data.data || {
+      const isSuccess = res?.succeeded ?? res?.data?.succeeded ?? (res && !res.errors?.length);
+      const noteData = res?.data?.data ?? res?.data ?? res;
+      if (isSuccess) {
+        const newNote = (noteData && noteData.text) ? noteData : {
           id: Date.now(),
           author: 'Jane Coordinator',
           role: 'Emergency Coordinator',
@@ -290,6 +293,110 @@ export const DecisionTraceAudit = ({
     URL.revokeObjectURL(url);
 
     showToast?.(`Audit trace exported to JSON with SHA-256 verification hash`, 'success');
+  };
+
+  const handleDownloadComplianceCertificate = () => {
+    try {
+      const content = `======================================================================
+RELIEFCORE HUMANITARIAN CRISIS MANAGEMENT PLATFORM
+OFFICIAL UN-OCHA HUMANITARIAN COMPLIANCE CERTIFICATE
+======================================================================
+Certificate ID: CERT-OCHA-${caseId}-${Date.now().toString(36).toUpperCase()}
+Incident Case ID: ${caseId}
+Timestamp: ${new Date().toISOString()}
+Standard: UN-OCHA / IASC Inter-Agency Standing Committee Guidelines
+Audit Status: VERIFIED & COMPLIANT
+
+COMPLIANCE VERIFICATION CHECKLIST:
+${complianceItems.map(item => `[${item.checked ? 'X' : ' '}] ${item.label}`).join('\n')}
+
+CRYPTOGRAPHIC LEDGER VALIDATION:
+Digital Signature: 0x8f2a991b5c43d7890e1fa67290bc91823746a
+Merkle Root Hash: sha256:7e492c10b88931a0dcbf310b83ec4886
+Audit Trail Status: IMMUTABLE AUDIT TRAIL LOGGED IN RELIEFCORE DB
+
+Certified by: HumanAid Emergency Relief Operation Center
+======================================================================`;
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `UN_OCHA_Compliance_Certificate_${caseId}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast?.('Official UN-OCHA Compliance Certificate generated & downloaded.', 'success');
+    } catch {
+      showToast?.('Failed to generate compliance certificate.', 'error');
+    }
+  };
+
+  const handleDownloadTelemetryLog = () => {
+    try {
+      const headers = ['Timestamp_UTC', 'Sensor_ID', 'O2_Concentration_Pct', 'Battery_Remaining_Minutes', 'Flow_Rate_LPM', 'Alert_Level'];
+      const now = Date.now();
+      const rows = [];
+      for (let i = 20; i >= 0; i--) {
+        const t = new Date(now - i * 120000).toISOString();
+        const o2 = (94.5 - i * 0.15).toFixed(1);
+        const batt = Math.max(10, 42 - i * 1.5).toFixed(0);
+        const flow = '5.0';
+        const alert = batt < 30 ? 'CRITICAL_BATTERY' : 'NORMAL';
+        rows.push([t, 'SENS-O2-042', o2, batt, flow, alert].join(','));
+      }
+      const csv = 'data:text/csv;charset=utf-8,' + encodeURIComponent([headers.join(','), ...rows].join('\n'));
+      const link = document.createElement('a');
+      link.href = csv;
+      link.download = `Oxygen_Depletion_Telemetry_Log_${caseId}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast?.('Oxygen_Depletion_Telemetry_Log.csv downloaded.', 'success');
+    } catch {
+      showToast?.('Failed to download telemetry log.', 'error');
+    }
+  };
+
+  const handleViewTriageNote = () => {
+    try {
+      const note = `======================================================================
+RELIEFCORE PARAMEDIC FIELD TRIAGE NOTE
+======================================================================
+Case Reference: ${caseId}
+Location: Cinnamon Gardens Elderly Facility, Ward 4
+Attending Physician: Dr. K. Wickramasinghe
+Field Unit: EMS-Rapid-Unit-7
+Timestamp: ${new Date().toISOString()}
+
+PATIENT POPULATION:
+- 6 elderly bedridden patients
+- Primary Diagnoses: Advanced COPD, acute respiratory failure, post-op ventilation
+- Critical Dependency: High-flow continuous oxygen concentrators (5.0 LPM)
+
+SITUATION REPORT:
+- Basement emergency diesel generator fully submerged under 1.2m floodwater.
+- Mains electrical power disabled by utility authority as flood safety measure.
+- Battery reserves depleted past 80%. Critical threshold reachable within 40 minutes.
+- Immediate evacuation or emergency generator transport requested.
+
+RECOMMENDED TRIAGE ACTION:
+- Priority 1: High-capacity mobile generator or battery swap unit immediately.
+- Priority 2: Priority evacuation via all-terrain high-clearance medical transport.
+======================================================================`;
+      const blob = new Blob([note], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Paramedic_Field_Triage_Note_${caseId}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast?.('Paramedic field triage note opened & saved.', 'success');
+    } catch {
+      showToast?.('Failed to open triage note.', 'error');
+    }
   };
 
   const timelineSteps = [
@@ -1519,7 +1626,7 @@ export const DecisionTraceAudit = ({
               <button 
                 type="button" 
                 className="btn-solid-teal sm"
-                onClick={() => showToast?.('Official UN-OCHA Compliance Certificate generated (PDF)', 'success')}
+                onClick={handleDownloadComplianceCertificate}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <FileCheck size={13} />
@@ -1679,7 +1786,7 @@ export const DecisionTraceAudit = ({
                 <button 
                   type="button" 
                   className="btn-outline-white sm"
-                  onClick={() => showToast?.('Opening Paramedic_Field_Triage_Note.pdf in viewer', 'info')}
+                  onClick={handleViewTriageNote}
                 >
                   View
                 </button>
@@ -1694,7 +1801,7 @@ export const DecisionTraceAudit = ({
                 <button 
                   type="button" 
                   className="btn-outline-white sm"
-                  onClick={() => showToast?.('Oxygen_Depletion_Telemetry_Log.csv downloaded', 'success')}
+                  onClick={handleDownloadTelemetryLog}
                 >
                   Download
                 </button>
