@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
+  ArrowLeft,
   TrendingUp,
   Truck,
   Droplets,
@@ -1946,7 +1947,10 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
                 <li key={item.id}>
                   <button
                     className={`adm-ss-nav-item ${isActive ? 'active' : ''}`}
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      navigate(item.id === 'dashboard' ? '/admin' : `/admin/${item.id}`);
+                    }}
                   >
                     <div className="adm-ss-nav-left">
                       <IconComp size={16} />
@@ -1990,6 +1994,20 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
         {/* Top Header Bar */}
         <header className="adm-ss-topbar">
           <div className="adm-ss-title-group">
+            {activeTab !== 'dashboard' && (
+              <button
+                type="button"
+                className="adm-ss-back-dashboard-btn"
+                onClick={() => {
+                  setActiveTab('dashboard');
+                  navigate('/admin');
+                }}
+                title="Back to Admin Dashboard"
+              >
+                <ArrowLeft size={16} />
+                <span>Back to Admin Dashboard</span>
+              </button>
+            )}
             <div className={`adm-ss-title-icon ${currentMeta.iconBg}`}>
               <HeaderIcon size={20} />
             </div>
