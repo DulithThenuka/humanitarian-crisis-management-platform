@@ -18,6 +18,7 @@ import {
   Settings
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
+import { HumanAidLogo } from '../../../components/common/HumanAidLogo';
 import { COORDINATOR_USER } from '../data/coordinatorPortalData';
 import './CoordinatorSidebar.css';
 
@@ -42,14 +43,8 @@ export const CoordinatorSidebar = ({
     <aside className="ec-sidebar">
       <div>
         {/* Brand Header */}
-        <div className="ec-sidebar-brand">
-          <div className="ec-brand-shield-icon">
-            <Shield size={20} />
-          </div>
-          <div>
-            <h2 className="ec-brand-title">HumanAid</h2>
-            <p className="ec-brand-subtitle">Response coordination</p>
-          </div>
+        <div className="ec-sidebar-brand" style={{ marginBottom: '16px' }}>
+          <HumanAidLogo variant="full" size="md" withContainer={true} />
         </div>
 
         {/* User Status Card */}

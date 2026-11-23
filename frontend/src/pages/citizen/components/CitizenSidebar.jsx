@@ -15,6 +15,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
+import { HumanAidLogo } from '../../../components/common/HumanAidLogo';
 
 export const CITIZEN_NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -57,14 +58,8 @@ export const CitizenSidebar = ({ activeTab, onSelectTab }) => {
     <aside className="cp-sidebar">
       {/* Brand Header */}
       <div className="cp-sidebar-header">
-        <a href="/citizen" className="cp-brand-row">
-          <div className="cp-brand-logo-wrap">
-            <Shield size={22} color="#ffffff" />
-          </div>
-          <div className="cp-brand-text">
-            <span className="cp-brand-title">HumanAid</span>
-            <span className="cp-brand-sub">Crisis relief network</span>
-          </div>
+        <a href="/citizen" className="cp-brand-row" style={{ textDecoration: 'none' }}>
+          <HumanAidLogo variant="full" size="md" withContainer={true} />
         </a>
 
         {/* Citizen User Card */}

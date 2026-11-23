@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { volunteerService } from '../../services/volunteerService';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 import {
   LayoutGrid,
   Search,
@@ -514,14 +515,8 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
       <aside className="vol-sidebar">
         <div>
           {/* Brand Header */}
-          <div className="vol-brand-header">
-            <div className="vol-brand-icon-box">
-              <Shield size={18} />
-            </div>
-            <div>
-              <h2 className="vol-brand-title">HumanAid</h2>
-              <p className="vol-brand-subtitle">Response coordination</p>
-            </div>
+          <div className="vol-brand-header" style={{ marginBottom: '16px' }}>
+            <HumanAidLogo variant="full" size="md" withContainer={true} />
           </div>
 
           {/* User Profile Card with Duty Switcher */}

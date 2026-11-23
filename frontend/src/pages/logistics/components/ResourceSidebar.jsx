@@ -1,4 +1,5 @@
 import React from 'react';
+import { HumanAidLogo } from '@/components/common/HumanAidLogo';
 import {
   LayoutDashboard,
   Package,
@@ -33,14 +34,8 @@ export const ResourceSidebar = ({ activeTab, onSelectTab, onDutyToggle, onDuty =
     <aside className="rm-sidebar">
       {/* Brand Header */}
       <div className="rm-sidebar-header">
-        <a href="/logistics" className="rm-brand-row">
-          <div className="rm-brand-logo-wrap">
-            <Shield size={22} className="rm-brand-shield-icon" />
-          </div>
-          <div className="rm-brand-text">
-            <span className="rm-brand-title">HumanAid</span>
-            <span className="rm-brand-sub">Response coordination</span>
-          </div>
+        <a href="/logistics" className="rm-brand-row" style={{ textDecoration: 'none' }}>
+          <HumanAidLogo variant="full" size="md" withContainer={true} />
         </a>
 
         {/* Officer Duty Card */}

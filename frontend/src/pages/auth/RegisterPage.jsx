@@ -19,7 +19,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 import { authService } from '../../services/authService';
-import reliefcoreIcon from '../../assets/reliefcore-icon.png';
+import { HumanAidLogo, humanaidLogoIcon } from '../../components/common/HumanAidLogo';
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -149,15 +149,7 @@ export const RegisterPage = () => {
           {/* Header */}
           <header className="flex items-center justify-between w-full">
             <Link to="/" className="flex items-center gap-3 no-underline group" title="Return to Homepage">
-              <img 
-                src={reliefcoreIcon} 
-                alt="HumanAid Crisis Command" 
-                className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform" 
-              />
-              <span className="font-semibold text-xl tracking-tight text-white">HumanAid</span>
-              <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white/60 ml-1">
-                Registration
-              </span>
+              <HumanAidLogo variant="full" size="sm" withContainer={true} />
             </Link>
 
             <Link
@@ -171,11 +163,11 @@ export const RegisterPage = () => {
 
           {/* Hero Center */}
           <main className="flex-1 flex flex-col items-center justify-center text-center py-10 lg:py-14 px-2">
-            <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform">
+            <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
               <img 
-                src={reliefcoreIcon} 
+                src={humanaidLogoIcon} 
                 alt="HumanAid Emblem" 
-                className="w-13 h-13 object-contain" 
+                className="w-16 h-16 object-contain rounded-xl" 
               />
             </div>
 
@@ -271,6 +263,9 @@ export const RegisterPage = () => {
 
           {/* Form Content */}
           <div className="w-full max-w-lg mx-auto my-auto py-4">
+            <div className="mb-4 flex justify-center lg:justify-start">
+              <HumanAidLogo variant="full" size="md" withContainer={true} />
+            </div>
             <div className="mb-5 text-center lg:text-left">
               <h2 className="text-2xl sm:text-3xl font-[500] text-white tracking-[-0.03em]">
                 Create Account

@@ -49,7 +49,7 @@ import {
 } from 'lucide-react';
 
 import westernProvinceMap from '../../assets/western-province-map-clean.png';
-import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 import { homeService } from '../../services/homeService';
 import Hero, { Animate, BAR_HEIGHTS } from '../../components/Hero';
 
@@ -442,13 +442,7 @@ export const LandingHomePage = () => {
       <Hero
         brandName="HumanAid"
         brandLogo={
-          <div className="flex items-center gap-2.5">
-            <img 
-              src={reliefcoreLogoWhite} 
-              alt="HumanAid Humanitarian Operations" 
-              className="h-[28px] sm:h-[32px] w-auto object-contain"
-            />
-          </div>
+          <HumanAidLogo variant="full" size="sm" withContainer={true} />
         }
         badgeTag={
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/70 backdrop-blur-[14px] border border-cyan-500/30 text-white/90 text-[12px] font-[450]">
@@ -1231,11 +1225,7 @@ export const LandingHomePage = () => {
             {/* Col 1: Brand */}
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2.5 mb-4">
-                <img 
-                  src={reliefcoreLogoWhite} 
-                  alt="HumanAid" 
-                  className="h-[28px] w-auto object-contain"
-                />
+                <HumanAidLogo variant="full" size="sm" withContainer={true} />
               </div>
               <p className="text-[13.5px] font-[450] text-white/60 max-w-[380px] leading-relaxed">
                 Autonomous humanitarian logistics & crisis coordination platform engineered for real-time disaster response across Sri Lanka.

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 
 import './ResourceManager.css';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 import {
   RESOURCE_MANAGER_USER,
   INITIAL_RESOURCE_METRICS,
@@ -276,14 +277,8 @@ export const ResourceManagerDashboard = ({ initialTab = 'overview' }) => {
       <aside className="rm-sidebar">
         <div>
           {/* Brand Header */}
-          <div className="rm-brand-header">
-            <div className="rm-brand-icon-box">
-              <Shield size={18} color="#ffffff" />
-            </div>
-            <div>
-              <h2 className="rm-brand-title">HumanAid</h2>
-              <p className="rm-brand-subtitle">Response coordination</p>
-            </div>
+          <div className="rm-brand-header" style={{ marginBottom: '16px' }}>
+            <HumanAidLogo variant="full" size="md" withContainer={true} />
           </div>
 
           {/* User Profile Switcher Card */}

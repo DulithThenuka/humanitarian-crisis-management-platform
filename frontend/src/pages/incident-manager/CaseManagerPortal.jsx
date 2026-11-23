@@ -22,6 +22,7 @@ import {
   CASE_MANAGER_USER, 
   INITIAL_CASES_LIST 
 } from './caseManagerData';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 
 import { useAuth } from '../../context/AuthContext';
 import { incidentService, normalizeIncidentForUI } from '../../services/incidentService';
@@ -380,14 +381,8 @@ export const CaseManagerPortal = ({ initialTab = 'dashboard' }) => {
       <aside className="cm-sidebar">
         <div>
           {/* Brand Header */}
-          <div className="cm-sidebar-brand" onClick={() => setActiveTab('dashboard')}>
-            <div className="cm-brand-icon">
-              <Shield size={20} />
-            </div>
-            <div>
-              <h2 className="cm-brand-title">HumanAid</h2>
-              <p className="cm-brand-sub">Response coordination</p>
-            </div>
+          <div className="cm-sidebar-brand" onClick={() => setActiveTab('dashboard')} style={{ cursor: 'pointer', marginBottom: '16px' }}>
+            <HumanAidLogo variant="full" size="md" withContainer={true} />
           </div>
 
           {/* User Status Card */}

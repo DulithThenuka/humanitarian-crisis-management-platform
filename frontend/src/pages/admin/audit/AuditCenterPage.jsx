@@ -28,7 +28,7 @@ import {
   X
 } from 'lucide-react';
 
-import reliefcoreLogoWhite from '@/assets/reliefcore-logo-white-text.png';
+import { HumanAidLogo } from '@/components/common/HumanAidLogo';
 import sarahJohnson from '@/assets/sarah-johnson.jpg';
 import crisisCenterIcon from '@/assets/crisis-center-icon.png';
 
@@ -226,12 +226,8 @@ export const AuditCenterPage = () => {
       <aside className="audit-sidebar">
         <div>
           <div className="audit-sidebar-brand">
-            <Link to="/coordinator/dashboard">
-              <img
-                src={reliefcoreLogoWhite}
-                alt="HumanAid Humanitarian Operations"
-                className="audit-brand-logo"
-              />
+            <Link to="/coordinator/dashboard" style={{ textDecoration: 'none' }}>
+              <HumanAidLogo variant="full" size="md" withContainer={true} />
             </Link>
           </div>
 

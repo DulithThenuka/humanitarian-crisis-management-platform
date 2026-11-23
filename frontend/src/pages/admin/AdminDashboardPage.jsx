@@ -74,7 +74,7 @@ import { shelterService } from '../../services/shelterService';
 import { volunteerService } from '../../services/volunteerService';
 import apiClient from '../../services/apiClient';
 import { useAuth } from '../../context/AuthContext';
-import reliefcoreIcon from '../../assets/reliefcore-icon.png';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 import sarahJohnsonAvatar from '../../assets/sarah-johnson.jpg';
 import westernProvinceMap from '../../assets/western-province-map-clean.png';
 import shelterPhoto1 from '../../assets/shelter-1.jpg';
@@ -1931,11 +1931,7 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
         <div className="adm-ss-sidebar-top">
           {/* Brand Header */}
           <div className="adm-ss-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <img src={reliefcoreIcon} alt="HumanAid" className="adm-ss-brand-logo" />
-            <div>
-              <h2 className="adm-ss-brand-title">HumanAid</h2>
-              <span className="adm-ss-brand-sub">Humanitarian Operations</span>
-            </div>
+            <HumanAidLogo variant="full" size="md" withContainer={true} />
           </div>
 
           {/* Navigation Links */}
