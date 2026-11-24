@@ -50,15 +50,17 @@ public class CrisisService : ICrisisService
             .Where(c => c.IsActive)
             .Sum(c => GetEstimatedAffected(c));
 
+        var dispatchedUnits = await _context.IncidentAssignments.CountAsync(cancellationToken);
+
         var stats = new CrisisSummaryStatsDto
         {
-            TotalCrises = totalCrises > 0 ? totalCrises : 5,
-            ActiveCrises = activeCrises > 0 ? activeCrises : 5,
-            HighSeverityCrises = highSeverity > 0 ? highSeverity : 3,
-            TotalEstimatedAffected = estimatedAffected > 0 ? estimatedAffected : 8550,
-            ActiveSheltersCount = activeShelters > 0 ? activeShelters : 16,
-            OpenRequestsCount = openRequests > 0 ? openRequests : 4,
-            DispatchedResponseUnits = 12,
+            TotalCrises = totalCrises,
+            ActiveCrises = activeCrises,
+            HighSeverityCrises = highSeverity,
+            TotalEstimatedAffected = estimatedAffected,
+            ActiveSheltersCount = activeShelters,
+            OpenRequestsCount = openRequests,
+            DispatchedResponseUnits = dispatchedUnits,
             LastUpdated = DateTime.UtcNow
         };
 

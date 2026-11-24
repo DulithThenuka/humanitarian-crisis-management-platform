@@ -66,6 +66,35 @@ export const DecisionHistoryView = ({ showToast }) => {
     });
   }, [records, searchQuery, categoryFilter, resultFilter]);
 
+  const handleExportHistory = () => {
+    try {
+      const headers = ['Reference ID', 'Action', 'Related Record', 'Coordinator', 'Category', 'Status', 'Timestamp'];
+      const rows = filteredRecords.map(r => [
+        `"${r.id || ''}"`,
+        `"${(r.action || '').replace(/"/g, '""')}"`,
+        `"${r.relatedRecord || ''}"`,
+        `"${r.coordinator || ''}"`,
+        `"${r.category || ''}"`,
+        `"${r.status || ''}"`,
+        `"${r.time || ''}"`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `RELIEFCORE_Coordinator_Decision_History_${new Date().toISOString().substring(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast?.('Coordinator decision log exported successfully.', 'success');
+    } catch (err) {
+      console.error('Export error:', err);
+      showToast?.('Failed to export decision history log.', 'error');
+    }
+  };
+
   return (
     <div className="ec-portal-canvas">
       {/* 1. Header Strip */}
@@ -79,7 +108,7 @@ export const DecisionHistoryView = ({ showToast }) => {
         </div>
         <button
           className="ec-btn-action-primary"
-          onClick={() => showToast('Exporting encrypted coordinator decision log (JSON/CSV)...', 'info')}
+          onClick={handleExportHistory}
         >
           <Download size={14} />
           <span>Export history</span>

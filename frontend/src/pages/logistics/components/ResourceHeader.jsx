@@ -14,7 +14,7 @@ const TAB_TITLES = {
   profile: 'Profile & Settings'
 };
 
-export const ResourceHeader = ({ activeTab, onSelectTab, showToast }) => {
+export const ResourceHeader = ({ activeTab, onSelectTab, onOpenSearch, showToast }) => {
   const currentTitle = TAB_TITLES[activeTab] || 'Resource Manager Portal';
 
   return (
@@ -29,17 +29,27 @@ export const ResourceHeader = ({ activeTab, onSelectTab, showToast }) => {
           </div>
 
           {/* Center: Global Search */}
-          <div className="rm-search-wrapper">
+          <div
+            className="rm-search-wrapper"
+            onClick={onOpenSearch}
+            role="button"
+            tabIndex={0}
+            title="Search inventory, allocations, dispatches... (⌘K / Ctrl+K)"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onOpenSearch?.();
+              }
+            }}
+          >
             <Search size={15} className="rm-search-icon" />
             <input
               type="text"
               className="rm-search-input"
               placeholder="Search inventory, allocations, dispatches..."
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && showToast) {
-                  showToast(`Searching for "${e.target.value}" across resource records`);
-                }
-              }}
+              readOnly
+              onClick={onOpenSearch}
+              onFocus={onOpenSearch}
             />
             <kbd className="rm-search-kbd">⌘ K</kbd>
           </div>

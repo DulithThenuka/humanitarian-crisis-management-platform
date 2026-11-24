@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
+import { volunteerService } from '../../services/volunteerService';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 import {
   LayoutGrid,
   Search,
@@ -10,10 +14,12 @@ import {
   User,
   LifeBuoy,
   Shield,
+  ShieldCheck,
   MapPin,
   LogOut,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 
 // Data
@@ -31,7 +37,6 @@ import {
   INITIAL_PREFERRED_CATEGORIES,
   SERVICE_AREAS
 } from './data/volunteerData';
-import { volunteerService } from '../../services/volunteerService';
 
 // Views
 import { OverviewView } from './views/OverviewView';
@@ -55,6 +60,7 @@ import './VolunteerPortal.css';
 export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user: authUser } = useAuth();
 
   // Navigation State
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -91,11 +97,40 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   const [upcomingList, setUpcomingList] = useState(UPCOMING_ASSIGNMENTS);
   const [notifications, setNotifications] = useState(RECENT_NOTIFICATIONS);
   const [activitySummary, setActivitySummary] = useState(VOLUNTEER_ACTIVITY_SUMMARY);
-  const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
+  const [opportunities, setOpportunities] = useState(() => {
+    try {
+      const saved = localStorage.getItem('volunteer_accepted_opportunity_ids');
+      if (saved) {
+        const acceptedIds = new Set(JSON.parse(saved).map((x) => String(x).toLowerCase().trim()));
+        return INITIAL_OPPORTUNITIES.filter(
+          (o) => !acceptedIds.has(String(o.id).toLowerCase().trim()) && !acceptedIds.has(String(o.title).toLowerCase().trim())
+        );
+      }
+    } catch (e) {
+      console.warn('Error initializing opportunities from storage:', e);
+    }
+    return INITIAL_OPPORTUNITIES;
+  });
   const [assignments, setAssignments] = useState(INITIAL_ASSIGNMENTS);
   const [scheduleDays, setScheduleDays] = useState(INITIAL_SCHEDULE_DAYS);
   const [availabilityDays, setAvailabilityDays] = useState(INITIAL_AVAILABILITY_DAYS);
   const [preferredCategories, setPreferredCategories] = useState(INITIAL_PREFERRED_CATEGORIES);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Sync with logged in user profile
+  useEffect(() => {
+    if (authUser) {
+      setUser((prev) => ({
+        ...prev,
+        name: authUser.fullName || authUser.name || prev.name,
+        role: authUser.role === 'Volunteer' || authUser.role === 4 ? 'Humanitarian Volunteer' : (authUser.role || prev.role),
+        email: authUser.email || prev.email,
+        avatar: authUser.initials || (authUser.fullName ? authUser.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : prev.avatar),
+        volunteerId: authUser.id ? `VOL-${authUser.id.substring(0, 4).toUpperCase()}` : prev.volunteerId,
+        volunteerGuid: authUser.id
+      }));
+    }
+  }, [authUser]);
 
   // Modals
   const [selectedOppForDetail, setSelectedOppForDetail] = useState(null);
@@ -125,105 +160,347 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
     help: 'Help & Support'
   };
 
-  // Live backend sync with fallback
+  // Authoritative Database Synchronization
+  const refreshVolunteerData = useCallback(async () => {
+    try {
+      // 1. Fetch authenticated volunteer profile from /volunteers/me
+      let myProfile = null;
+      try {
+        const meRes = await volunteerService.getMyProfile();
+        myProfile = meRes?.data || meRes;
+        if (myProfile && (myProfile.id || myProfile.volunteerCode)) {
+          setUser((prev) => ({
+            ...prev,
+            name: myProfile.fullName || prev.name,
+            email: myProfile.email || prev.email,
+            phone: myProfile.phoneNumber || prev.phone,
+            serviceArea: myProfile.serviceArea || prev.serviceArea,
+            volunteerId: myProfile.volunteerCode || prev.volunteerId,
+            volunteerGuid: myProfile.id || prev.volunteerGuid,
+            dutyStatus: typeof myProfile.isAvailable === 'boolean' ? myProfile.isAvailable : prev.dutyStatus,
+            skills: myProfile.skills ? myProfile.skills.split(',').map((s) => s.trim()) : prev.skills
+          }));
+        }
+      } catch (e) {
+        console.warn('Could not retrieve current volunteer profile:', e);
+      }
+
+      // 2. Fetch live assignments from backend API
+      const targetVolunteerId = myProfile?.id || user.volunteerGuid || authUser?.id;
+      const assignRes = await volunteerService.getAssignments(targetVolunteerId ? { volunteerId: targetVolunteerId } : {});
+      const rawAssignments = assignRes?.data || assignRes;
+      if (Array.isArray(rawAssignments)) {
+        const mapped = rawAssignments.map((a) => {
+          const isOffered = a.assignmentStatus === 0;
+          const isAccepted = a.assignmentStatus === 1;
+          const isCompleted = a.assignmentStatus === 2;
+          const isCancelled = a.assignmentStatus === 3;
+
+          const status = isOffered
+            ? 'Offered'
+            : isAccepted
+              ? 'Accepted'
+              : isCompleted
+                ? 'Completed'
+                : 'Declined';
+
+          const nextAction = isOffered
+            ? 'Respond'
+            : isAccepted
+              ? 'Open task'
+              : 'View history';
+
+          const actionType = isOffered
+            ? 'respond'
+            : isAccepted
+              ? 'open'
+              : 'history';
+
+          return {
+            id: a.volunteerCode ? `${a.volunteerCode}-${a.id.substring(0, 4)}` : a.id,
+            rawId: a.id,
+            taskTitle: a.taskDescription || 'Humanitarian Field Shift',
+            assigned: a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : 'Today',
+            deadline: a.shiftTime || '18:00',
+            location: a.serviceArea || 'Kelani East',
+            coordinator: a.volunteerName || 'Authorised Coordinator',
+            priority: isOffered ? 'High' : 'Medium',
+            status,
+            nextAction,
+            actionType,
+            details: a.notes || a.taskDescription || 'Coordinate relief operation support with authorized on-site team.'
+          };
+        });
+        setAssignments(mapped);
+
+        // Derive authoritative metrics from real assignments
+        const active = mapped.filter((m) => m.status === 'Accepted' || m.status === 'Offered');
+        const pending = mapped.filter((m) => m.status === 'Offered');
+        const inProg = mapped.filter((m) => m.status === 'Accepted');
+        const comp = mapped.filter((m) => m.status === 'Completed');
+
+        setMetrics({
+          assignedTasks: active.length,
+          assignedSub: `${active.length} active or scheduled`,
+          pendingAcceptance: pending.length,
+          pendingSub: `${pending.length} responding by 18:00`,
+          inProgress: inProg.length,
+          inProgressSub: `${inProg.length} in field`,
+          completedTasks: comp.length,
+          completedSub: `${comp.length * 3} volunteer hours`
+        });
+
+        // Update upcoming assignments
+        const upcoming = active[0] || mapped[0];
+        if (upcoming) {
+          setUpcomingAssignment({
+            id: upcoming.id,
+            rawId: upcoming.rawId,
+            title: upcoming.taskTitle,
+            code: `${upcoming.id} - ${upcoming.location} - ${upcoming.deadline}`,
+            day: '19',
+            month: 'FEB',
+            dateStr: upcoming.assigned,
+            time: upcoming.deadline,
+            reportingBy: 'Today - 18:00',
+            location: upcoming.location,
+            area: upcoming.location,
+            tags: ['Logistics', 'Field Ops', 'Priority'],
+            coordinator: upcoming.coordinator,
+            coordinatorPhone: '+94 77 555 0192',
+            description: upcoming.details,
+            ppeRequired: 'Reflective vest, safety boots, work gloves',
+            status: upcoming.status
+          });
+
+          setUpcomingList(
+            active.map((act) => ({
+              id: act.id,
+              rawId: act.rawId,
+              title: act.taskTitle,
+              timeLoc: `${act.assigned} - ${act.deadline} - ${act.location}`,
+              status: act.status,
+              badgeType: act.status === 'Offered' ? 'warning' : 'info',
+              iconType: 'truck'
+            }))
+          );
+        } else {
+          setUpcomingAssignment(null);
+          setUpcomingList([]);
+        }
+
+        // 3. Synchronize available opportunities with backend & assignments
+        try {
+          const oppRes = await volunteerService.getOpportunities(targetVolunteerId ? { volunteerId: targetVolunteerId } : {});
+          const backendOpps = oppRes?.data || oppRes;
+
+          let acceptedSet = new Set();
+          try {
+            const saved = localStorage.getItem('volunteer_accepted_opportunity_ids');
+            if (saved) {
+              JSON.parse(saved).forEach((x) => acceptedSet.add(String(x).toLowerCase().trim()));
+            }
+          } catch { }
+
+          if (Array.isArray(rawAssignments)) {
+            rawAssignments.forEach((a) => {
+              if (a.taskDescription) acceptedSet.add(a.taskDescription.toLowerCase().trim());
+            });
+          }
+
+          const sourceList = Array.isArray(backendOpps) && backendOpps.length > 0 ? backendOpps : INITIAL_OPPORTUNITIES;
+          const filteredList = sourceList.filter((opp) => {
+            const id = String(opp.id || '').toLowerCase().trim();
+            const title = String(opp.title || '').toLowerCase().trim();
+            return !acceptedSet.has(id) && !acceptedSet.has(title);
+          });
+
+          setOpportunities(filteredList);
+        } catch (oppErr) {
+          let acceptedSet = new Set();
+          try {
+            const saved = localStorage.getItem('volunteer_accepted_opportunity_ids');
+            if (saved) {
+              JSON.parse(saved).forEach((x) => acceptedSet.add(String(x).toLowerCase().trim()));
+            }
+          } catch { }
+
+          if (Array.isArray(rawAssignments)) {
+            rawAssignments.forEach((a) => {
+              if (a.taskDescription) acceptedSet.add(a.taskDescription.toLowerCase().trim());
+            });
+          }
+
+          setOpportunities((prev) =>
+            prev.filter((opp) => {
+              const id = String(opp.id || '').toLowerCase().trim();
+              const title = String(opp.title || '').toLowerCase().trim();
+              return !acceptedSet.has(id) && !acceptedSet.has(title);
+            })
+          );
+        }
+      }
+
+      // 4. Fetch live dashboard telemetry
+      const dashRes = await volunteerService.getDashboard();
+      const dash = dashRes?.data || dashRes;
+      if (dash?.metrics) {
+        setActivitySummary((prev) => ({
+          ...prev,
+          primaryServiceArea: dash.coordinatorUser?.operation || prev.primaryServiceArea
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to synchronize volunteer portal data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user.volunteerGuid, authUser?.id]);
+
+  // Initial load
   useEffect(() => {
-    let isMounted = true;
-    volunteerService.getDashboard()
-      .then((res) => {
-        if (!isMounted || !res?.data) return;
-        const d = res.data;
-        if (d.profile) setUser((prev) => ({ ...prev, ...d.profile }));
-        if (d.metrics) setMetrics(d.metrics);
-        if (d.upcomingAssignment) setUpcomingAssignment(d.upcomingAssignment);
-        if (d.upcomingList?.length) setUpcomingList(d.upcomingList);
-        if (d.notifications?.length) setNotifications(d.notifications);
-        if (d.activitySummary) setActivitySummary(d.activitySummary);
-        if (d.opportunities?.length) setOpportunities(d.opportunities);
-        if (d.assignments?.length) setAssignments(d.assignments);
-      })
-      .catch(() => {
-        // Fall back gracefully to prototype seed data
+    refreshVolunteerData();
+  }, [refreshVolunteerData]);
+
+  // Real-time synchronization
+  useRealtimeRefresh(['volunteers', 'crises', 'assistancerequests'], refreshVolunteerData);
+
+  // Handlers for Persisted Database Operations
+  const handleAcceptTask = async (opp) => {
+    // 1. Immediately record in persistent localStorage
+    try {
+      const saved = localStorage.getItem('volunteer_accepted_opportunity_ids');
+      const list = saved ? JSON.parse(saved) : [];
+      if (!list.includes(opp.id)) list.push(opp.id);
+      if (!list.includes(opp.title)) list.push(opp.title);
+      localStorage.setItem('volunteer_accepted_opportunity_ids', JSON.stringify(list));
+    } catch (e) {
+      console.warn('Could not persist accepted opportunity to localStorage:', e);
+    }
+
+    // 2. Remove immediately from React UI state
+    setOpportunities((prev) => prev.filter((o) => o.id !== opp.id && o.title !== opp.title));
+
+    // 3. Persist to backend database
+    try {
+      const targetVolunteerId = user.volunteerGuid || authUser?.id || user.id;
+      await volunteerService.assignShift({
+        volunteerId: targetVolunteerId,
+        shiftTime: opp.date || '08:30-13:30',
+        shiftTask: opp.title,
+        note: `${opp.id} | ${opp.categoryCode || opp.category || ''} | ${opp.description || ''}`,
+        status: 1
       });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+      showToast(`Task accepted: ${opp.title}. Added to My Assignments.`);
+    } catch (e) {
+      console.warn('Backend shift assignment error:', e);
+      showToast(`Task accepted: ${opp.title}. Added to My Assignments.`);
+    }
 
-  // Handlers
-  const handleAcceptTask = (opp) => {
-    volunteerService.acceptOpportunity(opp.id).catch(() => {});
-    // Add to assignments
-    const newAssignment = {
-      id: opp.id,
-      taskTitle: opp.title,
-      assigned: 'Today',
-      deadline: opp.date,
-      location: opp.location,
-      coordinator: opp.coordinator,
-      priority: opp.priority,
-      status: 'Accepted',
-      nextAction: 'Open task',
-      actionType: 'open',
-      details: opp.description
-    };
-
-    // Filter out from available
-    setOpportunities((prev) => prev.filter((o) => o.id !== opp.id));
-    setAssignments((prev) => [newAssignment, ...prev]);
-
-    // Update metrics
-    setMetrics((prev) => ({
-      ...prev,
-      assignedTasks: prev.assignedTasks + 1
-    }));
-
-    showToast(`Task accepted: ${opp.title}. Added to My Assignments.`);
+    // 4. Refresh authoritative assignments from backend
+    await refreshVolunteerData();
   };
 
-  const handleAssignmentResponse = (taskId, action) => {
-    volunteerService.updateAssignmentStatus(taskId, action).catch(() => {});
-    if (action === 'Accept') {
-      setAssignments((prev) =>
-        prev.map((a) =>
-          a.id === taskId
-            ? { ...a, status: 'Accepted', nextAction: 'Open task', actionType: 'open' }
-            : a
-        )
-      );
-      setMetrics((prev) => ({
-        ...prev,
-        pendingAcceptance: Math.max(0, prev.pendingAcceptance - 1)
-      }));
-      showToast(`Assignment ${taskId} accepted.`);
-    } else if (action === 'Decline') {
-      setAssignments((prev) => prev.filter((a) => a.id !== taskId));
-      setMetrics((prev) => ({
-        ...prev,
-        assignedTasks: Math.max(0, prev.assignedTasks - 1),
-        pendingAcceptance: Math.max(0, prev.pendingAcceptance - 1)
-      }));
-      showToast(`Assignment ${taskId} declined.`);
+  const handleAssignmentResponse = async (taskId, action) => {
+    const target = assignments.find((a) => a.id === taskId || a.rawId === taskId);
+    const idToUse = target?.rawId || taskId;
+
+    try {
+      if (action === 'Accept') {
+        if (target?.rawId) {
+          await volunteerService.acceptAssignment(idToUse);
+        }
+        showToast(`Assignment ${taskId} accepted.`);
+      } else if (action === 'Decline') {
+        if (target?.rawId) {
+          await volunteerService.releaseAssignment(idToUse, { reason: 'Volunteer declined assignment' });
+        }
+        showToast(`Assignment ${taskId} declined.`);
+      }
+      await refreshVolunteerData();
+    } catch (err) {
+      showToast(`Action failed: ${err?.message || 'Operation failed'}`);
+      await refreshVolunteerData();
     }
   };
 
-  const handleSaveAvailabilitySettings = (newSettings) => {
+  const handleCompleteTask = async (task, { loggedHours, shiftNotes } = {}) => {
+    const idToUse = task.rawId || task.id;
+    try {
+      if (task.rawId) {
+        await volunteerService.completeAssignment(idToUse, {
+          reason: shiftNotes || `Logged ${loggedHours} hours`,
+          hours: loggedHours
+        });
+      }
+      showToast(`Task ${task.id} marked as completed! Shift hours logged.`);
+      await refreshVolunteerData();
+    } catch (err) {
+      showToast(`Error completing task: ${err?.message || 'Failed'}`);
+      await refreshVolunteerData();
+    }
+  };
+
+  const handleSaveAvailabilitySettings = async (newSettings) => {
     setAvailabilityDays(newSettings.days);
     setPreferredCategories(newSettings.categories);
     setUser((prev) => ({
       ...prev,
       serviceArea: newSettings.serviceArea
     }));
+    try {
+      const idToUse = user.volunteerGuid || authUser?.id;
+      if (idToUse) {
+        await volunteerService.updateVolunteer(idToUse, {
+          serviceArea: newSettings.serviceArea,
+          skills: newSettings.categories ? newSettings.categories.join(', ') : undefined,
+          availability: JSON.stringify(newSettings.days)
+        });
+      }
+    } catch (err) {
+      console.error('Failed to persist availability settings:', err);
+    }
     showToast('Weekly availability settings saved successfully.');
   };
 
-  const handleUpdateAvailabilityQuick = (updated) => {
+  const handleUpdateAvailabilityQuick = async (updated) => {
     setUser((prev) => ({
       ...prev,
       dutyStatus: updated.dutyStatus,
       dutyLoggedTime: updated.dutyLoggedTime,
       serviceArea: updated.serviceArea
     }));
+    try {
+      const idToUse = user.volunteerGuid || authUser?.id;
+      if (idToUse) {
+        await volunteerService.updateVolunteer(idToUse, {
+          isAvailable: updated.dutyStatus,
+          serviceArea: updated.serviceArea
+        });
+      }
+    } catch (err) {
+      console.error('Failed to persist quick availability:', err);
+    }
     showToast('Volunteer availability preferences updated.');
+  };
+
+  const handleSaveProfile = async (profileData) => {
+    const idToUse = user.volunteerGuid || authUser?.id;
+    try {
+      if (idToUse) {
+        await volunteerService.updateVolunteer(idToUse, {
+          fullName: profileData.displayName,
+          email: profileData.email,
+          serviceArea: profileData.serviceArea,
+          skills: profileData.skills,
+          availability: profileData.availability
+        });
+      }
+      await refreshVolunteerData();
+      showToast('Volunteer profile and service preferences saved.');
+    } catch (err) {
+      showToast(`Failed to save profile: ${err?.message || 'Error'}`);
+    }
   };
 
   const handleMarkAllNotificationsRead = () => {
@@ -238,14 +515,8 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
       <aside className="vol-sidebar">
         <div>
           {/* Brand Header */}
-          <div className="vol-brand-header">
-            <div className="vol-brand-icon-box">
-              <Shield size={18} />
-            </div>
-            <div>
-              <h2 className="vol-brand-title">HumanAid</h2>
-              <p className="vol-brand-subtitle">Response coordination</p>
-            </div>
+          <div className="vol-brand-header" style={{ marginBottom: '16px' }}>
+            <HumanAidLogo variant="full" size="md" withContainer={true} />
           </div>
 
           {/* User Profile Card with Duty Switcher */}
@@ -262,9 +533,17 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
               <input
                 type="checkbox"
                 checked={user.dutyStatus}
-                onChange={(e) => {
+                onChange={async (e) => {
                   const newStatus = e.target.checked;
-                  setUser({ ...user, dutyStatus: newStatus });
+                  setUser((prev) => ({ ...prev, dutyStatus: newStatus }));
+                  try {
+                    const idToUse = user.volunteerGuid || authUser?.id;
+                    if (idToUse) {
+                      await volunteerService.updateVolunteer(idToUse, { isAvailable: newStatus });
+                    }
+                  } catch (err) {
+                    console.error('Failed to persist duty status:', err);
+                  }
                   showToast(
                     newStatus
                       ? 'Duty status active: Available for assignments.'
@@ -385,7 +664,7 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
         <div className="vol-sidebar-footer">
           <div className="vol-boundary-box">
             <div className="vol-boundary-header">
-              <Shield size={13} />
+              <ShieldCheck size={14} />
               <span>Volunteer prototype</span>
             </div>
             <p className="vol-boundary-text">
@@ -477,10 +756,12 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
               activitySummary={activitySummary}
               user={user}
               onNavigateTab={setActiveTab}
+              onRefreshData={refreshVolunteerData}
               onViewAssignment={(item) => {
                 const found =
-                  assignments.find((a) => a.id === item.id) || {
+                  assignments.find((a) => a.id === item.id || a.rawId === item.rawId) || {
                     id: item.id,
+                    rawId: item.rawId,
                     taskTitle: item.title,
                     assigned: '18 Feb',
                     deadline: '19 Feb - 12:00',
@@ -509,16 +790,26 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
             <MyAssignmentsView
               assignments={assignments}
               onActionClick={(item) => setSelectedAssignmentAction(item)}
+              onRefreshData={refreshVolunteerData}
             />
           )}
 
           {activeTab === 'progress' && (
             <TaskProgressView
               assignments={assignments}
-              onCompleteTask={(task) => {
-                showToast(`Task ${task.id} marked as completed!`);
+              onAcceptTask={async (taskId) => {
+                await handleAssignmentResponse(taskId, 'Accept');
               }}
+              onDeclineTask={async (taskId, reason) => {
+                const target = assignments.find((a) => a.id === taskId || a.rawId === taskId);
+                const idToUse = target?.rawId || taskId;
+                await volunteerService.releaseAssignment(idToUse, { reason: reason || 'Volunteer declined assignment' });
+                showToast(`Assignment declined.`);
+                await refreshVolunteerData();
+              }}
+              onCompleteTask={handleCompleteTask}
               showToast={showToast}
+              onNavigateTab={(tab) => setActiveTab(tab)}
             />
           )}
 
@@ -536,14 +827,25 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
               notifications={notifications}
               onMarkAllAsRead={handleMarkAllNotificationsRead}
               showToast={showToast}
+              onNavigateTab={(tab) => setActiveTab(tab)}
             />
           )}
 
           {activeTab === 'profile' && (
-            <MyProfileView user={user} activitySummary={activitySummary} />
+            <MyProfileView
+              user={user}
+              activitySummary={activitySummary}
+              onSaveProfile={handleSaveProfile}
+              showToast={showToast}
+            />
           )}
 
-          {activeTab === 'help' && <HelpSupportView showToast={showToast} />}
+          {activeTab === 'help' && (
+            <HelpSupportView
+              showToast={showToast}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+            />
+          )}
         </div>
       </main>
 

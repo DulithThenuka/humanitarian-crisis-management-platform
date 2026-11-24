@@ -73,8 +73,11 @@ export const AIServiceWorkspace = ({
       let isMounted = true;
       aiGovernanceService.getStatus()
         .then(res => {
-          if (isMounted && res?.data?.data) {
-            setProviderStatus(res.data.data);
+          if (isMounted) {
+            const status = res?.data?.data ?? res?.data ?? res;
+            if (status && (status.isConnected !== undefined || status.provider || status.status)) {
+              setProviderStatus(status);
+            }
           }
         })
         .catch(err => {
@@ -109,12 +112,16 @@ export const AIServiceWorkspace = ({
         category: selectedService
       });
 
-      if (res?.data?.succeeded) {
-        setExecutionResult(res.data.data);
-        const confText = res.data.data.confidencePercent != null && !isNaN(res.data.data.confidencePercent) ? `${res.data.data.confidencePercent}%` : 'N/A';
-        showToast?.(`Live ${res.data.data.serviceName} executed in ${res.data.data.executionTimeMs}ms with ${confText} confidence`, 'success');
+      const isSuccess = res?.succeeded ?? res?.data?.succeeded ?? (res && !res.errors?.length);
+      const resultData = res?.data?.data ?? res?.data ?? res;
+
+      if (isSuccess && resultData && typeof resultData === 'object' && (resultData.serviceName || resultData.serviceId || resultData.outputSummary)) {
+        setExecutionResult(resultData);
+        const confText = resultData.confidencePercent != null && !isNaN(resultData.confidencePercent) ? `${resultData.confidencePercent}%` : 'N/A';
+        const serviceDisplayName = resultData.serviceName || selectedService;
+        showToast?.(`Live ${serviceDisplayName} executed in ${resultData.executionTimeMs || 0}ms with ${confText} confidence`, 'success');
       } else {
-        const errMsg = res?.data?.message || 'Microservice execution failed on the backend.';
+        const errMsg = res?.message || res?.data?.message || 'Microservice execution failed on the backend.';
         setExecutionError(errMsg);
         showToast?.(errMsg, 'error');
       }

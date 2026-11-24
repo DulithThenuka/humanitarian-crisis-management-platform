@@ -37,3 +37,18 @@ public class UpdatePlacementStatusDto
     public string? Notes { get; set; }
 }
 
+public class ShelterIntakeQueueItemDto
+{
+    public Guid Id { get; set; }
+    public string CaseReference { get; set; } = string.Empty;
+    public string CitizenName { get; set; } = string.Empty;
+    public int NumberOfPeople { get; set; } = 1;
+    public string Location { get; set; } = string.Empty;
+    public string ContactPhone { get; set; } = string.Empty;
+    public string Urgency { get; set; } = "High";
+    public string UrgencyType { get; set; } = "warning";
+    public string SpecialNeeds { get; set; } = string.Empty;
+    public DateTime RequestedAt { get; set; }
+    public string Status { get; set; } = "Submitted";
+}
+

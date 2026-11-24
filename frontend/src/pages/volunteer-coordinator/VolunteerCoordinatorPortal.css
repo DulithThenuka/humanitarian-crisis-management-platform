@@ -1,17 +1,17 @@
 /* =========================================================
    VOLUNTEER COORDINATOR PORTAL - HumanAid Design System
-   Sidebar: Deep Pine Green (#14291e), Pale Sage (#dbe4c6)
+   Sidebar: Deep Navy Blue (#0c192e), Ice Blue Accent (#dbeafe)
    Canvas: (#f4f6f2), Crisp Surfaces, Modern Typography
    ========================================================= */
 
 :root {
-  /* Signature HumanAid Deep Pine Green Sidebar Theme */
-  --vc-sidebar-bg: #14291e;
-  --vc-sidebar-hover: #1b3829;
-  --vc-sidebar-active-bg: #dbe4c6;
-  --vc-sidebar-active-text: #14291e;
-  --vc-sidebar-text: #bcc5b9;
-  --vc-sidebar-muted: #829486;
+  /* Signature HumanAid Deep Navy Blue Sidebar Theme */
+  --vc-sidebar-bg: #0c192e;
+  --vc-sidebar-hover: #152c4d;
+  --vc-sidebar-active-bg: #dbeafe;
+  --vc-sidebar-active-text: #0a192f;
+  --vc-sidebar-text: #cbd5e1;
+  --vc-sidebar-muted: #8fa3bf;
 
   /* Canvas & Cards */
   --vc-canvas-bg: #f4f6f2;
@@ -20,18 +20,18 @@
   --vc-border-subtle: #edf2eb;
 
   /* Typography */
-  --vc-text-primary: #12281b;
-  --vc-text-secondary: #4b6152;
-  --vc-text-muted: #6f8576;
-  --vc-text-light: #94a89b;
+  --vc-text-primary: #0f172a;
+  --vc-text-secondary: #334155;
+  --vc-text-muted: #64748b;
+  --vc-text-light: #94a3b8;
 
   /* Brand Accents & Actions */
-  --vc-primary-dark: #14291e;
-  --vc-primary-dark-hover: #1f3e2e;
-  --vc-blue-accent: #234d38;
-  --vc-sage-light: #edf3ea;
-  --vc-sage-border: #dbe7d7;
-  --vc-sage-accent: #d2e5ce;
+  --vc-primary-dark: #0c2340;
+  --vc-primary-dark-hover: #173d66;
+  --vc-blue-accent: #1e40af;
+  --vc-sage-light: #eff6ff;
+  --vc-sage-border: #bfdbfe;
+  --vc-sage-accent: #93c5fd;
 
   /* Status Badges */
   --vc-critical-bg: #fee2e2;
@@ -99,13 +99,13 @@
 .vc-brand-icon-box {
   width: 32px;
   height: 32px;
-  border: 1px solid rgba(219, 228, 198, 0.3);
+  border: 1px solid rgba(147, 197, 253, 0.35);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #dbe4c6;
-  background: rgba(255, 255, 255, 0.06);
+  color: #93c5fd;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .vc-brand-title {
@@ -148,7 +148,7 @@
   height: 34px;
   border-radius: 50%;
   background: #ffffff;
-  color: #14291e;
+  color: #0c192e;
   font-weight: 800;
   font-size: 13px;
   display: flex;
@@ -226,7 +226,7 @@
 
 .vc-toggle-switch input:checked + .vc-toggle-slider:before {
   transform: translateX(16px);
-  background-color: #14291e;
+  background-color: #0c192e;
 }
 
 /* Navigation Menu */
@@ -289,7 +289,7 @@
 }
 
 .vc-nav-btn.active .vc-nav-badge {
-  background: #14291e;
+  background: #0c192e;
   color: #ffffff;
 }
 
@@ -316,7 +316,7 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #dbe4c6;
+  color: #93c5fd;
   margin-bottom: 4px;
 }
 
@@ -579,7 +579,7 @@
 
 /* Action Buttons */
 .vc-btn-primary {
-  background: var(--vc-primary-dark);
+  background: #0c2340;
   color: #ffffff;
   border: none;
   padding: 8px 16px;
@@ -592,16 +592,18 @@
   gap: 6px;
   transition: all 0.15s ease;
   font-family: inherit;
+  box-shadow: 0 1px 3px rgba(12, 35, 64, 0.2);
 }
 
 .vc-btn-primary:hover {
-  background: var(--vc-primary-dark-hover);
+  background: #173d66;
+  box-shadow: 0 3px 8px rgba(12, 35, 64, 0.3);
 }
 
 .vc-btn-outline {
   background: #ffffff;
-  border: 1px solid var(--vc-border);
-  color: var(--vc-text-primary);
+  border: 1px solid #cbd5e1;
+  color: #0c2340;
   padding: 7px 14px;
   border-radius: 7px;
   font-size: 12.5px;
@@ -615,8 +617,9 @@
 }
 
 .vc-btn-outline:hover {
-  background: var(--vc-canvas-bg);
-  border-color: #c5ccbe;
+  background: #f0f7ff;
+  border-color: #93c5fd;
+  color: #1e40af;
 }
 
 /* =========================================================

@@ -8,6 +8,10 @@ export const shelterService = {
     return await apiClient.get('/shelters', { params });
   },
 
+  getShelters: async (params = {}) => {
+    return await apiClient.get('/shelters', { params });
+  },
+
   /**
    * Fetches real-time shelter capacity and district-by-district breakdown telemetry.
    */
@@ -69,6 +73,13 @@ export const shelterService = {
    */
   getPlacements: async (params = {}) => {
     return await apiClient.get('/shelters/placements', { params });
+  },
+
+  /**
+   * Fetches pending assistance requests awaiting shelter allocation (family intake queue).
+   */
+  getIntakeQueue: async () => {
+    return await apiClient.get('/shelters/intake-queue');
   },
 
   /**

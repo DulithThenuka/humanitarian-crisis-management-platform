@@ -73,6 +73,24 @@ public class PartnersController : BaseApiController
     }
 
     /// <summary>
+    /// Updates a partner organisation's profile, contact details, and capacity.
+    /// </summary>
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Coordinator,Admin")]
+    public async Task<ActionResult<Result<PartnerOrganisationDto>>> UpdatePartner(
+        Guid id,
+        [FromBody] UpdatePartnerOrganisationDto dto,
+        CancellationToken cancellationToken)
+    {
+        var userId = CurrentUserId == Guid.Empty ? null : CurrentUserId.ToString();
+        var result = await _partnerService.UpdatePartnerAsync(id, dto, userId, cancellationToken);
+        if (!result.Succeeded)
+            return NotFound(result);
+
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Updates a partner organisation's operational status and MoU status.
     /// </summary>
     [HttpPatch("{id:guid}/status")]
@@ -112,6 +130,23 @@ public class PartnersController : BaseApiController
     {
         var userId = CurrentUserId == Guid.Empty ? (Guid?)null : CurrentUserId;
         var result = await _partnerService.LogCommitmentAsync(dto, userId, cancellationToken);
+        if (!result.Succeeded)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Updates an existing resource commitment's details.
+    /// </summary>
+    [HttpPut("commitments/{commitmentId:guid}")]
+    public async Task<ActionResult<Result<PartnerCommitmentDto>>> UpdateCommitment(
+        Guid commitmentId,
+        [FromBody] UpdatePartnerCommitmentDto dto,
+        CancellationToken cancellationToken)
+    {
+        var userId = CurrentUserId == Guid.Empty ? null : CurrentUserId.ToString();
+        var result = await _partnerService.UpdateCommitmentAsync(commitmentId, dto, userId, cancellationToken);
         if (!result.Succeeded)
             return BadRequest(result);
 

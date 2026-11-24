@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { aiGovernanceService } from '@/services/aiGovernanceService';
+import { HumanAidLogo } from '@/components/common/HumanAidLogo';
 import {
   Shield,
   ShieldCheck,
@@ -142,11 +143,13 @@ export const AIOperationsContainer = ({
         ]);
 
         if (isMounted) {
-          if (statusRes?.data?.data) {
-            setProviderStatus(statusRes.data.data);
+          const status = statusRes?.data?.data ?? statusRes?.data ?? statusRes;
+          if (status && (status.isConnected !== undefined || status.provider || status.status)) {
+            setProviderStatus(status);
           }
-          if (queueRes?.data?.data) {
-            setQueueCount(queueRes.data.data.length);
+          const queue = queueRes?.data?.data ?? queueRes?.data ?? queueRes;
+          if (Array.isArray(queue)) {
+            setQueueCount(queue.length);
           }
         }
       } catch (err) {
@@ -204,14 +207,8 @@ export const AIOperationsContainer = ({
       <aside className="ai-portal-sidebar">
         <div>
           {/* Brand Header */}
-          <div className="ai-sidebar-brand" onClick={() => setActiveSubView('overview')}>
-            <div className="ai-brand-shield-icon">
-              <Shield size={20} />
-            </div>
-            <div>
-              <h2 className="ai-brand-title">HumanAid</h2>
-              <p className="ai-brand-subtitle">Response coordination</p>
-            </div>
+          <div className="ai-sidebar-brand" onClick={() => setActiveSubView('overview')} style={{ cursor: 'pointer', marginBottom: '16px' }}>
+            <HumanAidLogo variant="full" size="md" withContainer={true} />
           </div>
 
           {/* Authorised Reviewer User Card */}

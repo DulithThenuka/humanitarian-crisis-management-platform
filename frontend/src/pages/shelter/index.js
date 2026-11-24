@@ -3,9 +3,13 @@
 // ==========================================
 
 // Main Module Entry
-export { ShelterAdminDashboard } from './ShelterAdminDashboard';
-export { ShelterAdminDashboard as ShelterPortalPage } from './ShelterAdminDashboard';
-export { ShelterAdminDashboard as default } from './ShelterAdminDashboard';
+export {
+  ShelterAdminDashboard,
+  ShelterAdminDashboard as ShelterPortalPage,
+  ShelterAdminDashboard as ShelterManagerPortal,
+  ShelterAdminDashboard as ShelterManagerDashboard,
+  ShelterAdminDashboard as default
+} from './ShelterAdminDashboard';
 
 // Sub-Category Page Modules
 export { ShelterDirectoryPage } from './directory/ShelterDirectoryPage';

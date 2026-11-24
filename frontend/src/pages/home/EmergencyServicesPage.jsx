@@ -21,7 +21,7 @@ import {
   Layers,
   Sparkles
 } from 'lucide-react';
-import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 
 export const EmergencyServicesPage = () => {
   const navigate = useNavigate();
@@ -189,11 +189,7 @@ export const EmergencyServicesPage = () => {
             <div className="h-5 w-px bg-white/15 hidden sm:block"></div>
 
             <Link to="/" className="flex items-center gap-2 text-decoration-none">
-              <img
-                src={reliefcoreLogoWhite}
-                alt="HumanAid"
-                className="h-[26px] w-auto object-contain"
-              />
+              <HumanAidLogo variant="full" size="sm" withContainer={true} />
             </Link>
           </div>
 

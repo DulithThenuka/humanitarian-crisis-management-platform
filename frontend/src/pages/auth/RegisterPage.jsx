@@ -19,7 +19,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 import { authService } from '../../services/authService';
-import reliefcoreIcon from '../../assets/reliefcore-icon.png';
+import { HumanAidLogo, humanaidLogoIcon } from '../../components/common/HumanAidLogo';
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -42,18 +42,12 @@ export const RegisterPage = () => {
   const roleOptions = [
     { id: 0, title: 'Citizen / Displaced', icon: Users },
     { id: 3, title: 'Field Volunteer', icon: HeartHandshake },
-    { id: 1, title: 'Coordinator', icon: Shield },
-    { id: 2, title: 'Logistics Manager', icon: Truck },
   ];
 
   const getRoleDescription = (roleId) => {
     switch (Number(roleId)) {
       case 3:
         return 'Receive SAR alerts, check into field shelters, and accept dispatch assignments.';
-      case 1:
-        return 'Access AI triage, command center overview, and humanitarian resource approval.';
-      case 2:
-        return 'Manage regional inventory depots, dispatch convoys, and track emergency stockpiles.';
       case 0:
       default:
         return 'Access high-ground shelters, request rations & medical aid, and track tickets.';
@@ -62,14 +56,8 @@ export const RegisterPage = () => {
 
   const redirectByRole = (role) => {
     const roleStr = (role || '').toString().toLowerCase();
-    if (roleStr === 'casemanager' || roleStr === '5') {
-      navigate('/case-manager');
-    } else if (roleStr === 'volunteer' || roleStr === '3') {
-      navigate('/volunteers/assignments');
-    } else if (roleStr === 'coordinator' || roleStr === '1' || roleStr === 'admin' || roleStr === '4') {
-      navigate('/coordinator/dashboard');
-    } else if (roleStr === 'logisticsmanager' || roleStr === '2') {
-      navigate('/logistics/inventory');
+    if (roleStr === 'volunteer' || roleStr === '3') {
+      navigate('/volunteer');
     } else {
       navigate('/citizen');
     }
@@ -82,13 +70,21 @@ export const RegisterPage = () => {
       showAlert('Please enter your full name', 'warning');
       return;
     }
-    if (!formData.email.trim()) {
-      showAlert('Please enter a valid email address', 'warning');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim() || !emailRegex.test(formData.email.trim())) {
+      showAlert('Please enter a valid email address (e.g. name@domain.com)', 'warning');
       return;
     }
     if (formData.password.length < 6) {
       showAlert('Password must contain at least 6 characters', 'warning');
       return;
+    }
+    if (formData.phoneNumber && formData.phoneNumber.trim().length > 0) {
+      const phoneDigits = formData.phoneNumber.replace(/[^0-9]/g, '');
+      if (phoneDigits.length < 7) {
+        showAlert('Please enter a valid contact phone number', 'warning');
+        return;
+      }
     }
     if (!agreeTerms) {
       showAlert('Please accept data protection & privacy protocols to register', 'warning');
@@ -153,15 +149,7 @@ export const RegisterPage = () => {
           {/* Header */}
           <header className="flex items-center justify-between w-full">
             <Link to="/" className="flex items-center gap-3 no-underline group" title="Return to Homepage">
-              <img 
-                src={reliefcoreIcon} 
-                alt="HumanAid Crisis Command" 
-                className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform" 
-              />
-              <span className="font-semibold text-xl tracking-tight text-white">HumanAid</span>
-              <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white/60 ml-1">
-                Registration
-              </span>
+              <HumanAidLogo variant="full" size="sm" withContainer={true} />
             </Link>
 
             <Link
@@ -175,11 +163,11 @@ export const RegisterPage = () => {
 
           {/* Hero Center */}
           <main className="flex-1 flex flex-col items-center justify-center text-center py-10 lg:py-14 px-2">
-            <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform">
+            <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
               <img 
-                src={reliefcoreIcon} 
+                src={humanaidLogoIcon} 
                 alt="HumanAid Emblem" 
-                className="w-13 h-13 object-contain" 
+                className="w-16 h-16 object-contain rounded-xl" 
               />
             </div>
 
@@ -275,6 +263,9 @@ export const RegisterPage = () => {
 
           {/* Form Content */}
           <div className="w-full max-w-lg mx-auto my-auto py-4">
+            <div className="mb-4 flex justify-center lg:justify-start">
+              <HumanAidLogo variant="full" size="md" withContainer={true} />
+            </div>
             <div className="mb-5 text-center lg:text-left">
               <h2 className="text-2xl sm:text-3xl font-[500] text-white tracking-[-0.03em]">
                 Create Account
@@ -393,8 +384,6 @@ export const RegisterPage = () => {
                 >
                   <option value={0}>Citizen / Displaced Person</option>
                   <option value={3}>Field Volunteer Responder</option>
-                  <option value={1}>Humanitarian Coordinator</option>
-                  <option value={2}>Logistics & Supply Manager</option>
                 </select>
 
                 {/* Interactive Liquid Glass Role Chips */}

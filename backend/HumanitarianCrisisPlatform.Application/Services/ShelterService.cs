@@ -15,6 +15,7 @@ public class ShelterService : IShelterService
 {
     private readonly IShelterRepository _repository;
     private readonly IResourceRepository _resourceRepository;
+    private readonly IAssistanceRequestRepository? _assistanceRequestRepository;
     private readonly IMappingService _mappingService;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -23,9 +24,20 @@ public class ShelterService : IShelterService
         IResourceRepository resourceRepository,
         IMappingService mappingService,
         IUnitOfWork unitOfWork)
+        : this(repository, resourceRepository, null, mappingService, unitOfWork)
+    {
+    }
+
+    public ShelterService(
+        IShelterRepository repository,
+        IResourceRepository resourceRepository,
+        IAssistanceRequestRepository? assistanceRequestRepository,
+        IMappingService mappingService,
+        IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _resourceRepository = resourceRepository;
+        _assistanceRequestRepository = assistanceRequestRepository;
         _mappingService = mappingService;
         _unitOfWork = unitOfWork;
     }
@@ -163,6 +175,17 @@ public class ShelterService : IShelterService
 
         await _repository.AddAllocationAsync(allocation, cancellationToken);
         await _repository.UpdateAsync(shelter, cancellationToken);
+
+        if (dto.AssistanceRequestId.HasValue && _assistanceRequestRepository != null)
+        {
+            var req = await _assistanceRequestRepository.GetByIdAsync(dto.AssistanceRequestId.Value, cancellationToken);
+            if (req != null)
+            {
+                req.Status = RequestStatus.InProgress;
+                await _assistanceRequestRepository.UpdateAsync(req, cancellationToken);
+            }
+        }
+
         await _unitOfWork.CommitAsync(cancellationToken);
 
         return Result<bool>.Success(true, "Evacuee allocated successfully");
@@ -196,13 +219,13 @@ public class ShelterService : IShelterService
             RegisteredShelters = registeredShelters,
             OperationalShelters = operationalShelters,
             CurrentOccupancy = currentOccupancy,
-            AcrossSites = acrossSites > 0 ? acrossSites : registeredShelters,
+            AcrossSites = acrossSites,
             RemainingCapacity = remainingCapacity,
             NearCapacityCount = nearCapacityCount,
             SupplyShortages = supplyShortages,
             CriticalShortages = criticalShortages,
-            AdmissionsToday = admissionsToday > 0 ? admissionsToday : Math.Min(48, currentOccupancy),
-            TransfersToday = transfersToday > 0 ? transfersToday : 12
+            AdmissionsToday = admissionsToday,
+            TransfersToday = transfersToday
         };
 
         var priorityItems = new List<PriorityAttentionItemDto>();
@@ -271,7 +294,7 @@ public class ShelterService : IShelterService
         var workflowSteps = new List<ShelterWorkflowStepDto>
         {
             new() { Step = 1, Title = "Citizen request recorded", Description = "Only relevant roles receive this handoff", Status = "completed" },
-            new() { Step = 2, Title = "Human/Case review", Description = "Shelter Admin action creates an audit history", Status = "completed" },
+            new() { Step = 2, Title = "Human/Case review", Description = "Shelter Manager action creates a verified audit record", Status = "completed" },
             new() { Step = 3, Title = "Resource / shelter decision", Description = "Only relevant roles receive this handoff", Status = "active" },
             new() { Step = 4, Title = "Volunteer or partner handoff", Description = "Only relevant roles receive this handoff", Status = "pending" },
             new() { Step = 5, Title = "Citizen status notification", Description = "Only relevant roles receive this handoff", Status = "pending" }
@@ -285,18 +308,6 @@ public class ShelterService : IShelterService
             Action = $"Evacuee intake confirmed for {a.PersonName} ({a.NumberOfPersons} persons)",
             ShelterId = a.ShelterId.ToString()
         }).ToList();
-
-        if (recentActivity.Count == 0)
-        {
-            recentActivity.Add(new ShelterActivityLogDto
-            {
-                Id = "ACT-101",
-                Time = DateTime.UtcNow.ToLocalTime().ToString("HH:mm"),
-                Title = "Shelter Roster Live Sync",
-                Action = "Verified records initialized from shared database",
-                ShelterId = null
-            });
-        }
 
         var result = new ShelterDashboardDto
         {
@@ -315,6 +326,13 @@ public class ShelterService : IShelterService
         if (string.IsNullOrWhiteSpace(facilityName))
         {
             return Result<ShelterDto>.Failure("Facility or shelter name is required");
+        }
+
+        var existingShelters = await _repository.GetAllAsync(cancellationToken);
+        if (existingShelters.Any(s => s.Name.Equals(facilityName, StringComparison.OrdinalIgnoreCase) ||
+                                     s.Name.EndsWith($" - {facilityName}", StringComparison.OrdinalIgnoreCase)))
+        {
+            return Result<ShelterDto>.Failure($"A shelter facility with the name '{facilityName}' already exists.");
         }
 
         var area = !string.IsNullOrWhiteSpace(dto.Area) ? dto.Area.Trim() : (!string.IsNullOrWhiteSpace(dto.Address) ? dto.Address.Trim() : "Western Province");
@@ -364,15 +382,27 @@ public class ShelterService : IShelterService
         if (!string.IsNullOrWhiteSpace(dto.Address)) shelter.Address = dto.Address.Trim();
         if (dto.Latitude.HasValue) shelter.Latitude = dto.Latitude.Value;
         if (dto.Longitude.HasValue) shelter.Longitude = dto.Longitude.Value;
-        if (dto.TotalCapacity.HasValue && dto.TotalCapacity.Value > 0) shelter.TotalCapacity = dto.TotalCapacity.Value;
-        if (dto.CurrentOccupancy.HasValue && dto.CurrentOccupancy.Value >= 0) shelter.CurrentOccupancy = dto.CurrentOccupancy.Value;
-        if (dto.Facilities != null) shelter.Facilities = dto.Facilities;
-        if (dto.ContactPhone != null) shelter.ContactPhone = dto.ContactPhone;
-        if (dto.IsActive.HasValue) shelter.IsActive = dto.IsActive.Value;
+        if (dto.TotalCapacity.HasValue)
+        {
+            if (dto.TotalCapacity.Value <= 0)
+            {
+                return Result<ShelterDto>.Failure("Total capacity must be greater than zero");
+            }
+            shelter.TotalCapacity = dto.TotalCapacity.Value;
+        }
+
+        if (dto.CurrentOccupancy.HasValue)
+        {
+            if (dto.CurrentOccupancy.Value < 0)
+            {
+                return Result<ShelterDto>.Failure("Current occupancy cannot be negative");
+            }
+            shelter.CurrentOccupancy = dto.CurrentOccupancy.Value;
+        }
 
         if (shelter.CurrentOccupancy > shelter.TotalCapacity)
         {
-            return Result<ShelterDto>.Failure("Occupancy cannot exceed total capacity");
+            return Result<ShelterDto>.Failure("Current occupancy cannot exceed total capacity");
         }
 
         await _repository.UpdateAsync(shelter, cancellationToken);
@@ -468,6 +498,51 @@ public class ShelterService : IShelterService
         return Result<ShelterActionResultDto>.Failure($"Unsupported action type: {dto.ActionType}");
     }
 
+    public async Task<Result<IReadOnlyList<ShelterIntakeQueueItemDto>>> GetIntakeQueueAsync(CancellationToken cancellationToken = default)
+    {
+        var requests = await _repository.GetPendingIntakeRequestsAsync(cancellationToken);
+        var dtos = requests.Select(r =>
+        {
+            var urgency = r.Urgency.ToString();
+            var urgencyType = r.Urgency == PriorityLevel.Critical ? "critical" : (r.Urgency == PriorityLevel.High ? "warning" : "info");
+
+            int people = r.NumberOfPeople > 0 ? r.NumberOfPeople : 1;
+            if (people == 1 && !string.IsNullOrWhiteSpace(r.Description))
+            {
+                var match = System.Text.RegularExpressions.Regex.Match(r.Description, @"(?:family of|household of|people:?|persons:?|party size:?)\s*(\d+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (match.Success && int.TryParse(match.Groups[1].Value, out var parsedCount) && parsedCount > 0)
+                {
+                    people = parsedCount;
+                }
+            }
+
+            var citizenName = r.Requestor != null && !string.IsNullOrWhiteSpace(r.Requestor.FullName)
+                ? r.Requestor.FullName
+                : "Evacuee / Citizen";
+
+            var location = !string.IsNullOrWhiteSpace(r.Address)
+                ? r.Address
+                : "Western Province";
+
+            return new ShelterIntakeQueueItemDto
+            {
+                Id = r.Id,
+                CaseReference = $"REQ-{r.Id.ToString()[..4].ToUpper()}",
+                CitizenName = citizenName,
+                NumberOfPeople = people,
+                Location = location,
+                ContactPhone = r.ContactPhone,
+                Urgency = urgency,
+                UrgencyType = urgencyType,
+                SpecialNeeds = r.Description,
+                RequestedAt = r.CreatedAt,
+                Status = r.Status.ToString()
+            };
+        }).ToList();
+
+        return Result<IReadOnlyList<ShelterIntakeQueueItemDto>>.Success(dtos);
+    }
+
     public async Task<Result<IReadOnlyList<PlacementAllocationDto>>> GetPlacementsAsync(
         Guid? shelterId = null,
         string? status = null,
@@ -488,6 +563,16 @@ public class ShelterService : IShelterService
 
         var shelter = await _repository.GetByIdAsync(dto.ShelterId, cancellationToken);
         if (shelter == null) return Result<PlacementAllocationDto>.Failure("Target shelter not found");
+
+        if (dto.AssistanceRequestId.HasValue)
+        {
+            var existingAllocations = await _repository.GetAllocationsAsync(cancellationToken: cancellationToken);
+            var alreadyAllocated = existingAllocations.Any(a => a.AssistanceRequestId == dto.AssistanceRequestId.Value && a.CheckOutDate == null);
+            if (alreadyAllocated)
+            {
+                return Result<PlacementAllocationDto>.Failure("This citizen case already has an active shelter placement.");
+            }
+        }
 
         var partySize = dto.NumberOfPersons > 0 ? dto.NumberOfPersons : 1;
         var available = shelter.TotalCapacity - shelter.CurrentOccupancy;
@@ -517,6 +602,17 @@ public class ShelterService : IShelterService
 
         await _repository.AddAllocationAsync(allocation, cancellationToken);
         await _repository.UpdateAsync(shelter, cancellationToken);
+
+        if (dto.AssistanceRequestId.HasValue && _assistanceRequestRepository != null)
+        {
+            var req = await _assistanceRequestRepository.GetByIdAsync(dto.AssistanceRequestId.Value, cancellationToken);
+            if (req != null)
+            {
+                req.Status = RequestStatus.InProgress;
+                await _assistanceRequestRepository.UpdateAsync(req, cancellationToken);
+            }
+        }
+
         await _unitOfWork.CommitAsync(cancellationToken);
 
         allocation.Shelter = shelter;
@@ -541,6 +637,17 @@ public class ShelterService : IShelterService
             {
                 allocation.Shelter.CurrentOccupancy = Math.Max(0, allocation.Shelter.CurrentOccupancy - allocation.NumberOfPersons);
                 await _repository.UpdateAsync(allocation.Shelter, cancellationToken);
+            }
+
+            if (allocation.AssistanceRequestId.HasValue && _assistanceRequestRepository != null)
+            {
+                var req = await _assistanceRequestRepository.GetByIdAsync(allocation.AssistanceRequestId.Value, cancellationToken);
+                if (req != null)
+                {
+                    req.Status = RequestStatus.Resolved;
+                    req.ResolvedAt = DateTime.UtcNow;
+                    await _assistanceRequestRepository.UpdateAsync(req, cancellationToken);
+                }
             }
         }
         else if (dto.TargetShelterId.HasValue && dto.TargetShelterId.Value != allocation.ShelterId)
@@ -663,6 +770,12 @@ public class ShelterService : IShelterService
         if (dto.DispatchStatus == 1 && allocation.DispatchedAt == null)
         {
             allocation.DispatchedAt = DateTime.UtcNow;
+            if (allocation.Resource != null)
+            {
+                var allocQty = Math.Min(allocation.Resource.AvailableQuantity, allocation.Quantity);
+                allocation.Resource.AllocatedQuantity += allocQty;
+                await _resourceRepository.UpdateAsync(allocation.Resource, cancellationToken);
+            }
         }
         else if (dto.DispatchStatus == 2)
         {
@@ -713,15 +826,18 @@ public class ShelterService : IShelterService
             .OrderByDescending(a => a.Rate)
             .ToList();
 
+        var compliantCount = dtos.Count(s => s.IsActive && !string.IsNullOrWhiteSpace(s.Facilities));
+        var pendingInspections = dtos.Count(s => s.IsActive && string.IsNullOrWhiteSpace(s.Facilities));
+
         var report = new ShelterReportsDto
         {
             DailySummary = new ShelterDailySummaryDto
             {
-                TotalAdmissions = admissions > 0 ? admissions : 148,
-                Discharges = discharges > 0 ? discharges : 24,
+                TotalAdmissions = admissions,
+                Discharges = discharges,
                 OccupancyRateAverage = $"{avgOccPct}%",
-                SafetyCompliantShelters = Math.Max(1, dtos.Count(s => s.IsActive) - 1),
-                PendingSafetyInspections = 1
+                SafetyCompliantShelters = compliantCount,
+                PendingSafetyInspections = pendingInspections
             },
             AreaOccupancies = areaOccupancies
         };

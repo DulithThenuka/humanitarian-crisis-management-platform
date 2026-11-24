@@ -15,7 +15,7 @@ import {
   AlertTriangle,
   Compass
 } from 'lucide-react';
-import reliefcoreIcon from '@/assets/reliefcore-icon.png';
+import { HumanAidLogo, humanaidLogoIcon } from '@/components/common/HumanAidLogo';
 import citizenHeroPhoto from '@/assets/citizen-hero-photo.jpg';
 
 export const BloomLandingPage = () => {
@@ -44,15 +44,7 @@ export const BloomLandingPage = () => {
           {/* Nav Header */}
           <header className="flex items-center justify-between w-full">
             <Link to="/" className="flex items-center gap-3 text-decoration-none group">
-              <img 
-                src={reliefcoreIcon} 
-                alt="RELIEFCORE Logo" 
-                className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform" 
-              />
-              <span className="font-semibold text-2xl tracking-tighter text-white uppercase">HumanAid</span>
-              <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white/60 ml-1">
-                Ops
-              </span>
+              <HumanAidLogo variant="full" size="sm" withContainer={true} />
             </Link>
 
             <button 
@@ -67,11 +59,11 @@ export const BloomLandingPage = () => {
 
           {/* Hero Center */}
           <main className="flex-1 flex flex-col items-center justify-center text-center py-12 lg:py-16 px-4">
-            <div className="w-20 h-20 mb-8 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform">
+            <div className="w-20 h-20 mb-8 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
               <img 
-                src={reliefcoreIcon} 
+                src={humanaidLogoIcon} 
                 alt="HumanAid Crisis Command" 
-                className="w-14 h-14 object-contain"
+                className="w-16 h-16 object-contain rounded-xl"
               />
             </div>
 

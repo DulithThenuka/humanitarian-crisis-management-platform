@@ -7,12 +7,14 @@ import {
   AlertCircle,
   FileText,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  RefreshCw,
 } from 'lucide-react';
 
 export const MyAssignmentsView = ({
-  assignments,
-  onActionClick
+  assignments = [],
+  onActionClick,
+  onRefreshData,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -47,6 +49,12 @@ export const MyAssignmentsView = ({
             Only assignments associated with your volunteer account are displayed.
           </p>
         </div>
+        {onRefreshData && (
+          <button className="vol-btn-outline" onClick={onRefreshData} title="Sync with server">
+            <RefreshCw size={14} />
+            <span>Sync Assignments</span>
+          </button>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -129,8 +137,8 @@ export const MyAssignmentsView = ({
             ) : (
               filteredAssignments.map((row) => (
                 <tr key={row.id}>
-                  <td className="vol-task-id-mono">{row.id}</td>
-                  <td style={{ fontWeight: 600 }}>{row.taskTitle}</td>
+                  <td className="vol-task-id-mono" style={{ cursor: 'pointer' }} onClick={() => onActionClick(row)} title="View task details">{row.id}</td>
+                  <td style={{ fontWeight: 600, cursor: 'pointer' }} onClick={() => onActionClick(row)} title="View task details">{row.taskTitle}</td>
                   <td style={{ color: '#657367' }}>{row.assigned}</td>
                   <td style={{ color: '#4a5b4a', fontWeight: 500 }}>{row.deadline}</td>
                   <td>{row.location}</td>

@@ -45,12 +45,14 @@
 /* Base Portal Container */
 .cp-portal-container {
   display: flex;
-  min-height: 100vh;
-  width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  width: 100vw;
   background-color: var(--cp-body-bg);
   color: var(--cp-text-main);
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-x: hidden;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* ==========================================================================
@@ -59,20 +61,24 @@
 .cp-sidebar {
   width: 270px;
   min-width: 270px;
+  max-width: 270px;
   background-color: var(--cp-sidebar-bg);
   border-right: 1px solid var(--cp-sidebar-border);
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
+  position: relative;
   height: 100vh;
+  max-height: 100vh;
+  flex-shrink: 0;
   z-index: 50;
-  overflow-y: auto;
+  overflow: hidden;
   color: var(--cp-sidebar-text);
+  box-sizing: border-box;
 }
 
 .cp-sidebar-header {
   padding: 22px 20px 16px 20px;
+  flex-shrink: 0;
 }
 
 .cp-brand-row {
@@ -161,6 +167,8 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .cp-nav-item {
@@ -211,6 +219,8 @@
 .cp-sidebar-footer {
   padding: 16px 14px;
   border-top: 1px solid var(--cp-sidebar-border);
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 .cp-privacy-box {
@@ -266,10 +276,13 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   background-color: var(--cp-body-bg);
+  box-sizing: border-box;
 }
 
 /* Header */
@@ -285,6 +298,7 @@
   position: sticky;
   top: 0;
   z-index: 40;
+  flex-shrink: 0;
 }
 
 .cp-header-title {
@@ -634,21 +648,321 @@
   border-bottom: none;
 }
 
-.cp-request-row:hover {
-  background-color: #f7f9f5;
+/* ==========================================================================
+   ACTIVE REQUEST PROGRESS CARD & STEPPER TIMELINE
+   ========================================================================== */
+.cp-active-progress-card {
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  background-color: #ffffff;
+  border: 1px solid var(--cp-border);
+  border-radius: 12px;
+  box-shadow: var(--cp-shadow-sm);
 }
 
-.cp-req-left {
+.cp-progress-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.cp-progress-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cp-progress-meta-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cp-progress-pretitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #657367;
+  text-transform: uppercase;
+}
+
+.cp-progress-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--cp-text-title);
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.cp-status-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cp-status-pill.cp-status-completed {
+  background-color: #ecfdf5;
+  color: #047857;
+}
+
+.cp-status-pill.cp-status-in-progress {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.cp-status-pill.cp-status-under-review {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.cp-status-pill.cp-status-none {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Metadata Strip in Active Card */
+.cp-progress-detail-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 10px 16px;
+  background-color: #f7f9f5;
+  border: 1px solid #edf1eb;
+  border-radius: 8px;
+  margin-bottom: 22px;
+}
+
+.cp-detail-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cp-detail-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #738075;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cp-detail-val {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #162e20;
+}
+
+.cp-urgency-val {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.cp-urgency-val.critical,
+.cp-urgency-val.urgent,
+.cp-urgency-val.high {
+  color: #b91c1c;
+}
+
+.cp-urgency-val.medium {
+  color: #b45309;
+}
+
+.cp-urgency-val.low,
+.cp-urgency-val.normal {
+  color: #047857;
+}
+
+/* Stepper Timeline */
+.cp-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin: 12px 0 22px 0;
+  padding: 0 12px;
+}
+
+.cp-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  min-width: 120px;
+}
+
+.cp-step-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  background-color: #f0f4ee;
+  border: 2px solid #d4ded3;
+  color: #738075;
+  transition: all 0.25s ease;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.cp-step.completed .cp-step-circle {
+  background-color: #1e3d2c;
+  border-color: #1e3d2c;
+  color: #ffffff;
+}
+
+.cp-step.current .cp-step-circle {
+  background-color: #1e3d2c;
+  border-color: #1e3d2c;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(30, 61, 44, 0.18);
+}
+
+.cp-step-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.cp-step-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #162e20;
+  white-space: nowrap;
+}
+
+.cp-step.completed .cp-step-label {
+  color: #1e3d2c;
+}
+
+.cp-step:not(.completed):not(.current) .cp-step-label {
+  color: #738075;
+  font-weight: 600;
+}
+
+.cp-step-time {
+  font-size: 11px;
+  color: #738075;
+  white-space: nowrap;
+}
+
+.cp-step.current .cp-step-time {
+  color: #1e3d2c;
+  font-weight: 700;
+}
+
+.cp-step-line {
+  flex: 1;
+  height: 3px;
+  background-color: #e2e8dd;
+  margin: 0 -4px 34px -4px;
+  position: relative;
+  z-index: 1;
+  transition: background-color 0.25s ease;
+}
+
+.cp-step-line.active {
+  background-color: #1e3d2c;
+}
+
+/* Progress Alert Notification */
+.cp-progress-alert {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 10px 14px;
+  background-color: #edf4ec;
+  border: 1px solid #d4ded3;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #243328;
+  line-height: 1.45;
 }
 
-.cp-req-icon-box {
-  width: 32px;
-  height: 32px;
+/* ==========================================================================
+   SUBMISSION HISTORY & NEARBY SHELTERS (BALANCED 2-COLUMN)
+   ========================================================================== */
+.cp-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.cp-card-pretitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #657367;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  display: block;
+}
+
+.cp-link-btn {
+  background: none;
+  border: none;
+  color: #1e3d2c;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cp-link-btn:hover {
+  text-decoration: underline;
+}
+
+.cp-requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cp-request-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background-color: #fcfdfb;
+  border: 1px solid #edf1eb;
   border-radius: 8px;
-  background-color: #f0f4ee;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cp-request-row:hover {
+  background-color: #f2f6f0;
+  border-color: #d4ded3;
+}
+
+.cp-request-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cp-request-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: #edf4ec;
   color: #1e3d2c;
   display: flex;
   align-items: center;
@@ -656,86 +970,189 @@
   flex-shrink: 0;
 }
 
-/* Stepper inside Request Progress */
-.cp-stepper-list {
+.cp-request-info {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin: 18px 0;
-  position: relative;
+  min-width: 0;
 }
 
-.cp-step-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  position: relative;
-}
-
-.cp-step-bullet {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
+.cp-request-title {
+  font-size: 13px;
   font-weight: 700;
+  color: #162e20;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cp-request-meta {
+  font-size: 11.5px;
+  color: #657367;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cp-request-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
   flex-shrink: 0;
 }
 
-.cp-step-bullet.completed {
-  background-color: #1e3d2c;
-  color: #ffffff;
+.cp-request-status-badge {
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
 }
 
-.cp-step-bullet.current {
-  background-color: #1e3d2c;
-  color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(30, 61, 44, 0.15);
-}
-
-.cp-step-bullet.upcoming {
-  background-color: #edf1eb;
+.cp-request-updated {
+  font-size: 10.5px;
   color: #8c9b8e;
 }
 
-.cp-step-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #162e20;
-}
-
-.cp-step-sub {
-  font-size: 11px;
-  color: #738075;
-  margin-left: auto;
-}
-
-/* Stepper progress connector line */
-.cp-step-item::after {
-  content: '';
-  position: absolute;
-  left: 10px;
-  top: 22px;
-  height: 16px;
-  width: 2px;
-  background-color: #d4ded3;
-}
-
-.cp-step-item:last-child::after {
-  display: none;
-}
-
-/* Next steps box */
-.cp-next-box {
-  background-color: #edf4ec;
-  border-radius: 8px;
-  padding: 10px 12px;
+/* Nearby Shelters Mini-Cards */
+.cp-shelter-mini-card {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 12px;
+  border-radius: 8px;
+  background-color: #fcfdfb;
+  border: 1px solid #edf1eb;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cp-shelter-mini-card:hover {
+  background-color: #f2f6f0;
+  border-color: #d4ded3;
+}
+
+.cp-shelter-mini-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cp-shelter-mini-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background-color: #edf4ec;
+  color: #1e3d2c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cp-shelter-mini-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #162e20;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cp-shelter-mini-meta {
+  font-size: 11px;
+  color: #657367;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   LEAFLET SHELTER MAP COMPONENT STYLES
+   ========================================================================== */
+.cp-shelter-map-card {
+  position: relative;
+  background-color: #ffffff;
+  border: 1px solid var(--cp-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--cp-shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-map-overlay-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #d4ded3;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #162e20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
+}
+
+.cp-map-legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #d4ded3;
+  font-size: 11px;
+  color: #405044;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
+}
+
+.cp-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.cp-legend-dot.green {
+  background-color: #1e3d2c;
+}
+
+.cp-legend-dot.red {
+  background-color: #dc2626;
+}
+
+.cp-leaflet-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(22, 46, 32, 0.15) !important;
+  border: 1px solid #d4ded3 !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-container {
+  font-family: inherit !important;
 }
 
 /* Category Grid 8 Cards */
@@ -872,10 +1289,60 @@
 @media (max-width: 768px) {
   .cp-portal-container {
     flex-direction: column;
+    height: auto;
+    max-height: none;
+    overflow-y: auto;
   }
   .cp-sidebar {
     width: 100%;
+    max-width: 100%;
     height: auto;
+    max-height: none;
     position: relative;
+    overflow: visible;
+  }
+  .cp-nav-menu {
+    overflow-y: visible;
+  }
+  .cp-main-content {
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+  }
+  .cp-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  .cp-stepper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding-left: 10px;
+  }
+  .cp-step {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+    min-width: 0;
+  }
+  .cp-step-circle {
+    margin-bottom: 0;
+  }
+  .cp-step-content {
+    align-items: flex-start;
+  }
+  .cp-step-line {
+    display: none;
+  }
+  .cp-progress-detail-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .cp-workspace {
+    padding: 16px 16px 32px 16px;
+  }
+  .cp-header {
+    padding: 0 16px;
   }
 }

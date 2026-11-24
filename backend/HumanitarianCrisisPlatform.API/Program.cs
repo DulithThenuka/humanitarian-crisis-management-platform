@@ -38,6 +38,7 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
+    c.CustomSchemaIds(type => type.FullName ?? type.Name);
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "RELIEFCORE Humanitarian Operations API",
@@ -73,6 +74,7 @@ builder.Services.AddSwaggerGen(c =>
 // Clean Architecture registrations
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddSingleton<HumanitarianCrisisPlatform.API.Services.RealtimeEventBus>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -94,6 +96,7 @@ using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await DatabaseSeeder.SeedAsync(context);
+        await PartnerSeeder.SeedAsync(context);
     }
     catch (Exception ex)
     {
@@ -118,6 +121,7 @@ app.UseMiddleware<RequestRateLimitingMiddleware>();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<RealtimeBroadcastMiddleware>();
 
 app.MapControllers();
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 
 // API Services
 import coordinatorService from '../../services/coordinatorService';
@@ -183,21 +184,38 @@ export const EmergencyCoordinatorPortal = ({
     } catch (err) {
       console.warn('Coordinator overview API connection error, displaying offline state:', err.message || err);
       setIsLive(false);
-      const errMsg = err.message || (typeof err === 'string' ? err : 'Backend unreachable');
+
+      const status = err?.status || err?.response?.status || err?.statusCode;
+      const isForbidden = status === 403 || String(err?.message || '').includes('403') || String(err || '').includes('403');
+      const isUnauthorized = status === 401 || String(err?.message || '').includes('401') || String(err || '').includes('401');
+
+      let errMsg;
+      let trendLabel;
+      if (isForbidden) {
+        errMsg = 'Access Restricted (HTTP 403): Current account does not have Emergency Coordinator permissions.';
+        trendLabel = 'Access restricted';
+      } else if (isUnauthorized) {
+        errMsg = 'Session Expired (HTTP 401): Please log in again with an authorized Coordinator account.';
+        trendLabel = 'Auth required';
+      } else {
+        errMsg = err.message || (typeof err === 'string' ? err : 'Backend unreachable');
+        trendLabel = 'Backend offline';
+      }
+
       setApiError(errMsg);
       setMetrics({
         incomingRequests: '—',
-        incomingTrend: 'Backend offline',
+        incomingTrend: trendLabel,
         pendingReviews: '—',
-        pendingTrend: 'Backend offline',
+        pendingTrend: trendLabel,
         criticalPriority: '—',
-        criticalTrend: 'Backend offline',
+        criticalTrend: trendLabel,
         moreInfoRequired: '—',
-        moreInfoTrend: 'Backend offline',
+        moreInfoTrend: trendLabel,
         activeEmergencies: '—',
-        emergenciesTrend: 'Backend offline',
+        emergenciesTrend: trendLabel,
         volunteersAssigned: '—',
-        volunteersTrend: 'Backend offline'
+        volunteersTrend: trendLabel
       });
     }
 
@@ -271,6 +289,11 @@ export const EmergencyCoordinatorPortal = ({
   useEffect(() => {
     loadPortalData();
   }, [loadPortalData]);
+
+  useRealtimeRefresh(
+    ['assistancerequests', 'crises', 'resources', 'shelters', 'alerts', 'aireview', 'coordinator'],
+    loadPortalData
+  );
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });

@@ -26,7 +26,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(50)
             .IsRequired(false);
 
-        // Explicit configuration for AssignedDistrict
         builder.Property(x => x.AssignedDistrict)
             .HasMaxLength(100)
             .IsRequired(false);

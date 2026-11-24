@@ -12,10 +12,12 @@ namespace HumanitarianCrisisPlatform.API.Controllers;
 public class AdminController : BaseApiController
 {
     private readonly IAdminService _adminService;
+    private readonly IAdminNotificationService _notificationService;
 
-    public AdminController(IAdminService adminService)
+    public AdminController(IAdminService adminService, IAdminNotificationService notificationService)
     {
         _adminService = adminService;
+        _notificationService = notificationService;
     }
 
     private string CurrentUserName =>
@@ -502,5 +504,86 @@ public class AdminController : BaseApiController
     {
         var result = await _adminService.ReseedDemoDataAsync(cancellationToken);
         return Ok(result);
+    }
+
+    // =========================================================================
+    // 11. Persistent Admin Registration Notifications
+    // =========================================================================
+    /// <summary>
+    /// Retrieves persistent system notifications including new Citizen and Volunteer registrations.
+    /// Restricted to Admin and Coordinator roles.
+    /// </summary>
+    [HttpGet("notifications")]
+    [Authorize(Roles = "Admin,Coordinator")]
+    public async Task<ActionResult<Result<IReadOnlyList<AdminNotificationDto>>>> GetNotifications(CancellationToken cancellationToken)
+    {
+        var notifications = await _notificationService.GetNotificationsAsync(cancellationToken);
+        return Ok(Result<IReadOnlyList<AdminNotificationDto>>.Success(notifications));
+    }
+
+    /// <summary>
+    /// Gets the count of unread administrative notifications.
+    /// </summary>
+    [HttpGet("notifications/unread-count")]
+    [Authorize(Roles = "Admin,Coordinator")]
+    public async Task<ActionResult<Result<int>>> GetUnreadCount(CancellationToken cancellationToken)
+    {
+        var count = await _notificationService.GetUnreadCountAsync(cancellationToken);
+        return Ok(Result<int>.Success(count));
+    }
+
+    /// <summary>
+    /// Marks an individual notification as read.
+    /// </summary>
+    [HttpPost("notifications/{id:guid}/mark-read")]
+    [Authorize(Roles = "Admin,Coordinator")]
+    public async Task<ActionResult<Result<bool>>> MarkNotificationRead(Guid id, CancellationToken cancellationToken)
+    {
+        var success = await _notificationService.MarkAsReadAsync(id, cancellationToken);
+        return Ok(Result<bool>.Success(success, success ? "Notification marked as read" : "Notification not found"));
+    }
+
+    /// <summary>
+    /// Marks all administrative notifications as read.
+    /// </summary>
+    [HttpPost("notifications/mark-all-read")]
+    [Authorize(Roles = "Admin,Coordinator")]
+    public async Task<ActionResult<Result<bool>>> MarkAllNotificationsRead(CancellationToken cancellationToken)
+    {
+        var success = await _notificationService.MarkAllAsReadAsync(cancellationToken);
+        return Ok(Result<bool>.Success(success, "All notifications marked as read"));
+    }
+
+    /// <summary>
+    /// Retrieves verified registration details for a citizen or volunteer from the database.
+    /// </summary>
+    [HttpGet("registration-details/{userId:guid}")]
+    [Authorize(Roles = "Admin,Coordinator")]
+    public async Task<ActionResult<Result<AdminRegistrationDetailsDto>>> GetRegistrationDetails(Guid userId, CancellationToken cancellationToken)
+    {
+        var details = await _notificationService.GetRegistrationDetailsAsync(userId, cancellationToken);
+        if (details == null)
+        {
+            return NotFound(Result<AdminRegistrationDetailsDto>.Failure("User registration details could not be found."));
+        }
+        return Ok(Result<AdminRegistrationDetailsDto>.Success(details));
+    }
+
+    /// <summary>
+    /// Verifies and activates a registered field volunteer.
+    /// </summary>
+    [HttpPost("volunteers/{userId:guid}/verify")]
+    [Authorize(Roles = "Admin,Coordinator")]
+    public async Task<ActionResult<Result<bool>>> VerifyVolunteerRegistration(
+        Guid userId,
+        [FromBody] VerifyVolunteerRequestDto? dto,
+        CancellationToken cancellationToken)
+    {
+        var success = await _notificationService.VerifyVolunteerAsync(userId, CurrentUserName, dto?.Notes, cancellationToken);
+        if (!success)
+        {
+            return BadRequest(Result<bool>.Failure("Failed to verify volunteer or volunteer profile not found."));
+        }
+        return Ok(Result<bool>.Success(true, "Field volunteer verified and credentials activated."));
     }
 }

@@ -8,7 +8,7 @@ public interface IAssistanceRequestService
 {
     Task<Result<AssistanceRequestResponseDto>> CreateRequestAsync(CreateAssistanceRequestDto dto, Guid requestorId, CancellationToken cancellationToken = default);
     Task<Result<AssistanceRequestResponseDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<Result<IReadOnlyList<AssistanceRequestResponseDto>>> GetAllAsync(RequestStatus? status = null, PriorityLevel? urgency = null, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<AssistanceRequestResponseDto>>> GetAllAsync(RequestStatus? status = null, PriorityLevel? urgency = null, Guid? requestorId = null, CancellationToken cancellationToken = default);
     Task<Result<AssistanceRequestResponseDto>> UpdateStatusAsync(Guid id, UpdateRequestStatusDto dto, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<AssistanceRequestResponseDto>>> GetByRequestorAsync(Guid requestorId, CancellationToken cancellationToken = default);
 }

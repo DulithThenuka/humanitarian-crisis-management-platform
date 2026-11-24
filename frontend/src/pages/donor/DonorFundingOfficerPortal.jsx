@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { donorService } from '../../services/donorService';
@@ -80,56 +81,50 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
   };
 
   // Load live data from Donor Backend API
-  useEffect(() => {
-    let isMounted = true;
+  const fetchDonorBackendData = useCallback(async () => {
+    try {
+      const [dashRes, recordsRes, campRes, allocRes, flagsRes] = await Promise.allSettled([
+        donorService.getDashboard(),
+        donorService.getDonorRecords(),
+        donorService.getCampaigns(),
+        donorService.getAllocations(),
+        donorService.getSuspiciousFlags()
+      ]);
 
-    async function fetchDonorBackendData() {
-      try {
-        const [dashRes, recordsRes, campRes, allocRes, flagsRes] = await Promise.allSettled([
-          donorService.getDashboard(),
-          donorService.getDonorRecords(),
-          donorService.getCampaigns(),
-          donorService.getAllocations(),
-          donorService.getSuspiciousFlags()
-        ]);
-
-        if (!isMounted) return;
-
-        if (dashRes.status === 'fulfilled' && dashRes.value?.succeeded && dashRes.value.data) {
-          const d = dashRes.value.data;
-          if (d.metrics) setMetrics(d.metrics);
-          if (d.priorityAttentionItems?.length) setPriorityItems(d.priorityAttentionItems);
-          if (d.connectedWorkflowSteps?.length) setWorkflowSteps(d.connectedWorkflowSteps);
-          if (d.recentActivity?.length) setRecentActivity(d.recentActivity);
-        }
-
-        if (recordsRes.status === 'fulfilled' && recordsRes.value?.succeeded && recordsRes.value.data?.length) {
-          setRecords(recordsRes.value.data);
-          setSelectedRecordId(recordsRes.value.data[0].id);
-        }
-
-        if (campRes.status === 'fulfilled' && campRes.value?.succeeded && campRes.value.data?.length) {
-          setCampaigns(campRes.value.data);
-        }
-
-        if (allocRes.status === 'fulfilled' && allocRes.value?.succeeded && allocRes.value.data?.length) {
-          setAllocations(allocRes.value.data);
-        }
-
-        if (flagsRes.status === 'fulfilled' && flagsRes.value?.succeeded && flagsRes.value.data?.length) {
-          setFlags(flagsRes.value.data);
-        }
-      } catch (err) {
-        console.warn('Donor backend fetch note: Running in resilient demo mode', err);
+      if (dashRes.status === 'fulfilled' && dashRes.value?.succeeded && dashRes.value.data) {
+        const d = dashRes.value.data;
+        if (d.metrics) setMetrics(d.metrics);
+        if (d.priorityAttentionItems?.length) setPriorityItems(d.priorityAttentionItems);
+        if (d.connectedWorkflowSteps?.length) setWorkflowSteps(d.connectedWorkflowSteps);
+        if (d.recentActivity?.length) setRecentActivity(d.recentActivity);
       }
+
+      if (recordsRes.status === 'fulfilled' && recordsRes.value?.succeeded && recordsRes.value.data?.length) {
+        setRecords(recordsRes.value.data);
+        setSelectedRecordId((prev) => prev || recordsRes.value.data[0].id);
+      }
+
+      if (campRes.status === 'fulfilled' && campRes.value?.succeeded && campRes.value.data?.length) {
+        setCampaigns(campRes.value.data);
+      }
+
+      if (allocRes.status === 'fulfilled' && allocRes.value?.succeeded && allocRes.value.data?.length) {
+        setAllocations(allocRes.value.data);
+      }
+
+      if (flagsRes.status === 'fulfilled' && flagsRes.value?.succeeded && flagsRes.value.data?.length) {
+        setFlags(flagsRes.value.data);
+      }
+    } catch (err) {
+      console.warn('Donor backend fetch note: Running in resilient demo mode', err);
     }
-
-    fetchDonorBackendData();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    fetchDonorBackendData();
+  }, [fetchDonorBackendData]);
+
+  useRealtimeRefresh(['donations'], fetchDonorBackendData);
 
   // Sign out handler
   const handleSignOut = () => {

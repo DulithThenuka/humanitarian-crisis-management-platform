@@ -14,8 +14,16 @@ public class VolunteerRepository : Repository<Volunteer>, IVolunteerRepository
         return await _context.Volunteers
             .Include(v => v.User)
             .Include(v => v.Assignments)
-            .AsNoTracking()
+            .OrderByDescending(v => v.CreatedAt)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Volunteer?> GetByIdWithUserAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Volunteers
+            .Include(v => v.User)
+            .Include(v => v.Assignments)
+            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
     }
 
     public async Task<IReadOnlyList<VolunteerAssignment>> GetAllAssignmentsWithDetailsAsync(CancellationToken cancellationToken = default)
@@ -25,13 +33,25 @@ public class VolunteerRepository : Repository<Volunteer>, IVolunteerRepository
             .ThenInclude(v => v!.User)
             .Include(a => a.AssistanceRequest)
             .OrderByDescending(a => a.CreatedAt)
-            .AsNoTracking()
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<VolunteerAssignment?> GetAssignmentByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.VolunteerAssignments
+            .Include(a => a.Volunteer)
+            .ThenInclude(v => v!.User)
+            .Include(a => a.AssistanceRequest)
+            .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
     }
 
     public async Task AddAssignmentAsync(VolunteerAssignment assignment, CancellationToken cancellationToken = default)
     {
         await _context.VolunteerAssignments.AddAsync(assignment, cancellationToken);
     }
-}
 
+    public async Task AddUserAsync(User user, CancellationToken cancellationToken = default)
+    {
+        await _context.Users.AddAsync(user, cancellationToken);
+    }
+}

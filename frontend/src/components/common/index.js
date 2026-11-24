@@ -4,4 +4,5 @@ export { Input } from './Input';
 export { LoadingSpinner } from './LoadingSpinner';
 export { Modal } from './Modal';
 export { PlatformDirectoryModal, PLATFORM_PAGES } from './PlatformDirectoryModal';
+export { HumanAidLogo, humanaidLogoFull, humanaidLogoIcon } from './HumanAidLogo';
 

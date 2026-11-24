@@ -1,17 +1,17 @@
 /* =========================================================
    VOLUNTEER PORTAL - HumanAid Design System
-   Sidebar: Deep Pine Green (#14291e), Pale Sage (#dbe4c6)
+   Sidebar: Deep Navy Blue (#0c192e), Ice Blue Accent (#dbeafe)
    Canvas (#f4f6f2), Crisp Surfaces, Modern Typography
    ========================================================= */
 
 :root {
-  /* Brand Deep Pine Green Theme for Sidebar */
-  --vol-sidebar-bg: #14291e;
-  --vol-sidebar-hover: #1b3829;
-  --vol-sidebar-active-bg: #dbe4c6;
-  --vol-sidebar-active-text: #14291e;
-  --vol-sidebar-text: #bcc5b9;
-  --vol-sidebar-muted: #829486;
+  /* Brand Dark Navy Blue Theme for Sidebar */
+  --vol-sidebar-bg: #0c192e;
+  --vol-sidebar-hover: #152c4d;
+  --vol-sidebar-active-bg: #dbeafe;
+  --vol-sidebar-active-text: #0a192f;
+  --vol-sidebar-text: #cbd5e1;
+  --vol-sidebar-muted: #8fa3bf;
 
   /* Canvas & Cards */
   --vol-canvas-bg: #f4f6f2;
@@ -20,17 +20,17 @@
   --vol-border-subtle: #edf2eb;
 
   /* Typography */
-  --vol-text-primary: #12281b;
-  --vol-text-secondary: #4b6152;
-  --vol-text-muted: #6f8576;
-  --vol-text-light: #94a89b;
+  --vol-text-primary: #0f172a;
+  --vol-text-secondary: #334155;
+  --vol-text-muted: #64748b;
+  --vol-text-light: #94a3b8;
 
-  /* Accent & Action Colors */
-  --vol-primary-green: #14291e;
-  --vol-primary-green-hover: #1f3e2e;
-  --vol-sage-light: #edf3ea;
-  --vol-sage-border: #dbe7d7;
-  --vol-sage-accent: #d2e5ce;
+  /* Accent & Action Colors (Dark Blue) */
+  --vol-primary-green: #0c2340;
+  --vol-primary-green-hover: #173d66;
+  --vol-sage-light: #eff6ff;
+  --vol-sage-border: #bfdbfe;
+  --vol-sage-accent: #93c5fd;
 
   /* Status Colors */
   --vol-success-bg: #dcfce7;
@@ -73,8 +73,8 @@
    1. Left Sidebar - HumanAid Deep Pine Theme
    ========================================================= */
 .vol-sidebar {
-  width: 260px;
-  min-width: 260px;
+  width: 290px;
+  min-width: 290px;
   background-color: var(--vol-sidebar-bg);
   background-image: none;
   color: #ffffff;
@@ -103,13 +103,13 @@
 .vol-brand-icon-box {
   width: 32px;
   height: 32px;
-  border: 1px solid rgba(219, 228, 198, 0.3);
+  border: 1px solid rgba(147, 197, 253, 0.35);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #dbe4c6;
-  background: rgba(255, 255, 255, 0.06);
+  color: #93c5fd;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .vol-brand-title {
@@ -129,15 +129,15 @@
 
 /* User Card with Duty Switcher */
 .vol-user-card {
-  margin: 14px 0;
-  padding: 10px 12px;
+  margin: 20px 0 24px 0;
+  padding: 12px 14px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 16px;
 }
 
 .vol-user-card-info {
@@ -145,14 +145,15 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
+  flex: 1;
 }
 
 .vol-user-avatar {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #ffffff;
-  color: #14291e;
+  color: #0c192e;
   font-weight: 800;
   font-size: 13px;
   display: flex;
@@ -164,17 +165,21 @@
 .vol-user-role-label {
   font-size: 9.5px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--vol-sidebar-muted);
+  margin-bottom: 3px;
 }
 
 .vol-user-role-name {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 2px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 .vol-user-person-name {
@@ -183,15 +188,17 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.25;
 }
 
 /* Toggle Switch */
 .vol-toggle-switch {
   position: relative;
   display: inline-block;
-  width: 38px;
-  height: 22px;
+  width: 36px;
+  height: 20px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .vol-toggle-switch input {
@@ -209,14 +216,14 @@
   bottom: 0;
   background-color: rgba(255, 255, 255, 0.2);
   transition: 0.2s;
-  border-radius: 22px;
+  border-radius: 20px;
 }
 
 .vol-toggle-slider:before {
   position: absolute;
   content: "";
-  height: 16px;
-  width: 16px;
+  height: 14px;
+  width: 14px;
   left: 3px;
   bottom: 3px;
   background-color: white;
@@ -224,23 +231,32 @@
   border-radius: 50%;
 }
 
-.vol-toggle-switch input:checked + .vol-toggle-slider {
+.vol-toggle-switch input:checked+.vol-toggle-slider {
   background-color: #ffffff;
 }
 
-.vol-toggle-switch input:checked + .vol-toggle-slider:before {
+.vol-toggle-switch input:checked+.vol-toggle-slider:before {
   transform: translateX(16px);
-  background-color: #14291e;
+  background-color: #0c192e;
+}
+
+.vol-toggle-switch input:checked+.vol-toggle-slider {
+  background-color: #ffffff;
+}
+
+.vol-toggle-switch input:checked+.vol-toggle-slider:before {
+  transform: translateX(16px);
+  background-color: #0c192e;
 }
 
 /* Navigation Menu */
 .vol-nav-list {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 6px 0 16px 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .vol-nav-btn {
@@ -248,10 +264,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
+  padding: 10px 14px;
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
   color: var(--vol-sidebar-text);
   font-size: 13px;
   font-weight: 500;
@@ -275,7 +291,7 @@
 .vol-nav-btn-content {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .vol-nav-badge {
@@ -293,7 +309,7 @@
 }
 
 .vol-nav-btn.active .vol-nav-badge {
-  background: #14291e;
+  background: #0c192e;
   color: #ffffff;
 }
 
@@ -320,7 +336,7 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #dbe4c6;
+  color: #93c5fd;
   margin-bottom: 4px;
 }
 
@@ -643,8 +659,8 @@
 
 .vol-ribbon-btn {
   background: transparent;
-  border: 1px solid #a3d9a5;
-  color: #15803d;
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 700;
   padding: 4px 12px;
@@ -655,7 +671,7 @@
 }
 
 .vol-ribbon-btn:hover {
-  background: #dcfce7;
+  background: #eff6ff;
 }
 
 /* =========================================================
@@ -771,12 +787,13 @@
 }
 
 .vol-date-box {
-  background: #183526;
+  background: #0c2340;
   color: #ffffff;
   border-radius: 8px;
   padding: 8px 14px;
   text-align: center;
   min-width: 58px;
+  box-shadow: 0 1px 3px rgba(12, 35, 64, 0.2);
 }
 
 .vol-date-box-num {
@@ -863,7 +880,7 @@
 
 /* Standard Buttons */
 .vol-btn-primary {
-  background: var(--vol-primary-green);
+  background: #0c2340;
   color: #ffffff;
   border: none;
   padding: 8px 16px;
@@ -876,16 +893,18 @@
   gap: 6px;
   transition: all 0.15s ease;
   font-family: inherit;
+  box-shadow: 0 1px 3px rgba(12, 35, 64, 0.2);
 }
 
 .vol-btn-primary:hover {
-  background: var(--vol-primary-green-hover);
+  background: #173d66;
+  box-shadow: 0 3px 8px rgba(12, 35, 64, 0.3);
 }
 
 .vol-btn-outline {
   background: #ffffff;
-  border: 1px solid var(--vol-border);
-  color: var(--vol-text-primary);
+  border: 1px solid #cbd5e1;
+  color: #0c2340;
   padding: 7px 14px;
   border-radius: 7px;
   font-size: 12.5px;
@@ -899,8 +918,9 @@
 }
 
 .vol-btn-outline:hover {
-  background: var(--vol-canvas-bg);
-  border-color: #c5ccbe;
+  background: #f0f7ff;
+  border-color: #93c5fd;
+  color: #1e40af;
 }
 
 /* =========================================================
@@ -1598,6 +1618,12 @@
   margin-bottom: 16px;
 }
 
+.vol-checkbox-grid input[type="checkbox"],
+.vol-avail-days-list input[type="checkbox"],
+.vol-checkbox-label input[type="checkbox"] {
+  accent-color: #0c2340;
+}
+
 .vol-checkbox-label {
   display: flex;
   align-items: center;
@@ -1695,7 +1721,7 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #183526;
+  background: #0c192e;
   color: #ffffff;
   padding: 12px 18px;
   border-radius: 8px;
@@ -1714,6 +1740,7 @@
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -1727,12 +1754,15 @@
   .vol-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .vol-two-col-grid {
     grid-template-columns: 1fr;
   }
+
   .vol-opportunities-grid {
     grid-template-columns: 1fr;
   }
+
   .vol-schedule-grid-layout {
     grid-template-columns: 1fr;
   }
@@ -1742,18 +1772,22 @@
   .vol-portal-container {
     flex-direction: column;
   }
+
   .vol-sidebar {
     width: 100%;
     height: auto;
     position: relative;
   }
+
   .vol-stats-grid {
     grid-template-columns: 1fr;
   }
+
   .vol-feature-content-row {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .vol-feature-right {
     align-items: flex-start;
   }
