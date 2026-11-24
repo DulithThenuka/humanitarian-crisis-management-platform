@@ -664,7 +664,7 @@ public class VolunteerService : IVolunteerService
         };
 
         // Update volunteer availability
-        volunteer.IsAvailable = true;
+        volunteer.IsAvailable = false;
         volunteer.Availability = dto.ShiftTime;
         volunteer.UpdatedAt = DateTime.UtcNow;
 

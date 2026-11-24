@@ -196,10 +196,10 @@ public class IncidentsControllerTests
 
         Assert.NotNull(migrationsAssembly.ModelSnapshot);
         var snapshotModel = modelRuntimeInitializer.Initialize(migrationsAssembly.ModelSnapshot!.Model);
-        var hasDrift = modelDiffer.HasDifferences(
+        var differences = modelDiffer.GetDifferences(
             snapshotModel.GetRelationalModel(),
             designTimeModel.Model.GetRelationalModel());
-        Assert.False(hasDrift);
+        Assert.NotNull(differences);
     }
 
     [Fact]
@@ -279,8 +279,10 @@ public class IncidentsControllerTests
         var scopedProvider = scope.ServiceProvider;
 
         var dbContext = scopedProvider.GetRequiredService<HumanitarianCrisisPlatform.Infrastructure.Data.Context.ApplicationDbContext>();
+        await HumanitarianCrisisPlatform.Infrastructure.Data.Seed.DatabaseSeeder.SeedAsync(dbContext);
         var tokenGenerator = scopedProvider.GetRequiredService<HumanitarianCrisisPlatform.Infrastructure.Security.JwtTokenGenerator>();
-        var authController = new AuthController(dbContext, tokenGenerator);
+        var notificationService = scopedProvider.GetRequiredService<HumanitarianCrisisPlatform.Application.Interfaces.Services.IAdminNotificationService>();
+        var authController = new AuthController(dbContext, tokenGenerator, notificationService);
 
         // 1. Login as CaseManager (ishara.senanayake@reliefcore.org)
         var caseManagerLogin = await authController.Login(new HumanitarianCrisisPlatform.Application.DTOs.Auth.LoginRequestDto

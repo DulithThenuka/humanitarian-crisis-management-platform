@@ -284,8 +284,8 @@ public class IncidentModuleWorkflowTests
         // Run DatabaseSeeder on top of the pre-existing 5 users
         await DatabaseSeeder.SeedAsync(context);
 
-        // 5 original users preserved + 1 CaseManager added = 6 users
-        Assert.Equal(6, await context.Users.CountAsync());
+        // 5 original users preserved + 3 added (CaseManager, PartnerOfficer, VolunteerCoordinator) = 8 users
+        Assert.Equal(8, await context.Users.CountAsync());
         var citizenAfter = await context.Users.SingleAsync(u => u.Id == existingCitizenId);
         Assert.Equal("citizen@crisisplatform.org", citizenAfter.Email);
         Assert.Equal("LeflKnogle6G94qKPK8LYNjnTllCqm2G3BUM08AzOK7=", citizenAfter.PasswordHash);

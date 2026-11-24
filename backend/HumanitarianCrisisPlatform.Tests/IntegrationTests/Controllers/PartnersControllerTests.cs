@@ -55,7 +55,7 @@ public class PartnersControllerTests : IClassFixture<DatabaseFixture>
     {
         var classAuth = typeof(PartnersController).GetCustomAttribute<AuthorizeAttribute>();
         Assert.NotNull(classAuth);
-        Assert.Equal("Coordinator,Admin,LogisticsManager", classAuth!.Roles);
+        Assert.Equal("Coordinator,Admin,LogisticsManager,PartnerOfficer,PartnerOrganisationOfficer,Partner", classAuth!.Roles);
 
         var createMethod = typeof(PartnersController).GetMethod(nameof(PartnersController.CreatePartner));
         var createAuth = createMethod?.GetCustomAttribute<AuthorizeAttribute>();
