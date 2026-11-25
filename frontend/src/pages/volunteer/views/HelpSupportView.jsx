@@ -378,18 +378,18 @@ export const HelpSupportView = ({ showToast, onNavigateTab }) => {
                     fontSize: '13px',
                     fontWeight: 600,
                     color: '#ffffff',
-                    backgroundColor: '#0c2340',
+                    backgroundColor: '#14291e',
                     border: 'none',
                     borderRadius: '6px',
                     cursor: 'pointer',
                     transition: 'background-color 0.15s ease',
-                    boxShadow: '0 1px 2px rgba(12, 35, 64, 0.15)'
+                    boxShadow: '0 1px 2px rgba(20, 41, 30, 0.2)'
                   }}
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor = '#173d66')
+                    (e.currentTarget.style.backgroundColor = '#1f3f2f')
                   }
                   onMouseLeave={(e) =>
-                    (e.currentTarget.style.backgroundColor = '#0c2340')
+                    (e.currentTarget.style.backgroundColor = '#14291e')
                   }
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit support request'}

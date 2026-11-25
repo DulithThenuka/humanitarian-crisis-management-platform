@@ -41,7 +41,7 @@ export const UpdateAvailabilityModal = ({ user, onClose, onSave }) => {
                 type="checkbox"
                 checked={dutyStatus}
                 onChange={(e) => setDutyStatus(e.target.checked)}
-                style={{ width: '18px', height: '18px', accentColor: '#0c2340' }}
+                style={{ width: '18px', height: '18px', accentColor: '#14291e' }}
               />
             </label>
           </div>

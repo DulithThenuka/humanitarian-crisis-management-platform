@@ -1,17 +1,17 @@
 /* =========================================================
    VOLUNTEER PORTAL - HumanAid Design System
-   Sidebar: Deep Navy Blue (#0c192e), Ice Blue Accent (#dbeafe)
+   Sidebar: Deep Pine Green (#14291e), Mint Accent (#dcfce7)
    Canvas (#f4f6f2), Crisp Surfaces, Modern Typography
    ========================================================= */
 
 :root {
-  /* Brand Dark Navy Blue Theme for Sidebar */
-  --vol-sidebar-bg: #0c192e;
-  --vol-sidebar-hover: #152c4d;
-  --vol-sidebar-active-bg: #dbeafe;
-  --vol-sidebar-active-text: #0a192f;
-  --vol-sidebar-text: #cbd5e1;
-  --vol-sidebar-muted: #8fa3bf;
+  /* Brand Deep Pine Green Theme for Sidebar */
+  --vol-sidebar-bg: #14291e;
+  --vol-sidebar-hover: #1c3b2b;
+  --vol-sidebar-active-bg: #dcfce7;
+  --vol-sidebar-active-text: #14291e;
+  --vol-sidebar-text: #e2e8f0;
+  --vol-sidebar-muted: #86efac;
 
   /* Canvas & Cards */
   --vol-canvas-bg: #f4f6f2;
@@ -25,12 +25,12 @@
   --vol-text-muted: #64748b;
   --vol-text-light: #94a3b8;
 
-  /* Accent & Action Colors (Dark Blue) */
-  --vol-primary-green: #0c2340;
-  --vol-primary-green-hover: #173d66;
-  --vol-sage-light: #eff6ff;
-  --vol-sage-border: #bfdbfe;
-  --vol-sage-accent: #93c5fd;
+  /* Accent & Action Colors (Dark Pine Green) */
+  --vol-primary-green: #14291e;
+  --vol-primary-green-hover: #1f3f2f;
+  --vol-sage-light: #f0fdf4;
+  --vol-sage-border: #bbf7d0;
+  --vol-sage-accent: #86efac;
 
   /* Status Colors */
   --vol-success-bg: #dcfce7;
@@ -103,12 +103,12 @@
 .vol-brand-icon-box {
   width: 32px;
   height: 32px;
-  border: 1px solid rgba(147, 197, 253, 0.35);
+  border: 1px solid rgba(134, 239, 172, 0.35);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #93c5fd;
+  color: #86efac;
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -153,7 +153,7 @@
   height: 36px;
   border-radius: 50%;
   background: #ffffff;
-  color: #0c192e;
+  color: #14291e;
   font-weight: 800;
   font-size: 13px;
   display: flex;
@@ -237,7 +237,7 @@
 
 .vol-toggle-switch input:checked+.vol-toggle-slider:before {
   transform: translateX(16px);
-  background-color: #0c192e;
+  background-color: #14291e;
 }
 
 .vol-toggle-switch input:checked+.vol-toggle-slider {
@@ -246,7 +246,7 @@
 
 .vol-toggle-switch input:checked+.vol-toggle-slider:before {
   transform: translateX(16px);
-  background-color: #0c192e;
+  background-color: #14291e;
 }
 
 /* Navigation Menu */
@@ -309,7 +309,7 @@
 }
 
 .vol-nav-btn.active .vol-nav-badge {
-  background: #0c192e;
+  background: #14291e;
   color: #ffffff;
 }
 
@@ -336,7 +336,7 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #93c5fd;
+  color: #86efac;
   margin-bottom: 4px;
 }
 
@@ -659,8 +659,8 @@
 
 .vol-ribbon-btn {
   background: transparent;
-  border: 1px solid #93c5fd;
-  color: #1d4ed8;
+  border: 1px solid #86efac;
+  color: #14291e;
   font-size: 12px;
   font-weight: 700;
   padding: 4px 12px;
@@ -671,7 +671,7 @@
 }
 
 .vol-ribbon-btn:hover {
-  background: #eff6ff;
+  background: #f0fdf4;
 }
 
 /* =========================================================
@@ -787,13 +787,13 @@
 }
 
 .vol-date-box {
-  background: #0c2340;
+  background: #14291e;
   color: #ffffff;
   border-radius: 8px;
   padding: 8px 14px;
   text-align: center;
   min-width: 58px;
-  box-shadow: 0 1px 3px rgba(12, 35, 64, 0.2);
+  box-shadow: 0 1px 3px rgba(20, 41, 30, 0.3);
 }
 
 .vol-date-box-num {
@@ -880,7 +880,7 @@
 
 /* Standard Buttons */
 .vol-btn-primary {
-  background: #0c2340;
+  background: #14291e;
   color: #ffffff;
   border: none;
   padding: 8px 16px;
@@ -893,18 +893,18 @@
   gap: 6px;
   transition: all 0.15s ease;
   font-family: inherit;
-  box-shadow: 0 1px 3px rgba(12, 35, 64, 0.2);
+  box-shadow: 0 1px 3px rgba(20, 41, 30, 0.3);
 }
 
 .vol-btn-primary:hover {
-  background: #173d66;
-  box-shadow: 0 3px 8px rgba(12, 35, 64, 0.3);
+  background: #1f3f2f;
+  box-shadow: 0 3px 8px rgba(20, 41, 30, 0.4);
 }
 
 .vol-btn-outline {
   background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #0c2340;
+  border: 1px solid #c2d6c7;
+  color: #14291e;
   padding: 7px 14px;
   border-radius: 7px;
   font-size: 12.5px;
@@ -918,9 +918,9 @@
 }
 
 .vol-btn-outline:hover {
-  background: #f0f7ff;
-  border-color: #93c5fd;
-  color: #1e40af;
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #14291e;
 }
 
 /* =========================================================
@@ -1621,7 +1621,7 @@
 .vol-checkbox-grid input[type="checkbox"],
 .vol-avail-days-list input[type="checkbox"],
 .vol-checkbox-label input[type="checkbox"] {
-  accent-color: #0c2340;
+  accent-color: #14291e;
 }
 
 .vol-checkbox-label {
@@ -1721,7 +1721,7 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #0c192e;
+  background: #14291e;
   color: #ffffff;
   padding: 12px 18px;
   border-radius: 8px;

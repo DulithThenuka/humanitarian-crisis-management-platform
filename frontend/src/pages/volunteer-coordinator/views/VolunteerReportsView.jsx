@@ -239,7 +239,7 @@ export const VolunteerReportsView = ({ onOpenExportModal }) => {
                           style={{
                             height: '100%',
                             width: `${Math.min(100, item.percent)}%`,
-                            backgroundColor: '#0c2340',
+                            backgroundColor: '#14291e',
                             borderRadius: '4px',
                             transition: 'width 0.4s ease'
                           }}

@@ -54,7 +54,7 @@ export const ExportReportModal = ({ isOpen, onClose, operationalArea = 'All' }) 
       <div className="vc-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="vc-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Download size={18} style={{ color: '#0c2340' }} />
+            <Download size={18} style={{ color: '#14291e' }} />
             <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#14291e' }}>
               Export Volunteer Report
             </h3>
@@ -109,9 +109,9 @@ export const ExportReportModal = ({ isOpen, onClose, operationalArea = 'All' }) 
                 style={{
                   justifyContent: 'center',
                   padding: '10px',
-                  borderColor: format === 'csv' ? '#0c2340' : '#dfe5d8',
+                  borderColor: format === 'csv' ? '#14291e' : '#dfe5d8',
                   backgroundColor: format === 'csv' ? '#f0fdf4' : '#ffffff',
-                  color: format === 'csv' ? '#166534' : '#4a5b4a'
+                  color: format === 'csv' ? '#14291e' : '#4a5b4a'
                 }}
                 onClick={() => setFormat('csv')}
               >
@@ -125,9 +125,9 @@ export const ExportReportModal = ({ isOpen, onClose, operationalArea = 'All' }) 
                 style={{
                   justifyContent: 'center',
                   padding: '10px',
-                  borderColor: format === 'pdf' ? '#0c2340' : '#dfe5d8',
+                  borderColor: format === 'pdf' ? '#14291e' : '#dfe5d8',
                   backgroundColor: format === 'pdf' ? '#f0fdf4' : '#ffffff',
-                  color: format === 'pdf' ? '#166534' : '#4a5b4a'
+                  color: format === 'pdf' ? '#14291e' : '#4a5b4a'
                 }}
                 onClick={() => setFormat('pdf')}
               >
@@ -152,7 +152,7 @@ export const ExportReportModal = ({ isOpen, onClose, operationalArea = 'All' }) 
                 type="checkbox"
                 checked={includeAudit}
                 onChange={(e) => setIncludeAudit(e.target.checked)}
-                style={{ accentColor: '#0c2340' }}
+                style={{ accentColor: '#14291e' }}
               />
               Include audit timestamps and coordinator reviewer trail
             </label>

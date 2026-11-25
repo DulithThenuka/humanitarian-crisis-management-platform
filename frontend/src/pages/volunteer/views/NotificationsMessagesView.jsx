@@ -538,7 +538,7 @@ export const NotificationsMessagesView = ({
                   style={{
                     background: 'transparent',
                     border: 'none',
-                    color: '#0c2340',
+                    color: '#14291e',
                     fontSize: '12px',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -587,7 +587,7 @@ export const NotificationsMessagesView = ({
                   key={msg.id}
                   style={{
                     width: '100%',
-                    backgroundColor: msg.isCoordinator ? '#f4f6f2' : '#0c2340',
+                    backgroundColor: msg.isCoordinator ? '#f4f6f2' : '#14291e',
                     color: msg.isCoordinator ? '#0f172a' : '#ffffff',
                     padding: '12px 16px',
                     borderRadius: '10px',
@@ -595,7 +595,7 @@ export const NotificationsMessagesView = ({
                     lineHeight: 1.45,
                     boxShadow: msg.isCoordinator
                       ? 'none'
-                      : '0 1px 3px rgba(12, 35, 64, 0.25)',
+                      : '0 1px 3px rgba(20, 41, 30, 0.3)',
                     boxSizing: 'border-box'
                   }}
                 >
@@ -658,7 +658,7 @@ export const NotificationsMessagesView = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: '8px',
-                  backgroundColor: '#0c2340',
+                  backgroundColor: '#14291e',
                   flexShrink: 0
                 }}
                 title="Send message"
