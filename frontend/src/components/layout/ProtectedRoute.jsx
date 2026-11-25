@@ -1,11 +1,17 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigationType } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LoadingSpinner } from '../common/LoadingSpinner';
+import {
+  isRoleAllowed,
+  resolveAuthorizedRoute,
+  hasNavigatedInSession
+} from '../../routes/roleNavigation';
 
 export const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, token, loading, isAuthenticated } = useAuth();
   const location = useLocation();
+  const navigationType = useNavigationType();
 
   if (loading) {
     return <LoadingSpinner message="Checking authentication..." />;
@@ -16,29 +22,32 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   if (allowedRoles && allowedRoles.length > 0) {
-    const userRoleStr = String(user?.role || '').toLowerCase();
-    const userRoleNormalized = userRoleStr.replace(/[\s_\/-]/g, '');
-
-    const isAllowed = allowedRoles.some((role) => {
-      const allowedStr = String(role || '').toLowerCase();
-      const allowedNormalized = allowedStr.replace(/[\s_\/-]/g, '');
-
-      return (
-        allowedStr === userRoleStr ||
-        allowedNormalized === userRoleNormalized ||
-        (allowedNormalized === 'admin' && (userRoleNormalized === '4' || user?.role === 4 || userRoleNormalized.includes('admin'))) ||
-        (allowedNormalized === 'coordinator' && (userRoleNormalized === '1' || user?.role === 1 || userRoleNormalized.includes('coordinator'))) ||
-        ((allowedNormalized === 'logisticsmanager' || allowedNormalized === 'resourcemanager') &&
-          (userRoleNormalized === '2' || user?.role === 2 || userRoleNormalized.includes('logistics') || userRoleNormalized.includes('resource'))) ||
-        (allowedNormalized === 'volunteer' && (userRoleNormalized === '3' || user?.role === 3)) ||
-        (allowedNormalized === 'citizen' && (userRoleNormalized === '0' || user?.role === 0)) ||
-        (allowedNormalized === 'casemanager' && (userRoleNormalized === '5' || user?.role === 5 || userRoleNormalized.includes('case'))) ||
-        (allowedNormalized === 'sheltermanager' && (userRoleNormalized === '6' || user?.role === 6 || userRoleNormalized.includes('shelter')))
-      );
-    });
+    const isAllowed = isRoleAllowed(user?.role, allowedRoles);
 
     if (!isAllowed) {
-      return <Navigate to="/unauthorized" replace />;
+      // If arrival on this unauthorized route was triggered by browser history traversal
+      // (Back / Forward button pop) within an active app session, safely redirect the user
+      // to their authorized dashboard rather than unexpectedly showing a 403 Access Denied page.
+      if (navigationType === 'POP' && hasNavigatedInSession()) {
+        const authorizedDashboard = resolveAuthorizedRoute(user?.role);
+        if (location.pathname !== authorizedDashboard) {
+          return <Navigate to={authorizedDashboard} replace />;
+        }
+        return <Navigate to="/" replace />;
+      }
+
+      // Genuine direct or forward unauthorized access
+      return (
+        <Navigate
+          to="/unauthorized"
+          state={{
+            attemptedPath: location.pathname,
+            userRole: user?.role,
+            isBackNavigation: false
+          }}
+          replace
+        />
+      );
     }
   }
 

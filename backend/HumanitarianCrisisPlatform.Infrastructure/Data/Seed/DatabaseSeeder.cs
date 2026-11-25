@@ -172,6 +172,9 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync();
         }
 
+        // Ensure all predefined staff accounts exist and can authenticate with initial credentials
+        await EnsurePredefinedStaffAccountsAsync(context);
+
         // 2. Seed Crisis Events
         CrisisEvent? activeCrisis = null;
         if (!await context.CrisisEvents.AnyAsync())
@@ -1107,6 +1110,69 @@ public static class DatabaseSeeder
                 await context.ResourceAllocations.AddRangeAsync(resourceRequests);
                 await context.SaveChangesAsync();
             }
+        }
+    }
+
+    /// <summary>
+    /// Ensures that all 8 predefined RELIEFCORE staff identities exist in the database with their
+    /// exact emails and roles, initial password "Password123!", while strictly preserving existing accounts.
+    /// </summary>
+    public static async Task EnsurePredefinedStaffAccountsAsync(ApplicationDbContext context)
+    {
+        var defaultPasswordHash = PasswordHasher.HashPassword("Password123!");
+
+        var predefinedStaff = new List<(string Email, string FullName, UserRole Role, string District)>
+        {
+            ("admin@reliefcore.lk", "System Administrator", UserRole.Admin, "National Command Center"),
+            ("coordinator@reliefcore.lk", "Emergency Coordinator", UserRole.Coordinator, "Western Province / Colombo"),
+            ("incident@reliefcore.lk", "Incident Manager", UserRole.CaseManager, "Western Province Command"),
+            ("resource@reliefcore.lk", "Resource Manager", UserRole.LogisticsManager, "Central Logistics Depot"),
+            ("shelter@reliefcore.lk", "Shelter Administrator", UserRole.ShelterManager, "Colombo Shelters Lead"),
+            ("volunteermanager@reliefcore.lk", "Volunteer Coordinator", UserRole.VolunteerCoordinator, "National Volunteer Operations"),
+            ("donations@reliefcore.lk", "Donor/Funding Officer", UserRole.DonorOfficer, "Financial Operations Command"),
+            ("partners@reliefcore.lk", "Partner Organization Officer", UserRole.PartnerOfficer, "Inter-Agency Relations Command")
+        };
+
+        bool hasChanges = false;
+        foreach (var staff in predefinedStaff)
+        {
+            var normalizedEmail = staff.Email.Trim().ToLowerInvariant();
+            var existing = await context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+
+            if (existing == null)
+            {
+                var newUser = new User
+                {
+                    Id = Guid.NewGuid(),
+                    FullName = staff.FullName,
+                    Email = normalizedEmail,
+                    PasswordHash = defaultPasswordHash,
+                    Role = staff.Role,
+                    AssignedDistrict = staff.District,
+                    IsActive = true
+                };
+                await context.Users.AddAsync(newUser);
+                hasChanges = true;
+            }
+            else
+            {
+                // Account exists - preserve credentials, ensure correct role and active status
+                if (existing.Role != staff.Role)
+                {
+                    existing.Role = staff.Role;
+                    hasChanges = true;
+                }
+                if (!existing.IsActive)
+                {
+                    existing.IsActive = true;
+                    hasChanges = true;
+                }
+            }
+        }
+
+        if (hasChanges)
+        {
+            await context.SaveChangesAsync();
         }
     }
 }

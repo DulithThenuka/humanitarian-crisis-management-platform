@@ -33,6 +33,9 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ModelValidationFilter>();
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -96,6 +99,7 @@ using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await DatabaseSeeder.SeedAsync(context);
+        await DatabaseSeeder.EnsurePredefinedStaffAccountsAsync(context);
         await PartnerSeeder.SeedAsync(context);
     }
     catch (Exception ex)

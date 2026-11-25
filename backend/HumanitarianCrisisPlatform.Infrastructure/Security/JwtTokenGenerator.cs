@@ -50,6 +50,41 @@ public class JwtTokenGenerator
             claimsList.Add(new Claim(ClaimTypes.Role, "Resource Manager"));
             claimsList.Add(new Claim("role", "ResourceManager"));
         }
+        else if (user.Role == UserRole.CaseManager)
+        {
+            claimsList.Add(new Claim(ClaimTypes.Role, "IncidentManager"));
+            claimsList.Add(new Claim(ClaimTypes.Role, "Incident Manager"));
+            claimsList.Add(new Claim(ClaimTypes.Role, "Case Manager"));
+            claimsList.Add(new Claim("role", "IncidentManager"));
+        }
+        else if (user.Role == UserRole.ShelterManager)
+        {
+            claimsList.Add(new Claim(ClaimTypes.Role, "ShelterAdmin"));
+            claimsList.Add(new Claim(ClaimTypes.Role, "ShelterAdministrator"));
+            claimsList.Add(new Claim(ClaimTypes.Role, "Shelter Administrator"));
+            claimsList.Add(new Claim("role", "ShelterAdmin"));
+        }
+        else if (user.Role == UserRole.VolunteerCoordinator)
+        {
+            claimsList.Add(new Claim(ClaimTypes.Role, "VolunteerManager"));
+            claimsList.Add(new Claim(ClaimTypes.Role, "Volunteer Coordinator"));
+            claimsList.Add(new Claim(ClaimTypes.Role, "Volunteer Manager"));
+            claimsList.Add(new Claim("role", "VolunteerCoordinator"));
+        }
+        else if (user.Role == UserRole.DonorOfficer)
+        {
+            claimsList.Add(new Claim(ClaimTypes.Role, "Donor"));
+            claimsList.Add(new Claim(ClaimTypes.Role, "FundingOfficer"));
+            claimsList.Add(new Claim(ClaimTypes.Role, "Donor/Funding Officer"));
+            claimsList.Add(new Claim("role", "DonorOfficer"));
+        }
+        else if (user.Role == UserRole.PartnerOfficer)
+        {
+            claimsList.Add(new Claim(ClaimTypes.Role, "Partner"));
+            claimsList.Add(new Claim(ClaimTypes.Role, "PartnerOrganisationOfficer"));
+            claimsList.Add(new Claim(ClaimTypes.Role, "Partner Organization Officer"));
+            claimsList.Add(new Claim("role", "PartnerOfficer"));
+        }
 
         var token = new JwtSecurityToken(
             issuer: settings.EffectiveIssuer,
