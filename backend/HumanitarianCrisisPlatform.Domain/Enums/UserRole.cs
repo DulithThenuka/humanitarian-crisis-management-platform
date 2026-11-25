@@ -1,5 +1,8 @@
+using System.Text.Json.Serialization;
+
 namespace HumanitarianCrisisPlatform.Domain.Enums;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum UserRole
 {
     Citizen = 0,
@@ -9,5 +12,7 @@ public enum UserRole
     Admin = 4,
     CaseManager = 5,
     ShelterManager = 6,
-    VolunteerCoordinator = 7
+    VolunteerCoordinator = 7,
+    DonorOfficer = 8,
+    PartnerOfficer = 9
 }

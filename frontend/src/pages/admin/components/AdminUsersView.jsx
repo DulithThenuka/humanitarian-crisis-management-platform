@@ -21,12 +21,42 @@ import { adminService } from '../../../services/adminService';
 const SYSTEM_ROLES = [
   'Admin',
   'Coordinator',
-  'LogisticsManager',
-  'Volunteer',
-  'Citizen',
   'CaseManager',
-  'ShelterManager'
+  'LogisticsManager',
+  'ShelterManager',
+  'VolunteerCoordinator',
+  'DonorOfficer',
+  'PartnerOfficer',
+  'Volunteer',
+  'Citizen'
 ];
+
+const ROLE_LABELS = {
+  Admin: 'System Administrator',
+  Coordinator: 'Emergency Coordinator',
+  CaseManager: 'Incident Manager',
+  LogisticsManager: 'Resource Manager',
+  ShelterManager: 'Shelter Administrator',
+  VolunteerCoordinator: 'Volunteer Coordinator',
+  DonorOfficer: 'Donor / Funding Officer',
+  PartnerOfficer: 'Partner Organisation Officer',
+  Volunteer: 'Field Volunteer',
+  Citizen: 'Citizen / Displaced'
+};
+
+const getRoleBadgeClass = (roleStr) => {
+  const norm = (roleStr || '').toLowerCase();
+  if (norm.includes('admin')) return 'bg-purple-100 text-purple-700';
+  if (norm.includes('volunteercoordinator')) return 'bg-cyan-100 text-cyan-700';
+  if (norm.includes('coordinator')) return 'bg-blue-100 text-blue-700';
+  if (norm.includes('case') || norm.includes('incident')) return 'bg-indigo-100 text-indigo-700';
+  if (norm.includes('logistics') || norm.includes('resource')) return 'bg-amber-100 text-amber-700';
+  if (norm.includes('shelter')) return 'bg-teal-100 text-teal-700';
+  if (norm.includes('donor')) return 'bg-emerald-100 text-emerald-700';
+  if (norm.includes('partner')) return 'bg-violet-100 text-violet-700';
+  if (norm.includes('volunteer')) return 'bg-emerald-100 text-emerald-700';
+  return 'bg-slate-100 text-slate-700';
+};
 
 export const AdminUsersView = ({
   users = [],
@@ -418,7 +448,7 @@ export const AdminUsersView = ({
               <option value="ALL">All Roles</option>
               {SYSTEM_ROLES.map((r) => (
                 <option key={r} value={r}>
-                  {r}
+                  {ROLE_LABELS[r] || r}
                 </option>
               ))}
             </select>
@@ -522,19 +552,9 @@ export const AdminUsersView = ({
                       <td className="text-xs text-slate-700 font-mono">{u.email}</td>
                       <td>
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                            roleStr.includes('Admin')
-                              ? 'bg-purple-100 text-purple-700'
-                              : roleStr.includes('Coordinator')
-                              ? 'bg-blue-100 text-blue-700'
-                              : roleStr.includes('Logistics')
-                              ? 'bg-amber-100 text-amber-700'
-                              : roleStr.includes('Volunteer')
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-slate-100 text-slate-700'
-                          }`}
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${getRoleBadgeClass(roleStr)}`}
                         >
-                          {roleStr}
+                          {ROLE_LABELS[roleStr] || roleStr}
                         </span>
                       </td>
                       <td className="text-xs text-slate-600">
@@ -746,7 +766,7 @@ export const AdminUsersView = ({
                   >
                     {SYSTEM_ROLES.map((r) => (
                       <option key={r} value={r}>
-                        {r}
+                        {ROLE_LABELS[r] || r}
                       </option>
                     ))}
                   </select>
@@ -894,7 +914,7 @@ export const AdminUsersView = ({
             >
               {SYSTEM_ROLES.map((r) => (
                 <option key={r} value={r}>
-                  {r}
+                  {ROLE_LABELS[r] || r}
                 </option>
               ))}
             </select>

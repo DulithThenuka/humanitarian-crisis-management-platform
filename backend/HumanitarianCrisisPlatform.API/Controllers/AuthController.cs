@@ -16,12 +16,12 @@ public class AuthController : BaseApiController
 {
     private readonly ApplicationDbContext _context;
     private readonly JwtTokenGenerator _tokenGenerator;
-    private readonly IAdminNotificationService _notificationService;
+    private readonly IAdminNotificationService? _notificationService;
 
     public AuthController(
         ApplicationDbContext context,
         JwtTokenGenerator tokenGenerator,
-        IAdminNotificationService notificationService)
+        IAdminNotificationService? notificationService = null)
     {
         _context = context;
         _tokenGenerator = tokenGenerator;
@@ -89,12 +89,12 @@ public class AuthController : BaseApiController
 
         if (user == null)
         {
-            return Unauthorized(Result<AuthResponseDto>.Failure("Invalid email or password"));
+            return Unauthorized(Result<AuthResponseDto>.Failure("No account found with these credentials."));
         }
 
         if (!user.IsActive)
         {
-            return Unauthorized(Result<AuthResponseDto>.Failure("Account has been deactivated. Please contact an emergency administrator."));
+            return Unauthorized(Result<AuthResponseDto>.Failure("Your account is disabled. Please contact the administrator."));
         }
 
         // Verify password against stored hash, standard seed password, development master password, or documented role seed passwords
@@ -110,7 +110,7 @@ public class AuthController : BaseApiController
 
         if (!isPasswordValid)
         {
-            return Unauthorized(Result<AuthResponseDto>.Failure("Invalid email or password"));
+            return Unauthorized(Result<AuthResponseDto>.Failure("Invalid email or password."));
         }
 
         var token = _tokenGenerator.GenerateToken(user);
@@ -135,13 +135,28 @@ public class AuthController : BaseApiController
             return BadRequest(Result<AuthResponseDto>.Failure("Full name, email, and password are required."));
         }
 
-        // ROLE SECURITY: Public signup is strictly restricted to Citizen and Field Volunteer
-        if (dto.Role != UserRole.Citizen && dto.Role != UserRole.Volunteer)
+        if (dto.Password.Length < 6)
         {
-            return BadRequest(Result<AuthResponseDto>.Failure("Public registration is restricted to Citizen and Field Volunteer roles only. Privileged roles must be provisioned by a System Administrator."));
+            return BadRequest(Result<AuthResponseDto>.Failure("Password must contain at least 6 characters."));
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.ConfirmPassword) && dto.Password != dto.ConfirmPassword)
+        {
+            return BadRequest(Result<AuthResponseDto>.Failure("Password and Confirm Password do not match."));
         }
 
         var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
+        if (!new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(normalizedEmail))
+        {
+            return BadRequest(Result<AuthResponseDto>.Failure("Please enter a valid email address."));
+        }
+
+        // ROLE SECURITY: Public signup is strictly restricted to Citizen and Field Volunteer
+        if (dto.Role != UserRole.Citizen && dto.Role != UserRole.Volunteer)
+        {
+            return BadRequest(Result<AuthResponseDto>.Failure("Public registration is restricted to Citizen and Volunteer roles only. Privileged roles must be provisioned by a System Administrator."));
+        }
+
         var exists = await _context.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
         if (exists)
         {
