@@ -728,7 +728,7 @@ export const TaskProgressView = ({
                   {isCompleted || item.checked ? (
                     <CheckSquare
                       size={16}
-                      style={{ color: '#0c2340', flexShrink: 0 }}
+                      style={{ color: '#14291e', flexShrink: 0 }}
                     />
                   ) : (
                     <Square
@@ -738,7 +738,7 @@ export const TaskProgressView = ({
                   )}
                   <span
                     style={{
-                      color: isCompleted || item.checked ? '#0c2340' : '#334155',
+                      color: isCompleted || item.checked ? '#14291e' : '#334155',
                       fontWeight: isCompleted || item.checked ? 600 : 400,
                       userSelect: 'none'
                     }}
@@ -760,7 +760,7 @@ export const TaskProgressView = ({
                       width: '100%',
                       height: '38px',
                       borderRadius: '6px',
-                      backgroundColor: '#0c2340',
+                      backgroundColor: '#14291e',
                       color: '#ffffff',
                       fontSize: '12.5px',
                       fontWeight: 600,

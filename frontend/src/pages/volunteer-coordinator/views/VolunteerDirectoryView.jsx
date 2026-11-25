@@ -390,8 +390,8 @@ export const VolunteerDirectoryView = ({
         title="Verify and Activate Volunteer"
         subtitle="Confirms identity credentials and activates volunteer for field shift deployment. Saves changes to SQL Server database."
         confirmLabel="Confirm & Persist"
-        confirmBg="#0c2340"
-        confirmHoverBg="#173d66"
+        confirmBg="#14291e"
+        confirmHoverBg="#1f3f2f"
       />
 
       <ActionModal

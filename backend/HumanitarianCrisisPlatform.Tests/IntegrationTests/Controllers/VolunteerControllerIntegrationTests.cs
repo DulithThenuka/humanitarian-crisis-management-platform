@@ -89,7 +89,7 @@ public class VolunteerControllerIntegrationTests : IClassFixture<DatabaseFixture
     {
         var (controller, _, userId, volunteerId) = CreateController(asVolunteer: true);
 
-        var result = await controller.GetCurrentVolunteer(CancellationToken.None);
+        var result = await controller.GetMyProfile(CancellationToken.None);
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var resVal = Assert.IsType<Result<VolunteerCoordinatorDto>>(okResult.Value);
 
