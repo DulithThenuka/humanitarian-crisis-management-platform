@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, LogOut } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import { donorService } from '../../services/donorService';
 
 // Data
@@ -41,6 +42,7 @@ import './DonorFundingOfficer.css';
 
 export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) => {
   const navigate = useNavigate();
+  const { user: authUser, logout } = useAuth();
 
   // Navigation State
   const [activeTab, setActiveTab] = useState(initialActiveTab);
@@ -142,13 +144,22 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
 
   useRealtimeRefresh(['donations'], fetchDonorBackendData);
 
-  // Sign out handler
-  const handleSignOut = () => {
-    triggerToast('Signing out of Funding Officer session...', 'info');
-    setTimeout(() => {
-      navigate('/login');
-    }, 600);
+  // Centralized Sign out handler
+  const handleSignOut = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.warn('Funding Officer logout error:', err);
+    }
+    navigate('/', { replace: true });
   };
+
+  const activeOfficer = authUser ? {
+    ...officer,
+    fullName: authUser.fullName || officer.fullName,
+    shortName: authUser.fullName ? authUser.fullName.split(' ').filter(Boolean).map(p => p[0]).join('').slice(0, 2).toUpperCase() : officer.shortName,
+    role: authUser.role || officer.role
+  } : officer;
 
   // Create new record handler
   const handleCreateRecord = async (newRecord) => {
@@ -341,7 +352,7 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
         setActiveTab={setActiveTab}
         dutyActive={dutyActive}
         setDutyActive={setDutyActive}
-        officer={officer}
+        officer={activeOfficer}
         pendingReviewCount={records.filter(r => r.status === 'Review' || r.verification !== 'Verified').length}
         suspiciousCount={flags.length}
         onSignOut={handleSignOut}
@@ -354,9 +365,10 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
           activeTab={activeTab}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          officer={officer}
+          officer={activeOfficer}
           unreadCount={flags.length}
           onOpenNotifications={() => setActiveTab('suspicious')}
+          onSignOut={handleSignOut}
         />
 
         {/* Tab 1: Funding Dashboard */}

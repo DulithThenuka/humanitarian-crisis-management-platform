@@ -10,7 +10,8 @@ import {
   FileText,
   ChevronRight,
   Shield,
-  ShieldCheck
+  ShieldCheck,
+  LogOut
 } from 'lucide-react';
 
 export const FundingSidebar = ({
@@ -136,8 +137,13 @@ export const FundingSidebar = ({
           </p>
         </div>
 
-        <button className="fo-signout-btn" onClick={onSignOut}>
-          <ChevronRight size={14} />
+        <button 
+          type="button" 
+          className="fo-signout-btn" 
+          onClick={onSignOut}
+          title="Sign out of Donor & Funding Officer session"
+        >
+          <LogOut size={14} />
           <span>Sign out</span>
         </button>
       </div>

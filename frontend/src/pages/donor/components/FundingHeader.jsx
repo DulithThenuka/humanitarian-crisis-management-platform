@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, ShieldCheck } from 'lucide-react';
+import { Search, Bell, ShieldCheck, LogOut } from 'lucide-react';
 
 export const FundingHeader = ({
   activeTab,
@@ -7,6 +7,7 @@ export const FundingHeader = ({
   setSearchQuery,
   officer,
   onOpenNotifications,
+  onSignOut,
   unreadCount = 5
 }) => {
   const getTabLabel = (tab) => {
@@ -75,6 +76,31 @@ export const FundingHeader = ({
               </span>
             </div>
           </div>
+
+          {/* Header Sign Out Action */}
+          {onSignOut && (
+            <button
+              type="button"
+              className="fo-header-signout-btn"
+              onClick={onSignOut}
+              title="Sign out of Donor & Funding Officer session"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                background: '#f4f6f2',
+                border: '1px solid #e2e8dd',
+                color: '#657367',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <LogOut size={15} />
+            </button>
+          )}
         </div>
       </header>
 
