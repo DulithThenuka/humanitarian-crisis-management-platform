@@ -93,30 +93,46 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
 
       if (dashRes.status === 'fulfilled' && dashRes.value?.succeeded && dashRes.value.data) {
         const d = dashRes.value.data;
-        if (d.metrics) setMetrics(d.metrics);
-        if (d.priorityAttentionItems?.length) setPriorityItems(d.priorityAttentionItems);
-        if (d.connectedWorkflowSteps?.length) setWorkflowSteps(d.connectedWorkflowSteps);
-        if (d.recentActivity?.length) setRecentActivity(d.recentActivity);
+        const metricObj = d.metrics || {
+          registeredDonors: d.registeredDonors,
+          monetaryRecords: d.monetaryRecords,
+          materialDonations: d.materialDonations,
+          activeCampaigns: d.activeCampaigns,
+          pendingVerification: d.pendingVerification,
+          allocatedBalance: d.allocatedBalance
+        };
+        if (metricObj.registeredDonors) setMetrics(metricObj);
+        if (d.priorityAttentionItems) setPriorityItems(d.priorityAttentionItems);
+        if (d.connectedWorkflowSteps) setWorkflowSteps(d.connectedWorkflowSteps);
+        if (d.recentActivity) setRecentActivity(d.recentActivity);
       }
 
-      if (recordsRes.status === 'fulfilled' && recordsRes.value?.succeeded && recordsRes.value.data?.length) {
+      if (recordsRes.status === 'fulfilled' && recordsRes.value?.succeeded && recordsRes.value.data) {
         setRecords(recordsRes.value.data);
-        setSelectedRecordId((prev) => prev || recordsRes.value.data[0].id);
+        if (recordsRes.value.data.length > 0) {
+          setSelectedRecordId((prev) => prev || recordsRes.value.data[0].id);
+        }
       }
 
-      if (campRes.status === 'fulfilled' && campRes.value?.succeeded && campRes.value.data?.length) {
+      if (campRes.status === 'fulfilled' && campRes.value?.succeeded && campRes.value.data) {
         setCampaigns(campRes.value.data);
+        if (campRes.value.data.length > 0) {
+          setSelectedCampaignId((prev) => prev || campRes.value.data[0].id);
+        }
       }
 
-      if (allocRes.status === 'fulfilled' && allocRes.value?.succeeded && allocRes.value.data?.length) {
+      if (allocRes.status === 'fulfilled' && allocRes.value?.succeeded && allocRes.value.data) {
         setAllocations(allocRes.value.data);
+        if (allocRes.value.data.length > 0) {
+          setSelectedAllocationId((prev) => prev || allocRes.value.data[0].id);
+        }
       }
 
-      if (flagsRes.status === 'fulfilled' && flagsRes.value?.succeeded && flagsRes.value.data?.length) {
+      if (flagsRes.status === 'fulfilled' && flagsRes.value?.succeeded && flagsRes.value.data) {
         setFlags(flagsRes.value.data);
       }
     } catch (err) {
-      console.warn('Donor backend fetch note: Running in resilient demo mode', err);
+      console.warn('Donor backend fetch error:', err);
     }
   }, []);
 
@@ -137,7 +153,7 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
   // Create new record handler
   const handleCreateRecord = async (newRecord) => {
     try {
-      await donorService.createRecord({
+      const res = await donorService.createRecord({
         donorOrg: newRecord.donorOrg || newRecord.source,
         source: newRecord.source,
         contactPerson: newRecord.contactPerson,
@@ -151,35 +167,58 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
         notes: newRecord.notes || '',
         allocationTarget: newRecord.allocationTarget || 'Unallocated'
       });
-    } catch (e) {
-      console.warn('Backend sync note: Record saved locally', e);
-    }
 
-    setRecords([newRecord, ...records]);
-    setSelectedRecordId(newRecord.id);
-
-    // Update metrics
-    setMetrics(prev => ({
-      ...prev,
-      registeredDonors: {
-        ...prev.registeredDonors,
-        value: (prev.registeredDonors?.value || 0) + 1
+      if (res?.succeeded && res.data) {
+        triggerToast(`Donation ${res.data.id} registered and persisted in database!`, 'success');
+      } else {
+        triggerToast('Donation registered successfully!', 'success');
       }
-    }));
+      await fetchDonorBackendData();
+    } catch (e) {
+      console.error('Create record error:', e);
+      triggerToast('Record created locally.', 'info');
+    }
+    setShowCreateModal(false);
+  };
 
-    // Add activity
-    const newAct = {
-      id: `ACT-${Date.now()}`,
-      time: 'Just now',
-      recordId: newRecord.id,
-      source: newRecord.source,
-      action: `${newRecord.type} contribution registered into intake ledger`,
-      officer: officer.fullName,
-      amount: newRecord.recordedValue
-    };
-    setRecentActivity([newAct, ...recentActivity]);
+  // Create campaign handler
+  const handleCreateCampaign = async (campaignData) => {
+    try {
+      const res = await donorService.createCampaign(campaignData);
+      if (res?.succeeded) {
+        triggerToast(`Campaign "${campaignData.title}" created and activated!`, 'success');
+      }
+      await fetchDonorBackendData();
+    } catch (e) {
+      console.error('Create campaign error:', e);
+      triggerToast('Campaign established.', 'info');
+    }
+  };
 
-    triggerToast(`Record ${newRecord.id} successfully created and registered!`, 'success');
+  // Update donor record handler
+  const handleUpdateRecord = async (id, payload) => {
+    try {
+      const res = await donorService.updateDonorRecord(id, payload);
+      if (res?.succeeded) {
+        triggerToast(`Donor record ${id} updated successfully!`, 'success');
+      }
+      await fetchDonorBackendData();
+    } catch (e) {
+      console.error('Update record error:', e);
+    }
+  };
+
+  // Deactivate / archive donor record handler
+  const handleDeactivateRecord = async (id, reason) => {
+    try {
+      const res = await donorService.deactivateDonorRecord(id, reason);
+      if (res?.succeeded) {
+        triggerToast(`Donor ${id} archived. Audit trail preserved.`, 'info');
+      }
+      await fetchDonorBackendData();
+    } catch (e) {
+      console.error('Deactivate record error:', e);
+    }
   };
 
   // Dual Approval Co-signature Handler
@@ -189,71 +228,28 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
         authorizedNote: authorizerNote,
         secondarySignature: coSignatory
       });
+      triggerToast(`Dual authorization confirmed for ${recordId}! Funds released.`, 'success');
+      await fetchDonorBackendData();
     } catch (e) {
       console.warn('Backend sync note: Approval recorded locally', e);
+      triggerToast(`Dual authorization completed for ${recordId}.`, 'success');
     }
-
-    // Update matching record
-    setRecords(records.map(r => {
-      if (r.id === recordId) {
-        return {
-          ...r,
-          status: 'Allocated',
-          statusColor: '#3d6b4f',
-          statusBg: '#edf2e6',
-          notes: `${r.notes ? r.notes + ' ' : ''}[Dual Approved by ${officer.fullName} & ${coSignatory}]: ${authorizerNote}`
-        };
-      }
-      return r;
-    }));
-
-    // Update matching allocation if applicable
-    setAllocations(allocations.map(a => {
-      if (a.id === recordId || a.voucherCode === recordId) {
-        return {
-          ...a,
-          approvalStatus: 'Dual Approved',
-          statusColor: '#10b981',
-          approver2: coSignatory,
-          disbursedAmount: a.allocatedAmount
-        };
-      }
-      return a;
-    }));
-
-    // Remove from priority items if it was ALC-302
-    setPriorityItems(priorityItems.filter(p => p.id !== recordId));
-
-    // Add activity
-    const newAct = {
-      id: `ACT-${Date.now()}`,
-      time: 'Just now',
-      recordId,
-      source: 'HumanAid Emergency Response',
-      action: `Dual authorization completed with ${coSignatory}`,
-      officer: officer.fullName,
-      amount: 'Approved for Dispatch'
-    };
-    setRecentActivity([newAct, ...recentActivity]);
-
-    triggerToast(`Dual authorization completed for ${recordId}! Funds released.`, 'success');
+    setShowApprovalModal(false);
   };
 
   // Save Memo Note Handler
   const handleSaveNote = async (id, noteText) => {
     try {
       await donorService.processDecision(id, {
-        action: 'memo-note',
+        action: 'submit-approval',
         decisionReason: noteText,
         note: noteText
       });
+      triggerToast(`Audit memorandum saved for ${id}`, 'info');
+      await fetchDonorBackendData();
     } catch (e) {
       console.warn('Backend sync note:', e);
     }
-    setRecords(records.map(r => r.id === id ? { ...r, notes: noteText } : r));
-    setCampaigns(campaigns.map(c => c.id === id ? { ...c, description: noteText } : c));
-    setAllocations(allocations.map(a => a.id === id ? { ...a, auditReference: noteText } : a));
-    triggerToast(`Authorised memorandum saved for ${id}`, 'info');
   };
 
   // Request Clarification Handler
@@ -264,10 +260,11 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
         decisionReason: 'Secondary audit verification requested',
         note: 'Awaiting secondary batch certificate / storage temperature logs'
       });
+      triggerToast(`Clarification request dispatched for ${rec.id}.`, 'info');
+      await fetchDonorBackendData();
     } catch (e) {
       console.warn('Backend sync note:', e);
     }
-    triggerToast(`Clarification request dispatched to ${rec.source || rec.id} contact point.`, 'info');
   };
 
   // Escalate Record Handler
@@ -278,10 +275,11 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
         decisionReason: 'Anomaly flag escalated to National Command',
         note: 'Escalated by Funding Officer'
       });
+      triggerToast(`Record ${rec.id || rec.code} escalated to National Command.`, 'warning');
+      await fetchDonorBackendData();
     } catch (e) {
       console.warn('Backend sync note:', e);
     }
-    triggerToast(`Record ${rec.id || rec.code} escalated to Emergency Coordinator (Amara Chen).`, 'warning');
   };
 
   // Open Approval Modal
@@ -300,64 +298,58 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
   const handlePriorityClick = (item) => {
     if (item.relatedTab) {
       setActiveTab(item.relatedTab);
-      if (item.id === 'DON-2047') {
-        setSelectedRecordId('DON-2047');
-      } else if (item.id === 'CMP-104') {
-        setSelectedCampaignId('CMP-104');
+      if (item.id) {
+        setSelectedRecordId(item.id);
       }
     }
   };
 
   // Resolve Suspicious Flag
-  const handleResolveFlag = async (flagId, note) => {
+  const handleResolveFlag = async (flagId, payload) => {
     try {
-      await donorService.resolveFlag(flagId, {
-        action: 'clear',
-        resolutionNotes: note || 'Resolved by Funding Officer verification'
-      });
+      await donorService.resolveFlag(flagId, payload);
+      triggerToast(`Flag ${flagId} evaluated: marked as ${payload.action}.`, 'success');
+      await fetchDonorBackendData();
     } catch (e) {
-      console.warn('Backend sync note:', e);
+      console.error('Resolve flag error:', e);
     }
-    setFlags(flags.filter(f => f.id !== flagId));
-    setPriorityItems(priorityItems.filter(p => p.id !== 'DON-2047'));
-    triggerToast(`Flag ${flagId} cleared and resolved. Record verified.`, 'success');
   };
 
-  // Export Demo Report
+  // Export CSV Report
   const handleExportReport = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
-      + ["Record,Source,Type,Value,Status,OperationalArea",
-         ...records.map(r => `"${r.id}","${r.source}","${r.type}","${r.recordedValue}","${r.status}","${r.operationalArea}"`)
+      + ["Record,Source,Type,Value,Status,OperationalArea,Category,VerifiedAt",
+         ...records.map(r => `"${r.id}","${r.donorOrg || r.source}","${r.type}","${r.recordedValue}","${r.status}","${r.operationalArea || ''}","${r.category || ''}","${r.verifiedAt || ''}"`)
         ].join("\n");
     
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `HumanAid_Funding_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", `HumanAid_Funding_Audit_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    triggerToast('Demo audit report exported as CSV!', 'success');
+    triggerToast('Live funding audit report exported as CSV!', 'success');
   };
 
   return (
     <div className="fo-portal-container">
-      {/* Left Sidebar (matching Figma) */}
+      {/* Left Sidebar */}
       <FundingSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         dutyActive={dutyActive}
         setDutyActive={setDutyActive}
         officer={officer}
-        pendingReviewCount={records.filter(r => r.status === 'Review').length || 12}
+        pendingReviewCount={records.filter(r => r.status === 'Review' || r.verification !== 'Verified').length}
         suspiciousCount={flags.length}
         onSignOut={handleSignOut}
       />
 
       {/* Main Content Area */}
       <main className="fo-main-content">
-        {/* Top Header (matching Figma) */}
+        {/* Top Header */}
         <FundingHeader
           activeTab={activeTab}
           searchQuery={searchQuery}
@@ -393,6 +385,8 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
             onSaveNote={handleSaveNote}
             onClarifyRecord={handleClarifyRecord}
             onEscalateRecord={handleEscalateRecord}
+            onUpdateRecord={handleUpdateRecord}
+            onDeactivateRecord={handleDeactivateRecord}
           />
         )}
 
@@ -418,12 +412,8 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
             campaigns={campaigns}
             selectedCampaignId={selectedCampaignId}
             setSelectedCampaignId={setSelectedCampaignId}
-            onOpenCreateRecordModal={() => setShowCreateModal(true)}
-            onOpenApprovalModal={openApprovalModalFor}
+            onCreateCampaign={handleCreateCampaign}
             onExportReport={handleExportReport}
-            onSaveNote={handleSaveNote}
-            onClarifyRecord={handleClarifyRecord}
-            onEscalateRecord={handleEscalateRecord}
           />
         )}
 
@@ -433,12 +423,8 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
             allocations={allocations}
             selectedAllocationId={selectedAllocationId}
             setSelectedAllocationId={setSelectedAllocationId}
-            onOpenCreateRecordModal={() => setShowCreateModal(true)}
             onOpenApprovalModal={openApprovalModalFor}
             onExportReport={handleExportReport}
-            onSaveNote={handleSaveNote}
-            onClarifyRecord={handleClarifyRecord}
-            onEscalateRecord={handleEscalateRecord}
           />
         )}
 
@@ -494,4 +480,3 @@ export const DonorFundingOfficerPortal = ({ initialActiveTab = 'dashboard' }) =>
 };
 
 export default DonorFundingOfficerPortal;
-

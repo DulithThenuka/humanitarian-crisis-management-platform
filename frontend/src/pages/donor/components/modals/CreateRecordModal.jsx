@@ -41,7 +41,7 @@ export const CreateRecordModal = ({ isOpen, onClose, onCreateRecord }) => {
       statusBg: '#eff6ff',
       statusBorder: '#bfdbfe',
       operationalArea: formData.operationalArea,
-      notes: formData.notes || 'Prototype demonstration record logged by Funding Officer.',
+      notes: formData.notes || 'Verified donation recorded by Funding Officer.',
       verifiedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
       verifiedBy: 'Malini Wijeratne (Funding Officer)',
       category: formData.category
@@ -57,7 +57,7 @@ export const CreateRecordModal = ({ isOpen, onClose, onCreateRecord }) => {
         <div className="fo-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Plus size={18} color="#3d6b4f" />
-            <span className="fo-modal-title">Create Prototype Record</span>
+            <span className="fo-modal-title">Record Humanitarian Donation / Grant</span>
           </div>
           <button className="fo-modal-close-btn" onClick={onClose}>
             <X size={16} />
@@ -67,7 +67,7 @@ export const CreateRecordModal = ({ isOpen, onClose, onCreateRecord }) => {
         <form onSubmit={handleSubmit}>
           <div className="fo-modal-body">
             <p style={{ fontSize: '12px', color: '#657367', lineHeight: 1.5 }}>
-              Enter demonstration donor or material contribution details to simulate funding allocation workflows within the western province disaster response scope.
+              Register verified monetary contributions or material relief consignments directly into the active humanitarian operations database.
             </p>
 
             <div className="fo-form-group">

@@ -170,6 +170,20 @@ public class CreateDonorRecordDto
     public string AllocationTarget { get; set; } = "Unallocated";
 }
 
+public class UpdateDonorRecordDto
+{
+    public string? DonorOrg { get; set; }
+    public string? ContactPerson { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public decimal? Amount { get; set; }
+    public string? Category { get; set; }
+    public string? OperationalArea { get; set; }
+    public string? Notes { get; set; }
+    public string? AllocationTarget { get; set; }
+    public string? Status { get; set; }
+}
+
 public class DonorDecisionDto
 {
     [Required]
@@ -306,5 +320,34 @@ public class RecentActivityItemDto
     public string Officer { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public string Amount { get; set; } = string.Empty;
+}
+
+public class FundingReportsSummaryDto
+{
+    public decimal TotalMonetaryInflow { get; set; }
+    public decimal TotalMonetaryAllocated { get; set; }
+    public decimal NetAvailableReserve { get; set; }
+    public int TotalMaterialUnitsInflow { get; set; }
+    public int TotalMaterialUnitsDistributed { get; set; }
+    public int MaterialUnitsInReserve { get; set; }
+    public List<ReportBreakdownItemDto> SectorBreakdowns { get; set; } = new();
+    public List<ReportBreakdownItemDto> DistrictBreakdowns { get; set; } = new();
+    public List<ReportTimelinePointDto> TimelineTrend { get; set; } = new();
+}
+
+public class ReportBreakdownItemDto
+{
+    public string Category { get; set; } = string.Empty;
+    public decimal MonetaryAmount { get; set; }
+    public int MaterialUnits { get; set; }
+    public int RecordCount { get; set; }
+    public double Percentage { get; set; }
+}
+
+public class ReportTimelinePointDto
+{
+    public string Label { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public int Units { get; set; }
 }
 

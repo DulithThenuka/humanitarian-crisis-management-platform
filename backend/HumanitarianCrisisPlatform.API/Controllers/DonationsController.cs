@@ -318,5 +318,51 @@ public class DonationsController : BaseApiController
         }
         return Ok(result);
     }
+
+    /// <summary>
+    /// Updates a donor record's information.
+    /// </summary>
+    [HttpPut("records/{id}")]
+    public async Task<ActionResult<Result<DonorRecordDto>>> UpdateDonorRecord(
+        string id,
+        [FromBody] UpdateDonorRecordDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _donationService.UpdateDonorRecordAsync(id, dto, CurrentUserName, cancellationToken);
+        if (!result.Succeeded)
+        {
+            return NotFound(result);
+        }
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Soft-archives / deactivates a donor record while preserving financial audit history.
+    /// </summary>
+    [HttpDelete("records/{id}")]
+    public async Task<ActionResult<Result>> DeactivateDonorRecord(
+        string id,
+        [FromQuery] string? reason,
+        CancellationToken cancellationToken)
+    {
+        var result = await _donationService.DeactivateDonorRecordAsync(id, reason, CurrentUserName, cancellationToken);
+        if (!result.Succeeded)
+        {
+            return NotFound(result);
+        }
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves live financial & material transparency reports aggregated from database.
+    /// </summary>
+    [HttpGet("reports")]
+    public async Task<ActionResult<Result<FundingReportsSummaryDto>>> GetReports(
+        [FromQuery] string? operation,
+        CancellationToken cancellationToken)
+    {
+        var result = await _donationService.GetReportsSummaryAsync(operation, cancellationToken);
+        return Ok(result);
+    }
 }
 

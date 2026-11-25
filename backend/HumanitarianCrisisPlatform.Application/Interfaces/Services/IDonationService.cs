@@ -31,5 +31,8 @@ public interface IDonationService
     Task<Result<FundingAllocationDto>> ApproveAllocationAsync(string id, ApproveFundingAllocationDto dto, string? officerName, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<SuspiciousFlagDto>>> GetSuspiciousFlagsAsync(CancellationToken cancellationToken = default);
     Task<Result<SuspiciousFlagDto>> ResolveSuspiciousFlagAsync(string id, ResolveSuspiciousFlagDto dto, string? officerName, CancellationToken cancellationToken = default);
+    Task<Result<DonorRecordDto>> UpdateDonorRecordAsync(string id, UpdateDonorRecordDto dto, string? officerName, CancellationToken cancellationToken = default);
+    Task<Result> DeactivateDonorRecordAsync(string id, string? reason, string? officerName, CancellationToken cancellationToken = default);
+    Task<Result<FundingReportsSummaryDto>> GetReportsSummaryAsync(string? operation = null, CancellationToken cancellationToken = default);
 }
 

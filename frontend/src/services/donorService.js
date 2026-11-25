@@ -61,6 +61,17 @@ export const donorService = {
   },
   resolveFlag: async (id, payload) => {
     return await apiClient.post(`/donor/suspicious-flags/${id}/resolve`, payload);
+  },
+  updateDonorRecord: async (id, payload) => {
+    return await apiClient.put(`/donor/records/${id}`, payload);
+  },
+  deactivateDonorRecord: async (id, reason = '') => {
+    return await apiClient.delete(`/donor/records/${id}`, { params: { reason } });
+  },
+  getReportsSummary: async (operation = '') => {
+    const params = {};
+    if (operation && operation !== 'Current operation') params.operation = operation;
+    return await apiClient.get('/donor/reports', { params });
   }
 };
 
