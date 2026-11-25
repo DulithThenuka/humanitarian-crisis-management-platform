@@ -63,7 +63,15 @@ export const ResourceSidebar = ({
     <aside className="rm-sidebar">
       {/* Brand Header */}
       <div className="rm-sidebar-header">
-        <a href="/logistics" className="rm-brand-row" style={{ textDecoration: 'none' }}>
+        <a
+          href="/logistics/overview"
+          onClick={(e) => {
+            e.preventDefault();
+            onSelectTab('overview');
+          }}
+          className="rm-brand-row"
+          style={{ textDecoration: 'none' }}
+        >
           <HumanAidLogo variant="full" size="md" withContainer={true} />
         </a>
 

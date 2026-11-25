@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { ResourceSidebar } from './components/ResourceSidebar';
@@ -32,6 +32,7 @@ import {
 
 export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [onDuty, setOnDuty] = useState(true);
@@ -41,6 +42,52 @@ export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
   if (!isAuthenticated && !user) {
     return <Navigate to="/login" replace />;
   }
+
+  // Sync activeTab with URL route and props
+  useEffect(() => {
+    if (initialActiveTab) {
+      setActiveTab(initialActiveTab);
+    }
+    const p = (location.pathname || '').toLowerCase();
+    if (p.includes('/inventory') || p.includes('/depots') || p.includes('/warehouses')) {
+      setActiveTab('inventory');
+    } else if (p.includes('/allocations') || p.includes('/requests') || p.includes('/requisitions')) {
+      setActiveTab('allocations');
+    } else if (p.includes('/tracking') || p.includes('/dispatch')) {
+      setActiveTab('tracking');
+    } else if (p.includes('/suppliers') || p.includes('/donations') || p.includes('/intake') || p.includes('/receiving')) {
+      setActiveTab('suppliers');
+    } else if (p.includes('/stock-alerts') || p.includes('/alerts')) {
+      setActiveTab('stock-alerts');
+    } else if (p.includes('/reports')) {
+      setActiveTab('reports');
+    } else if (p.includes('/activity')) {
+      setActiveTab('activity');
+    } else if (p.includes('/notifications')) {
+      setActiveTab('notifications');
+    } else if (p.includes('/profile')) {
+      setActiveTab('profile');
+    } else if (
+      p.includes('/overview') ||
+      p.includes('/dashboard') ||
+      p === '/logistics' ||
+      p === '/logistics/' ||
+      p === '/resource-manager' ||
+      p === '/resource-portal' ||
+      p === '/resources'
+    ) {
+      setActiveTab('overview');
+    }
+  }, [initialActiveTab, location.pathname]);
+
+  const handleSelectTab = (tabId) => {
+    setActiveTab(tabId);
+    if (tabId === 'overview') {
+      navigate('/logistics/overview');
+    } else {
+      navigate(`/logistics/${tabId}`);
+    }
+  };
 
   // Live data states initialized with baseline prototypes
   const [metrics, setMetrics] = useState(OVERVIEW_METRICS);
@@ -433,7 +480,7 @@ export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
       {/* Deep Pine Green Sidebar */}
       <ResourceSidebar
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={handleSelectTab}
         onDutyToggle={handleDutyToggle}
         onDuty={onDuty}
         onSignOut={handleSignOut}
@@ -444,7 +491,7 @@ export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
         {/* Top Header & Coursework Prototype Banner */}
         <ResourceHeader
           activeTab={activeTab}
-          onSelectTab={setActiveTab}
+          onSelectTab={handleSelectTab}
           onOpenSearch={() => setIsSearchOpen(true)}
           showToast={showToast}
         />
@@ -454,7 +501,7 @@ export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
           {activeTab === 'overview' && (
             <ResourceOverviewView
               metrics={metrics}
-              onSelectTab={setActiveTab}
+              onSelectTab={handleSelectTab}
               showToast={showToast}
               onAddInventory={handleOpenAddInventory}
             />
@@ -504,7 +551,7 @@ export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
             <StockAlertsView
               alerts={alerts}
               showToast={showToast}
-              onSelectTab={setActiveTab}
+              onSelectTab={handleSelectTab}
               onExportReport={() => handleExportCsv('alerts')}
               onCreateReorder={handleReorder}
             />
@@ -546,7 +593,7 @@ export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onSelectTab={(tabId, title) => {
-          setActiveTab(tabId);
+          handleSelectTab(tabId);
           setIsSearchOpen(false);
           if (showToast && title) {
             showToast(`Navigated to ${title}`);
