@@ -23,6 +23,7 @@ import {
 
 import './VolunteerCoordinatorPortal.css';
 import { HumanAidLogo } from '../../components/common/HumanAidLogo';
+import { useAuth } from '../../context/AuthContext';
 
 import {
   COORDINATOR_USER
@@ -42,6 +43,7 @@ import { CompareRecordModal } from './components/CompareRecordModal';
 
 export const VolunteerCoordinatorPortal = () => {
   const navigate = useNavigate();
+  const { user: authUser, logout } = useAuth();
 
   // Navigation tab state
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -245,8 +247,13 @@ export const VolunteerCoordinatorPortal = () => {
     }
   };
 
-  const handleSignOut = () => {
-    navigate('/login');
+  const handleSignOut = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.warn('Volunteer Coordinator logout error:', err);
+    }
+    navigate('/', { replace: true });
   };
 
   // Nav menu items
@@ -360,7 +367,12 @@ export const VolunteerCoordinatorPortal = () => {
             </p>
           </div>
 
-          <button className="vc-signout-btn" onClick={handleSignOut}>
+          <button 
+            type="button"
+            className="vc-signout-btn" 
+            onClick={handleSignOut}
+            title="Sign out of Volunteer Coordinator session"
+          >
             <LogOut size={14} />
             <span>Sign out</span>
           </button>
@@ -470,17 +482,28 @@ export const VolunteerCoordinatorPortal = () => {
                   justifyContent: 'center'
                 }}
               >
-                {COORDINATOR_USER.avatar}
+                {authUser?.fullName ? authUser.fullName.split(' ').filter(Boolean).map(p => p[0]).join('').slice(0, 2).toUpperCase() : COORDINATOR_USER.avatar}
               </div>
               <div style={{ lineHeight: 1.2 }}>
                 <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#14291e' }}>
-                  {COORDINATOR_USER.name}
+                  {authUser?.fullName || COORDINATOR_USER.name}
                 </div>
                 <div style={{ fontSize: '9.5px', color: '#657367' }}>
                   {COORDINATOR_USER.role}
                 </div>
               </div>
             </div>
+
+            {/* Header Sign Out Action */}
+            <button
+              type="button"
+              className="vc-btn-icon"
+              onClick={handleSignOut}
+              title="Sign out of Volunteer Coordinator session"
+              style={{ cursor: 'pointer', color: '#657367' }}
+            >
+              <LogOut size={15} />
+            </button>
           </div>
         </header>
 
