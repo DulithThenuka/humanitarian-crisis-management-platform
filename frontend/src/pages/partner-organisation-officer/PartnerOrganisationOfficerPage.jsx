@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 import './PartnerOfficerStyles.css';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 import { useAuth } from '../../context/AuthContext';
 import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { partnerService } from '../../services/partnerService';
@@ -476,14 +477,8 @@ export const PartnerOrganisationOfficerPage = ({ initialActiveTab = 'dashboard' 
       {/* 1. LEFT SIDEBAR (Solid Deep Pine Green #14291e) */}
       <aside className="po-sidebar">
         <div className="po-sidebar-header">
-          <div className="po-brand-row">
-            <div className="po-brand-logo-wrap">
-              <Shield size={19} className="po-brand-shield-icon" />
-            </div>
-            <div className="po-brand-text">
-              <span className="po-brand-title">HumanAid</span>
-              <span className="po-brand-sub">Response coordination</span>
-            </div>
+          <div className="po-brand-row" style={{ textDecoration: 'none' }}>
+            <HumanAidLogo variant="full" size="md" withContainer={true} />
           </div>
         </div>
 

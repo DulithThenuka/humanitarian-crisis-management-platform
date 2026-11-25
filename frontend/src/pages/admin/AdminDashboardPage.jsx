@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
+  ArrowLeft,
   TrendingUp,
   Truck,
   Droplets,
@@ -73,7 +74,7 @@ import { shelterService } from '../../services/shelterService';
 import { volunteerService } from '../../services/volunteerService';
 import apiClient from '../../services/apiClient';
 import { useAuth } from '../../context/AuthContext';
-import reliefcoreIcon from '../../assets/reliefcore-icon.png';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 import sarahJohnsonAvatar from '../../assets/sarah-johnson.jpg';
 import westernProvinceMap from '../../assets/western-province-map-clean.png';
 import shelterPhoto1 from '../../assets/shelter-1.jpg';
@@ -1930,11 +1931,7 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
         <div className="adm-ss-sidebar-top">
           {/* Brand Header */}
           <div className="adm-ss-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <img src={reliefcoreIcon} alt="HumanAid" className="adm-ss-brand-logo" />
-            <div>
-              <h2 className="adm-ss-brand-title">HumanAid</h2>
-              <span className="adm-ss-brand-sub">Humanitarian Operations</span>
-            </div>
+            <HumanAidLogo variant="full" size="md" withContainer={true} />
           </div>
 
           {/* Navigation Links */}
@@ -1946,7 +1943,10 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
                 <li key={item.id}>
                   <button
                     className={`adm-ss-nav-item ${isActive ? 'active' : ''}`}
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      navigate(item.id === 'dashboard' ? '/admin' : `/admin/${item.id}`);
+                    }}
                   >
                     <div className="adm-ss-nav-left">
                       <IconComp size={16} />
@@ -1990,6 +1990,20 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
         {/* Top Header Bar */}
         <header className="adm-ss-topbar">
           <div className="adm-ss-title-group">
+            {activeTab !== 'dashboard' && (
+              <button
+                type="button"
+                className="adm-ss-back-dashboard-btn"
+                onClick={() => {
+                  setActiveTab('dashboard');
+                  navigate('/admin');
+                }}
+                title="Back to Admin Dashboard"
+              >
+                <ArrowLeft size={16} />
+                <span>Back to Admin Dashboard</span>
+              </button>
+            )}
             <div className={`adm-ss-title-icon ${currentMeta.iconBg}`}>
               <HeaderIcon size={20} />
             </div>

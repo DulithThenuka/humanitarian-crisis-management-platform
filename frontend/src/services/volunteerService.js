@@ -6,9 +6,15 @@ export const volunteerService = {
     return await apiClient.get('/volunteers/dashboard');
   },
 
-  // 2. Volunteer Directory
+  // 2. Volunteer Directory & Profiles
   getMyProfile: async () => {
     return await apiClient.get('/volunteers/me');
+  },
+  getProfile: async () => {
+    return await apiClient.get('/volunteers/profile');
+  },
+  updateProfile: async (profileData) => {
+    return await apiClient.put('/volunteers/profile', profileData);
   },
   getAll: async (params = {}) => {
     return await apiClient.get('/volunteers', { params });
@@ -16,14 +22,21 @@ export const volunteerService = {
   getAllVolunteers: async (params = {}) => {
     return await apiClient.get('/volunteers', { params });
   },
-  getMyProfile: async () => {
-    return await apiClient.get('/volunteers/me');
+  getDirectory: async (search = '', status = '', serviceArea = '') => {
+    const params = {};
+    if (search) params.search = search;
+    if (status && status !== 'all') params.status = status;
+    if (serviceArea && serviceArea !== 'all') params.serviceArea = serviceArea;
+    return await apiClient.get('/volunteers', { params });
   },
   getVolunteerById: async (id) => {
     return await apiClient.get(`/volunteers/${id}`);
   },
   createVolunteer: async (data) => {
     return await apiClient.post('/volunteers', data);
+  },
+  createRecord: async (volunteerData) => {
+    return await apiClient.post('/volunteers/records', volunteerData);
   },
   updateVolunteer: async (id, data) => {
     return await apiClient.put(`/volunteers/${id}`, data);
@@ -41,9 +54,12 @@ export const volunteerService = {
     return await apiClient.post(`/volunteers/${id}/escalate`, data);
   },
 
-  // 3. Scheduling & Assignment
+  // 3. Scheduling & Assignments
   getAssignments: async (params = {}) => {
     return await apiClient.get('/volunteers/assignments', { params });
+  },
+  getMyAssignments: async () => {
+    return await apiClient.get('/volunteers/assignments');
   },
   assignShift: async (data) => {
     return await apiClient.post('/volunteers/assignments', data);
@@ -54,6 +70,9 @@ export const volunteerService = {
   acceptAssignment: async (id) => {
     return await apiClient.post(`/volunteers/assignments/${id}/accept`);
   },
+  updateAssignmentStatus: async (assignmentId, action, notes = '') => {
+    return await apiClient.post(`/volunteers/assignments/${assignmentId}/status`, { action, notes });
+  },
   completeAssignment: async (id, data = {}) => {
     return await apiClient.post(`/volunteers/assignments/${id}/complete`, data);
   },
@@ -61,8 +80,19 @@ export const volunteerService = {
     return await apiClient.post(`/volunteers/assignments/${id}/release`, data);
   },
 
-  // 4. Matching & Decision Audit
+  // 4. Opportunities
+  getOpportunities: async () => {
+    return await apiClient.get('/volunteers/opportunities');
+  },
+  acceptOpportunity: async (opportunityId) => {
+    return await apiClient.post(`/volunteers/opportunities/${opportunityId}/accept`);
+  },
+
+  // 5. Matching & Decisions
   getMatchingRecommendation: async () => {
+    return await apiClient.get('/volunteers/matching');
+  },
+  getAIMatchingRecommendations: async () => {
     return await apiClient.get('/volunteers/matching');
   },
   recordMatchingDecision: async (data) => {
@@ -72,7 +102,7 @@ export const volunteerService = {
     return await apiClient.get('/volunteers/matching/history');
   },
 
-  // 5. Activity & Safety Scoped Updates
+  // 6. Activity & Safety Scoped Updates
   getActivityTimeline: async () => {
     return await apiClient.get('/volunteers/activity');
   },
@@ -80,7 +110,10 @@ export const volunteerService = {
     return await apiClient.post('/volunteers/activity', data);
   },
 
-  // 6. Reports & Analytics
+  // 7. Coordinator Dashboard & Reports
+  getCoordinatorDashboard: async () => {
+    return await apiClient.get('/volunteers/coordinator/dashboard');
+  },
   getReports: async (params = {}) => {
     return await apiClient.get('/volunteers/reports', { params });
   },

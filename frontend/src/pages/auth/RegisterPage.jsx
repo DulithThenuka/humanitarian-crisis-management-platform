@@ -19,17 +19,19 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 import { authService } from '../../services/authService';
-import reliefcoreIcon from '../../assets/reliefcore-icon.png';
+import { HumanAidLogo, humanaidLogoIcon } from '../../components/common/HumanAidLogo';
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phoneNumber: '',
-    role: 0 // 0 = Citizen, 3 = Volunteer, 1 = Coordinator, 2 = Logistics
+    role: 0 // 0 = Citizen, 3 = Volunteer
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(true);
   const [loading, setLoading] = useState(false);
   const [selectedLang, setSelectedLang] = useState('English');
@@ -79,6 +81,10 @@ export const RegisterPage = () => {
       showAlert('Password must contain at least 6 characters', 'warning');
       return;
     }
+    if (formData.password !== formData.confirmPassword) {
+      showAlert('Password and Confirm Password do not match', 'warning');
+      return;
+    }
     if (formData.phoneNumber && formData.phoneNumber.trim().length > 0) {
       const phoneDigits = formData.phoneNumber.replace(/[^0-9]/g, '');
       if (phoneDigits.length < 7) {
@@ -97,6 +103,7 @@ export const RegisterPage = () => {
       fullName: formData.fullName.trim(),
       email: formData.email.trim(),
       password: formData.password,
+      confirmPassword: formData.confirmPassword,
       phoneNumber: formData.phoneNumber.trim() || null,
       role: parseInt(formData.role, 10)
     };
@@ -149,15 +156,7 @@ export const RegisterPage = () => {
           {/* Header */}
           <header className="flex items-center justify-between w-full">
             <Link to="/" className="flex items-center gap-3 no-underline group" title="Return to Homepage">
-              <img 
-                src={reliefcoreIcon} 
-                alt="HumanAid Crisis Command" 
-                className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform" 
-              />
-              <span className="font-semibold text-xl tracking-tight text-white">HumanAid</span>
-              <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white/60 ml-1">
-                Registration
-              </span>
+              <HumanAidLogo variant="full" size="sm" withContainer={true} />
             </Link>
 
             <Link
@@ -171,11 +170,11 @@ export const RegisterPage = () => {
 
           {/* Hero Center */}
           <main className="flex-1 flex flex-col items-center justify-center text-center py-10 lg:py-14 px-2">
-            <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform">
+            <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
               <img 
-                src={reliefcoreIcon} 
+                src={humanaidLogoIcon} 
                 alt="HumanAid Emblem" 
-                className="w-13 h-13 object-contain" 
+                className="w-16 h-16 object-contain rounded-xl" 
               />
             </div>
 
@@ -271,6 +270,9 @@ export const RegisterPage = () => {
 
           {/* Form Content */}
           <div className="w-full max-w-lg mx-auto my-auto py-4">
+            <div className="mb-4 flex justify-center lg:justify-start">
+              <HumanAidLogo variant="full" size="md" withContainer={true} />
+            </div>
             <div className="mb-5 text-center lg:text-left">
               <h2 className="text-2xl sm:text-3xl font-[500] text-white tracking-[-0.03em]">
                 Create Account
@@ -321,7 +323,7 @@ export const RegisterPage = () => {
                 </div>
               </div>
 
-              {/* Password & Phone Row on larger screens */}
+              {/* Password & Confirm Password Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {/* Password Field */}
                 <div className="flex flex-col gap-1">
@@ -351,23 +353,51 @@ export const RegisterPage = () => {
                   </div>
                 </div>
 
-                {/* Phone Number Field */}
+                {/* Confirm Password Field */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs uppercase tracking-wider text-white/60 font-medium" htmlFor="reg-phone-input">
-                    Phone number
+                  <label className="text-xs uppercase tracking-wider text-white/60 font-medium" htmlFor="reg-confirm-password-input">
+                    Confirm Password
                   </label>
                   <div className="liquid-glass rounded-2xl px-4 py-2.5 flex items-center gap-3 transition-colors focus-within:bg-white/[0.04]">
-                    <Phone className="text-white/40 shrink-0" size={17} />
+                    <Lock className="text-white/40 shrink-0" size={17} />
                     <input
-                      id="reg-phone-input"
+                      id="reg-confirm-password-input"
                       className="w-full bg-transparent border-none outline-none text-white placeholder-white/30 text-sm font-display focus:ring-0"
-                      type="tel"
-                      placeholder="+94 77 123 4567"
-                      value={formData.phoneNumber}
-                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                      autoComplete="tel"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="Re-enter password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                      required
+                      autoComplete="new-password"
                     />
+                    <button
+                      type="button"
+                      className="text-white/40 hover:text-white transition-colors cursor-pointer shrink-0"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    >
+                      {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    </button>
                   </div>
+                </div>
+              </div>
+
+              {/* Phone Number Field */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs uppercase tracking-wider text-white/60 font-medium" htmlFor="reg-phone-input">
+                  Phone number (optional)
+                </label>
+                <div className="liquid-glass rounded-2xl px-4 py-2.5 flex items-center gap-3 transition-colors focus-within:bg-white/[0.04]">
+                  <Phone className="text-white/40 shrink-0" size={17} />
+                  <input
+                    id="reg-phone-input"
+                    className="w-full bg-transparent border-none outline-none text-white placeholder-white/30 text-sm font-display focus:ring-0"
+                    type="tel"
+                    placeholder="+94 77 123 4567"
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                    autoComplete="tel"
+                  />
                 </div>
               </div>
 

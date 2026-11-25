@@ -40,7 +40,7 @@ import {
   Inbox
 } from 'lucide-react';
 
-import reliefcoreLogoWhite from '@/assets/reliefcore-logo-white-text.png';
+import { HumanAidLogo } from '@/components/common/HumanAidLogo';
 import sarahJohnson from '@/assets/sarah-johnson.jpg';
 import crisisCenterIcon from '@/assets/crisis-center-icon.png';
 import { LiveSatelliteCrisisMap } from '@/components/maps/LiveSatelliteCrisisMap';
@@ -399,12 +399,8 @@ export const DashboardOverviewPage = ({ initialTab = 'dashboard' }) => {
       <aside className="coord-sidebar">
         <div>
           <div className="coord-sidebar-brand">
-            <Link to="/coordinator/dashboard" onClick={() => setActiveNav('dashboard')}>
-              <img
-                src={reliefcoreLogoWhite}
-                alt="HumanAid Humanitarian Operations"
-                className="coord-brand-logo"
-              />
+            <Link to="/coordinator/dashboard" onClick={() => setActiveNav('dashboard')} style={{ textDecoration: 'none' }}>
+              <HumanAidLogo variant="full" size="md" withContainer={true} />
             </Link>
           </div>
 

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../common/Button';
+import { HumanAidLogo } from '../common/HumanAidLogo';
 
 export const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -30,26 +31,7 @@ export const Navbar = () => {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            backgroundColor: '#1c3628',
-            color: '#dbe4c6',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Shield size={20} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-              HumanAid
-            </span>
-            <span style={{ fontSize: '10.5px', color: '#9fa89e', letterSpacing: '0.02em' }}>
-              Response coordination
-            </span>
-          </div>
+          <HumanAidLogo variant="full" size="sm" withContainer={true} />
         </Link>
         <span style={{ fontSize: '10px', background: '#1c3628', color: '#dbe4c6', border: '1px solid #2a4c38', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
           LIVE

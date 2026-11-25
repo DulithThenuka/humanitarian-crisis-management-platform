@@ -28,7 +28,8 @@ public class AdminControllerTests : IClassFixture<DatabaseFixture>
     {
         var db = context ?? _fixture.CreateContext();
         var adminService = new AdminService(db);
-        var controller = new AdminController(adminService);
+        var notificationMock = new Moq.Mock<HumanitarianCrisisPlatform.Application.Interfaces.Services.IAdminNotificationService>();
+        var controller = new AdminController(adminService, notificationMock.Object);
 
         var claims = new List<Claim>();
         if (currentUserId.HasValue)

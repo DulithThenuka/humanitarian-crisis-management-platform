@@ -6,8 +6,10 @@ using HumanitarianCrisisPlatform.Application.Interfaces.Services;
 
 namespace HumanitarianCrisisPlatform.API.Controllers;
 
-[Authorize(Roles = "Coordinator,Admin,LogisticsManager")]
+[Authorize(Roles = "Coordinator,Admin,LogisticsManager,PartnerOfficer,PartnerOrganisationOfficer,Partner")]
 [Route("api/[controller]")]
+[Route("api/partner")]
+[Route("api/partner-officer")]
 public class PartnersController : BaseApiController
 {
     private readonly IPartnerService _partnerService;
@@ -192,6 +194,108 @@ public class PartnersController : BaseApiController
         if (!result.Succeeded)
             return BadRequest(result);
 
+        return Ok(result);
+    }
+
+    // =========================================================================
+    // Partner Organisation Officer Endpoints
+    // =========================================================================
+
+    /// <summary>
+    /// Gets the comprehensive dashboard metrics and telemetry for the Partner Organisation Officer.
+    /// </summary>
+    [HttpGet("officer/dashboard")]
+    public async Task<ActionResult<Result<PartnerOfficerDashboardDto>>> GetOfficerDashboard(
+        [FromQuery] string? organisation,
+        CancellationToken cancellationToken)
+    {
+        var result = await _partnerService.GetOfficerDashboardAsync(organisation, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves commitments and assistance records scoped for the partner organisation officer.
+    /// </summary>
+    [HttpGet("officer/records")]
+    public async Task<ActionResult<Result<IReadOnlyList<PartnerRecordDto>>>> GetOfficerRecords(
+        [FromQuery] string? status,
+        [FromQuery] string? search,
+        [FromQuery] string? operationalArea,
+        CancellationToken cancellationToken)
+    {
+        var result = await _partnerService.GetOfficerRecordsAsync(status, search, operationalArea, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves a single partner record by code (e.g. COM-118).
+    /// </summary>
+    [HttpGet("officer/records/{id}")]
+    public async Task<ActionResult<Result<PartnerRecordDto>>> GetOfficerRecordById(string id, CancellationToken cancellationToken)
+    {
+        var result = await _partnerService.GetOfficerRecordByIdAsync(id, cancellationToken);
+        if (!result.Succeeded)
+            return NotFound(result);
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Registers a new partner commitment / assistance prototype record.
+    /// </summary>
+    [HttpPost("officer/records")]
+    public async Task<ActionResult<Result<PartnerRecordDto>>> CreateOfficerRecord(
+        [FromBody] CreatePartnerRecordDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(Result<PartnerRecordDto>.Failure("Invalid record payload."));
+
+        var result = await _partnerService.CreateOfficerRecordAsync(dto, CurrentUserName, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Processes an authorised partner action (confirm, clarify, escalate) on a record.
+    /// </summary>
+    [HttpPost("officer/records/{id}/action")]
+    public async Task<ActionResult<Result<PartnerRecordDto>>> ProcessRecordAction(
+        string id,
+        [FromBody] ProcessPartnerRecordActionDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(Result<PartnerRecordDto>.Failure("Invalid action payload."));
+
+        var result = await _partnerService.ProcessRecordActionAsync(id, dto, CurrentUserName, cancellationToken);
+        if (!result.Succeeded)
+            return NotFound(result);
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves inter-agency coordination timeline entries for the partner workspace.
+    /// </summary>
+    [HttpGet("officer/timeline")]
+    public async Task<ActionResult<Result<IReadOnlyList<PartnerTimelineEntryDto>>>> GetTimeline(CancellationToken cancellationToken)
+    {
+        var result = await _partnerService.GetTimelineAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Posts a new operational coordination entry to the partner workspace.
+    /// </summary>
+    [HttpPost("officer/timeline")]
+    public async Task<ActionResult<Result<PartnerTimelineEntryDto>>> AddTimelineEntry(
+        [FromBody] CreatePartnerTimelineEntryDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(Result<PartnerTimelineEntryDto>.Failure("Invalid timeline entry payload."));
+
+        var result = await _partnerService.AddTimelineEntryAsync(dto, CurrentUserName, cancellationToken);
         return Ok(result);
     }
 }

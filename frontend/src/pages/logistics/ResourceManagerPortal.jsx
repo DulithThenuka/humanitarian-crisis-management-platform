@@ -28,8 +28,8 @@ import {
   STOCK_ALERTS
 } from './data/resourceManagerData';
 
-export const ResourceManagerPortal = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
+  const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [onDuty, setOnDuty] = useState(true);
   const [toastMessage, setToastMessage] = useState(null);
 

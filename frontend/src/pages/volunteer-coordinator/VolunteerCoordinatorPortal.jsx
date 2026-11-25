@@ -22,10 +22,12 @@ import {
 } from 'lucide-react';
 
 import './VolunteerCoordinatorPortal.css';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 
 import {
   COORDINATOR_USER
 } from './data/coordinatorData';
+import { volunteerService } from '../../services/volunteerService';
 
 import { CoordinatorDashboardView } from './views/CoordinatorDashboardView';
 import { VolunteerDirectoryView } from './views/VolunteerDirectoryView';
@@ -37,8 +39,6 @@ import { VolunteerReportsView } from './views/VolunteerReportsView';
 import { CreateVolunteerModal } from './components/CreateVolunteerModal';
 import { ExportReportModal } from './components/ExportReportModal';
 import { CompareRecordModal } from './components/CompareRecordModal';
-
-import { volunteerService } from '../../services/volunteerService';
 
 export const VolunteerCoordinatorPortal = () => {
   const navigate = useNavigate();
@@ -297,14 +297,8 @@ export const VolunteerCoordinatorPortal = () => {
       <aside className="vc-sidebar">
         <div>
           {/* Brand Header */}
-          <div className="vc-brand-header">
-            <div className="vc-brand-icon-box">
-              <Shield size={18} />
-            </div>
-            <div>
-              <h2 className="vc-brand-title">RELIEFCORE</h2>
-              <p className="vc-brand-subtitle">Volunteer Coordination</p>
-            </div>
+          <div className="vc-brand-header" style={{ marginBottom: '16px' }}>
+            <HumanAidLogo variant="full" size="md" withContainer={true} />
           </div>
 
           {/* User Card with Duty Switcher */}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { HumanAidLogo } from '@/components/common/HumanAidLogo';
 import {
   LayoutDashboard,
   Users,
@@ -73,14 +74,8 @@ export const FundingSidebar = ({
     <aside className="fo-sidebar">
       {/* Brand Header */}
       <div className="fo-sidebar-header">
-        <div className="fo-brand-row">
-          <div className="fo-brand-logo-wrap">
-            <Layers size={20} />
-          </div>
-          <div className="fo-brand-text">
-            <span className="fo-brand-title">HumanAid</span>
-            <span className="fo-brand-sub">Response Coordination</span>
-          </div>
+        <div className="fo-brand-row" style={{ textDecoration: 'none' }}>
+          <HumanAidLogo variant="full" size="md" withContainer={true} />
         </div>
       </div>
 

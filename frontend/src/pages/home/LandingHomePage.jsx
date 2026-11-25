@@ -49,7 +49,7 @@ import {
 } from 'lucide-react';
 
 import westernProvinceMap from '../../assets/western-province-map-clean.png';
-import reliefcoreLogoWhite from '../../assets/reliefcore-logo-white-text.png';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 import { homeService } from '../../services/homeService';
 import Hero, { Animate, BAR_HEIGHTS } from '../../components/Hero';
 
@@ -212,6 +212,8 @@ export const LandingHomePage = () => {
   const roles = [
     {
       id: 'citizen',
+      role: 'Citizen',
+      roleId: 0,
       title: 'Citizen / Affected Person',
       desc: 'Submit urgent SOS assistance requests, find verified open shelters, and track real-time ticket progress.',
       path: '/citizen',
@@ -229,6 +231,8 @@ export const LandingHomePage = () => {
     },
     {
       id: 'coordinator',
+      role: 'Coordinator',
+      roleId: 1,
       title: 'Emergency Coordinator',
       desc: 'Live crisis overview, automated AI triage review, dynamic priority queues, and field incident command.',
       path: '/coordinator',
@@ -247,6 +251,8 @@ export const LandingHomePage = () => {
     },
     {
       id: 'incident-manager',
+      role: 'CaseManager',
+      roleId: 5,
       title: 'Incident / Case Manager',
       desc: 'Comprehensive incident dossiers, verification workflows, communication logs, and inter-agency coordination.',
       path: '/incident-manager',
@@ -264,6 +270,8 @@ export const LandingHomePage = () => {
     },
     {
       id: 'logistics',
+      role: 'LogisticsManager',
+      roleId: 2,
       title: 'Resource & Logistics Manager',
       desc: 'Central warehouse stockpiles, relief convoy allocation, medical supply reserves, and dispatch tracking.',
       path: '/logistics',
@@ -281,7 +289,9 @@ export const LandingHomePage = () => {
     },
     {
       id: 'shelter',
-      title: 'Shelter Management',
+      role: 'ShelterManager',
+      roleId: 6,
+      title: 'Shelter Management / Shelter Administrator',
       desc: 'High-ground relief center capacity, real-time bed availability counters, and evacuee intake allocation.',
       path: '/shelter',
       badge: 'Facility Ops',
@@ -298,7 +308,9 @@ export const LandingHomePage = () => {
     },
     {
       id: 'volunteer',
-      title: 'Volunteer Management',
+      role: 'Volunteer',
+      roleId: 3,
+      title: 'Volunteer Management / Field Volunteer',
       desc: 'Frontline responder rosters, task assignment dispatch, search & rescue coordination, and field check-ins.',
       path: '/volunteer',
       badge: 'Field Responders',
@@ -314,6 +326,8 @@ export const LandingHomePage = () => {
     },
     {
       id: 'volunteer-coordinator',
+      role: 'VolunteerCoordinator',
+      roleId: 7,
       title: 'Volunteer Coordinator',
       desc: 'Operational dashboard tracking volunteer readiness, task assignments, crisis coordination handoffs, and verification workflows.',
       path: '/volunteer-coordinator',
@@ -332,6 +346,8 @@ export const LandingHomePage = () => {
     },
     {
       id: 'donor',
+      role: 'DonorOfficer',
+      roleId: 8,
       title: 'Donor & Funding Management',
       desc: 'Controlled funding workspace, dual authorization allocations, monetary & in-kind records, transparency tracking, and emergency aid packages.',
       path: '/donor',
@@ -347,6 +363,8 @@ export const LandingHomePage = () => {
     },
     {
       id: 'partner',
+      role: 'PartnerOfficer',
+      roleId: 9,
       title: 'Partner Organisation Management',
       desc: 'NGO, Red Cross, and disaster relief agency partnerships, assigned operational zones, and resource commitments.',
       path: '/partner',
@@ -362,9 +380,11 @@ export const LandingHomePage = () => {
     },
     {
       id: 'admin',
+      role: 'Admin',
+      roleId: 4,
       title: 'System Administration',
       desc: 'Platform health telemetry, user RBAC permissions, audit trail oversight, and system security controls.',
-      path: '/login',
+      path: '/admin',
       badge: 'Administration',
       icon: Settings,
       color: '#6366f1',
@@ -442,13 +462,7 @@ export const LandingHomePage = () => {
       <Hero
         brandName="HumanAid"
         brandLogo={
-          <div className="flex items-center gap-2.5">
-            <img 
-              src={reliefcoreLogoWhite} 
-              alt="HumanAid Humanitarian Operations" 
-              className="h-[28px] sm:h-[32px] w-auto object-contain"
-            />
-          </div>
+          <HumanAidLogo variant="full" size="sm" withContainer={true} />
         }
         badgeTag={
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/70 backdrop-blur-[14px] border border-cyan-500/30 text-white/90 text-[12px] font-[450]">
@@ -1080,14 +1094,35 @@ export const LandingHomePage = () => {
           </div>
         </div>
 
-        {/* 12 Operational Role Workspaces Cards */}
+        {/* 10 Operational Role Workspaces Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {roles.map((r, i) => {
             const IconComponent = r.icon;
+            const handleCardClick = () => {
+              navigate('/login', {
+                state: {
+                  selectedRole: r.role,
+                  roleTitle: r.title,
+                  roleId: r.roleId,
+                  roleContext: r.id
+                }
+              });
+            };
+
             return (
               <div 
                 key={i} 
-                className="rounded-[24px] bg-slate-900/40 hover:bg-slate-900/70 backdrop-blur-[20px] border border-white/[0.08] hover:border-white/25 p-6 sm:p-7 transition-all duration-300 group flex flex-col justify-between shadow-[0_12px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)]"
+                onClick={handleCardClick}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleCardClick();
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Sign in as ${r.title}`}
+                className="rounded-[24px] bg-slate-900/40 hover:bg-slate-900/75 backdrop-blur-[20px] border border-white/[0.08] hover:border-white/30 p-6 sm:p-7 transition-all duration-300 group flex flex-col justify-between shadow-[0_12px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)] cursor-pointer hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-cyan-400/50 select-none"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -1106,8 +1141,7 @@ export const LandingHomePage = () => {
                   </div>
 
                   <h3 
-                    onClick={() => navigate(r.path)}
-                    className="text-white text-[19px] sm:text-[20px] font-[500] group-hover:text-sky-300 transition-colors cursor-pointer"
+                    className="text-white text-[19px] sm:text-[20px] font-[500] group-hover:text-sky-300 transition-colors"
                   >
                     {r.title}
                   </h3>
@@ -1115,22 +1149,16 @@ export const LandingHomePage = () => {
                     {r.desc}
                   </p>
 
-                  {/* Sub-links / Quick launch buttons to access each sub-page */}
+                  {/* Capabilities / Feature Tags */}
                   {r.sublinks && r.sublinks.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-4 pt-3 border-t border-white/[0.08]">
                       {r.sublinks.map((sub, sIdx) => (
-                        <button
+                        <span
                           key={sIdx}
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(sub.path);
-                          }}
-                          className="px-2.5 py-1 rounded-[8px] bg-white/[0.06] hover:bg-white/[0.16] text-white/80 hover:text-white text-[11px] font-[450] border border-white/[0.1] hover:border-white/25 transition-all cursor-pointer flex items-center gap-1 group/btn"
+                          className="px-2.5 py-1 rounded-[8px] bg-white/[0.06] text-white/70 text-[11px] font-[450] border border-white/[0.08] flex items-center gap-1 group-hover:text-white/90 group-hover:border-white/20 transition-all pointer-events-none"
                         >
                           <span>{sub.label}</span>
-                          <ArrowRight size={10} className="text-white/40 group-hover/btn:text-white group-hover/btn:translate-x-0.5 transition-all" />
-                        </button>
+                        </span>
                       ))}
                     </div>
                   )}
@@ -1139,14 +1167,12 @@ export const LandingHomePage = () => {
 
                 <div className="mt-5 pt-4 border-t border-white/[0.08] flex items-center justify-between">
                   <span className="text-[11.5px] text-white/50 line-clamp-1">{r.featured}</span>
-                  <button
-                    type="button"
-                    onClick={() => navigate(r.path)}
-                    className="h-[34px] px-4 rounded-[10px] bg-white/[0.08] hover:bg-white text-white hover:text-slate-900 text-[12.5px] font-[500] flex items-center gap-1.5 transition-all cursor-pointer border border-white/10 shrink-0 ml-2"
+                  <div
+                    className="h-[34px] px-4 rounded-[10px] bg-white/[0.08] group-hover:bg-white text-white group-hover:text-slate-900 text-[12.5px] font-[500] flex items-center gap-1.5 transition-all border border-white/10 shrink-0 ml-2"
                   >
-                    <span>Open Portal</span>
+                    <span>Sign In</span>
                     <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                  </button>
+                  </div>
                 </div>
               </div>
             );
@@ -1231,11 +1257,7 @@ export const LandingHomePage = () => {
             {/* Col 1: Brand */}
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2.5 mb-4">
-                <img 
-                  src={reliefcoreLogoWhite} 
-                  alt="HumanAid" 
-                  className="h-[28px] w-auto object-contain"
-                />
+                <HumanAidLogo variant="full" size="sm" withContainer={true} />
               </div>
               <p className="text-[13.5px] font-[450] text-white/60 max-w-[380px] leading-relaxed">
                 Autonomous humanitarian logistics & crisis coordination platform engineered for real-time disaster response across Sri Lanka.

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, useNavigationType, Link, Navigate } from 'react-router-dom';
 import {
   Mail,
   Lock,
@@ -8,51 +8,39 @@ import {
   ArrowRight,
   ArrowLeft,
   ChevronDown,
-  Globe
+  Globe,
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 import { authService } from '../../services/authService';
-import reliefcoreIcon from '../../assets/reliefcore-icon.png';
+import { HumanAidLogo, humanaidLogoIcon } from '../../components/common/HumanAidLogo';
+import {
+  ROLE_CONFIG,
+  getCanonicalRole,
+  getRoleDisplayTitle,
+  resolveAuthorizedRoute,
+  isRouteAllowedForRole
+} from '../../routes/roleNavigation';
 import './LoginPage.css';
 
 const resolvePostLoginRoute = (role, redirectParam) => {
-  if (redirectParam && typeof redirectParam === 'string' && redirectParam.startsWith('/') && !redirectParam.startsWith('/login')) {
-    return redirectParam;
+  let targetPath = '';
+  if (typeof redirectParam === 'string') {
+    targetPath = redirectParam;
+  } else if (redirectParam && typeof redirectParam.pathname === 'string') {
+    targetPath = redirectParam.pathname;
   }
 
-  const normalizedRole = (role || '').toString().trim().toLowerCase();
-  if (normalizedRole === 'admin' || normalizedRole === 'administrator' || normalizedRole === '4' || normalizedRole.includes('admin')) {
-    return '/admin';
+  if (targetPath && targetPath.startsWith('/') && !targetPath.startsWith('/login') && !targetPath.startsWith('/unauthorized')) {
+    // Only honor redirectParam if the user's authenticated role is genuinely authorized for it!
+    if (isRouteAllowedForRole(role, targetPath)) {
+      return targetPath;
+    }
   }
-  if (normalizedRole === 'volunteercoordinator' || normalizedRole.includes('volunteer coordinator') || normalizedRole === 'volunteermanager' || normalizedRole.includes('volunteer manager')) {
-    return '/volunteer-coordinator';
-  }
-  if (normalizedRole === 'coordinator' || normalizedRole === '1' || normalizedRole.includes('coordinator')) {
-    return '/coordinator';
-  }
-  if (normalizedRole === 'casemanager' || normalizedRole === 'incidentmanager' || normalizedRole === '8' || normalizedRole.includes('case manager') || normalizedRole.includes('incident')) {
-    return '/case-manager';
-  }
-  if (normalizedRole === 'sheltermanager' || normalizedRole === 'shelteradministrator' || normalizedRole === 'shelteradmin' || normalizedRole === '5' || normalizedRole.includes('shelter')) {
-    return '/shelter';
-  }
-  if (normalizedRole === 'logisticsmanager' || normalizedRole === '2' || normalizedRole.includes('logistics')) {
-    return '/logistics';
-  }
-  if (normalizedRole === 'volunteer' || normalizedRole === '3') {
-    return '/volunteer';
-  }
-  if (normalizedRole === 'donor' || normalizedRole === '6' || normalizedRole.includes('funding')) {
-    return '/donor';
-  }
-  if (normalizedRole === 'partner' || normalizedRole === '7' || normalizedRole.includes('partner')) {
-    return '/partner-officer';
-  }
-  if (normalizedRole === 'citizen' || normalizedRole === '0') {
-    return '/citizen';
-  }
-  return '/coordinator';
+
+  return resolveAuthorizedRoute(role);
 };
 
 export const LoginPage = () => {
@@ -63,13 +51,34 @@ export const LoginPage = () => {
   const [selectedLang, setSelectedLang] = useState('English');
   const [showLangMenu, setShowLangMenu] = useState(false);
 
-  const { login } = useAuth();
+  const { user, login, isAuthenticated } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
   const location = useLocation();
+  const navigationType = useNavigationType();
 
   const searchParams = new URLSearchParams(location.search);
   const redirectParam = searchParams.get('redirect') || location.state?.from;
+
+  const selectedRoleRaw = location.state?.selectedRole || searchParams.get('role') || '';
+  const canonicalSelectedRole = getCanonicalRole(selectedRoleRaw);
+  const selectedRoleConfig = canonicalSelectedRole ? ROLE_CONFIG[canonicalSelectedRole] : null;
+  const roleTitle = location.state?.roleTitle || (selectedRoleConfig ? selectedRoleConfig.title : (selectedRoleRaw || null));
+
+  // If already authenticated:
+  if (isAuthenticated && user) {
+    const canonicalCurrentRole = getCanonicalRole(user.role);
+    // If arriving via browser history pop, or no explicit different role was requested:
+    // Immediately redirect to authorized dashboard using replace navigation so back history cannot trap user.
+    if (navigationType === 'POP' || !canonicalSelectedRole || canonicalSelectedRole === canonicalCurrentRole) {
+      const authorizedRoute = resolveAuthorizedRoute(user.role);
+      return <Navigate to={authorizedRoute} replace />;
+    }
+  }
+
+  const handleClearRole = () => {
+    navigate('/login', { replace: true, state: {} });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,8 +90,21 @@ export const LoginPage = () => {
       });
       if (response?.succeeded && response?.data?.token) {
         login(response.data, rememberMe);
-        showAlert(response.message || 'Login successful', 'success');
-        const targetRoute = resolvePostLoginRoute(response.data.role, redirectParam);
+        const actualRole = response.data.role;
+        const actualCanonical = getCanonicalRole(actualRole);
+        const targetRoute = resolvePostLoginRoute(actualRole, redirectParam);
+
+        if (canonicalSelectedRole && actualCanonical && canonicalSelectedRole !== actualCanonical) {
+          const actualTitle = getRoleDisplayTitle(actualRole) || actualRole;
+          const expectedTitle = roleTitle || canonicalSelectedRole;
+          showAlert(
+            `Authenticated as ${actualTitle}. You have been redirected to your authorized workspace (${actualTitle}) instead of the requested ${expectedTitle}.`,
+            'info'
+          );
+        } else {
+          showAlert(response.message || 'Login successful', 'success');
+        }
+
         navigate(targetRoute, { replace: true });
       } else {
         showAlert(response?.errors?.[0] || response?.message || 'Invalid credentials', 'error');
@@ -131,15 +153,7 @@ export const LoginPage = () => {
           {/* Header */}
           <header className="flex items-center justify-between w-full">
             <Link to="/" className="flex items-center gap-3 no-underline group" title="Return to Homepage">
-              <img
-                src={reliefcoreIcon}
-                alt="HumanAid Response Coordination"
-                className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform"
-              />
-              <span className="font-semibold text-xl tracking-tight text-white">HumanAid</span>
-              <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-white/60 ml-1">
-                Response
-              </span>
+              <HumanAidLogo variant="full" size="sm" withContainer={true} />
             </Link>
 
             <Link
@@ -153,11 +167,11 @@ export const LoginPage = () => {
 
           {/* Hero Center */}
           <main className="flex-1 flex flex-col items-center justify-center text-center py-10 lg:py-14 px-2">
-            <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform">
+            <div className="w-20 h-20 mb-6 rounded-2xl liquid-glass flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
               <img
-                src={reliefcoreIcon}
+                src={humanaidLogoIcon}
                 alt="HumanAid Emblem"
-                className="w-13 h-13 object-contain"
+                className="w-16 h-16 object-contain rounded-xl"
               />
             </div>
 
@@ -252,6 +266,9 @@ export const LoginPage = () => {
 
           {/* Form Content */}
           <div className="w-full max-w-md mx-auto my-auto py-6">
+            <div className="mb-5 flex justify-center lg:justify-start">
+              <HumanAidLogo variant="full" size="md" withContainer={true} />
+            </div>
             <div className="mb-6 text-center lg:text-left">
               <h2 className="text-2xl sm:text-3xl font-[500] text-white tracking-[-0.03em]">
                 Welcome back
@@ -259,6 +276,38 @@ export const LoginPage = () => {
               <p className="text-xs sm:text-sm text-white/60 mt-1 font-normal">
                 Secure access to humanitarian crisis operations
               </p>
+              {isAuthenticated && user && (
+                <div className="mt-3 flex items-center justify-between px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs">
+                  <span className="text-amber-200/90 truncate">
+                    Currently signed in as <strong>{getRoleDisplayTitle(user.role) || user.role}</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => navigate(resolveAuthorizedRoute(user.role), { replace: true })}
+                    className="text-amber-400 hover:text-amber-300 font-semibold underline ml-2 shrink-0"
+                  >
+                    Go to Dashboard
+                  </button>
+                </div>
+              )}
+              {roleTitle && (
+                <div className="mt-3.5 flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.08] border border-white/15 text-xs shadow-inner">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse" />
+                    <span className="text-white/60 shrink-0">Selected Role:</span>
+                    <span className="text-white font-semibold truncate">{roleTitle}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleClearRole}
+                    className="text-white/50 hover:text-white transition-colors cursor-pointer text-[11px] font-medium ml-2 shrink-0 flex items-center gap-1 hover:underline"
+                    title="Clear selected role"
+                  >
+                    <X size={12} />
+                    <span>Clear</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -273,7 +322,7 @@ export const LoginPage = () => {
                     id="email-input"
                     className="w-full bg-transparent border-none outline-none text-white placeholder-white/30 text-sm font-display focus:ring-0"
                     type="email"
-                    placeholder="coordinator@humanaid.org"
+                    placeholder={selectedRoleConfig?.defaultEmail || "coordinator@humanaid.org"}
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required

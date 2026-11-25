@@ -3,6 +3,7 @@ import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { shelterService } from '../../services/shelterService';
+import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 import {
   LayoutGrid,
   Home,
@@ -457,14 +458,8 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
       <aside className="sh-sidebar">
         <div>
           {/* Brand Header */}
-          <div className="sh-brand-header">
-            <div className="sh-brand-icon-box">
-              <Shield size={18} />
-            </div>
-            <div>
-              <h2 className="sh-brand-title">HumanAid</h2>
-              <p className="sh-brand-subtitle">Response coordination</p>
-            </div>
+          <div className="sh-brand-header" style={{ marginBottom: '16px' }}>
+            <HumanAidLogo variant="full" size="md" withContainer={true} />
           </div>
 
           {/* User Profile Switcher Card */}

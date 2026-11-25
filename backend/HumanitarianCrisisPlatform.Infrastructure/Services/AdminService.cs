@@ -1,8 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using HumanitarianCrisisPlatform.Application.Common.Models;
 using HumanitarianCrisisPlatform.Application.DTOs.Admin;
+using HumanitarianCrisisPlatform.Application.Interfaces.Infrastructure;
 using HumanitarianCrisisPlatform.Application.Interfaces.Services;
 using HumanitarianCrisisPlatform.Domain.Entities;
 using HumanitarianCrisisPlatform.Domain.Enums;
@@ -15,12 +17,19 @@ namespace HumanitarianCrisisPlatform.Infrastructure.Services;
 public class AdminService : IAdminService
 {
     private readonly ApplicationDbContext _context;
+    private readonly INotificationService? _notificationService;
+    private readonly IConfiguration? _configuration;
     private static PlatformSettingsDto _settings = new();
     private static readonly DateTime _serverStartTime = DateTime.UtcNow;
 
-    public AdminService(ApplicationDbContext context)
+    public AdminService(
+        ApplicationDbContext context,
+        INotificationService? notificationService = null,
+        IConfiguration? configuration = null)
     {
         _context = context;
+        _notificationService = notificationService;
+        _configuration = configuration;
     }
 
     private async Task EnsureSeededAsync(CancellationToken cancellationToken)
@@ -32,6 +41,9 @@ public class AdminService : IAdminService
         {
             await DatabaseSeeder.SeedAsync(_context);
         }
+
+        // Always ensure predefined staff accounts exist and can authenticate
+        await DatabaseSeeder.EnsurePredefinedStaffAccountsAsync(_context);
     }
 
     // =========================================================================
@@ -291,6 +303,36 @@ public class AdminService : IAdminService
 
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Section 8: When an authorized administrator creates a new staff account,
+        // send an email notification to the configured project owner's email address.
+        if (user.Role != UserRole.Citizen && user.Role != UserRole.Volunteer && _notificationService != null)
+        {
+            try
+            {
+                var projectOwnerEmail = _configuration?["EmailNotifications:ProjectOwnerEmail"] ?? "owner@reliefcore.lk";
+                var subject = $"[RELIEFCORE] Staff Account Provisioned: {user.FullName} ({user.Role})";
+                var body = $@"Staff Account Provisioning Notification
+================================================================================
+Account Creation Confirmation:
+A new staff identity has been successfully created and saved in the database.
+
+Staff Full Name : {user.FullName}
+Staff Email     : {user.Email}
+Staff Role      : {user.Role}
+Assigned Area   : {user.AssignedDistrict ?? "General Operations"}
+Initial Password: {dto.Password}
+Account Status  : Active
+Created At (UTC): {DateTime.UtcNow:u}
+================================================================================";
+
+                await _notificationService.SendEmailAsync(projectOwnerEmail, subject, body, cancellationToken);
+            }
+            catch
+            {
+                // Non-fatal to account creation
+            }
+        }
 
         var resultDto = new AdminUserDto
         {
