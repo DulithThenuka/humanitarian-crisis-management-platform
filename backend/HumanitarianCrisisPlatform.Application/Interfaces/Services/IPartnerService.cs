@@ -17,5 +17,14 @@ public interface IPartnerService
     Task<Result<PartnerCommitmentDto>> UpdateCommitmentStatusAsync(Guid commitmentId, UpdateCommitmentStatusDto dto, string? userId, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<SectorZoneDto>>> GetSectorZonesAsync(CancellationToken cancellationToken = default);
     Task<Result<SectorZoneDto>> AssignPartnerToZoneAsync(AssignPartnerZoneDto dto, string? userId, CancellationToken cancellationToken = default);
+
+    // Partner Organisation Officer Specific Operations
+    Task<Result<PartnerOfficerDashboardDto>> GetOfficerDashboardAsync(string? organisation = null, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<PartnerRecordDto>>> GetOfficerRecordsAsync(string? status = null, string? search = null, string? operationalArea = null, CancellationToken cancellationToken = default);
+    Task<Result<PartnerRecordDto>> GetOfficerRecordByIdAsync(string id, CancellationToken cancellationToken = default);
+    Task<Result<PartnerRecordDto>> CreateOfficerRecordAsync(CreatePartnerRecordDto dto, string? officerName, CancellationToken cancellationToken = default);
+    Task<Result<PartnerRecordDto>> ProcessRecordActionAsync(string id, ProcessPartnerRecordActionDto dto, string? officerName, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<PartnerTimelineEntryDto>>> GetTimelineAsync(CancellationToken cancellationToken = default);
+    Task<Result<PartnerTimelineEntryDto>> AddTimelineEntryAsync(CreatePartnerTimelineEntryDto dto, string? officerName, CancellationToken cancellationToken = default);
 }
 

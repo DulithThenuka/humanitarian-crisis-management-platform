@@ -27,6 +27,7 @@ import { HumanAidLogo } from '../../components/common/HumanAidLogo';
 import {
   COORDINATOR_USER
 } from './data/coordinatorData';
+import { volunteerService } from '../../services/volunteerService';
 
 import { CoordinatorDashboardView } from './views/CoordinatorDashboardView';
 import { VolunteerDirectoryView } from './views/VolunteerDirectoryView';
@@ -38,8 +39,6 @@ import { VolunteerReportsView } from './views/VolunteerReportsView';
 import { CreateVolunteerModal } from './components/CreateVolunteerModal';
 import { ExportReportModal } from './components/ExportReportModal';
 import { CompareRecordModal } from './components/CompareRecordModal';
-
-import { volunteerService } from '../../services/volunteerService';
 
 export const VolunteerCoordinatorPortal = () => {
   const navigate = useNavigate();
