@@ -464,7 +464,7 @@ export const AIVolunteerMatchingView = ({
                     width: '100%',
                     padding: '10px',
                     justifyContent: 'center',
-                    backgroundColor: '#0c2340',
+                    backgroundColor: '#14291e',
                     color: '#ffffff',
                     display: 'inline-flex',
                     alignItems: 'center',

@@ -28,7 +28,7 @@ export const ROLE_CONFIG = {
     title: 'Resource & Logistics Manager',
     badge: 'SUPPLY CHAIN',
     defaultEmail: 'resource@reliefcore.lk',
-    targetRoute: '/logistics',
+    targetRoute: '/logistics/overview',
     aliases: ['logisticsmanager', 'resourcemanager', 'logistics', 'resource', '2']
   },
   ShelterManager: {
@@ -108,7 +108,7 @@ export const resolveAuthorizedRoute = (role) => {
     return '/incident-manager';
   }
   if (normalizedRole === 'logisticsmanager' || normalizedRole === 'resourcemanager' || normalizedRole === '2' || normalizedRole.includes('logistics') || normalizedRole.includes('resource')) {
-    return '/logistics';
+    return '/logistics/overview';
   }
   if (normalizedRole === 'sheltermanager' || normalizedRole === 'shelteradministrator' || normalizedRole === 'shelteradmin' || normalizedRole === '6' || normalizedRole.includes('shelter')) {
     return '/shelter';

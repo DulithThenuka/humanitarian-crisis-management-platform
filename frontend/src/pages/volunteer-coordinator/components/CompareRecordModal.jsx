@@ -41,7 +41,7 @@ export const CompareRecordModal = ({ isOpen, onClose, duplicateInfo }) => {
       <div className="vc-modal-content" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
         <div className="vc-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Scale size={18} style={{ color: '#0c2340' }} />
+            <Scale size={18} style={{ color: '#14291e' }} />
             <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#14291e' }}>
               Compare Suspected Duplicate / Related Records
             </h3>

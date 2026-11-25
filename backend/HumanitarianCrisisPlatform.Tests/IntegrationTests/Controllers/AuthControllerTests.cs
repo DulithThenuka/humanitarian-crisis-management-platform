@@ -1,11 +1,15 @@
 using Xunit;
+using Moq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using HumanitarianCrisisPlatform.API.Controllers;
 using HumanitarianCrisisPlatform.Application.Common.Models;
 using HumanitarianCrisisPlatform.Application.DTOs.Auth;
+using HumanitarianCrisisPlatform.Application.Interfaces.Services;
 using HumanitarianCrisisPlatform.Domain.Enums;
+using HumanitarianCrisisPlatform.Infrastructure.Data.Context;
+using HumanitarianCrisisPlatform.Infrastructure.Data.Seed;
 using HumanitarianCrisisPlatform.Tests.IntegrationTests.Infrastructure;
 using HumanitarianCrisisPlatform.Infrastructure.Security;
 
@@ -20,12 +24,18 @@ public class AuthControllerTests : IClassFixture<DatabaseFixture>
         _fixture = fixture;
     }
 
+    private AuthController CreateController(ApplicationDbContext context, JwtTokenGenerator tokenGen)
+    {
+        var notificationMock = new Mock<IAdminNotificationService>();
+        return new AuthController(context, tokenGen, notificationMock.Object);
+    }
+
     [Fact]
     public async Task Login_WithInvalidCredentials_ShouldReturnUnauthorized()
     {
         var context = _fixture.CreateContext();
         var tokenGen = new JwtTokenGenerator(_fixture.Configuration);
-        var controller = new AuthController(context, tokenGen);
+        var controller = CreateController(context, tokenGen);
 
         var result = await controller.Login(new LoginRequestDto
         {
@@ -42,8 +52,9 @@ public class AuthControllerTests : IClassFixture<DatabaseFixture>
     public async Task Login_WithSeededCoordinatorCredentials_ShouldReturnSuccessAndToken()
     {
         var context = _fixture.CreateContext();
+        await DatabaseSeeder.SeedAsync(context);
         var tokenGen = new JwtTokenGenerator(_fixture.Configuration);
-        var controller = new AuthController(context, tokenGen);
+        var controller = CreateController(context, tokenGen);
 
         var result = await controller.Login(new LoginRequestDto
         {
@@ -65,8 +76,9 @@ public class AuthControllerTests : IClassFixture<DatabaseFixture>
     public async Task Login_CaseInsensitiveEmail_ShouldSucceed()
     {
         var context = _fixture.CreateContext();
+        await DatabaseSeeder.SeedAsync(context);
         var tokenGen = new JwtTokenGenerator(_fixture.Configuration);
-        var controller = new AuthController(context, tokenGen);
+        var controller = CreateController(context, tokenGen);
 
         var result = await controller.Login(new LoginRequestDto
         {
@@ -87,7 +99,7 @@ public class AuthControllerTests : IClassFixture<DatabaseFixture>
     {
         var context = _fixture.CreateContext();
         var tokenGen = new JwtTokenGenerator(_fixture.Configuration);
-        var controller = new AuthController(context, tokenGen);
+        var controller = CreateController(context, tokenGen);
 
         var registerDto = new RegisterRequestDto
         {
@@ -124,8 +136,9 @@ public class AuthControllerTests : IClassFixture<DatabaseFixture>
     public async Task Register_DuplicateEmail_ShouldReturnBadRequest()
     {
         var context = _fixture.CreateContext();
+        await DatabaseSeeder.SeedAsync(context);
         var tokenGen = new JwtTokenGenerator(_fixture.Configuration);
-        var controller = new AuthController(context, tokenGen);
+        var controller = CreateController(context, tokenGen);
 
         var registerDto = new RegisterRequestDto
         {
@@ -148,8 +161,9 @@ public class AuthControllerTests : IClassFixture<DatabaseFixture>
     public async Task Login_WithCaseManagerCredentials_ShouldGenerateJwtValidatedByJwtBearer()
     {
         var context = _fixture.CreateContext();
+        await DatabaseSeeder.SeedAsync(context);
         var tokenGen = new JwtTokenGenerator(_fixture.Configuration);
-        var controller = new AuthController(context, tokenGen);
+        var controller = CreateController(context, tokenGen);
 
         var loginResponse = await controller.Login(new LoginRequestDto
         {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { shelterService } from '../../services/shelterService';
 import { HumanAidLogo } from '../../components/common/HumanAidLogo';
@@ -49,10 +49,15 @@ import './ShelterManager.css';
 export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
 
   // Navigation State
   const [activeTab, setActiveTab] = useState(initialTab);
+
+  // If user is unauthenticated, redirect to login
+  if (!isAuthenticated && !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   // Sync activeTab with URL route and props
   useEffect(() => {
@@ -448,8 +453,13 @@ export const ShelterAdminDashboard = ({ initialTab = 'dashboard' }) => {
     }
   };
 
-  const handleSignOut = () => {
-    navigate('/login');
+  const handleSignOut = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+    navigate('/login', { replace: true });
   };
 
   return (

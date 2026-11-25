@@ -366,10 +366,20 @@
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: left;
+  border-radius: 6px;
+  text-decoration: none;
 }
 
 .rm-signout-btn:hover {
   color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.rm-sidebar-divider {
+  height: 1px;
+  background-color: var(--rm-sidebar-border, rgba(255, 255, 255, 0.08));
+  margin: 6px 0;
+  width: 100%;
 }
 
 /* ==========================================================================

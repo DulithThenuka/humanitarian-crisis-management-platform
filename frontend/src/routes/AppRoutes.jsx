@@ -245,20 +245,36 @@ export const AppRoutes = () => {
       {/* ========================================================= */}
       {/* MODULE 4: Resource & Logistics Manager (/logistics/*)     */}
       {/* ========================================================= */}
-      <Route path="/logistics" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="inventory" /></ProtectedRoute>} />
-      <Route path="/logistics/dashboard" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="inventory" /></ProtectedRoute>} />
+      <Route path="/logistics" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="overview" /></ProtectedRoute>} />
+      <Route path="/logistics/overview" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="overview" /></ProtectedRoute>} />
+      <Route path="/logistics/dashboard" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="overview" /></ProtectedRoute>} />
       <Route path="/logistics/inventory" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><ResourceInventoryPage /></ProtectedRoute>} />
       <Route path="/logistics/dispatch" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><AllocationDispatchPage /></ProtectedRoute>} />
-      <Route path="/logistics/allocations" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><AllocationDispatchPage /></ProtectedRoute>} />
-      <Route path="/logistics/requests" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="requests" /></ProtectedRoute>} />
-      <Route path="/logistics/requisitions" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="requests" /></ProtectedRoute>} />
-      <Route path="/logistics/depots" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="depots" /></ProtectedRoute>} />
-      <Route path="/logistics/warehouses" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="depots" /></ProtectedRoute>} />
-      <Route path="/logistics/intake" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="intake" /></ProtectedRoute>} />
-      <Route path="/logistics/receiving" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="intake" /></ProtectedRoute>} />
-      <Route path="/resource-manager" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="inventory" /></ProtectedRoute>} />
-      <Route path="/resource-portal" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="inventory" /></ProtectedRoute>} />
-      <Route path="/resources" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="inventory" /></ProtectedRoute>} />
+      <Route path="/logistics/allocations" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="allocations" /></ProtectedRoute>} />
+      <Route path="/logistics/tracking" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="tracking" /></ProtectedRoute>} />
+      <Route path="/logistics/requests" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="allocations" /></ProtectedRoute>} />
+      <Route path="/logistics/requisitions" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="allocations" /></ProtectedRoute>} />
+      <Route path="/logistics/suppliers" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="suppliers" /></ProtectedRoute>} />
+      <Route path="/logistics/donations" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="suppliers" /></ProtectedRoute>} />
+      <Route path="/logistics/stock-alerts" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="stock-alerts" /></ProtectedRoute>} />
+      <Route path="/logistics/alerts" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="stock-alerts" /></ProtectedRoute>} />
+      <Route path="/logistics/reports" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="reports" /></ProtectedRoute>} />
+      <Route path="/logistics/activity" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="activity" /></ProtectedRoute>} />
+      <Route path="/logistics/notifications" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="notifications" /></ProtectedRoute>} />
+      <Route path="/logistics/profile" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="profile" /></ProtectedRoute>} />
+      <Route path="/logistics/depots" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="inventory" /></ProtectedRoute>} />
+      <Route path="/logistics/warehouses" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="inventory" /></ProtectedRoute>} />
+      <Route path="/logistics/intake" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="suppliers" /></ProtectedRoute>} />
+      <Route path="/logistics/receiving" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="suppliers" /></ProtectedRoute>} />
+
+      {/* Resource Manager Official Routes & Backward-Compatible Aliases */}
+      <Route path="/resource-manager" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="overview" /></ProtectedRoute>} />
+      <Route path="/resource-manager/overview" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="overview" /></ProtectedRoute>} />
+      <Route path="/resource-manager/dashboard" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="overview" /></ProtectedRoute>} />
+      <Route path="/resource-manager/inventory" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="inventory" /></ProtectedRoute>} />
+      <Route path="/resource-manager/*" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="overview" /></ProtectedRoute>} />
+      <Route path="/resource-portal" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="overview" /></ProtectedRoute>} />
+      <Route path="/resources" element={<ProtectedRoute allowedRoles={['LogisticsManager', 'ResourceManager', 'Coordinator', 'Admin']}><LogisticsPortalPage initialTab="overview" /></ProtectedRoute>} />
 
       {/* ========================================================= */}
       {/* MODULE 5: Shelter Management (/shelter/*)                 */}
