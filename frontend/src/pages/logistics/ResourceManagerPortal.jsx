@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 import { ResourceSidebar } from './components/ResourceSidebar';
 import { ResourceHeader } from './components/ResourceHeader';
@@ -29,9 +31,16 @@ import {
 } from './data/resourceManagerData';
 
 export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
+  const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [onDuty, setOnDuty] = useState(true);
   const [toastMessage, setToastMessage] = useState(null);
+
+  // If user is unauthenticated, redirect to login
+  if (!isAuthenticated && !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   // Live data states initialized with baseline prototypes
   const [metrics, setMetrics] = useState(OVERVIEW_METRICS);
@@ -409,6 +418,16 @@ export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
     showToast(`Replenishment reorder created for ${alert.item}`);
   };
 
+  const handleSignOut = async () => {
+    try {
+      showToast('Signing out of Resource Manager workspace...');
+      await logout();
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+    navigate('/login', { replace: true });
+  };
+
   return (
     <div className="rm-portal-container">
       {/* Deep Pine Green Sidebar */}
@@ -417,6 +436,7 @@ export const ResourceManagerPortal = ({ initialActiveTab = 'overview' }) => {
         onSelectTab={setActiveTab}
         onDutyToggle={handleDutyToggle}
         onDuty={onDuty}
+        onSignOut={handleSignOut}
       />
 
       {/* Main Workspace Canvas */}

@@ -1,4 +1,6 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { HumanAidLogo } from '@/components/common/HumanAidLogo';
 import {
   LayoutDashboard,
@@ -13,7 +15,8 @@ import {
   Settings,
   Shield,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  LogOut
 } from 'lucide-react';
 
 export const NAV_ITEMS = [
@@ -29,7 +32,33 @@ export const NAV_ITEMS = [
   { id: 'profile', label: 'Profile & Settings', icon: Settings }
 ];
 
-export const ResourceSidebar = ({ activeTab, onSelectTab, onDutyToggle, onDuty = true }) => {
+export const ResourceSidebar = ({
+  activeTab,
+  onSelectTab,
+  onDutyToggle,
+  onDuty = true,
+  onSignOut
+}) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOutClick = async (e) => {
+    e.preventDefault();
+    if (onSignOut) {
+      await onSignOut();
+      return;
+    }
+    try {
+      await logout();
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+    navigate('/login', { replace: true });
+  };
+
+  const officerName = user?.fullName || user?.name || 'Dilan Perera';
+  const officerAvatar = user?.initials || 'DP';
+
   return (
     <aside className="rm-sidebar">
       {/* Brand Header */}
@@ -41,11 +70,11 @@ export const ResourceSidebar = ({ activeTab, onSelectTab, onDutyToggle, onDuty =
         {/* Officer Duty Card */}
         <div className="rm-officer-card">
           <div className="rm-officer-info">
-            <div className="rm-officer-avatar">DP</div>
+            <div className="rm-officer-avatar">{officerAvatar}</div>
             <div className="rm-officer-meta">
               <span className="rm-officer-pre">SIGNED IN AS</span>
               <span className="rm-officer-role">Relief / Resource Manager</span>
-              <span className="rm-officer-name">Dilan Perera</span>
+              <span className="rm-officer-name">{officerName}</span>
             </div>
           </div>
           <div
@@ -94,11 +123,25 @@ export const ResourceSidebar = ({ activeTab, onSelectTab, onDutyToggle, onDuty =
           </p>
         </div>
 
-        {/* Exit Link */}
-        <a href="/" className="rm-signout-btn">
+        {/* Exit Resource Portal Option (retaining exact existing behavior) */}
+        <a href="/" className="rm-signout-btn" style={{ marginBottom: '4px' }}>
           <ChevronRight size={15} />
           <span>Exit resource portal</span>
         </a>
+
+        {/* Subtle Divider */}
+        <div className="rm-sidebar-divider" />
+
+        {/* Sign Out Menu Item */}
+        <button
+          type="button"
+          onClick={handleSignOutClick}
+          className="rm-signout-btn"
+          style={{ marginTop: '4px' }}
+        >
+          <LogOut size={15} />
+          <span>Sign out</span>
+        </button>
       </div>
     </aside>
   );
