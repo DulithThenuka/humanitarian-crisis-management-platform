@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ChevronDown, Bell, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Search, ChevronDown, Bell, CheckCircle2, AlertTriangle, RefreshCw, LogOut } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { COORDINATOR_USER } from '../data/coordinatorPortalData';
 import './CoordinatorHeader.css';
@@ -16,7 +16,16 @@ export const CoordinatorHeader = ({
   coordinator
 }) => {
   const navigate = useNavigate();
-  const { user: authUser } = useAuth();
+  const { user: authUser, logout } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.warn('Sign out error:', err);
+    }
+    navigate('/', { replace: true });
+  };
 
   const activeUser = coordinator || authUser;
   const fullName = activeUser?.fullName || activeUser?.name || COORDINATOR_USER.fullName;
@@ -130,6 +139,16 @@ export const CoordinatorHeader = ({
               <span className="ec-profile-role">{role} &gt;</span>
             </div>
           </div>
+
+          <button
+            type="button"
+            className="ec-header-signout-btn"
+            onClick={handleSignOut}
+            title="Sign out of Emergency Coordinator session"
+          >
+            <LogOut size={14} />
+            <span>Sign out</span>
+          </button>
         </div>
       </header>
 

@@ -5,7 +5,8 @@ export const DuplicateInspectModal = ({
   isOpen,
   onClose,
   onMarkDistinct,
-  currentCase
+  currentCase,
+  duplicateCandidate
 }) => {
   if (!isOpen) return null;
 
@@ -15,11 +16,12 @@ export const DuplicateInspectModal = ({
   const people = currentCase?.affectedPeople ? `${currentCase.affectedPeople} people` : '6 people';
   const submittedAt = currentCase?.submittedAt || '18 Feb 09:34';
 
-  const duplicateId = currentCase?.id === 'HMR-1039' ? 'HMR-1042' : 'HMR-1018';
-  const duplicateCategory = currentCase?.id === 'HMR-1039' ? 'Medical Assistance' : 'Shelter Request';
-  const duplicateLocation = currentCase?.id === 'HMR-1039' ? 'Wattala Central (950m away)' : 'Kelani East · Zone 02 (800m away)';
-  const duplicatePeople = currentCase?.id === 'HMR-1039' ? '12 patients' : '4 people (1 elder)';
-  const duplicateTime = '17 Feb 21:10';
+  const duplicateId = duplicateCandidate?.matchId || (currentCase?.id === 'HMR-1042' ? 'HMR-1039' : currentCase?.id === 'HMR-1039' ? 'HMR-1042' : 'HMR-1039');
+  const duplicateCategory = duplicateCandidate?.matchCategory || (duplicateId === 'HMR-1039' ? 'Medicine / Medical Assistance' : 'Emergency Shelter');
+  const duplicateLocation = duplicateCandidate?.matchDesc || (duplicateId === 'HMR-1039' ? 'Wattala Central (adjacent sector, [6.9890, 79.8910])' : 'Kelani East · Zone 02');
+  const duplicatePeople = duplicateCandidate?.affectedPeople ? `${duplicateCandidate.affectedPeople} occupants` : (duplicateId === 'HMR-1039' ? '12 patients' : '4 people');
+  const duplicateTime = 'Active Incident Record';
+  const similarityText = duplicateCandidate?.similarity || '22% category and geographic overlap';
 
   return (
     <div className="ec-modal-overlay" onClick={onClose}>

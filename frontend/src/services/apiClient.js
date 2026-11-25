@@ -36,10 +36,32 @@ export const isValidJwtToken = (rawToken) => {
 };
 
 export const clearStoredAuth = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('user');
+  try {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('activeRole');
+    localStorage.removeItem('selectedRole');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('activeRole');
+    sessionStorage.removeItem('selectedRole');
+  } catch (err) {
+    console.warn('Storage cleanup warning:', err);
+  }
+
+  // Clear any potential authentication cookies on path / and /api
+  if (typeof document !== 'undefined' && document.cookie) {
+    const cookies = document.cookie.split(';');
+    cookies.forEach((c) => {
+      const eqPos = c.indexOf('=');
+      const name = eqPos > -1 ? c.substring(0, eqPos).trim() : c.trim();
+      if (name) {
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/api`;
+      }
+    });
+  }
+
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('humanaid:auth-cleared'));
   }

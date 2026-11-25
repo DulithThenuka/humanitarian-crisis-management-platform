@@ -98,14 +98,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(async () => {
+    clearStoredAuth();
+    setToken(null);
+    setUser(null);
     try {
       await authService.logout();
     } catch {
       // Proceed with local session cleanup even if backend is offline
     }
-    clearStoredAuth();
-    setToken(null);
-    setUser(null);
   }, []);
 
   const isAuthenticated = Boolean(token && isValidJwtToken(token));

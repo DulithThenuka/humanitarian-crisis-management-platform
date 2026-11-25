@@ -63,7 +63,8 @@ import {
   Award,
   TrendingDown,
   Target,
-  Clock
+  Clock,
+  LogOut
 } from 'lucide-react';
 
 import { adminService } from '../../services/adminService';
@@ -1980,6 +1981,38 @@ RELIEFCORE PLATFORM TELEMETRY v1.4.2
               </div>
             </div>
           </div>
+          <button
+            type="button"
+            className="adm-ss-signout-btn"
+            onClick={async () => {
+              try {
+                await logout();
+              } catch (err) {
+                console.warn('Admin logout error:', err);
+              }
+              navigate('/', { replace: true });
+            }}
+            title="Sign out of System Administrator session"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              width: '100%',
+              padding: '8px 12px',
+              marginTop: '8px',
+              background: 'rgba(220, 38, 38, 0.12)',
+              border: '1px solid rgba(220, 38, 38, 0.28)',
+              borderRadius: '8px',
+              color: '#fca5a5',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <LogOut size={14} />
+            <span>Sign out</span>
+          </button>
         </div>
       </aside>
 

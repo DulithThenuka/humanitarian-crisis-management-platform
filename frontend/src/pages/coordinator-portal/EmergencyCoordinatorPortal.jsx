@@ -6,6 +6,9 @@ import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 // API Services
 import coordinatorService from '../../services/coordinatorService';
 import incidentService from '../../services/incidentService';
+import { shelterService } from '../../services/shelterService';
+import { resourceService } from '../../services/resourceService';
+import { aiGovernanceService } from '../../services/aiGovernanceService';
 
 // Data
 import {
@@ -73,6 +76,8 @@ export const EmergencyCoordinatorPortal = ({
   const [isLive, setIsLive] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [alerts, setAlerts] = useState([]);
+  const [shelters, setShelters] = useState([]);
+  const [resources, setResources] = useState([]);
 
   // Controls & HUD
   const [autoNextEnabled, setAutoNextEnabled] = useState(false);
@@ -90,6 +95,7 @@ export const EmergencyCoordinatorPortal = ({
   const [previewImageSrc, setPreviewImageSrc] = useState(null);
 
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateCandidate, setDuplicateCandidate] = useState(null);
   const [showCreateIncidentModal, setShowCreateIncidentModal] = useState(false);
   const [showCreateAlertModal, setShowCreateAlertModal] = useState(false);
 
@@ -283,6 +289,22 @@ export const EmergencyCoordinatorPortal = ({
       }
     } catch (err) {
       console.warn('Emergency alerts API offline:', err.message || err);
+    }
+
+    try {
+      const shelterRes = await shelterService.getAll();
+      const rawShelters = Array.isArray(shelterRes) ? shelterRes : (shelterRes?.data || []);
+      setShelters(rawShelters);
+    } catch (err) {
+      console.warn('Shelters API fetch note:', err.message || err);
+    }
+
+    try {
+      const resRes = await resourceService.getInventory();
+      const rawResources = Array.isArray(resRes) ? resRes : (resRes?.data || []);
+      setResources(rawResources);
+    } catch (err) {
+      console.warn('Resources API fetch note:', err.message || err);
     }
   }, [coordinatorUser.fullName, selectedCaseId]);
 
@@ -589,7 +611,19 @@ export const EmergencyCoordinatorPortal = ({
     const targetCase = cases.find(c => c.id === caseId) || currentCase;
     const appliedPriority = decisionType === 'accept' ? (targetCase?.severity || 'High') : finalPriority;
 
-    // 1. Attempt backend incident AI review endpoint
+    // 0. Attempt backend AI decision service endpoint (/api/aireview/decision)
+    try {
+      await aiGovernanceService.recordDecision({
+        caseId: caseId,
+        decision: decisionType === 'accept' ? 'Approve' : decisionType === 'adjust' ? 'Modify' : 'Reject',
+        reason: reason,
+        overriddenPriority: decisionType === 'adjust' ? appliedPriority : null
+      });
+    } catch (err) {
+      console.warn('AI governance decision endpoint note:', err.message);
+    }
+
+    // 1. Attempt backend incident AI review endpoint (/api/incidents/{id}/ai-review/decision)
     try {
       await incidentService.recordAIReviewDecision(caseId, {
         decision: decLabel,
@@ -853,7 +887,10 @@ export const EmergencyCoordinatorPortal = ({
             onSelectCase={setSelectedCaseId}
             currentCase={currentCase}
             onOpenCaseReview={handleOpenCaseReview}
-            onInspectDuplicate={() => setShowDuplicateModal(true)}
+            onInspectDuplicate={(candidate) => {
+              setDuplicateCandidate(candidate);
+              setShowDuplicateModal(true);
+            }}
             onAcceptRecommendation={handleAcceptAIRecommendation}
             onRecordAIDecision={handleRecordAIDecision}
             aiReviewed={aiReviewed}
@@ -868,6 +905,8 @@ export const EmergencyCoordinatorPortal = ({
             selectedIncidentId={selectedIncidentId}
             setSelectedIncidentId={setSelectedIncidentId}
             currentIncident={currentIncident}
+            shelters={shelters}
+            resources={resources}
             onOpenCreateIncidentModal={() => setShowCreateIncidentModal(true)}
             onNavigateTab={setActiveTab}
             showToast={showToast}
@@ -963,6 +1002,9 @@ export const EmergencyCoordinatorPortal = ({
             cases={cases}
             recentActivity={recentActivity}
             alerts={alerts}
+            shelters={shelters}
+            resources={resources}
+            crises={incidents}
             onOpenCaseReview={handleOpenCaseReview}
             onNavigateTab={setActiveTab}
             onOpenAlertModal={() => setShowCreateAlertModal(true)}
@@ -988,6 +1030,7 @@ export const EmergencyCoordinatorPortal = ({
         isOpen={showDuplicateModal}
         onClose={() => setShowDuplicateModal(false)}
         currentCase={currentCase}
+        duplicateCandidate={duplicateCandidate}
         onMarkDistinct={() => {
           setShowDuplicateModal(false);
           showToast('Marked as verified distinct case (non-duplicate)');

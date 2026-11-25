@@ -1,23 +1,70 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Plus,
-  Minus,
-  Navigation,
   Search,
   MapPin,
-  AlertTriangle
+  AlertTriangle,
+  Layers,
+  Filter
 } from 'lucide-react';
+import { CoordinatorInteractiveMap } from '../components/CoordinatorInteractiveMap';
 
 export const CrisisManagementView = ({
-  incidents,
+  incidents = [],
   selectedIncidentId,
   setSelectedIncidentId,
   currentIncident,
+  shelters = [],
+  resources = [],
   onOpenCreateIncidentModal,
   onNavigateTab,
   showToast
 }) => {
-  const activeIncident = currentIncident || (incidents && incidents.length > 0 ? incidents[0] : null);
+  // Filter States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [severityFilter, setSeverityFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Filtered Incidents based on Search, Severity & Status
+  const filteredIncidents = useMemo(() => {
+    return (incidents || []).filter(inc => {
+      // 1. Search Query
+      if (searchQuery && searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const titleMatch = (inc.title || '').toLowerCase().includes(q);
+        const idMatch = (inc.id || '').toLowerCase().includes(q);
+        const areaMatch = (inc.area || '').toLowerCase().includes(q);
+        if (!titleMatch && !idMatch && !areaMatch) return false;
+      }
+
+      // 2. Severity Filter
+      if (severityFilter !== 'all') {
+        const sev = (inc.severity || '').toLowerCase();
+        if (severityFilter === 'critical' && sev !== 'critical') return false;
+        if (severityFilter === 'high' && sev !== 'high') return false;
+        if (severityFilter === 'medium' && sev !== 'medium' && sev !== 'moderate') return false;
+      }
+
+      // 3. Status Filter
+      if (statusFilter !== 'all') {
+        const stat = (inc.currentStatus || inc.status || '').toLowerCase();
+        const isResolved = stat.includes('resolved') || stat.includes('closed');
+        if (statusFilter === 'active' && isResolved) return false;
+        if (statusFilter === 'resolved' && !isResolved) return false;
+      }
+
+      return true;
+    });
+  }, [incidents, searchQuery, severityFilter, statusFilter]);
+
+  // Active Incident Selection
+  const activeIncident = useMemo(() => {
+    if (selectedIncidentId) {
+      const match = (incidents || []).find(i => i.id === selectedIncidentId);
+      if (match) return match;
+    }
+    return currentIncident || (filteredIncidents.length > 0 ? filteredIncidents[0] : (incidents[0] || null));
+  }, [selectedIncidentId, incidents, currentIncident, filteredIncidents]);
 
   return (
     <div className="ec-portal-canvas">
@@ -27,7 +74,7 @@ export const CrisisManagementView = ({
           <span className="ec-breadcrumb-tiny">INCIDENT COMMAND</span>
           <h2 className="ec-review-main-title">Crisis &amp; Incident Management</h2>
           <p className="ec-review-sub-meta">
-            Monitor active incidents, related requests, response teams and unresolved issues.
+            Live database incident command · Real geographic positioning &amp; operational resource synchronization.
           </p>
         </div>
         <button
@@ -48,17 +95,29 @@ export const CrisisManagementView = ({
               type="text"
               placeholder="Search incidents or locations..."
               className="ec-search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="ec-req-filter-group">
-            <select className="ec-filter-dropdown-btn">
-              <option>All severities</option>
-              <option>High severity</option>
-              <option>Medium severity</option>
+            <select
+              className="ec-filter-dropdown-btn"
+              value={severityFilter}
+              onChange={(e) => setSeverityFilter(e.target.value)}
+            >
+              <option value="all">All severities</option>
+              <option value="critical">Critical severity</option>
+              <option value="high">High severity</option>
+              <option value="medium">Medium severity</option>
             </select>
-            <select className="ec-filter-dropdown-btn">
-              <option>Active incidents</option>
-              <option>Resolved</option>
+            <select
+              className="ec-filter-dropdown-btn"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All incident status</option>
+              <option value="active">Active incidents</option>
+              <option value="resolved">Resolved / Closed</option>
             </select>
           </div>
         </div>
@@ -67,112 +126,79 @@ export const CrisisManagementView = ({
       {/* Upper Grid: Incidents List + Interactive Map */}
       <div className="ec-crisis-upper-grid">
         {/* Left Column: Incidents Cards List */}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {(incidents || []).map((inc) => (
-            <div
-              key={inc.id}
-              className={`ec-incident-card ${inc.id === selectedIncidentId ? 'active' : ''}`}
-              onClick={() => setSelectedIncidentId(inc.id)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span className="ec-meta-label-tiny">{inc.id}</span>
-                <span className={inc.severity === 'High' || inc.severity === 'Critical' ? 'ec-badge-critical' : 'ec-badge-high'}>
-                  ● {inc.severity || 'High'}
-                </span>
-              </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#14291e', marginBottom: '4px' }}>
-                {inc.title}
-              </div>
-              <div style={{ fontSize: '11.5px', color: '#657367', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
-                <MapPin size={12} color="#3d6b4f" />
-                <span>{inc.area}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <span className="ec-resource-tag-pill">{inc.stats}</span>
-              </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '420px', overflowY: 'auto' }}>
+          {filteredIncidents.length === 0 ? (
+            <div style={{
+              padding: '28px 16px',
+              textAlign: 'center',
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #dfe5d8',
+              color: '#657367',
+              fontSize: '13px'
+            }}>
+              No incidents match the active search or filter criteria.
             </div>
-          ))}
+          ) : (
+            filteredIncidents.map((inc) => (
+              <div
+                key={inc.id}
+                className={`ec-incident-card ${inc.id === activeIncident?.id ? 'active' : ''}`}
+                onClick={() => setSelectedIncidentId && setSelectedIncidentId(inc.id)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span className="ec-meta-label-tiny">{inc.id}</span>
+                  <span className={(inc.severity || '').toLowerCase() === 'critical' ? 'ec-badge-critical' : 'ec-badge-high'}>
+                    ● {inc.severity || 'High'}
+                  </span>
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: 800, color: '#14291e', marginBottom: '4px' }}>
+                  {inc.title}
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#657367', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+                  <MapPin size={12} color="#3d6b4f" />
+                  <span>{inc.area}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span className="ec-resource-tag-pill">{inc.stats}</span>
+                  {inc.parsedLat || (typeof (inc.lat ?? inc.latitude) === 'number') ? (
+                    <span style={{ fontSize: '10.5px', color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
+                      ✓ Geocoded
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '10.5px', color: '#d97706', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
+                      ⚠ No coords
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
-        {/* Right Column: Crisis Map Viewport */}
-        <div className="ec-panel-card" style={{ padding: '12px' }}>
-          <div className="ec-map-viewport" style={{ height: '340px' }}>
-            <svg className="ec-map-svg-canvas" viewBox="0 0 600 340">
-              <defs>
-                <pattern id="crisisGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#d5e3f0" strokeWidth="0.8" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#crisisGrid)" />
-
-              {/* Flood Channel */}
-              <path
-                d="M -20 200 Q 150 170 300 220 T 620 190"
-                fill="none"
-                stroke="#b8ccaa"
-                strokeWidth="28"
-                opacity="0.8"
-              />
-
-              {/* Crisis Hazard Zone */}
-              <circle cx="210" cy="150" r="70" fill="#ef4444" fillOpacity="0.16" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4 3" />
-              <circle cx="210" cy="150" r="42" fill="#ef4444" fillOpacity="0.25" />
-
-              {/* Hazard Pill */}
-              <g transform="translate(182, 138)">
-                <rect width="64" height="20" rx="4" fill="#dc2626" />
-                <text x="32" y="14" fill="#ffffff" fontSize="9.5" fontWeight="bold" textAnchor="middle">
-                  ▲ 17 critical
-                </text>
-              </g>
-
-              {/* Resource Depot Marker */}
-              <g transform="translate(370, 110)">
-                <rect width="84" height="20" rx="4" fill="#3d6b4f" />
-                <text x="42" y="14" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
-                  RES-021 · 240
-                </text>
-              </g>
-
-              {/* Shelter Marker */}
-              <g transform="translate(340, 240)">
-                <rect width="96" height="20" rx="4" fill="#0a192f" />
-                <text x="48" y="14" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
-                  SH-008 · 36 spaces
-                </text>
-              </g>
-            </svg>
-
-            {/* Controls */}
-            <div className="ec-map-controls-dock">
-              <button className="ec-map-zoom-btn" onClick={() => showToast('Zoomed in')}>
-                <Plus size={14} />
-              </button>
-              <button className="ec-map-zoom-btn" onClick={() => showToast('Zoomed out')}>
-                <Minus size={14} />
-              </button>
-              <button className="ec-map-zoom-btn" onClick={() => showToast('Centered on incident location')}>
-                <Navigation size={12} />
-              </button>
-            </div>
-
-            {/* Layers Dock */}
-            <div className="ec-map-layers-dock">
-              <span className="ec-meta-label-tiny" style={{ marginBottom: '2px' }}>Visible layers</span>
-              <div className="ec-layer-item">
-                <span style={{ color: '#ef4444' }}>●</span>
-                <span>Critical requests</span>
-              </div>
-              <div className="ec-layer-item">
-                <span style={{ color: '#10b981' }}>●</span>
-                <span>Verified shelters</span>
-              </div>
-              <div className="ec-layer-item">
-                <span style={{ color: '#3d6b4f' }}>●</span>
-                <span>Resource depots</span>
-              </div>
-            </div>
+        {/* Right Column: Real Geographic Leaflet Map */}
+        <div className="ec-panel-card" style={{ padding: '12px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: '#14291e' }}>
+              INCIDENT GEOSPATIAL MAP
+            </span>
+            <span style={{ fontSize: '11px', color: '#657367' }}>
+              {filteredIncidents.length} active in view · Synchronized with queue
+            </span>
           </div>
+
+          <CoordinatorInteractiveMap
+            height="360px"
+            mode="incident"
+            cases={filteredIncidents}
+            shelters={shelters}
+            resources={resources}
+            crises={incidents}
+            selectedIncidentId={activeIncident?.id}
+            onSelectIncident={setSelectedIncidentId}
+            onNavigateTab={onNavigateTab}
+          />
         </div>
       </div>
 
@@ -188,7 +214,9 @@ export const CrisisManagementView = ({
                 {activeIncident.id} · Lead team: {activeIncident.leadTeam || 'National Relief Unit'}
               </div>
             </div>
-            <span className="ec-badge-critical">● {activeIncident.severity || 'High'} severity</span>
+            <span className={(activeIncident.severity || '').toLowerCase() === 'critical' ? 'ec-badge-critical' : 'ec-badge-high'}>
+              ● {activeIncident.severity || 'High'} severity
+            </span>
           </div>
 
           {/* 4-Item Metric Quad */}
@@ -202,7 +230,7 @@ export const CrisisManagementView = ({
               <span
                 className="ec-meta-val-text"
                 style={{ color: '#3d6b4f', cursor: 'pointer', textDecoration: 'underline' }}
-                onClick={() => onNavigateTab('requests')}
+                onClick={() => onNavigateTab && onNavigateTab('requests')}
               >
                 {activeIncident.relatedRequests || 'Open'}
               </span>
@@ -240,7 +268,7 @@ export const CrisisManagementView = ({
                       <div className="ec-meter-track">
                         <div
                           className={iss.severity === 'Critical' ? 'ec-meter-fill-red' : 'ec-meter-fill-amber'}
-                          style={{ width: `${iss.percentage}%` }}
+                          style={{ width: `${iss.percentage || 60}%` }}
                         />
                       </div>
                     </div>
@@ -283,19 +311,19 @@ export const CrisisManagementView = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #eef1ea' }}>
             <button
               className="ec-btn-hero-outline"
-              onClick={() => showToast('Update log form opened')}
+              onClick={() => showToast && showToast('Update log form opened')}
             >
               Record update
             </button>
             <button
               className="ec-btn-hero-outline"
-              onClick={() => onNavigateTab('requests')}
+              onClick={() => onNavigateTab && onNavigateTab('requests')}
             >
               Link requests
             </button>
             <button
               className="ec-btn-hero-primary"
-              onClick={() => showToast('Incident escalated to National Disaster Management Center (DMC)', 'warning')}
+              onClick={() => showToast && showToast('Incident escalated to National Disaster Management Center (DMC)', 'warning')}
             >
               Escalate incident
             </button>

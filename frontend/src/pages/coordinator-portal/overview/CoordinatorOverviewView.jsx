@@ -21,6 +21,7 @@ import {
   RESPONSE_PERFORMANCE,
   EMERGENCY_ALERTS
 } from '../data/coordinatorPortalData';
+import { CoordinatorInteractiveMap } from '../components/CoordinatorInteractiveMap';
 import './CoordinatorOverviewView.css';
 
 export const CoordinatorOverviewView = ({
@@ -28,6 +29,9 @@ export const CoordinatorOverviewView = ({
   cases,
   recentActivity,
   alerts,
+  shelters = [],
+  resources = [],
+  crises = [],
   onOpenCaseReview,
   onNavigateTab,
   onOpenAlertModal,
@@ -193,95 +197,30 @@ export const CoordinatorOverviewView = ({
 
       {/* Regional Crisis Map + Priority Cases Row */}
       <div className="ec-grid-map-and-cases">
-        {/* Left: Map */}
+        {/* Left: Interactive Regional Crisis Map */}
         <div className="ec-panel-card">
           <div className="ec-panel-card-head">
             <div>
               <h3 className="ec-panel-title-text">Regional crisis overview</h3>
-              <p className="ec-panel-subtitle-text">{isLive ? 'Sector operational map · Active crisis zones' : 'Illustrative incident markers - not live tracking'}</p>
+              <p className="ec-panel-subtitle-text">
+                {isLive ? 'Live Database Geospatial Map · Western Province & Hazard Sectors' : 'Geographic Operations Map · Synchronized with Live Backend'}
+              </p>
             </div>
-            <button className="ec-panel-link-btn" onClick={() => navigate('/map')}>
-              Open crisis map
+            <button className="ec-panel-link-btn" onClick={() => onNavigateTab ? onNavigateTab('crisis') : navigate('/map')}>
+              Open incident map
             </button>
           </div>
 
-          <div className="ec-map-viewport">
-            <svg className="ec-map-svg-canvas" viewBox="0 0 600 280">
-              <defs>
-                <pattern id="gridPatternOverview" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#d5e3f0" strokeWidth="0.8" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#gridPatternOverview)" />
-
-              {/* River Corridor */}
-              <path
-                d="M -20 180 Q 150 160 300 200 T 620 170"
-                fill="none"
-                stroke="#b8ccaa"
-                strokeWidth="24"
-                opacity="0.8"
-              />
-
-              {/* Crisis Hazard Circle Overlay */}
-              <circle cx="210" cy="140" r="65" fill="#ef4444" fillOpacity="0.16" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4 3" />
-              <circle cx="210" cy="140" r="38" fill="#ef4444" fillOpacity="0.25" />
-
-              {/* Hazard Badge Pill */}
-              <g transform="translate(182, 128)">
-                <rect width="64" height="20" rx="4" fill="#dc2626" />
-                <text x="32" y="14" fill="#ffffff" fontSize="9.5" fontWeight="bold" textAnchor="middle">
-                  ▲ 17 critical
-                </text>
-              </g>
-
-              {/* Resource Depot Marker */}
-              <g transform="translate(350, 95)">
-                <rect width="84" height="20" rx="4" fill="#3d6b4f" />
-                <text x="42" y="14" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
-                  RES-021 · 240
-                </text>
-              </g>
-
-              {/* Shelter Marker */}
-              <g transform="translate(330, 215)">
-                <rect width="96" height="20" rx="4" fill="#0a192f" />
-                <text x="48" y="14" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
-                  SH-008 · 36 spaces
-                </text>
-              </g>
-            </svg>
-
-            {/* Map Controls */}
-            <div className="ec-map-controls-dock">
-              <button className="ec-map-zoom-btn" onClick={() => setMapZoom(prev => Math.min(prev + 0.2, 2))}>
-                <Plus size={14} />
-              </button>
-              <button className="ec-map-zoom-btn" onClick={() => setMapZoom(prev => Math.max(prev - 0.2, 0.8))}>
-                <Minus size={14} />
-              </button>
-              <button className="ec-map-zoom-btn" onClick={() => showToast('Centered map on Western Province HQ')}>
-                <Navigation size={12} />
-              </button>
-            </div>
-
-            {/* Layers Pill */}
-            <div className="ec-map-layers-dock">
-              <span className="ec-meta-label-tiny" style={{ marginBottom: '2px' }}>Visible layers</span>
-              <div className="ec-layer-item">
-                <span style={{ color: '#ef4444' }}>●</span>
-                <span>Critical requests</span>
-              </div>
-              <div className="ec-layer-item">
-                <span style={{ color: '#10b981' }}>●</span>
-                <span>Verified shelters</span>
-              </div>
-              <div className="ec-layer-item">
-                <span style={{ color: '#3d6b4f' }}>●</span>
-                <span>Resource depots</span>
-              </div>
-            </div>
-          </div>
+          <CoordinatorInteractiveMap
+            height="290px"
+            cases={cases}
+            shelters={shelters}
+            resources={resources}
+            crises={crises}
+            onOpenCaseReview={onOpenCaseReview}
+            onNavigateTab={onNavigateTab}
+            mode="overview"
+          />
         </div>
 
         {/* Right: Priority Cases List */}

@@ -60,7 +60,16 @@ import './VolunteerPortal.css';
 export const VolunteerPortal = ({ initialTab = 'overview' }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user: authUser } = useAuth();
+  const { user: authUser, logout } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.warn('Volunteer logout error:', err);
+    }
+    navigate('/', { replace: true });
+  };
 
   // Navigation State
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -672,9 +681,9 @@ export const VolunteerPortal = ({ initialTab = 'overview' }) => {
             </p>
           </div>
 
-          <button className="vol-signout-btn" onClick={() => navigate('/dashboard')}>
+          <button className="vol-signout-btn" onClick={handleSignOut} title="Sign out of Volunteer session">
             <LogOut size={14} />
-            <span>Exit volunteer portal</span>
+            <span>Sign out</span>
           </button>
         </div>
       </aside>

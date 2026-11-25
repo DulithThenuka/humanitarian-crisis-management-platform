@@ -67,10 +67,9 @@ export const LoginPage = () => {
 
   // If already authenticated:
   if (isAuthenticated && user) {
-    const canonicalCurrentRole = getCanonicalRole(user.role);
-    // If arriving via browser history pop, or no explicit different role was requested:
-    // Immediately redirect to authorized dashboard using replace navigation so back history cannot trap user.
-    if (navigationType === 'POP' || !canonicalSelectedRole || canonicalSelectedRole === canonicalCurrentRole) {
+    // If arriving via browser history pop (Back / Forward traversal) or directly navigating to /login without choosing a role:
+    // Safely redirect to authorized dashboard using replace navigation so back history cannot trap user.
+    if (navigationType === 'POP' || !canonicalSelectedRole) {
       const authorizedRoute = resolveAuthorizedRoute(user.role);
       return <Navigate to={authorizedRoute} replace />;
     }
@@ -89,9 +88,22 @@ export const LoginPage = () => {
         password: formData.password
       });
       if (response?.succeeded && response?.data?.token) {
-        login(response.data, rememberMe);
         const actualRole = response.data.role;
         const actualCanonical = getCanonicalRole(actualRole);
+
+        // ROLE VALIDATION: If a specific role was requested (e.g. Emergency Coordinator),
+        // validate that the authenticated account actually possesses the requested role (or Admin).
+        // If not, reject the login attempt and do not authorize session into an incorrect role.
+        if (canonicalSelectedRole && actualCanonical && canonicalSelectedRole !== actualCanonical) {
+          if (canonicalSelectedRole === 'Coordinator' && actualCanonical !== 'Coordinator' && actualCanonical !== 'Admin') {
+            const actualTitle = getRoleDisplayTitle(actualRole) || actualRole;
+            showAlert(`Access Denied: The account '${formData.email.trim()}' is registered as a ${actualTitle} and does not have Emergency Coordinator privileges.`, 'error');
+            setLoading(false);
+            return;
+          }
+        }
+
+        login(response.data, rememberMe);
         const targetRoute = resolvePostLoginRoute(actualRole, redirectParam);
 
         if (canonicalSelectedRole && actualCanonical && canonicalSelectedRole !== actualCanonical) {

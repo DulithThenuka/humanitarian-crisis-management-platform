@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ShieldCheck,
   Sparkles,
@@ -12,9 +12,11 @@ import {
   Users,
   Clock,
   Loader2,
-  Check
+  Check,
+  Cpu,
+  Info
 } from 'lucide-react';
-import { AI_DECISION_SUPPORT_DATA } from '../data/coordinatorPortalData';
+import { aiGovernanceService } from '../../../services/aiGovernanceService';
 import { ConsequentialActionModal } from '../components/modals/ConsequentialActionModal';
 import './AIDecisionSupportView.css';
 
@@ -40,85 +42,148 @@ export const AIDecisionSupportView = ({
     return currentCase || (cases.length > 0 ? cases[0] : null);
   }, [cases, selectedCaseId, currentCase]);
 
-  const activeCaseId = activeCase?.id || AI_DECISION_SUPPORT_DATA.relatedCaseId;
-  const assessmentId = `AID-${activeCaseId.replace(/\D/g, '') || '2051'}`;
-  const recommendedPriority = activeCase?.severity || AI_DECISION_SUPPORT_DATA.recommendedPriority;
+  const activeCaseId = activeCase?.id || 'HMR-1042';
 
-  // Urgency Score (0-100) vs AI Confidence
-  // Rule: Do NOT present urgency score as AI confidence!
-  const rawUrgencyScore = activeCase?.aipriorityScore ?? activeCase?.aiPriorityScore;
-  const urgencyScore = typeof rawUrgencyScore === 'number'
-    ? Math.round(rawUrgencyScore > 1 ? rawUrgencyScore : rawUrgencyScore * 100)
-    : (activeCase?.severity === 'Critical' ? 89 : activeCase?.severity === 'High' ? 76 : 58);
-
-  // AI Confidence: meaningful model certainty value (distinct from urgency score)
-  const rawConfidence = activeCase?.aiConfidence ?? activeCase?.aiConfidenceScore;
-  const hasValidConfidence = typeof rawConfidence === 'number' && rawConfidence > 0 && rawConfidence !== rawUrgencyScore;
-  const confidenceScore = hasValidConfidence
-    ? Math.round(rawConfidence > 1 ? rawConfidence : rawConfidence * 100)
-    : (activeCase?.severity === 'Critical' ? 88 : activeCase?.severity === 'High' ? 84 : null);
-
-  const affectedCount = activeCase?.affectedPeople || 6;
+  // Live Backend AI Assessment State
+  const [assessment, setAssessment] = useState(null);
+  const [loadingAssessment, setLoadingAssessment] = useState(false);
+  const [assessmentError, setAssessmentError] = useState(null);
 
   // Human Review Form State
-  const [humanFinalPriority, setHumanFinalPriority] = useState(recommendedPriority);
+  const [humanFinalPriority, setHumanFinalPriority] = useState('High');
   const [humanReviewReason, setHumanReviewReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [lastRecordedDecision, setLastRecordedDecision] = useState(
-    aiReviewed ? { type: 'accept', priority: recommendedPriority, time: 'Recently' } : null
-  );
+  const [lastRecordedDecision, setLastRecordedDecision] = useState(null);
 
   // Consequential Action Modal State
   const [aiActionModal, setAiActionModal] = useState(null);
   const [modalReason, setModalReason] = useState('');
   const [modalConfirmedCheck, setModalConfirmedCheck] = useState(false);
 
-  // Keep final priority in sync when switching cases
-  React.useEffect(() => {
+  // Fetch Live AI Assessment from Backend
+  const loadAssessment = useCallback(async (caseId) => {
+    if (!caseId) return;
+    setLoadingAssessment(true);
+    setAssessmentError(null);
+    try {
+      const res = await aiGovernanceService.getCase(caseId);
+      const data = res?.data || res;
+      if (data && (data.caseId || data.decisionId || data.urgencyScore !== undefined)) {
+        setAssessment(data);
+        if (data.isReviewedByHuman && data.humanDecision) {
+          setLastRecordedDecision({
+            type: data.humanDecision.toLowerCase().includes('approve') || data.humanDecision.toLowerCase().includes('accept')
+              ? 'accept'
+              : data.humanDecision.toLowerCase().includes('modify') || data.humanDecision.toLowerCase().includes('adjust') || data.humanDecision.toLowerCase().includes('override')
+              ? 'adjust'
+              : 'reject',
+            priority: data.currentPriority || data.recommendedPriority,
+            time: data.reviewedAt ? new Date(data.reviewedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recorded',
+            reviewer: data.reviewedByName || 'Emergency Coordinator'
+          });
+        }
+      } else {
+        setAssessment(null);
+      }
+    } catch (err) {
+      console.warn(`Live AI assessment fetch note for ${caseId}:`, err.message || err);
+      setAssessmentError(err.message || 'AI assessment not available');
+      setAssessment(null);
+    } finally {
+      setLoadingAssessment(false);
+    }
+  }, []);
+
+  // Sync assessment when activeCaseId changes
+  useEffect(() => {
+    loadAssessment(activeCaseId);
+  }, [activeCaseId, loadAssessment]);
+
+  // Derived recommendation values from live backend assessment or safe fallback
+  const assessmentId = assessment?.decisionId || `AID-${activeCaseId.replace(/\D/g, '') || '2051'}`;
+  const recommendedPriority = assessment?.recommendedPriority || activeCase?.severity || 'High';
+
+  // Urgency Score (0-100)
+  const urgencyScore = typeof assessment?.urgencyScore === 'number'
+    ? assessment.urgencyScore
+    : (typeof activeCase?.aipriorityScore === 'number'
+        ? Math.round(activeCase.aipriorityScore > 1 ? activeCase.aipriorityScore : activeCase.aipriorityScore * 100)
+        : (activeCase?.severity === 'Critical' ? 90 : activeCase?.severity === 'High' ? 75 : 55));
+
+  // AI Confidence Score (0-100)
+  const confidenceScore = typeof assessment?.confidence === 'number'
+    ? assessment.confidence
+    : (typeof assessment?.confidenceScore === 'number'
+        ? Math.round(assessment.confidenceScore > 1 ? assessment.confidenceScore : assessment.confidenceScore * 100)
+        : (typeof activeCase?.aiConfidence === 'number' ? Math.round(activeCase.aiConfidence > 1 ? activeCase.aiConfidence : activeCase.aiConfidence * 100) : 85));
+
+  // AI Provider Identity (Accurate labeling: rule-based heuristic)
+  const providerLabel = assessment?.providerLabel || 'Rule-Based Demonstration Decision Support';
+  const isRuleBased = assessment?.isRuleBased ?? true;
+
+  const affectedCount = assessment?.affectedCount || activeCase?.affectedPeople || 6;
+
+  // Keep final priority in sync when switching cases or receiving assessment
+  useEffect(() => {
     setHumanFinalPriority(recommendedPriority);
     setHumanReviewReason('');
   }, [activeCaseId, recommendedPriority]);
 
   // Request-specific evidence behind each recommendation factor
-  const factors = useMemo(() => [
-    {
-      id: 'f1',
-      title: 'Immediate exposure risk',
-      evidenceLabel: 'HAZARD PROXIMITY',
-      detail: activeCase?.description
-        ? `"${activeCase.description.slice(0, 90)}${activeCase.description.length > 90 ? '...' : ''}" (${activeCase.location || activeCase.generalLocation || 'Active hazard sector'})`
-        : `Hazard proximity and floodwater conditions in ${activeCase?.location || 'Western Province Sector'}`,
-      impact: activeCase?.severity === 'Critical' ? 'High' : 'Medium'
-    },
-    {
-      id: 'f2',
-      title: 'People potentially affected',
-      evidenceLabel: 'AFFECTED OCCUPANTS',
-      detail: activeCase?.affectedSummary
-        ? activeCase.affectedSummary
-        : `${affectedCount} household occupants requiring emergency intervention`,
-      impact: affectedCount >= 5 ? 'High' : 'Medium'
-    },
-    {
-      id: 'f3',
-      title: 'Vulnerability & access constraints',
-      evidenceLabel: 'ACCESSIBILITY & NEEDS',
-      detail: activeCase?.accessibility
-        ? `${activeCase.accessibility} · Contact: ${activeCase.contactStatus || 'Citizen direct line'}`
-        : 'Elderly occupants / step-free access requirement noted in dispatch report',
-      impact: 'High'
-    },
-    {
-      id: 'f4',
-      title: 'Operational time sensitivity',
-      evidenceLabel: 'TEMPORAL URGENCY',
-      detail: `Submitted: ${activeCase?.submittedAt || 'Today'} · Context: ${activeCase?.emergencyContext || activeCase?.operationalArea || 'Active response sector'}`,
-      impact: activeCase?.severity === 'Critical' ? 'High' : 'Medium'
+  const factors = useMemo(() => {
+    if (assessment?.factors && Array.isArray(assessment.factors) && assessment.factors.length > 0) {
+      return assessment.factors.map((f, idx) => ({
+        id: f.id || `f-${idx}`,
+        title: f.title || f.factorName || `Factor ${idx + 1}`,
+        evidenceLabel: f.tag || f.evidenceLabel || 'EVIDENCE',
+        detail: f.desc || f.detail || 'Verified database indicator',
+        impact: f.tagType === 'critical' ? 'Critical' : f.tagType === 'high' ? 'High' : 'Medium'
+      }));
     }
-  ], [activeCase, affectedCount]);
+
+    return [
+      {
+        id: 'f1',
+        title: 'Immediate exposure risk',
+        evidenceLabel: 'HAZARD PROXIMITY',
+        detail: activeCase?.description
+          ? `"${activeCase.description.slice(0, 90)}${activeCase.description.length > 90 ? '...' : ''}" (${activeCase.location || activeCase.generalLocation || 'Active hazard sector'})`
+          : `Hazard proximity and floodwater conditions in ${activeCase?.location || 'Western Province Sector'}`,
+        impact: activeCase?.severity === 'Critical' ? 'High' : 'Medium'
+      },
+      {
+        id: 'f2',
+        title: 'People potentially affected',
+        evidenceLabel: 'AFFECTED OCCUPANTS',
+        detail: activeCase?.affectedSummary
+          ? activeCase.affectedSummary
+          : `${affectedCount} household occupants requiring emergency intervention`,
+        impact: affectedCount >= 5 ? 'High' : 'Medium'
+      },
+      {
+        id: 'f3',
+        title: 'Vulnerability & access constraints',
+        evidenceLabel: 'ACCESSIBILITY & NEEDS',
+        detail: activeCase?.accessibility
+          ? `${activeCase.accessibility} · Contact: ${activeCase.contactStatus || 'Citizen direct line'}`
+          : 'Elderly occupants / step-free access requirement noted in dispatch report',
+        impact: 'High'
+      },
+      {
+        id: 'f4',
+        title: 'Operational time sensitivity',
+        evidenceLabel: 'TEMPORAL URGENCY',
+        detail: `Submitted: ${activeCase?.submittedAt || 'Today'} · Context: ${activeCase?.emergencyContext || activeCase?.operationalArea || 'Active response sector'}`,
+        impact: activeCase?.severity === 'Critical' ? 'High' : 'Medium'
+      }
+    ];
+  }, [assessment, activeCase, affectedCount]);
 
   // AI Recommendation Rationale
   const aiRationale = useMemo(() => {
+    if (assessment?.reasoning) {
+      return assessment.reasoning;
+    }
     if (activeCase?.severity === 'Critical') {
       return `Multiple high-vulnerability indicators detected: ${affectedCount} occupants in an exposed hazard area (${activeCase?.location || 'Operational Sector'}), with acute accessibility and physical safety requirements. Calculated urgency of ${urgencyScore}/100 exceeds critical dispatch threshold.`;
     }
@@ -126,7 +191,24 @@ export const AIDecisionSupportView = ({
       return `Significant infrastructure or safety constraint identified: priority aid distribution recommended for ${activeCase?.category || 'assistance request'} at ${activeCase?.location || 'assigned area'}. Urgency score of ${urgencyScore}/100 indicates urgent logistics handoff.`;
     }
     return `Standard humanitarian relief need verified in active operational zone. Recommended priority (${recommendedPriority}) reflects baseline delivery schedule without immediate life-safety peril.`;
-  }, [activeCase, affectedCount, urgencyScore, recommendedPriority]);
+  }, [assessment, activeCase, affectedCount, urgencyScore, recommendedPriority]);
+
+  // Duplicate Warning candidate from live backend assessment
+  const duplicateCandidate = useMemo(() => {
+    if (assessment?.duplicateSuggestionCaseNumber) {
+      const sim = typeof assessment.duplicateSimilarityScore === 'number'
+        ? Math.round(assessment.duplicateSimilarityScore > 1 ? assessment.duplicateSimilarityScore : assessment.duplicateSimilarityScore * 100)
+        : 22;
+      return {
+        matchId: assessment.duplicateSuggestionCaseNumber,
+        similarity: `${sim}% Similarity`,
+        matchCategory: 'Emergency Assistance Request',
+        matchDesc: `Adjacent sector request flagged by automated keyword & geographic overlap (${sim}% similarity).`,
+        hasDuplicate: true
+      };
+    }
+    return null;
+  }, [assessment]);
 
   // Open Confirmation Modal
   const handleOpenAiModal = (type) => {
@@ -147,6 +229,21 @@ export const AIDecisionSupportView = ({
 
     setIsSubmitting(true);
     try {
+      const decPayload = {
+        caseId: activeCaseId,
+        decision: actionType === 'accept' ? 'Approve' : actionType === 'adjust' ? 'Modify' : 'Reject',
+        reason: reasonText,
+        overriddenPriority: actionType === 'adjust' ? humanFinalPriority : null
+      };
+
+      // 1. Direct call to AI governance backend API
+      try {
+        await aiGovernanceService.recordDecision(decPayload);
+      } catch (err) {
+        console.warn('aiGovernanceService.recordDecision note:', err.message || err);
+      }
+
+      // 2. Prop call to parent portal handler (updates coordinator state & incident AI review)
       if (onRecordAIDecision) {
         await onRecordAIDecision(activeCaseId, actionType, humanFinalPriority, reasonText);
       } else if (actionType === 'accept' && onAcceptRecommendation) {
@@ -162,6 +259,9 @@ export const AIDecisionSupportView = ({
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         reviewer: coordinatorUser?.fullName || 'Emergency Coordinator'
       });
+
+      // Reload live assessment to reflect DB update
+      await loadAssessment(activeCaseId);
     } catch (err) {
       console.error('Failed to record AI decision:', err);
       showToast?.(err.message || 'Failed to record AI review decision.', 'error');
@@ -169,6 +269,13 @@ export const AIDecisionSupportView = ({
       setIsSubmitting(false);
     }
   };
+
+  const isReviewed = Boolean(
+    assessment?.isReviewedByHuman ||
+    lastRecordedDecision ||
+    aiReviewed ||
+    (activeCase?.aiReviewed)
+  );
 
   return (
     <div className="ec-portal-canvas ec-ai-support-root">
@@ -196,9 +303,24 @@ export const AIDecisionSupportView = ({
         </div>
 
         <div className="ec-ai-status-dock">
-          <span className={lastRecordedDecision || aiReviewed ? 'ec-badge-verified' : 'ec-badge-pending'}>
-            ● {lastRecordedDecision ? `Human Review: ${lastRecordedDecision.type === 'accept' ? 'Accepted' : lastRecordedDecision.type === 'adjust' ? 'Adjusted' : 'Rejected'}` : (aiReviewed ? 'Human Review Recorded' : 'Pending Human Review')}
-          </span>
+          {loadingAssessment ? (
+            <span className="ec-badge-pending" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <Loader2 size={12} className="ec-spin-icon" /> Syncing Live Assessment...
+            </span>
+          ) : isReviewed ? (
+            <span className="ec-badge-verified">
+              ● Human Review:{' '}
+              {lastRecordedDecision
+                ? `${lastRecordedDecision.type === 'accept' ? 'Accepted' : lastRecordedDecision.type === 'adjust' ? 'Adjusted' : 'Rejected'} (${lastRecordedDecision.priority})`
+                : assessment?.humanDecision
+                ? `${assessment.humanDecision} (${assessment.currentPriority || recommendedPriority})`
+                : 'Recorded'}
+            </span>
+          ) : (
+            <span className="ec-badge-pending">
+              ● Pending Human Review
+            </span>
+          )}
         </div>
       </div>
 
@@ -224,11 +346,45 @@ export const AIDecisionSupportView = ({
         </div>
       )}
 
-      {/* 3. Mandatory Human Review Mandate Banner */}
-      <div className="ec-ai-mandate-card">
-        <ShieldCheck size={20} color="#3d6b4f" className="ec-mandate-icon" />
-        <div className="ec-mandate-content">
-          <strong>Mandatory Human Approval:</strong> AI priority scores and duplicate flags provide automated triage guidance only. Operational dispatch priority must be confirmed or adjusted by an authorised Emergency Coordinator.
+      {/* 3. Mandatory Human Review Mandate & AI Model Architecture Banner */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
+        <div className="ec-ai-mandate-card" style={{ margin: 0 }}>
+          <ShieldCheck size={20} color="#3d6b4f" className="ec-mandate-icon" />
+          <div className="ec-mandate-content">
+            <strong>Mandatory Human Approval:</strong> AI priority scores and duplicate flags provide automated triage guidance only. Operational dispatch priority must be confirmed or adjusted by an authorised Emergency Coordinator.
+          </div>
+        </div>
+
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          backgroundColor: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          borderRadius: '10px',
+          padding: '12px 16px',
+          fontSize: '12px',
+          color: '#334155'
+        }}>
+          <Cpu size={18} color="#0284c7" style={{ flexShrink: 0 }} />
+          <div>
+            <div style={{ fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>Engine: {providerLabel}</span>
+              <span style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                color: '#0284c7',
+                backgroundColor: '#e0f2fe',
+                padding: '1px 6px',
+                borderRadius: '4px'
+              }}>
+                {isRuleBased ? 'Deterministic Rule Engine' : 'External AI Provider'}
+              </span>
+            </div>
+            <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+              Transparent keyword &amp; vulnerability rule-scoring · Zero unverified black-box decisions
+            </div>
+          </div>
         </div>
       </div>
 
@@ -281,7 +437,7 @@ export const AIDecisionSupportView = ({
             <div className="ec-panel-card-head">
               <div>
                 <h3 className="ec-panel-title-text">Factors influencing recommendation</h3>
-                <p className="ec-panel-subtitle-text">Request-specific evidence extracted from citizen report</p>
+                <p className="ec-panel-subtitle-text">Request-specific evidence extracted from citizen report &amp; database state</p>
               </div>
               <span className="ec-cmd-k-badge">{factors.length} verified factors</span>
             </div>
@@ -299,7 +455,7 @@ export const AIDecisionSupportView = ({
                       <div className="ec-factor-detail">{fac.detail}</div>
                     </div>
                   </div>
-                  <span className={fac.impact === 'High' ? 'ec-badge-critical' : 'ec-badge-medium'}>
+                  <span className={fac.impact === 'Critical' ? 'ec-badge-critical' : fac.impact === 'High' ? 'ec-badge-critical' : 'ec-badge-medium'}>
                     ● {fac.impact}
                   </span>
                 </div>
@@ -307,39 +463,51 @@ export const AIDecisionSupportView = ({
             </div>
           </div>
 
-          {/* Duplicate-Request Warning Card (Preserved with Inspect Side by Side) */}
+          {/* Duplicate-Request Warning Card */}
           <div className="ec-duplicate-card">
             <div className="ec-panel-card-head">
               <div>
                 <h3 className="ec-panel-title-text">Duplicate-request warning</h3>
                 <p className="ec-panel-subtitle-text">
-                  {AI_DECISION_SUPPORT_DATA.duplicateWarning.note}
+                  Automated similarity detection evaluates geospatial and category overlap
                 </p>
               </div>
-              <span className="ec-badge-high">
-                ● {AI_DECISION_SUPPORT_DATA.duplicateWarning.similarity}
-              </span>
+              {duplicateCandidate ? (
+                <span className="ec-badge-high">
+                  ● {duplicateCandidate.similarity}
+                </span>
+              ) : (
+                <span className="ec-badge-verified">
+                  ● No Duplicate
+                </span>
+              )}
             </div>
 
-            <div className="ec-duplicate-item-box">
-              <div>
-                <div className="ec-duplicate-match-title">
-                  {AI_DECISION_SUPPORT_DATA.duplicateWarning.matchId} · {AI_DECISION_SUPPORT_DATA.duplicateWarning.matchCategory}
+            {duplicateCandidate ? (
+              <div className="ec-duplicate-item-box">
+                <div>
+                  <div className="ec-duplicate-match-title">
+                    {duplicateCandidate.matchId} · {duplicateCandidate.matchCategory}
+                  </div>
+                  <div className="ec-duplicate-match-desc">
+                    {duplicateCandidate.matchDesc}
+                  </div>
                 </div>
-                <div className="ec-duplicate-match-desc">
-                  {AI_DECISION_SUPPORT_DATA.duplicateWarning.matchDesc}
-                </div>
+                <button
+                  type="button"
+                  className="ec-btn-preview-sm"
+                  onClick={() => onInspectDuplicate?.(duplicateCandidate)}
+                  title="Inspect requests side-by-side to verify distinction"
+                >
+                  <Eye size={13} />
+                  <span>Inspect side by side</span>
+                </button>
               </div>
-              <button
-                type="button"
-                className="ec-btn-preview-sm"
-                onClick={onInspectDuplicate}
-                title="Inspect requests side-by-side to verify distinction"
-              >
-                <Eye size={13} />
-                <span>Inspect side by side</span>
-              </button>
-            </div>
+            ) : (
+              <div style={{ fontSize: '12px', color: '#657367', padding: '10px 14px', backgroundColor: '#fcfdfb', borderRadius: '8px', border: '1px solid #eef2ea' }}>
+                No duplicate or overlapping assistance requests detected in this operational sector.
+              </div>
+            )}
           </div>
         </div>
 
@@ -369,11 +537,11 @@ export const AIDecisionSupportView = ({
               </div>
               <div className="ec-linked-meta-row">
                 <span className="ec-linked-meta-label">Category:</span>
-                <strong className="ec-linked-meta-val">{activeCase?.category || 'Emergency Assistance'}</strong>
+                <strong className="ec-linked-meta-val">{assessment?.category || activeCase?.category || 'Emergency Assistance'}</strong>
               </div>
               <div className="ec-linked-meta-row">
                 <span className="ec-linked-meta-label">Location:</span>
-                <span className="ec-linked-meta-val">{activeCase?.location || activeCase?.generalLocation || 'Western Province Sector'}</span>
+                <span className="ec-linked-meta-val">{assessment?.address || assessment?.operationalArea || activeCase?.location || activeCase?.generalLocation || 'Western Province Sector'}</span>
               </div>
               <div className="ec-linked-meta-row">
                 <span className="ec-linked-meta-label">Household:</span>
@@ -385,7 +553,7 @@ export const AIDecisionSupportView = ({
             <div className="ec-linked-citizen-quote">
               <span className="ec-quote-label">CITIZEN NARRATIVE:</span>
               <p className="ec-quote-body">
-                "{activeCase?.description || 'Assistance request submitted through citizen crisis intake portal.'}"
+                "{assessment?.description || activeCase?.description || 'Assistance request submitted through citizen crisis intake portal.'}"
               </p>
             </div>
           </div>
@@ -402,11 +570,14 @@ export const AIDecisionSupportView = ({
             </div>
 
             {/* Review Status Banner if Already Recorded */}
-            {lastRecordedDecision && (
+            {(lastRecordedDecision || assessment?.isReviewedByHuman) && (
               <div className="ec-recorded-decision-banner">
                 <Check size={16} color="#059669" />
                 <div>
-                  <strong>Decision Recorded:</strong> {lastRecordedDecision.type === 'accept' ? 'Accepted' : lastRecordedDecision.type === 'adjust' ? 'Adjusted' : 'Rejected'} ({lastRecordedDecision.priority}) at {lastRecordedDecision.time}
+                  <strong>Decision Recorded:</strong>{' '}
+                  {lastRecordedDecision
+                    ? `${lastRecordedDecision.type === 'accept' ? 'Accepted' : lastRecordedDecision.type === 'adjust' ? 'Adjusted' : 'Rejected'} (${lastRecordedDecision.priority}) at ${lastRecordedDecision.time}`
+                    : `${assessment?.humanDecision || 'Approved'} (${assessment?.currentPriority || recommendedPriority}) by ${assessment?.reviewedByName || 'Coordinator'}`}
                 </div>
               </div>
             )}
